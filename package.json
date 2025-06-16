@@ -1,0 +1,20 @@
+{
+  "name": "pettr",
+  "workspaces": ["apps/*", "packages/*"],
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "concurrently": "^9.1.2"
+  },
+  "scripts": {
+    "dev:web": "cd apps/web && bun dev",
+    "dev:api": "cd apps/api && bun run dev",
+    "dev": "concurrently \"bun run dev:web\" \"bun run dev:api\"",
+    "build": "bun run build:web && bun run build:api"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
