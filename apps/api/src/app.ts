@@ -1,9 +1,8 @@
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "../lib/auth";
+import { auth } from "./lib/auth";
  
-const app = express();
-const port = 8000;
+export const app = express();
  
 app.all("/api/auth/*", toNodeHandler(auth));
  
@@ -11,6 +10,3 @@ app.all("/api/auth/*", toNodeHandler(auth));
 // or only apply it to routes that don't interact with Better Auth
 app.use(express.json());
  
-app.listen(port, () => {
-    console.log(`Better Auth app listening on port ${port}`);
-});
