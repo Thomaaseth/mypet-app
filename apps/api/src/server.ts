@@ -1,7 +1,7 @@
 import { app } from './app'
+import { config } from './config';
 
-const port = process.env.PORT || 3001;
 
-app.listen(port, () => {
-    console.log(`Better Auth app listening on port ${port}`);
+app.listen(config.api.port, () => {
+    console.log(`Better Auth app listening on port ${config.api.port}`);
 });

@@ -13,6 +13,13 @@
     "nodemon": "^3.1.10",
     "tsx": "^4.20.3"
   },
+  "scripts": {
+    "dev": "bun run db:migrate && bun run src/server.ts",
+    "start": "bun run src/server.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate", 
+    "db:push": "drizzle-kit push"
+  },
   "peerDependencies": {
     "typescript": "^5.8.3"
   },

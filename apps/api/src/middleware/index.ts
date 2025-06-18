@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { respondWithError } from "../lib/json";
 import {
     BadRequestError,
     NotFoundError,
@@ -48,5 +49,5 @@ export function errorMiddleware(err: Error, _: Request, res: Response, __: NextF
         console.log(err.message);
     }
 
-    res.status(statusCode).json({ error: message });
+    respondWithError(res, statusCode, message);
 }

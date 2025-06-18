@@ -1,4 +1,4 @@
 export * from './auth-schema'
-// export * from './pets'
-// export * from './vets'
-// export * from './appointments'
+// export * from './schema1'
+// export * from './schema2'
+// export * from './schema3'
