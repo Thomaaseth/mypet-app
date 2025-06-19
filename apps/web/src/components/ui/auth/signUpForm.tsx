@@ -73,6 +73,7 @@ export default function SignUpForm() {
         setIsLoading(false);
       }
     } catch (err) {
+      console.error('An error occurred: ', err)
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }

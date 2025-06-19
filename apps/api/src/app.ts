@@ -21,25 +21,21 @@ app.use(express.json());
 
 
 
-// app.use("/api/auth", toNodeHandler(auth));
- 
+// BETTER-AUTH
 app.post('/api/auth/sign-up/email', (req, res, next) => {
     Promise.resolve(signUpHandler(req, res)).catch(next);
 });
-
 app.post('/api/auth/sign-in/email', (req, res, next) => {
     Promise.resolve(signInHandler(req, res)).catch(next);
 });
-
 app.get('/api/auth/session', (req, res, next) => {
     Promise.resolve(getSessionHandler(req, res)).catch(next);
 });
-
 app.post('/api/auth/sign-out', (req, res, next) => {
     Promise.resolve(signOutHandler(req, res)).catch(next);
 });
 
-
+// APP HEALTH
 app.get('/api/health', (req, res, next) => {
     Promise.resolve(healthCheck(req, res)).catch(next);
 });
