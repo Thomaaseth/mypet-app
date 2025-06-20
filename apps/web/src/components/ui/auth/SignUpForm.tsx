@@ -48,7 +48,7 @@ export default function SignUpForm() {
           email: data.email,
           password: data.password,
           name: `${data.firstName} ${data.lastName}`,
-          callbackURL: '/dashboard',
+          callbackURL: '/',
         });
 
         if (error) {
@@ -61,7 +61,7 @@ export default function SignUpForm() {
     );
 
     if (result) {
-      router.push('/dashboard');
+      router.push('/');
     }
   };
 

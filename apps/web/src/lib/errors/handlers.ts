@@ -1,6 +1,7 @@
 import { AppError } from './types';
 
 interface AuthClientError {
+  error?: string;
   body?: {
     message?: string;
     code?: string;
@@ -23,7 +24,7 @@ export const authErrorHandler = (error: unknown): AppError => {
 
   // Type-safe error handling
   if (isAuthClientError(error)) {
-    message = error.body?.message || error.message || 'An authentication error occurred';
+    message = error.error || error.body?.message || error.message || 'An authentication error occurred';
   } else if (error instanceof Error) {
     message = error.message;
   } else if (typeof error === 'string') {

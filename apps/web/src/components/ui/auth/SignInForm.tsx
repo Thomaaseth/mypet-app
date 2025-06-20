@@ -39,7 +39,7 @@ export default function SignInForm() {
         const { error } = await authClient.signIn.email({
           email: data.email,
           password: data.password,
-          callbackURL: '/dashboard',
+          callbackURL: '/',
         });
 
         if (error) {
@@ -52,7 +52,7 @@ export default function SignInForm() {
     );
 
     if (result) {
-      router.push('/dashboard');
+      router.push('/');
     }
   };
 
