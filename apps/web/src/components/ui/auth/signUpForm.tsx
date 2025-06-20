@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '../../../lib/auth-client';
+import { useErrorState } from '../../../hooks/useErrorsState';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { authErrorHandler } from '../../../lib/errors/handlers';
 
 const signUpSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -28,9 +30,8 @@ const signUpSchema = z.object({
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { isLoading, error, clearError, executeAction } = useErrorState();
 
   const {
     register,
@@ -41,41 +42,26 @@ export default function SignUpForm() {
   });
 
   const onSubmit = async (data: SignUpFormData) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await authClient.signUp.email(
-        {
+    const result = await executeAction(
+      async () => {
+        const { error } = await authClient.signUp.email({
           email: data.email,
           password: data.password,
           name: `${data.firstName} ${data.lastName}`,
           callbackURL: '/dashboard',
-        },
-        {
-          onRequest: () => {
-            // Loading handled by isLoading state
-          },
-          onSuccess: () => {
-            // User is automatically signed in after signup
-            router.push('/dashboard');
-          },
-          onError: (ctx) => {
-            setError(ctx.error.message);
-            setIsLoading(false);
-          },
-        }
-      );
+        });
 
-      // Handle error if onError wasn't called
-      if (error) {
-        setError(error.message || 'An error occurred during signup');
-        setIsLoading(false);
-      }
-    } catch (err) {
-      console.error('An error occurred: ', err)
-      setError('An unexpected error occurred. Please try again.');
-      setIsLoading(false);
+        if (error) {
+          throw error;
+        }
+
+        return { success: true };
+      },
+      authErrorHandler
+    );
+
+    if (result) {
+      router.push('/dashboard');
     }
   };
 
@@ -150,12 +136,22 @@ export default function SignUpForm() {
           </p>
         </div>
 
-        {/* Error Display */}
+        {/* Auth Error Display with shadcn Alert */}
         {error && (
-          <div className="rounded-md bg-destructive/15 border border-destructive/20 p-3">
-            <p className="text-sm text-destructive">{error}</p>
-          </div>
-        )}
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                {error.message}
+                <button 
+                  type="button" 
+                  onClick={clearError}
+                  className="text-xs hover:underline ml-4"
+                >
+                  Dismiss
+                </button>
+              </AlertDescription>
+            </Alert>
+          )}
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isLoading}>
