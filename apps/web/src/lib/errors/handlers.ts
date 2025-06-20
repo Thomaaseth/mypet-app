@@ -1,7 +1,37 @@
 import { AppError } from './types';
 
-export const authErrorHandler = (error: any): AppError => {
-  const message = error?.body?.message || error?.message || 'An authentication error occurred';
+interface AuthClientError {
+  body?: {
+    message?: string;
+    code?: string;
+  };
+  message?: string;
+  status?: number;
+  statusCode?: number;
+}
+
+function isAuthClientError(error: unknown): error is AuthClientError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    ('body' in error || 'message' in error || 'status' in error)
+  );
+}
+
+export const authErrorHandler = (error: unknown): AppError => {
+  let message: string;
+
+  // Type-safe error handling
+  if (isAuthClientError(error)) {
+    message = error.body?.message || error.message || 'An authentication error occurred';
+  } else if (error instanceof Error) {
+    message = error.message;
+  } else if (typeof error === 'string') {
+    message = error;
+  } else {
+    message = 'An authentication error occurred';
+  }
+
   console.log('Auth Error Debug:', { error, message }); // Temporary debug log
 
   // Better-auth specific error mapping
