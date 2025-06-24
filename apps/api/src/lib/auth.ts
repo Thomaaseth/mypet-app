@@ -12,6 +12,7 @@ export const auth = betterAuth({
     }),
     secret: config.auth.secret,
     baseURL: config.auth.url,
+    trustedOrigins: ["http://localhost:3000"],
     emailAndPassword: {
         enabled: true,
         disableSignUp: false,
@@ -21,8 +22,33 @@ export const auth = betterAuth({
 		autoSignIn: true,
 		sendResetPassword: async ({ user, url, token }) => {
 			// Send reset password email
+            console.log(`Send reset password email to ${user.email}`);
+            console.log(`Reset URL: ${url}`);
+            // TODO: Implement email sending
 		},
 		resetPasswordTokenExpiresIn: 3600, // 1 hour
+    },
+    user: {
+        changeEmail: {
+            enabled: true,
+            sendChangeEmailVerification: async ({ user, newEmail, url, token }) => {
+                 // Send change email verification email
+                 console.log(`Send email change verification to ${newEmail}`);
+                 console.log(`Verification URL: ${url}`);
+                 console.log(`User: ${user.email} wants to change to: ${newEmail}`);
+                 // TODO: Implement email sending
+                 // This should send an email to the NEW email address with the verification link
+            },
+        },
+        deleteUser: {
+            enabled: true,
+            sendDeleteAccountVerification: async ({ user, url, token }) => {
+                // Send account deletion verification email  
+                console.log(`Send delete account verification to ${user.email}`);
+                console.log(`Verification URL: ${url}`);
+                // TODO: Implement email sending
+            },
+        },
     },
     hooks: {
         before: createAuthMiddleware(async (ctx) => {
@@ -70,19 +96,6 @@ export const auth = betterAuth({
         }),
     },
 })
-
-
-// export const auth = betterAuth({
-//     database: drizzleAdapter(db, {
-//         provider: "pg",
-//     }),
-//     secret: config.auth.secret,
-//     baseURL: config.auth.url,
-//     // basePath: "/api/auth",
-//     emailAndPassword: {
-//         enabled: true,
-//     }
-// });
 
 console.log("Better-auth initialized successfully");
 console.log("🔧 Available endpoints:", Object.keys(auth));
