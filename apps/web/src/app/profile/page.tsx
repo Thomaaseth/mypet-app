@@ -86,9 +86,6 @@ export default function MyProfilePage() {
         console.log('🔍 Starting session check...');
 
         const sessionResponse = await authClient.getSession();
-        console.log('Full session response:', sessionResponse);
-        console.log('Response type:', typeof sessionResponse);
-        console.log('Response keys:', Object.keys(sessionResponse));
         
         if ('data' in sessionResponse && sessionResponse.data?.user) {
           console.log('✅ Has data property:', sessionResponse.data);
