@@ -24,7 +24,8 @@ export const auth = betterAuth({
 			// Send reset password email
             console.log(`Send reset password email to ${user.email}`);
             console.log(`Reset URL: ${url}`);
-            // TODO: Implement email sending
+            console.log(`Token: ${token}`);
+            // TODO: Implement actual email sending
 		},
 		resetPasswordTokenExpiresIn: 3600, // 1 hour
     },
@@ -36,19 +37,16 @@ export const auth = betterAuth({
                  console.log(`Send email change verification to ${newEmail}`);
                  console.log(`Verification URL: ${url}`);
                  console.log(`User: ${user.email} wants to change to: ${newEmail}`);
-                 // TODO: Implement email sending
+                 // TODO: Implement actual email sending
                  // This should send an email to the NEW email address with the verification link
             },
         },
-        deleteUser: {
-            enabled: true,
-            sendDeleteAccountVerification: async ({ user, url, token }) => {
-                // Send account deletion verification email  
-                console.log(`Send delete account verification to ${user.email}`);
-                console.log(`Verification URL: ${url}`);
-                // TODO: Implement email sending
-            },
-        },
+        // deleteUser: {
+        //     enabled: true,
+        //     sendDeleteAccountVerification: async ({ user, url, token }) => {
+        //         // TODO: Implement LATER if necessary
+        //     },
+        // },
     },
     hooks: {
         before: createAuthMiddleware(async (ctx) => {
