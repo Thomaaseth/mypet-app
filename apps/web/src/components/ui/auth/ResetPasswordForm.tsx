@@ -14,23 +14,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { newPasswordSchema } from '@/lib/validations/password';
 
-const resetPasswordSchema = z.object({
-    newPassword: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .max(128, 'Password must be less than 128 characters')
-      .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
-      .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-      .regex(/(?=.*\d)/, 'Password must contain at least one number')
-      .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain at least one special character'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  }).refine(data => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+// const resetPasswordSchema = z.object({
+//     newPassword: z
+//       .string()
+//       .min(8, 'Password must be at least 8 characters')
+//       .max(128, 'Password must be less than 128 characters')
+//       .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
+//       .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
+//       .regex(/(?=.*\d)/, 'Password must contain at least one number')
+//       .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain at least one special character'),
+//     confirmPassword: z.string().min(1, 'Please confirm your password'),
+//   }).refine(data => data.newPassword === data.confirmPassword, {
+//     message: "Passwords do not match",
+//     path: ["confirmPassword"],
+//   });
   
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+type ResetPasswordFormData = z.infer<typeof newPasswordSchema >;
 
 interface ResetPasswordFormProps {
     token: string;
@@ -43,7 +44,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const { isLoading, error, executeAction } = useErrorState();
   
     const form = useForm<ResetPasswordFormData>({
-      resolver: zodResolver(resetPasswordSchema),
+      resolver: zodResolver(newPasswordSchema ),
       defaultValues: {
         newPassword: '',
         confirmPassword: '',

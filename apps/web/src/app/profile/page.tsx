@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 // import { toast } from '@/components/ui/use-toast';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { passwordChangeSchema } from '@/lib/validations/password';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
@@ -22,26 +23,26 @@ const emailUpdateSchema = z.object({
 });
 
 // Schema for password change
-const passwordChangeSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be less than 128 characters')
-    .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
-    .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-    .regex(/(?=.*\d)/, 'Password must contain at least one number')
-    .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain at least one special character'),
-  confirmPassword: z.string().min(1, 'Please confirm your password'),
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+// const passwordChangeSchema = z.object({
+//   currentPassword: z.string().min(1, 'Current password is required'),
+//   newPassword: z
+//     .string()
+//     .min(8, 'Password must be at least 8 characters')
+//     .max(128, 'Password must be less than 128 characters')
+//     .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
+//     .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
+//     .regex(/(?=.*\d)/, 'Password must contain at least one number')
+//     .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain at least one special character'),
+//   confirmPassword: z.string().min(1, 'Please confirm your password'),
+// }).refine(data => data.newPassword === data.confirmPassword, {
+//   message: "Passwords do not match",
+//   path: ["confirmPassword"],
+// });
 
 type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
-type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
+type PasswordChangeFormData = z.infer<typeof passwordChangeSchema >;
 
-// Simple user interface for our local state
+// Simple user interface
 interface ProfileUser {
   id: string;
   email: string;
@@ -88,9 +89,9 @@ export default function MyProfilePage() {
         const sessionResponse = await authClient.getSession();
         
         if ('data' in sessionResponse && sessionResponse.data?.user) {
-          console.log('✅ Has data property:', sessionResponse.data);
-          console.log('📊 Data keys:', Object.keys(sessionResponse.data || {}));
-          console.log('📊 Data content:', JSON.stringify(sessionResponse.data, null, 2));
+          console.log('Has data property:', sessionResponse.data);
+          console.log('Data keys:', Object.keys(sessionResponse.data || {}));
+          console.log('Data content:', JSON.stringify(sessionResponse.data, null, 2));
           const user = sessionResponse.data.user;
 
           setCurrentUser({
