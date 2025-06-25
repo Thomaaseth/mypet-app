@@ -1,10 +1,10 @@
 'use client'
 
 import { createAuthClient } from "better-auth/react"
-import { config } from "./config"
+import { getConfig } from "./config"
 
 export const authClient = createAuthClient({
-    baseURL: config.api.baseUrl,
+    baseURL: getConfig().api.baseUrl,
     fetchOptions: {
         credentials: "include",
     },

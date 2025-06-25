@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '@/lib/auth-client';
-import { config } from '@/lib/config';
+import { getConfig } from '@/lib/config';
 import { useErrorState } from '@/hooks/useErrorsState';
 import { authErrorHandler } from '@/lib/errors/handlers';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ export default function ForgotPasswordForm() {
             async () => {
                 const response = await authClient.forgetPassword({
                     email: data.email,
-                    redirectTo: `${config.auth.callbackBaseUrl}/reset-password`,
+                    redirectTo: `${getConfig().auth.callbackBaseUrl}/reset-password`,
                 });
 
                 if ('error' in response && response.error) {
