@@ -5,32 +5,27 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
-import LogoutButton from '@/components/ui/auth/LogoutButton';
-import { User } from 'lucide-react';
-
-interface NavUser {
-  id: string;
-  email: string;
-  name: string;
-  emailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  image?: string | null;
-}
+import { LogOut, Loader2 } from 'lucide-react';
+import { useErrorState } from '@/hooks/useErrorsState';
+import { authErrorHandler } from '@/lib/errors/handlers';
+import { User } from '@/types/auth';
 
 export const Navbar = () => {
-  const [user, setUser] = useState<NavUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoading: isLoggingOut, executeAction } = useErrorState();
 
-  // Load user session on mount
+  // Load user session on mount and when pathname changes (to detect logout)
   useEffect(() => {
     const loadUserSession = async () => {
       try {
+        console.log('🔍 Navbar: Checking user session...');
         const sessionResponse = await authClient.getSession();
         
         if ('data' in sessionResponse && sessionResponse.data?.user) {
+          console.log('✅ Navbar: User found:', sessionResponse.data.user);
           setUser({
             id: sessionResponse.data.user.id,
             email: sessionResponse.data.user.email,
@@ -41,10 +36,11 @@ export const Navbar = () => {
             image: sessionResponse.data.user.image,
           });
         } else {
+          console.log('❌ Navbar: No user found, setting to null');
           setUser(null);
         }
       } catch (error) {
-        console.error('Failed to load user session:', error);
+        console.error('❌ Navbar: Failed to load user session:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -52,7 +48,32 @@ export const Navbar = () => {
     };
 
     loadUserSession();
-  }, []);
+  }, [pathname]); // Re-run when pathname changes to detect logout redirects
+
+  // Handle logout with proper state management
+  const handleLogout = async () => {
+    console.log('🔄 Navbar: Starting logout process...');
+    const result = await executeAction(
+      async () => {
+        const { error } = await authClient.signOut({});
+
+        if (error) {
+          throw error;
+        }
+
+        console.log('✅ Navbar: Logout successful, clearing user state');
+        setUser(null); // Immediately clear user state
+        return { success: true };
+      },
+      authErrorHandler
+    );
+
+    if (result) {
+      console.log('✅ Navbar: Redirecting to home page');
+      router.push('/');
+      router.refresh(); // Refresh to update any server-side state
+    }
+  };
 
   // Navigation items for authenticated users
   const authenticatedNavItems = [
@@ -123,15 +144,21 @@ export const Navbar = () => {
                   </Button>
                 ))}
                 
-                {/* User info and logout */}
+                {/* Logout button */}
                 <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">{user.name}</span>
-                  </div>
-                  <LogoutButton variant="outline" size="sm" showIcon={false}>
-                    Logout
-                  </LogoutButton>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogOut className="mr-2 h-4 w-4" />
+                    )}
+                    {isLoggingOut ? 'Signing out...' : 'Logout'}
+                  </Button>
                 </div>
               </>
             ) : (

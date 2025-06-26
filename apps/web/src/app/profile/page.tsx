@@ -16,46 +16,19 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
+import { User } from 'better-auth/types';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
   newEmail: z.string().email('Please enter a valid email address'),
 });
 
-// Schema for password change
-// const passwordChangeSchema = z.object({
-//   currentPassword: z.string().min(1, 'Current password is required'),
-//   newPassword: z
-//     .string()
-//     .min(8, 'Password must be at least 8 characters')
-//     .max(128, 'Password must be less than 128 characters')
-//     .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
-//     .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-//     .regex(/(?=.*\d)/, 'Password must contain at least one number')
-//     .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain at least one special character'),
-//   confirmPassword: z.string().min(1, 'Please confirm your password'),
-// }).refine(data => data.newPassword === data.confirmPassword, {
-//   message: "Passwords do not match",
-//   path: ["confirmPassword"],
-// });
-
 type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
 type PasswordChangeFormData = z.infer<typeof passwordChangeSchema >;
 
-// Simple user interface
-interface ProfileUser {
-  id: string;
-  email: string;
-  name: string;
-  emailVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  image?: string | null;
-}
-
 export default function MyProfilePage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<ProfileUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

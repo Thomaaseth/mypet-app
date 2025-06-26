@@ -64,8 +64,3 @@ export default function LogoutButton({
     </Button>
   );
 }
-
-// Simple logout button for navbar or menu usage
-// Usage example:
-// <LogoutButton variant="ghost" />
-// <LogoutButton variant="outline" showIcon={false}>Logout</LogoutButton>
