@@ -104,7 +104,7 @@ export const Navbar = () => {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/" className="flex items-center space-x-2">
-                <span className="text-xl font-bold">MyPet</span>
+                <span className="text-xl font-bold">Pettr</span>
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -124,7 +124,7 @@ export const Navbar = () => {
           {/* Logo/Brand */}
           <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold">MyPet</span>
+              <span className="text-xl font-bold">Pettr</span>
             </Link>
           </div>
 
@@ -151,6 +151,7 @@ export const Navbar = () => {
                     size="sm" 
                     onClick={handleLogout}
                     disabled={isLoggingOut}
+                    className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all duration-200 hover:scale-105"
                   >
                     {isLoggingOut ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -177,10 +178,18 @@ export const Navbar = () => {
                 
                 {/* Auth buttons */}
                 <div className="flex items-center space-x-2 ml-4">
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button 
+                    variant={isActivePath('/login') ? "default" : "ghost"} 
+                    size="sm" 
+                    asChild
+                  >
                     <Link href="/login">Login</Link>
                   </Button>
-                  <Button variant="default" size="sm" asChild>
+                  <Button 
+                    variant={isActivePath('/signup') ? "default" : "ghost"} 
+                    size="sm" 
+                    asChild
+                  >
                     <Link href="/signup">Sign Up</Link>
                   </Button>
                 </div>

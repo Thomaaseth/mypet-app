@@ -16,7 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
-import { User } from 'better-auth/types';
+import { User } from '@/types/auth';
 
 // Schema for email update
 const emailUpdateSchema = z.object({

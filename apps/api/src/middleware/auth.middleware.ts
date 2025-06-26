@@ -2,8 +2,9 @@ import type { Request, Response, NextFunction } from 'express';
 import { auth } from '../lib/auth';
 import { fromNodeHeaders } from 'better-auth/node';
 import { respondWithError } from '../lib/json';
-import { extractErrorDetails } from '../types/betterAuthErrors';
+import { APIError } from 'better-auth/api';
 import { session } from '@/db';
+import { _statusCode } from 'better-auth/*';
 
 
 export interface AuthenticatedRequest extends Request {
@@ -62,8 +63,13 @@ export async function globalAuthHandler(req: Request, res: Response, next: NextF
         
         next();
     } catch (error: unknown) {
-        console.error('Global auth middleware error', error);
-        const { statusCode, message } = extractErrorDetails(error);
-        respondWithError(res, statusCode || 401, message || 'Authentication failed')
+    
+    console.error('Global auth middleware error', error);
+    if (error instanceof APIError) {
+        respondWithError(res, error.statusCode || 401, error.message);
+        return;
+    }
+    
+    respondWithError(res, 401, 'Authentication failed');
     }
 }
