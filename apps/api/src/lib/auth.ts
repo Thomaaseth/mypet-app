@@ -54,6 +54,13 @@ export const auth = betterAuth({
             token: string;
         }, request?: Request) => {
             // Send verification email using Resend
+            console.log('🔍 Original URL:', url);
+            console.log('🔍 config.app.url:', config.app.url);
+            const urlObj = new URL(url);
+            urlObj.searchParams.set('callbackURL', config.app.url);
+            const modifiedUrl = urlObj.toString();
+            console.log('🔍 Modified URL:', modifiedUrl);
+
             console.log(`Sending verification email to ${user.email}`);
             
             const result = await emailService.sendVerificationEmail(
@@ -61,7 +68,7 @@ export const auth = betterAuth({
                     email: user.email, 
                     name: user.name || user.email.split('@')[0] 
                 },
-                url
+                modifiedUrl
             );
             
             if (!result.success) {
@@ -71,7 +78,7 @@ export const auth = betterAuth({
             
             console.log('Verification email sent successfully');
         },
-        sendOnSignUp: false, // Automatically send verification email on signup
+        sendOnSignUp: true, // Automatically send verification email on signup
         autoSignInAfterVerification: true, // Auto sign in after email verification
     },
     user: {

@@ -49,14 +49,14 @@ export default function SignUpForm() {
           throw signUpError;
         }
 
-        const { error: verificationError } = await authClient.sendVerificationEmail({
-          email: data.email,
-          callbackURL: 'http://localhost:3000/profile',
-        });
+        // const { error: verificationError } = await authClient.sendVerificationEmail({
+        //   email: data.email,
+        //   callbackURL: 'http://localhost:3000/profile',
+        // });
 
-        if (verificationError) {
-          throw verificationError;
-        }
+        // if (verificationError) {
+        //   throw verificationError;
+        // }
 
         return { success: true };
       },
@@ -66,7 +66,6 @@ export default function SignUpForm() {
     if (result) {
       router.push('/');
       alert('Account created! Please check your email to verify your account.');
-
     }
   };
 
