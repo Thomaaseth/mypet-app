@@ -38,15 +38,24 @@ export default function SignUpForm() {
   const onSubmit = async (data: SignUpFormData) => {
     const result = await executeAction(
       async () => {
-        const { error } = await authClient.signUp.email({
+        const { error: signUpError } = await authClient.signUp.email({
           email: data.email,
           password: data.password,
           name: `${data.firstName} ${data.lastName}`,
-          callbackURL: '/',
+          // callbackURL: '/',
         });
 
-        if (error) {
-          throw error;
+        if (signUpError) {
+          throw signUpError;
+        }
+
+        const { error: verificationError } = await authClient.sendVerificationEmail({
+          email: data.email,
+          callbackURL: 'http://localhost:3000/profile',
+        });
+
+        if (verificationError) {
+          throw verificationError;
         }
 
         return { success: true };
@@ -56,6 +65,8 @@ export default function SignUpForm() {
 
     if (result) {
       router.push('/');
+      alert('Account created! Please check your email to verify your account.');
+
     }
   };
 

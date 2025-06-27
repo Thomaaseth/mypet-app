@@ -47,7 +47,6 @@ export const auth = betterAuth({
         },
         resetPasswordTokenExpiresIn: 3600, // 1 hour
     },
-    // Email verification is configured separately at the root level
     emailVerification: {
         sendVerificationEmail: async ({ user, url, token }: {
             user: { id: string; email: string; name: string | null; emailVerified: boolean };
@@ -72,7 +71,7 @@ export const auth = betterAuth({
             
             console.log('Verification email sent successfully');
         },
-        sendOnSignUp: true, // Automatically send verification email on signup
+        sendOnSignUp: false, // Automatically send verification email on signup
         autoSignInAfterVerification: true, // Auto sign in after email verification
     },
     user: {
@@ -107,7 +106,6 @@ export const auth = betterAuth({
     },
     hooks: {
         before: createAuthMiddleware(async (ctx) => {
-            // Only validate on signup
             if (ctx.path !== "/sign-up/email") {
                 return;
             }
