@@ -1,8 +1,10 @@
+// apps/api/src/lib/auth.ts
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { db } from "../db"
 import { config } from "../config";
 import { createAuthMiddleware, APIError } from "better-auth/api"
+import { emailService } from "./email/email.service";
 
 console.log("Creating Better-auth instance...");
 
@@ -16,37 +18,92 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
         disableSignUp: false,
-		requireEmailVerification: false,
-		minPasswordLength: 8,
-		maxPasswordLength: 128,
-		autoSignIn: true,
-		sendResetPassword: async ({ user, url, token }) => {
-			// Send reset password email
-            console.log(`Send reset password email to ${user.email}`);
-            console.log(`Reset URL: ${url}`);
-            console.log(`Token: ${token}`);
-            // TODO: Implement actual email sending
-		},
-		resetPasswordTokenExpiresIn: 3600, // 1 hour
+        requireEmailVerification: true, // Require email verification for login
+        minPasswordLength: 8,
+        maxPasswordLength: 128,
+        autoSignIn: true,
+        sendResetPassword: async ({ user, url, token }: { 
+            user: { id: string; email: string; name: string | null }; 
+            url: string; 
+            token: string 
+        }) => {
+            // Send reset password email using Resend
+            console.log(`Sending reset password email to ${user.email}`);
+            
+            const result = await emailService.sendPasswordResetEmail(
+                { 
+                    email: user.email, 
+                    name: user.name || user.email.split('@')[0] 
+                },
+                url
+            );
+            
+            if (!result.success) {
+                console.error('Failed to send reset password email:', result.error);
+                throw new Error('Failed to send reset password email');
+            }
+            
+            console.log('Reset password email sent successfully');
+        },
+        resetPasswordTokenExpiresIn: 3600, // 1 hour
+    },
+    // Email verification is configured separately at the root level
+    emailVerification: {
+        sendVerificationEmail: async ({ user, url, token }: {
+            user: { id: string; email: string; name: string | null; emailVerified: boolean };
+            url: string;
+            token: string;
+        }, request?: Request) => {
+            // Send verification email using Resend
+            console.log(`Sending verification email to ${user.email}`);
+            
+            const result = await emailService.sendVerificationEmail(
+                { 
+                    email: user.email, 
+                    name: user.name || user.email.split('@')[0] 
+                },
+                url
+            );
+            
+            if (!result.success) {
+                console.error('Failed to send verification email:', result.error);
+                throw new Error('Failed to send verification email');
+            }
+            
+            console.log('Verification email sent successfully');
+        },
+        sendOnSignUp: true, // Automatically send verification email on signup
+        autoSignInAfterVerification: true, // Auto sign in after email verification
     },
     user: {
         changeEmail: {
             enabled: true,
-            sendChangeEmailVerification: async ({ user, newEmail, url, token }) => {
-                 // Send change email verification email
-                 console.log(`Send email change verification to ${newEmail}`);
-                 console.log(`Verification URL: ${url}`);
-                 console.log(`User: ${user.email} wants to change to: ${newEmail}`);
-                 // TODO: Implement actual email sending
-                 // This should send an email to the NEW email address with the verification link
+            sendChangeEmailVerification: async ({ user, newEmail, url, token }: {
+                user: { id: string; email: string; name: string | null };
+                newEmail: string;
+                url: string;
+                token: string;
+            }) => {
+                // Send change email verification using Resend
+                console.log(`Sending email change verification to ${newEmail}`);
+                
+                const result = await emailService.sendEmailChangeVerification(
+                    { 
+                        email: user.email, 
+                        name: user.name || user.email.split('@')[0] 
+                    },
+                    newEmail,
+                    url
+                );
+                
+                if (!result.success) {
+                    console.error('Failed to send email change verification:', result.error);
+                    throw new Error('Failed to send email change verification');
+                }
+                
+                console.log('Email change verification sent successfully');
             },
         },
-        // deleteUser: {
-        //     enabled: true,
-        //     sendDeleteAccountVerification: async ({ user, url, token }) => {
-        //         // TODO: Implement LATER if necessary
-        //     },
-        // },
     },
     hooks: {
         before: createAuthMiddleware(async (ctx) => {

@@ -21,6 +21,13 @@ type Config = {
         secret: string;
         url: string;
     };
+    email: {
+        resendApiKey: string;
+        // fromAddress: string;
+    };
+    app: {
+        url: string;
+    };
 };
 
 const migrationConfig: MigrationConfig = {
@@ -40,4 +47,11 @@ export const config: Config = {
         secret: envOrThrow("BETTER_AUTH_SECRET"),
         url: envOrThrow("BETTER_AUTH_URL")
     },
+    email: {
+        resendApiKey: envOrThrow("RESEND_API_KEY"),
+        // fromAddress: process.env.EMAIL_FROM_ADDRESS || "Pettr <noreply@pettr.com>"
+    },
+    app: {
+        url: process.env.APP_URL || "http://localhost:3000"
+    }
 }
