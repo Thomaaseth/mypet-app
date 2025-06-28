@@ -4,10 +4,10 @@ import { config } from '../../config';
 const resend = new Resend(config.email.resendApiKey);
 
 // Email configuration
-// Use Resend's default domain - no custom domain needed!
+// Use Resend's default domain 
 const FROM_EMAIL = 'Pettr <onboarding@resend.dev>';
 const APP_NAME = 'Pettr';
-const APP_URL = config.app.url || 'http://localhost:3000';
+const APP_URL = config.env.webUrl;
 
 interface EmailOptions {
     to: string;

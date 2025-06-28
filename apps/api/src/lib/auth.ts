@@ -13,8 +13,8 @@ export const auth = betterAuth({
         provider: "pg",
     }),
     secret: config.auth.secret,
-    baseURL: config.auth.url,
-    trustedOrigins: ["http://localhost:3000"],
+    baseURL: config.env.apiUrl,
+    trustedOrigins: [config.env.webUrl],
     emailAndPassword: {
         enabled: true,
         disableSignUp: false,
@@ -54,12 +54,11 @@ export const auth = betterAuth({
             token: string;
         }, request?: Request) => {
             // Send verification email using Resend
-            console.log('🔍 Original URL:', url);
-            console.log('🔍 config.app.url:', config.app.url);
+
             const urlObj = new URL(url);
-            urlObj.searchParams.set('callbackURL', config.app.url);
+            urlObj.searchParams.set('callbackURL', config.env.webUrl);
+            // urlObj.searchParams.set('callbackURL', config.app.url);
             const modifiedUrl = urlObj.toString();
-            console.log('🔍 Modified URL:', modifiedUrl);
 
             console.log(`Sending verification email to ${user.email}`);
             
