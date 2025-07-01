@@ -37,7 +37,7 @@ export const auth = betterAuth({
                 },
                 url
             );
-            
+                        
             if (!result.success) {
                 console.error('Failed to send reset password email:', result.error);
                 throw new Error('Failed to send reset password email');
@@ -91,14 +91,17 @@ export const auth = betterAuth({
             }) => {
                 // Send change email verification using Resend
                 console.log(`Sending email change verification to ${newEmail}`);
-                
+                const urlObj = new URL(url);
+                urlObj.searchParams.set('callbackURL', config.env.webUrl);
+                const modifiedUrl = urlObj.toString();
+
                 const result = await emailService.sendEmailChangeVerification(
                     { 
                         email: user.email, 
                         name: user.name || user.email.split('@')[0] 
                     },
                     newEmail,
-                    url
+                    modifiedUrl
                 );
                 
                 if (!result.success) {

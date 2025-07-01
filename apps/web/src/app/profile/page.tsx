@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-// import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
@@ -113,15 +113,17 @@ export default function MyProfilePage() {
     );
 
     if (result) {
-      // Show success toast
-    //   toast({
-    //     title: currentUser?.emailVerified 
-    //       ? "Verification email sent" 
-    //       : "Email updated successfully",
-    //     description: currentUser?.emailVerified 
-    //       ? "Please check your inbox and click the verification link to complete the change."
-    //       : undefined,
-    //   });
+      //  toast({
+      //    title: currentUser?.emailVerified 
+      //      ? "Verification email sent" 
+      //      : "Email updated successfully",
+      //    description: currentUser?.emailVerified 
+      //      ? "Please check your inbox and click the verification link to complete the change."
+      //      : undefined,
+      //  });
+          toast.message("Email has been successfully updated!", {
+            description: "Check your inbox and click the verification link to complete the change."
+          })
 
       // If current email is not verified, the change happens immediately
       if (!currentUser?.emailVerified) {
@@ -163,9 +165,7 @@ export default function MyProfilePage() {
 
     if (result) {
       passwordForm.reset();
-    //   toast({
-    //     title: "Password changed successfully",
-    //   });
+      toast.success("Password changed successfully");
     }
 
     return result;

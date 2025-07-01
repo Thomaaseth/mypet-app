@@ -5,7 +5,8 @@ const resend = new Resend(config.email.resendApiKey);
 
 // Email configuration
 // Use Resend's default domain 
-const FROM_EMAIL = 'Pettr <onboarding@resend.dev>';
+// const FROM_EMAIL = 'Pettr <onboarding@resend.dev>';
+const FROM_EMAIL = 'hello@pettr.life'
 const APP_NAME = 'Pettr';
 const APP_URL = config.env.webUrl;
 
