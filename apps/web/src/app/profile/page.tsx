@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
+import { toastService } from '@/lib/toast';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
@@ -113,17 +113,7 @@ export default function MyProfilePage() {
     );
 
     if (result) {
-      //  toast({
-      //    title: currentUser?.emailVerified 
-      //      ? "Verification email sent" 
-      //      : "Email updated successfully",
-      //    description: currentUser?.emailVerified 
-      //      ? "Please check your inbox and click the verification link to complete the change."
-      //      : undefined,
-      //  });
-          toast.message("Email has been successfully updated!", {
-            description: "Check your inbox and click the verification link to complete the change."
-          })
+        toastService.auth.emailUpdated(currentUser?.emailVerified || false);
 
       // If current email is not verified, the change happens immediately
       if (!currentUser?.emailVerified) {
@@ -165,7 +155,7 @@ export default function MyProfilePage() {
 
     if (result) {
       passwordForm.reset();
-      toast.success("Password changed successfully");
+      toastService.auth.passwordChanged();
     }
 
     return result;
@@ -242,7 +232,7 @@ export default function MyProfilePage() {
               Change the email address associated with your account
               {currentUser.emailVerified && (
                 <span className="block text-xs text-muted-foreground mt-1">
-                  You'll receive a verification email at your new address
+                  {"You'll receive a verification email at your new address"}{' '}
                 </span>
               )}
             </CardDescription>

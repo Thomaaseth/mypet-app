@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { toastService } from '@/lib/toast';
 
 // Zod schema for sign in
 const signInSchema = z.object({
@@ -52,6 +53,7 @@ export default function SignInForm() {
     );
 
     if (result) {
+      toastService.auth.signInSuccess();
       router.push('/');
     }
   };
@@ -133,7 +135,7 @@ export default function SignInForm() {
       {/* Sign Up Link */}
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{' '}
+            {"Don't have an account?"}{' '}
           <a
             href="/signup"
             className="font-medium text-primary underline underline-offset-4 hover:no-underline"

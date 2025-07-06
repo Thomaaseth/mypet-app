@@ -9,6 +9,7 @@ import { LogOut, Loader2 } from 'lucide-react';
 import { useErrorState } from '@/hooks/useErrorsState';
 import { authErrorHandler } from '@/lib/errors/handlers';
 import { User } from '@/types/auth';
+import { toastService } from '@/lib/toast';
 
 export const Navbar = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -53,6 +54,8 @@ export const Navbar = () => {
   // Handle logout with proper state management
   const handleLogout = async () => {
     console.log('🔄 Navbar: Starting logout process...');
+    toastService.auth.signOutSuccess();
+
     const result = await executeAction(
       async () => {
         const { error } = await authClient.signOut({});
