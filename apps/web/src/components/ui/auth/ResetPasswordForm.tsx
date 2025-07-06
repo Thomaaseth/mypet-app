@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { newPasswordSchema } from '@/lib/validations/password';
+import { toastService } from '@/lib/toast';
 
   
 type ResetPasswordFormData = z.infer<typeof newPasswordSchema >;
@@ -55,6 +56,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       );
   
       if (result) {
+        toastService.auth.passwordResetSuccess();
         router.push('/login');
       }
     };

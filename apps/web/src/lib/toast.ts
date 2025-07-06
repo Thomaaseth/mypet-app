@@ -4,7 +4,7 @@ export const toastService = {
   success: (message: string, description?: string) => {
     return toast.success(message, {
       description,
-      duration: 4000,
+      duration: 5000,
     });
   },
 
@@ -26,9 +26,6 @@ export const toastService = {
     return toast.success(message, {
       description: description || "Check your inbox and follow the instructions.",
       duration: 5000,
-      style: {
-              '--description-color': 'hsl(var(--foreground))',
-    } as React.CSSProperties,
     });
   },
 
@@ -62,9 +59,6 @@ auth: {
     signInSuccess: () => 
       toastService.success("Welcome back!"),
 
-    signOutSuccess: () => 
-      toastService.success("Signed out successfully"),
-
     passwordChanged: () => 
       toastService.success("Password changed successfully"),
 
@@ -84,6 +78,12 @@ auth: {
         "Password reset email sent",
         "Check your inbox for reset instructions."
       ),
+
+    passwordResetSuccess: () => 
+      toastService.success(
+        "Password reset successfully!",
+        "You can now sign in with your new password."
+        ),
   },
 }
 

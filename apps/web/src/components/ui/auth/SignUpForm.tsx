@@ -43,21 +43,12 @@ export default function SignUpForm() {
           email: data.email,
           password: data.password,
           name: `${data.firstName} ${data.lastName}`,
-          // callbackURL: '/',
+          // callbackURL: '/', Removed to handle manual redirect
         });
 
         if (signUpError) {
           throw signUpError;
         }
-
-        // const { error: verificationError } = await authClient.sendVerificationEmail({
-        //   email: data.email,
-        //   callbackURL: 'http://localhost:3000/profile',
-        // });
-
-        // if (verificationError) {
-        //   throw verificationError;
-        // }
 
         return { success: true };
       },

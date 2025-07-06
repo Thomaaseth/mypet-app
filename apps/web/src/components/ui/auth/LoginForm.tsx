@@ -40,7 +40,7 @@ export default function SignInForm() {
         const { error } = await authClient.signIn.email({
           email: data.email,
           password: data.password,
-          callbackURL: '/',
+          // callbackURL: '/',
         });
 
         if (error) {
@@ -54,7 +54,7 @@ export default function SignInForm() {
 
     if (result) {
       toastService.auth.signInSuccess();
-      router.replace('/');
+      router.push('/');
     }
   };
 

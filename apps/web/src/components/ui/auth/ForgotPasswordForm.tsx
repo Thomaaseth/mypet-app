@@ -62,13 +62,13 @@ export default function ForgotPasswordForm() {
                   <CheckCircle className="mx-auto h-12 w-12 text-green-600 mb-4" />
                   <CardTitle>Check Your Email</CardTitle>
                   <CardDescription>
-                    We've sent password reset instructions to your email address.
+                    {"We've sent password reset instructions to your email address."}{''}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground text-center">
-                      Didn't receive the email? Check your spam folder or try again.
+                      {"Didn't receive the email? Check your spam folder or try again."}{''}
                     </p>
                     <div className="flex space-x-2">
                       <Button 
@@ -95,7 +95,7 @@ export default function ForgotPasswordForm() {
           <CardHeader>
             <CardTitle>Reset Your Password</CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your password.
+              {"Enter your email address and we'll send you a link to reset your password."}{''}
             </CardDescription>
           </CardHeader>
           <CardContent>
