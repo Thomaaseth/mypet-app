@@ -54,7 +54,7 @@ export default function SignInForm() {
 
     if (result) {
       toastService.auth.signInSuccess();
-      router.push('/');
+      router.replace('/');
     }
   };
 
