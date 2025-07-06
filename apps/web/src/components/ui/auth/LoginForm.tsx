@@ -24,7 +24,10 @@ type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
   const router = useRouter();
-  const { isLoading, error, clearError, executeAction } = useErrorState();
+  const { isLoading, error, clearError, executeAction } = useErrorState({
+    showErrorToast: true,
+    toastCriticalOnly: true
+  });
 
   const {
     register,
@@ -40,7 +43,7 @@ export default function SignInForm() {
         const { error } = await authClient.signIn.email({
           email: data.email,
           password: data.password,
-          // callbackURL: '/',
+          // callbackURL: '/', Removed to handle manual redirect 
         });
 
         if (error) {
