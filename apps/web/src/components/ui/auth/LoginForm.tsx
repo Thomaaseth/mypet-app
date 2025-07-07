@@ -43,7 +43,7 @@ export default function SignInForm() {
         const { error } = await authClient.signIn.email({
           email: data.email,
           password: data.password,
-          // callbackURL: '/', Removed to handle manual redirect 
+          // callbackURL: '/', // Removed to handle manual redirect 
         });
 
         if (error) {

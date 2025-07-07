@@ -17,6 +17,12 @@ import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'luci
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
 import { User } from '@/types/auth';
+import { 
+  // ProfilePageSkeleton, 
+  AccountInfoSkeleton, 
+  EmailFormSkeleton, 
+  PasswordFormSkeleton 
+} from '@/components/ui/skeletons/ProfileSkeleton';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
@@ -24,11 +30,12 @@ const emailUpdateSchema = z.object({
 });
 
 type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
-type PasswordChangeFormData = z.infer<typeof passwordChangeSchema >;
+type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
 
 export default function MyProfilePage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -80,14 +87,15 @@ export default function MyProfilePage() {
 
           emailForm.setValue('newEmail', user.email);
         } else {
-        console.log('❌ No user in data');
-        console.log('🔄 About to redirect to /login');
-
+          console.log('❌ No user in data');
+          console.log('🔄 About to redirect to /login');
           router.push('/login');
         }
       } catch (error) {
         console.error('Failed to load user session:', error);
         router.push('/login');
+      } finally {
+        setIsLoadingUser(false);
       }
     };
 
@@ -113,14 +121,14 @@ export default function MyProfilePage() {
     );
 
     if (result) {
-        toastService.auth.emailUpdated(currentUser?.emailVerified || false);
+      toastService.auth.emailUpdated(currentUser?.emailVerified || false);
 
       // If current email is not verified, the change happens immediately
       if (!currentUser?.emailVerified) {
         try {
           const sessionResponse = await authClient.getSession();
           if ('data' in sessionResponse && sessionResponse.data?.user) {
-            setCurrentUser(prev => prev ? { 
+            setCurrentUser(prev => prev ? {
               ...prev, 
               email: data.newEmail 
             } : null);
@@ -161,6 +169,34 @@ export default function MyProfilePage() {
     return result;
   };
 
+    console.log('🔄 RENDER DEBUG:', {
+    isLoadingUser,
+    hasCurrentUser: !!currentUser,
+    currentUserEmail: currentUser?.email
+  });
+
+  if (isLoadingUser) {
+    return (
+      <div className="container mx-auto py-8 max-w-2xl">
+        <div className="space-y-6">
+          {/* Page Header */}
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+            <p className="text-muted-foreground">
+              Manage your account settings and preferences
+            </p>
+          </div>
+          <AccountInfoSkeleton />
+          <EmailFormSkeleton />
+          <PasswordFormSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+
+  // If no user found after loading, this should not happen as we redirect to login
+  // but keeping it as a fallback
   if (!currentUser) {
     return (
       <div className="container mx-auto py-8">
@@ -202,26 +238,33 @@ export default function MyProfilePage() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-muted-foreground">{currentUser.email}</p>
                   {currentUser.emailVerified ? (
-                    <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                    <div className="flex items-center gap-1 text-xs text-green-600">
                       <CheckCircle className="h-3 w-3" />
                       Verified
-                    </span>
+                    </div>
                   ) : (
-                    <span className="text-xs text-amber-600">Unverified</span>
+                    <div className="flex items-center gap-1 text-xs text-amber-600">
+                      <AlertCircle className="h-3 w-3" />
+                      Unverified
+                    </div>
                   )}
                 </div>
               </div>
               <div>
-                <Label className="text-sm font-medium">Member Since</Label>
+                <Label className="text-sm font-medium">Member since</Label>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(currentUser.createdAt).toLocaleDateString()}
+                  {new Date(currentUser.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Email Update Section */}
+        {/* Email Update Form */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -230,28 +273,35 @@ export default function MyProfilePage() {
             </CardTitle>
             <CardDescription>
               Change the email address associated with your account
-              {currentUser.emailVerified && (
-                <span className="block text-xs text-muted-foreground mt-1">
-                  {"You'll receive a verification email at your new address"}{' '}
-                </span>
-              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={emailForm.handleSubmit(onEmailUpdate)} className="space-y-4">
+            <form 
+              onSubmit={emailForm.handleSubmit(onEmailUpdate)} 
+              className="space-y-4"
+            >
               {emailUpdateState.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{emailUpdateState.error.message}</AlertDescription>
+                  <AlertDescription className="flex items-center justify-between">
+                    {emailUpdateState.error.message}
+                    <button 
+                      type="button" 
+                      onClick={emailUpdateState.clearError}
+                      className="text-xs hover:underline ml-4"
+                    >
+                      Dismiss
+                    </button>
+                  </AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="space-y-2">
-                <Label htmlFor="newEmail">New Email Address</Label>
+                <Label htmlFor="newEmail">New Email</Label>
                 <Input
                   id="newEmail"
                   type="email"
-                  placeholder="Enter new email address"
+                  placeholder="Enter new email"
                   {...emailForm.register('newEmail')}
                   aria-invalid={!!emailForm.formState.errors.newEmail}
                 />
@@ -262,25 +312,21 @@ export default function MyProfilePage() {
                 )}
               </div>
 
-              <Button
-                type="submit"
+              <Button 
+                type="submit" 
                 disabled={emailUpdateState.isLoading}
-                className="w-full"
+                size="sm"
               >
-                {emailUpdateState.isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating Email...
-                  </>
-                ) : (
-                  'Update Email'
+                {emailUpdateState.isLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
+                {emailUpdateState.isLoading ? 'Updating...' : 'Update Email'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Password Change Section */}
+        {/* Password Change Form */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -292,132 +338,133 @@ export default function MyProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={passwordForm.handleSubmit(onPasswordChange)} className="space-y-4">
+            <form 
+              onSubmit={passwordForm.handleSubmit(onPasswordChange)} 
+              className="space-y-4"
+            >
               {passwordChangeState.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{passwordChangeState.error.message}</AlertDescription>
+                  <AlertDescription className="flex items-center justify-between">
+                    {passwordChangeState.error.message}
+                    <button 
+                      type="button" 
+                      onClick={passwordChangeState.clearError}
+                      className="text-xs hover:underline ml-4"
+                    >
+                      Dismiss
+                    </button>
+                  </AlertDescription>
                 </Alert>
               )}
 
-              {/* Current Password */}
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <div className="relative">
-                  <Input
-                    id="currentPassword"
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    placeholder="Enter current password"
-                    {...passwordForm.register('currentPassword')}
-                    aria-invalid={!!passwordForm.formState.errors.currentPassword}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  >
-                    {showCurrentPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">
-                      {showCurrentPassword ? 'Hide password' : 'Show password'}
-                    </span>
-                  </Button>
+              <div className="space-y-4">
+                {/* Current Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showCurrentPassword ? "text" : "password"}
+                      placeholder="Enter current password"
+                      {...passwordForm.register('currentPassword')}
+                      aria-invalid={!!passwordForm.formState.errors.currentPassword}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    >
+                      {showCurrentPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {passwordForm.formState.errors.currentPassword && (
+                    <p className="text-sm text-destructive">
+                      {passwordForm.formState.errors.currentPassword.message}
+                    </p>
+                  )}
                 </div>
-                {passwordForm.formState.errors.currentPassword && (
-                  <p className="text-sm text-destructive">
-                    {passwordForm.formState.errors.currentPassword.message}
-                  </p>
-                )}
+
+                {/* New Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      placeholder="Enter new password"
+                      {...passwordForm.register('newPassword')}
+                      aria-invalid={!!passwordForm.formState.errors.newPassword}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {passwordForm.formState.errors.newPassword && (
+                    <p className="text-sm text-destructive">
+                      {passwordForm.formState.errors.newPassword.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Confirm New Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm new password"
+                      {...passwordForm.register('confirmPassword')}
+                      aria-invalid={!!passwordForm.formState.errors.confirmPassword}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {passwordForm.formState.errors.confirmPassword && (
+                    <p className="text-sm text-destructive">
+                      {passwordForm.formState.errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
               </div>
 
-              {/* New Password */}
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showNewPassword ? 'text' : 'password'}
-                    placeholder="Enter new password"
-                    {...passwordForm.register('newPassword')}
-                    aria-invalid={!!passwordForm.formState.errors.newPassword}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                  >
-                    {showNewPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">
-                      {showNewPassword ? 'Hide password' : 'Show password'}
-                    </span>
-                  </Button>
-                </div>
-                {passwordForm.formState.errors.newPassword && (
-                  <p className="text-sm text-destructive">
-                    {passwordForm.formState.errors.newPassword.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm new password"
-                    {...passwordForm.register('confirmPassword')}
-                    aria-invalid={!!passwordForm.formState.errors.confirmPassword}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">
-                      {showConfirmPassword ? 'Hide password' : 'Show password'}
-                    </span>
-                  </Button>
-                </div>
-                {passwordForm.formState.errors.confirmPassword && (
-                  <p className="text-sm text-destructive">
-                    {passwordForm.formState.errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
+              <Button 
+                type="submit" 
                 disabled={passwordChangeState.isLoading}
-                className="w-full"
+                size="sm"
               >
-                {passwordChangeState.isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Changing Password...
-                  </>
-                ) : (
-                  'Change Password'
+                {passwordChangeState.isLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
+                {passwordChangeState.isLoading ? 'Changing...' : 'Change Password'}
               </Button>
             </form>
           </CardContent>
