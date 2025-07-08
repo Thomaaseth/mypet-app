@@ -44,9 +44,6 @@ export const getWebConfig = (): WebConfig => {
     
     if (cachedConfig.app.isDevelopment) {
       console.log('🔧 Config loaded and validated:', {
-        NODE_ENV: nodeEnv,
-        appUrl: cachedConfig.app.url,
-        apiUrl: cachedConfig.api.baseUrl,
       });
     }
 

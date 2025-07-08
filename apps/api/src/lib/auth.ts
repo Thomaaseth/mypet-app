@@ -15,6 +15,22 @@ export const auth = betterAuth({
     secret: config.auth.secret,
     baseURL: config.env.apiUrl,
     trustedOrigins: [config.env.webUrl],
+    session: {
+        expiresIn: 60 * 60 * 24 * 30, // 30 days
+        updateAge: 60 * 60 * 24, // Update session every 24 hours
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60 // 5 minutes cache
+        }
+    },
+    advanced: {
+        useSecureCookies: process.env.NODE_ENV === "production",
+        cookiePrefix: "pettr-auth", 
+        crossSubDomainCookies: process.env.NODE_ENV === "production" ? {
+            enabled: true,
+            domain: ".yourdomain.com" // Set actual domain for production
+        } : undefined,
+    },
     emailAndPassword: {
         enabled: true,
         disableSignUp: false,

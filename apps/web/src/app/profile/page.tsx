@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toastService } from '@/lib/toast';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
 import { 
   AccountInfoSkeleton, 
@@ -65,11 +65,11 @@ export default function MyProfilePage() {
   });
 
   // Sync email form when user data loads
-  useState(() => {
+  useEffect(() => {
     if (currentUser?.email && emailForm.getValues('newEmail') !== currentUser.email) {
       emailForm.setValue('newEmail', currentUser.email);
     }
-  });
+  }, [currentUser?.email, emailForm]);
 
   // Handle email update using Better Auth's native changeEmail
   const onEmailUpdate = async (data: EmailUpdateFormData) => {
@@ -128,7 +128,7 @@ export default function MyProfilePage() {
     return result;
   };
 
-  // toggle functions for password visibility
+  // Toggle functions for password visibility
   const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
     setPasswordVisibility(prev => ({
       ...prev,
