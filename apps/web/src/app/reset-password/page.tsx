@@ -1,41 +1,37 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import ResetPasswordForm from '@/components/ui/auth/ResetPasswordForm';
+import { useTokenValidation } from '@/hooks/useTokenValidation'; // New hook!
 
 export default function ResetPasswordPage() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
-    const [token, setToken] = useState<string | null>(null);
-    const [isValidating, setIsValidating] = useState(true);
+  // Single hook manages all token validation logic
+  const { token, isValidating, isValid } = useTokenValidation({
+    paramName: 'token',
+    redirectOnInvalid: '/forgot-password',
+    required: true
+  });
 
-    useEffect(() => {
-        const tokenFromUrl = searchParams.get('token');
-        if (!tokenFromUrl) {
-            console.log("Invalid reset link");
-            router.push('/forgot-password');
-            return;
-        }
-        setToken(tokenFromUrl);
-        setIsValidating(false);
-    }, [searchParams, router]);
-
-    if (isValidating || !token) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-center">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Validating reset link...
-                </div>
-            </div>
-        );
-    }
-
+  // Simple loading state
+  if (isValidating) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <ResetPasswordForm token={token} />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Validating reset link...
         </div>
+      </div>
     );
+  }
+
+  // Simple validation check - redirect logic is handled in the hook
+  if (!isValid || !token) {
+    return null; // Hook handles redirect
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <ResetPasswordForm token={token} />
+    </div>
+  );
 }

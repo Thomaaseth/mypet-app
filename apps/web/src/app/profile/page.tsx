@@ -5,8 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '@/lib/auth-client';
 import { useErrorState } from '@/hooks/useErrorsState';
+import { useUserSession } from '@/hooks/useUserSession';
 import { authErrorHandler } from '@/lib/errors/handlers';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,11 +14,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toastService } from '@/lib/toast';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
-import { User } from '@/types/auth';
 import { 
-  // ProfilePageSkeleton, 
   AccountInfoSkeleton, 
   EmailFormSkeleton, 
   PasswordFormSkeleton 
@@ -33,19 +31,25 @@ type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
 type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
 
 export default function MyProfilePage() {
-  const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // user session state
+  const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useUserSession({
+    redirectOnError: true,
+    redirectTo: '/login'
+  });
+
+  // UI-specific state remains as separate useState
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
 
   // Email update form
   const emailUpdateState = useErrorState();
   const emailForm = useForm<EmailUpdateFormData>({
     resolver: zodResolver(emailUpdateSchema),
     defaultValues: {
-      newEmail: '',
+      newEmail: currentUser?.email || '',
     },
   });
 
@@ -60,47 +64,12 @@ export default function MyProfilePage() {
     },
   });
 
-  // Load current user session
-  useEffect(() => {
-    const loadUserSession = async () => {
-      try {
-        console.log('🔍 Starting session check...');
-
-        const sessionResponse = await authClient.getSession();
-        
-        if ('data' in sessionResponse && sessionResponse.data?.user) {
-          console.log('Has data property:', sessionResponse.data);
-          console.log('Data keys:', Object.keys(sessionResponse.data || {}));
-          console.log('Data content:', JSON.stringify(sessionResponse.data, null, 2));
-          const user = sessionResponse.data.user;
-
-          setCurrentUser({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            emailVerified: user.emailVerified,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            image: user.image,
-          });
-          console.log('✅ User found:', sessionResponse.data.user);
-
-          emailForm.setValue('newEmail', user.email);
-        } else {
-          console.log('❌ No user in data');
-          console.log('🔄 About to redirect to /login');
-          router.push('/login');
-        }
-      } catch (error) {
-        console.error('Failed to load user session:', error);
-        router.push('/login');
-      } finally {
-        setIsLoadingUser(false);
-      }
-    };
-
-    loadUserSession();
-  }, [emailForm, router]);
+  // Sync email form when user data loads
+  useState(() => {
+    if (currentUser?.email && emailForm.getValues('newEmail') !== currentUser.email) {
+      emailForm.setValue('newEmail', currentUser.email);
+    }
+  });
 
   // Handle email update using Better Auth's native changeEmail
   const onEmailUpdate = async (data: EmailUpdateFormData) => {
@@ -123,19 +92,9 @@ export default function MyProfilePage() {
     if (result) {
       toastService.auth.emailUpdated(currentUser?.emailVerified || false);
 
-      // If current email is not verified, the change happens immediately
+      // Use updateUser 
       if (!currentUser?.emailVerified) {
-        try {
-          const sessionResponse = await authClient.getSession();
-          if ('data' in sessionResponse && sessionResponse.data?.user) {
-            setCurrentUser(prev => prev ? {
-              ...prev, 
-              email: data.newEmail 
-            } : null);
-          }
-        } catch (error) {
-          console.error('Failed to refresh session:', error);
-        }
+        updateUser({ email: data.newEmail });
       }
     }
 
@@ -169,23 +128,19 @@ export default function MyProfilePage() {
     return result;
   };
 
-    console.log('🔄 RENDER DEBUG:', {
-    isLoadingUser,
-    hasCurrentUser: !!currentUser,
-    currentUserEmail: currentUser?.email
-  });
+  // toggle functions for password visibility
+  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+    setPasswordVisibility(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
 
+  // Loading state is managed by the hook
   if (isLoadingUser) {
     return (
-      <div className="container mx-auto py-8 max-w-2xl">
-        <div className="space-y-6">
-          {/* Page Header */}
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
-            <p className="text-muted-foreground">
-              Manage your account settings and preferences
-            </p>
-          </div>
+      <div className="container mx-auto max-w-4xl py-8 px-4">
+        <div className="space-y-8">
           <AccountInfoSkeleton />
           <EmailFormSkeleton />
           <PasswordFormSkeleton />
@@ -194,71 +149,58 @@ export default function MyProfilePage() {
     );
   }
 
-
-  // If no user found after loading, this should not happen as we redirect to login
-  // but keeping it as a fallback
-  if (!currentUser) {
+  // Error state is managed by the hook
+  if (sessionError) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Loading your profile...
-        </div>
+      <div className="container mx-auto max-w-4xl py-8 px-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Failed to load your profile. Please try refreshing the page.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto py-8 max-w-2xl">
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences
-          </p>
-        </div>
+  // User will always exist here due to redirect logic in hook
+  if (!currentUser) return null;
 
-        {/* Current User Info */}
+  return (
+    <div className="container mx-auto max-w-4xl py-8 px-4">
+      <div className="space-y-8">
+        {/* Account Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Account Information</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Account Information
+            </CardTitle>
             <CardDescription>
-              Your current account details
+              Your account details and verification status.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium">Name</Label>
-                <p className="text-sm text-muted-foreground">{currentUser.name}</p>
+                <Label className="text-sm font-medium text-muted-foreground">Name</Label>
+                <p className="text-sm font-medium">{currentUser.name}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium">Email</Label>
+                <Label className="text-sm font-medium text-muted-foreground">Email</Label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+                  <p className="text-sm font-medium">{currentUser.email}</p>
                   {currentUser.emailVerified ? (
-                    <div className="flex items-center gap-1 text-xs text-green-600">
-                      <CheckCircle className="h-3 w-3" />
-                      Verified
-                    </div>
+                    <CheckCircle className="h-4 w-4 text-green-600" />
                   ) : (
-                    <div className="flex items-center gap-1 text-xs text-amber-600">
-                      <AlertCircle className="h-3 w-3" />
-                      Unverified
-                    </div>
+                    <AlertCircle className="h-4 w-4 text-yellow-600" />
                   )}
                 </div>
-              </div>
-              <div>
-                <Label className="text-sm font-medium">Member since</Label>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(currentUser.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
+                {!currentUser.emailVerified && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Email not verified. Check your inbox for verification email.
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -268,40 +210,30 @@ export default function MyProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
+              <Mail className="h-5 w-5" />
               Update Email
             </CardTitle>
             <CardDescription>
-              Change the email address associated with your account
+              Change your account email address.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form 
-              onSubmit={emailForm.handleSubmit(onEmailUpdate)} 
-              className="space-y-4"
-            >
+            <form onSubmit={emailForm.handleSubmit(onEmailUpdate)} className="space-y-4">
               {emailUpdateState.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="flex items-center justify-between">
+                  <AlertDescription>
                     {emailUpdateState.error.message}
-                    <button 
-                      type="button" 
-                      onClick={emailUpdateState.clearError}
-                      className="text-xs hover:underline ml-4"
-                    >
-                      Dismiss
-                    </button>
                   </AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="newEmail">New Email</Label>
+                <Label htmlFor="newEmail">New Email Address</Label>
                 <Input
                   id="newEmail"
                   type="email"
-                  placeholder="Enter new email"
+                  placeholder="Enter new email address"
                   {...emailForm.register('newEmail')}
                   aria-invalid={!!emailForm.formState.errors.newEmail}
                 />
@@ -330,42 +262,32 @@ export default function MyProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lock className="h-4 w-4" />
+              <Lock className="h-5 w-5" />
               Change Password
             </CardTitle>
             <CardDescription>
-              Update your password to keep your account secure
+              Update your account password for better security.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form 
-              onSubmit={passwordForm.handleSubmit(onPasswordChange)} 
-              className="space-y-4"
-            >
+            <form onSubmit={passwordForm.handleSubmit(onPasswordChange)} className="space-y-4">
               {passwordChangeState.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="flex items-center justify-between">
+                  <AlertDescription>
                     {passwordChangeState.error.message}
-                    <button 
-                      type="button" 
-                      onClick={passwordChangeState.clearError}
-                      className="text-xs hover:underline ml-4"
-                    >
-                      Dismiss
-                    </button>
                   </AlertDescription>
                 </Alert>
               )}
 
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {/* Current Password */}
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">Current Password</Label>
                   <div className="relative">
                     <Input
                       id="currentPassword"
-                      type={showCurrentPassword ? "text" : "password"}
+                      type={passwordVisibility.current ? "text" : "password"}
                       placeholder="Enter current password"
                       {...passwordForm.register('currentPassword')}
                       aria-invalid={!!passwordForm.formState.errors.currentPassword}
@@ -375,13 +297,9 @@ export default function MyProfilePage() {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      onClick={() => togglePasswordVisibility('current')}
                     >
-                      {showCurrentPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {passwordVisibility.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   {passwordForm.formState.errors.currentPassword && (
@@ -397,7 +315,7 @@ export default function MyProfilePage() {
                   <div className="relative">
                     <Input
                       id="newPassword"
-                      type={showNewPassword ? "text" : "password"}
+                      type={passwordVisibility.new ? "text" : "password"}
                       placeholder="Enter new password"
                       {...passwordForm.register('newPassword')}
                       aria-invalid={!!passwordForm.formState.errors.newPassword}
@@ -407,13 +325,9 @@ export default function MyProfilePage() {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      onClick={() => togglePasswordVisibility('new')}
                     >
-                      {showNewPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {passwordVisibility.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   {passwordForm.formState.errors.newPassword && (
@@ -429,7 +343,7 @@ export default function MyProfilePage() {
                   <div className="relative">
                     <Input
                       id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
+                      type={passwordVisibility.confirm ? "text" : "password"}
                       placeholder="Confirm new password"
                       {...passwordForm.register('confirmPassword')}
                       aria-invalid={!!passwordForm.formState.errors.confirmPassword}
@@ -439,13 +353,9 @@ export default function MyProfilePage() {
                       variant="ghost"
                       size="sm"
                       className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() => togglePasswordVisibility('confirm')}
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {passwordVisibility.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   {passwordForm.formState.errors.confirmPassword && (

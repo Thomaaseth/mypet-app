@@ -1,56 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
 import { useErrorState } from '@/hooks/useErrorsState';
+import { useUserSession } from '@/hooks/useUserSession';
 import { authErrorHandler } from '@/lib/errors/handlers';
-import { User } from '@/types/auth';
 
 export const Navbar = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  
+  // Use hook instead of manual change
+  const { user, isLoading, refreshSession, clearSession } = useUserSession();
+  
   const { isLoading: isLoggingOut, executeAction } = useErrorState();
 
-  // Load user session on mount and when pathname changes (to detect logout)
+  // Use refreshSession instead of manual loadUserSession
   useEffect(() => {
-    const loadUserSession = async () => {
-      try {
-        console.log('🔍 Navbar: Checking user session...');
-        const sessionResponse = await authClient.getSession();
-        
-        if ('data' in sessionResponse && sessionResponse.data?.user) {
-          console.log('✅ Navbar: User found:', sessionResponse.data.user);
-          setUser({
-            id: sessionResponse.data.user.id,
-            email: sessionResponse.data.user.email,
-            name: sessionResponse.data.user.name,
-            emailVerified: sessionResponse.data.user.emailVerified,
-            createdAt: sessionResponse.data.user.createdAt,
-            updatedAt: sessionResponse.data.user.updatedAt,
-            image: sessionResponse.data.user.image,
-          });
-        } else {
-          console.log('❌ Navbar: No user found, setting to null');
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('❌ Navbar: Failed to load user session:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    refreshSession();
+  }, [pathname, refreshSession]);
 
-    loadUserSession();
-  }, [pathname]); 
-
-  // Handle logout with proper state management
+  // Use clearSession from hook
   const handleLogout = async () => {
     console.log('🔄 Navbar: Starting logout process...');
 
@@ -63,7 +37,7 @@ export const Navbar = () => {
         }
 
         console.log('✅ Navbar: Logout successful, clearing user state');
-        setUser(null); // Immediately clear user state
+        clearSession(); // Use hook method instead of setUser(null)
         return { success: true };
       },
       authErrorHandler
@@ -97,7 +71,6 @@ export const Navbar = () => {
     return pathname.startsWith(href);
   };
 
-  // Show loading state
   if (isLoading) {
     return (
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -202,4 +175,3 @@ export const Navbar = () => {
     </nav>
   );
 };
-
