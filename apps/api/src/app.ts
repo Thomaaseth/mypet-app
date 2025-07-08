@@ -6,6 +6,8 @@ import { healthCheck, readinessCheck } from "./handlers/health";
 import cors from 'cors';
 import { config } from "./config";
 
+import petRoutes from '@/routes/pets.routes';
+
 export const app = express();
 
 app.use(cors({
@@ -17,10 +19,14 @@ app.use(cors({
 
 app.use(middlewareLogResponse);
 
+// Better-auth routes
 app.all('/api/auth/*splat', toNodeHandler(auth));
+
+// JSON Parsing middleware
 app.use(express.json());
 
-
+// PET ROUTES
+app.use('/api/pets', petRoutes)
 
 // APP HEALTH
 app.get('/api/health', (req, res, next) => {

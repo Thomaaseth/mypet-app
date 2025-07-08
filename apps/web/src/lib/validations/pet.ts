@@ -10,7 +10,7 @@ export const weightUnitSchema = z.enum(['kg', 'lbs'], {
   errorMap: () => ({ message: 'Please select a valid weight unit' })
 });
 
-// Base pet validation schema
+// Base pet validation schema (no refine so we can use .extend, .shape, .partial)
 export const basePetFormSchema = z.object({
   name: z
     .string()
@@ -20,7 +20,7 @@ export const basePetFormSchema = z.object({
   
   species: z
     .string()
-    .max(30, 'Species/breed must be less than 30 characters')
+    .max(50, 'Species/breed must be less than 50 characters')
     .regex(/^[a-zA-Z\s\-'\.]*$/, 'Species/breed can only contain letters, spaces, hyphens, apostrophes, and periods')
     .optional()
     .or(z.literal('')),
@@ -64,7 +64,7 @@ export const basePetFormSchema = z.object({
     .or(z.literal('')),
 });
 
-// Validation with unit-specific weight limits
+// Enhanced validation with unit-specific weight limits (this will be a ZodEffects)
 export const petFormSchema = basePetFormSchema.refine((data) => {
   if (!data.weight) return true; // Optional field
   
@@ -106,7 +106,7 @@ export const createPetSchema = basePetFormSchema.extend({
   path: ['weight']
 });
 
-// Schema for updating a pet
+// Schema for updating a pet (more flexible)
 export const updatePetSchema = basePetFormSchema.partial().extend({
   id: z.string().uuid('Invalid pet ID'),
 }).refine((data) => {
@@ -128,17 +128,10 @@ export const updatePetSchema = basePetFormSchema.partial().extend({
   path: ['weight']
 });
 
-// Schema for pet search/filter
-export const petFilterSchema = z.object({
-  species: z.string().max(50).optional(),
-  search: z.string().max(100).optional(),
-});
-
 // Export types
 export type PetFormData = z.infer<typeof petFormSchema>;
 export type CreatePetData = z.infer<typeof createPetSchema>;
 export type UpdatePetData = z.infer<typeof updatePetSchema>;
-export type PetFilterData = z.infer<typeof petFilterSchema>;
 
 // Utility functions for validation
 export const validatePetForm = (data: unknown) => {
