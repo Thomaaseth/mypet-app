@@ -206,3 +206,30 @@ export const calculatePetAge = (birthDate: string | null): string => {
   
   return years === 1 ? '1 year' : `${years} years`;
 };
+
+// Common species suggestions for autocomplete (optional helper)
+export const commonSpeciesSuggestions: readonly string[] = [
+  // Dogs
+  'Labrador Retriever',
+  'Golden Retriever', 
+  'German Shepherd',
+  'French Bulldog',
+  'Bulldog',
+  'Poodle',
+  'Beagle',
+  'Rottweiler',
+  'Yorkshire Terrier',
+  'Mixed Breed Dog',
+  // Cats
+  'Persian Cat',
+  'Maine Coon',
+  'British Shorthair', 
+  'Ragdoll',
+  'Bengal Cat',
+  'Siamese Cat',
+  'Russian Blue',
+  'Scottish Fold',
+  'Mixed Breed Cat',
+  // General
+  'Mixed Breed',
+] as const;
