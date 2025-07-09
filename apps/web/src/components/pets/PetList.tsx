@@ -1,7 +1,7 @@
 // apps/web/src/components/pets/PetList.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -30,6 +30,7 @@ import PetCard from './PetCard';
 import PetForm from './PetForm';
 import type { Pet, PetFormData } from '@/types/pet';
 import { petErrorHandler } from '@/lib/api/pets';
+import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 
 export default function PetList() {
   const { pets, isLoading, error, createPet, updatePet, deletePet } = usePets();
@@ -42,11 +43,16 @@ export default function PetList() {
   const [activeTab, setActiveTab] = useState<string>('');
 
   // Set active tab to first pet when pets load
-  useState(() => {
+//   useState(() => {
+//     if (pets.length > 0 && !activeTab) {
+//       setActiveTab(pets[0].id);
+//     }
+//   });
+    useEffect(() => {
     if (pets.length > 0 && !activeTab) {
-      setActiveTab(pets[0].id);
+        setActiveTab(pets[0].id); // Auto-select first pet (latest added => desc order)
     }
-  });
+    }, [pets, activeTab]);
 
   // Handle create pet
   const handleCreatePet = async (data: PetFormData): Promise<Pet | null> => {
@@ -109,17 +115,21 @@ export default function PetList() {
   };
 
   // Loading state
+//   if (isLoading) {
+//     return (
+//       <div className="container mx-auto py-8 px-4">
+//         <div className="flex items-center justify-center min-h-[400px]">
+//           <div className="text-center space-y-4">
+//             <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+//             <p className="text-muted-foreground">Loading your pets...</p>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-            <p className="text-muted-foreground">Loading your pets...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <PetListSkeleton />;
   }
 
   // Error state
