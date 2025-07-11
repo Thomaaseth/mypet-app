@@ -14,12 +14,14 @@ import { user } from './auth-schema';
 
 export const petGenderEnum = pgEnum('pet_gender', ['male', 'female', 'unknown']);
 export const weightUnitEnum = pgEnum('weight_unit', ['kg', 'lbs']);
+export const petAnimalTypeEnum = pgEnum('pet_animal_type', ['cat', 'dog']);
 
 // Pets table
 export const pets = pgTable('pets', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }).notNull(),
   name: varchar('name', { length: 100 }).notNull(),
+  animalType: petAnimalTypeEnum('animal_type').notNull(), // REQUIRED
   species: varchar('species', { length: 50 }), // Optional
   gender: petGenderEnum('gender').default('unknown'),
   birthDate: date('birth_date'),
