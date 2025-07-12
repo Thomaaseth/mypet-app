@@ -59,7 +59,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 <p className="text-sm text-muted-foreground">{pet.species}</p>
                 ) : (
                 <p className="text-sm text-muted-foreground capitalize">{pet.animalType}</p>
-                )};
+                )}
           </div>
           <CardAction>
             <DropdownMenu>

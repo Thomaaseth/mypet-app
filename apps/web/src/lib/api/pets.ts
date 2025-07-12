@@ -1,180 +1,96 @@
-import { getApiUrl } from '@/lib/config';
-import type { 
-  Pet, 
-  PetFormData, 
-  PetsApiResponse, 
-  PetApiResponse, 
-  PetError 
-} from '@/types/pet';
+import { get, post, put, del } from './base';  // Use base functions directly
+import { ValidationError } from './errors';
+import type { Pet, PetFormData, PetsApiResponse, PetError } from '@/types/pet';
 
-// Base API configuration
-const API_BASE_URL = getApiUrl();
-
-// Utility function to handle API errors
-const handleApiError = (error: unknown): never => {
-  if (error && typeof error === 'object' && 'response' in error) {
-    const apiError = error as { response?: { data?: { error?: string } } };
-    if (apiError.response?.data?.error) {
-      throw new Error(apiError.response.data.error);
-    }
-  }
-  
-  if (error instanceof Error) {
-    throw new Error(error.message);
-  }
-  
-  throw new Error('An unexpected error occurred');
-};
-
-// Utility function to make authenticated requests
-const makeAuthenticatedRequest = async (
-  endpoint: string, 
-  options: RequestInit = {}
-): Promise<Response> => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const response = await fetch(url, {
-    ...options,
-    credentials: 'include', // Include cookies for better-auth
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-
-  return response;
-};
-
-// Parse JSON response with error handling
-const parseJsonResponse = async <T>(response: Response): Promise<T> => {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-  }
-
-  return response.json();
-};
-
-// Pet API functions
 export const petApi = {
-  // Get all user's pets
+
   async getPets(): Promise<PetsApiResponse> {
     try {
-      const response = await makeAuthenticatedRequest('/api/pets', {
-        method: 'GET',
-      });
-
-      const result = await parseJsonResponse<{ data: PetsApiResponse; message: string }>(response);
-      return result.data;
+      return await get<PetsApiResponse>('/api/pets');
     } catch (error) {
       console.error('Error fetching pets:', error);
-      return handleApiError(error);
+      throw error;
     }
   },
 
-  // Get a specific pet by ID
-  async getPet(petId: string): Promise<Pet> {
+  async getPetById(petId: string): Promise<Pet> {
     try {
-      const response = await makeAuthenticatedRequest(`/api/pets/${petId}`, {
-        method: 'GET',
-      });
-
-      const result = await parseJsonResponse<{ data: PetApiResponse; message: string }>(response);
-      return result.data.pet;
+      const result = await get<{ pet: Pet }>(`/api/pets/${petId}`);
+      return result.pet;
     } catch (error) {
       console.error('Error fetching pet:', error);
-      return handleApiError(error);
+      throw error;
     }
   },
 
-  // Create a new pet
   async createPet(petData: PetFormData): Promise<Pet> {
     try {
-      const response = await makeAuthenticatedRequest('/api/pets', {
-        method: 'POST',
-        body: JSON.stringify(petData),
-      });
-
-      const result = await parseJsonResponse<{ data: PetApiResponse; message: string }>(response);
-      return result.data.pet;
+      const result = await post<{ pet: Pet }, PetFormData>('/api/pets', petData);
+      return result.pet;
     } catch (error) {
       console.error('Error creating pet:', error);
-      return handleApiError(error);
+      throw error;
     }
   },
 
-  // Update an existing pet
   async updatePet(petId: string, petData: Partial<PetFormData>): Promise<Pet> {
     try {
-      const response = await makeAuthenticatedRequest(`/api/pets/${petId}`, {
-        method: 'PUT',
-        body: JSON.stringify(petData),
-      });
-
-      const result = await parseJsonResponse<{ data: PetApiResponse; message: string }>(response);
-      return result.data.pet;
+      const result = await put<{ pet: Pet }, Partial<PetFormData>>(`/api/pets/${petId}`, petData);
+      return result.pet;
     } catch (error) {
       console.error('Error updating pet:', error);
-      return handleApiError(error);
+      throw error;
     }
   },
 
-  // Delete a pet (soft delete)
   async deletePet(petId: string): Promise<void> {
     try {
-      const response = await makeAuthenticatedRequest(`/api/pets/${petId}`, {
-        method: 'DELETE',
-      });
-
-      await parseJsonResponse<{ message: string }>(response);
+      await del<{ message: string }>(`/api/pets/${petId}`);
     } catch (error) {
       console.error('Error deleting pet:', error);
-      handleApiError(error);
+      throw error;
     }
   },
 
-  // Permanently delete a pet (hard delete)
   async permanentlyDeletePet(petId: string): Promise<void> {
     try {
-      const response = await makeAuthenticatedRequest(`/api/pets/${petId}/permanent`, {
-        method: 'DELETE',
-      });
-
-      await parseJsonResponse<{ message: string }>(response);
+      await del<{ message: string }>(`/api/pets/${petId}/permanent`);
     } catch (error) {
       console.error('Error permanently deleting pet:', error);
-      handleApiError(error);
+      throw error;
     }
   },
 
-  // Get pet count
   async getPetCount(): Promise<number> {
     try {
-      const response = await makeAuthenticatedRequest('/api/pets/stats/count', {
-        method: 'GET',
-      });
-
-      const result = await parseJsonResponse<{ data: { count: number }; message: string }>(response);
-      return result.data.count;
+      const result = await get<{ count: number }>('/api/pets/stats/count');
+      return result.count;
     } catch (error) {
       console.error('Error fetching pet count:', error);
-      return handleApiError(error);
+      throw error;
     }
   },
 };
 
-// Pet error handler utility (following your authErrorHandler pattern)
 export const petErrorHandler = (error: unknown): PetError => {
   let message: string;
   let field: keyof PetFormData | undefined;
-  let code: string | undefined;
+  let code: string;
 
-  if (error instanceof Error) {
+  // Handle API error types
+  if (error instanceof ValidationError) {
     message = error.message;
+    field = error.field as keyof PetFormData;
+    code = error.code;
+  } else if (error instanceof Error) {
+    message = error.message;
+    code = 'PET_ERROR';
   } else if (typeof error === 'string') {
     message = error;
+    code = 'PET_ERROR';
   } else {
     message = 'An error occurred while processing your request';
+    code = 'PET_ERROR';
   }
 
   // Map specific validation errors to fields
@@ -202,6 +118,6 @@ export const petErrorHandler = (error: unknown): PetError => {
   return {
     message,
     field,
-    code: code || 'PET_ERROR',
+    code,
   };
 };
