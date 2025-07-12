@@ -16,10 +16,11 @@ export function usePetForm(options: UsePetFormOptions = {}) {
     if (pet) {
       return {
         name: pet.name,
+        animalType: pet.animalType,
         species: pet.species || '',
         gender: pet.gender,
         birthDate: pet.birthDate || '',
-        weight: pet.weight || '',
+        weight: pet.weight ??'',
         weightUnit: pet.weightUnit,
         isNeutered: pet.isNeutered,
         microchipNumber: pet.microchipNumber || '',
@@ -29,6 +30,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
 
     return {
       name: '',
+      animalType: 'cat',
       species: '',
       gender: 'unknown',
       birthDate: '',
@@ -50,6 +52,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
   const resetWithPet = (newPet: Pet) => {
     const formData: PetFormData = {
       name: newPet.name,
+      animalType: newPet.animalType,
       species: newPet.species || '',
       gender: newPet.gender,
       birthDate: newPet.birthDate || '',

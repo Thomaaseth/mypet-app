@@ -5,6 +5,7 @@ export interface Pet {
   id: string;
   userId: string;
   name: string;
+  animalType: 'cat' | 'dog';
   species: string | null; // Optional: user can enter any text like "Golden Retriever", "Persian Cat", etc.
   gender: PetGender;
   birthDate: string | null; // ISO date string
@@ -22,7 +23,8 @@ export interface Pet {
 // Form data types
 export interface PetFormData {
   name: string;
-  species: string; // Free text field
+  animalType: 'cat' | 'dog';
+  species?: string; // Free text field
   gender: PetGender;
   birthDate: string; // HTML date input format: YYYY-MM-DD
   weight: string; // String for form input (the weight value)

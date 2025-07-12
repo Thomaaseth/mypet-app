@@ -53,9 +53,9 @@ export default function PetForm({
   // Handle form submission
  const onFormSubmit = async (formData: z.infer<typeof petFormSchema>) => {
   try {
-    // Transform with proper type safety - convert optional fields to required strings
     const transformedData: PetFormData = {
       name: formData.name,
+      animalType: formData.animalType,
       species: formData.species ?? '',
       gender: formData.gender,
       birthDate: formData.birthDate ?? '',
@@ -103,6 +103,30 @@ export default function PetForm({
         )}
       </div>
 
+      {/* Animal Type */}
+        <div className="space-y-2">
+        <Label htmlFor="animalType">Animal Type *</Label>
+        <Select 
+            value={watch('animalType')} 
+            onValueChange={(value: 'cat' | 'dog') => {
+            setValue('animalType', value);
+            // Clear species when animal type changes
+            setValue('species', '');
+            }}
+        >
+            <SelectTrigger>
+            <SelectValue placeholder="Select cat or dog" />
+            </SelectTrigger>
+            <SelectContent>
+            <SelectItem value="cat">Cat</SelectItem>
+            <SelectItem value="dog">Dog</SelectItem>
+            </SelectContent>
+        </Select>
+        {errors.animalType && (
+            <p className="text-sm text-destructive">{errors.animalType.message}</p>
+        )}
+        </div>
+
       {/* Species/Breed */}
       <div className="space-y-2">
         <Label htmlFor="species">Species/Breed</Label>
@@ -120,26 +144,26 @@ export default function PetForm({
           />
           
           {/* Species Suggestions Dropdown */}
-          {showSpeciesSuggestions && (
+            {showSpeciesSuggestions && watch('animalType') && (
             <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-md border bg-background shadow-lg">
-              {commonSpeciesSuggestions
+                {commonSpeciesSuggestions[watch('animalType') as 'cat' | 'dog']
                 .filter(suggestion => 
-                  !watchedSpecies || 
-                  suggestion.toLowerCase().includes(watchedSpecies.toLowerCase())
+                    !watchedSpecies || 
+                    suggestion.toLowerCase().includes(watchedSpecies.toLowerCase())
                 )
                 .map((suggestion: string) => (
-                  <button
+                    <button
                     key={suggestion}
                     type="button"
                     className="w-full px-3 py-2 text-left text-sm hover:bg-muted focus:bg-muted focus:outline-none"
                     onMouseDown={() => handleSpeciesSuggestion(suggestion)}
-                  >
+                    >
                     {suggestion}
-                  </button>
+                    </button>
                 ))
-              }
+                }
             </div>
-          )}
+            )}
         </div>
         {errors.species && (
           <p className="text-sm text-destructive">{errors.species.message}</p>

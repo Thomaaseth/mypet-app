@@ -57,7 +57,13 @@ export function usePets(): UsePetsReturn {
   const createPet = useCallback(async (petData: PetFormData): Promise<Pet | null> => {
     const result = await executeAction(
       async () => {
-        const newPet = await petApi.createPet(petData);
+
+        const transformedData = {
+        ...petData,
+        weight: petData.weight ? petData.weight.replace(',', '.') : ''
+        };
+
+        const newPet = await petApi.createPet(transformedData);
         
         // Update local state by adding the new pet
         setState(prev => ({
@@ -81,7 +87,13 @@ export function usePets(): UsePetsReturn {
   ): Promise<Pet | null> => {
     const result = await executeAction(
       async () => {
-        const updatedPet = await petApi.updatePet(petId, petData);
+
+        const transformedData = {
+        ...petData,
+        weight: petData.weight ? petData.weight.replace(',', '.') : ''
+        };
+
+        const updatedPet = await petApi.updatePet(petId, transformedData);
         
         // Update local state
         setState(prev => ({

@@ -114,19 +114,7 @@ export default function PetList() {
     return result;
   };
 
-  // Loading state
-//   if (isLoading) {
-//     return (
-//       <div className="container mx-auto py-8 px-4">
-//         <div className="flex items-center justify-center min-h-[400px]">
-//           <div className="text-center space-y-4">
-//             <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-//             <p className="text-muted-foreground">Loading your pets...</p>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
+
 
   if (isLoading) {
     return <PetListSkeleton />;
@@ -232,18 +220,18 @@ export default function PetList() {
 
         {/* Pet Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
+            <TabsList className="flex justify-center w-full">
             {pets.map((pet) => (
-              <TabsTrigger 
+                <TabsTrigger 
                 key={pet.id} 
                 value={pet.id}
-                className="flex items-center gap-2 text-left"
-              >
+                className="flex items-center gap-2 text-left min-w-[120px]"
+                >
                 <Heart className="h-4 w-4" />
                 <span className="truncate">{pet.name}</span>
-              </TabsTrigger>
+                </TabsTrigger>
             ))}
-          </TabsList>
+            </TabsList>
 
           {/* Pet Tab Content */}
           {pets.map((pet) => (

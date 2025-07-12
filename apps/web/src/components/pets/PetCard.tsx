@@ -55,9 +55,11 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <CardTitle className="text-lg">{pet.name}</CardTitle>
-            {pet.species && (
-              <p className="text-sm text-muted-foreground">{pet.species}</p>
-            )}
+            {pet.species ? (
+                <p className="text-sm text-muted-foreground">{pet.species}</p>
+                ) : (
+                <p className="text-sm text-muted-foreground capitalize">{pet.animalType}</p>
+                )};
           </div>
           <CardAction>
             <DropdownMenu>
