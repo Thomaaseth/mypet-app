@@ -35,5 +35,7 @@ export type {
 } from './types';
 
 export { petApi, petErrorHandler } from './domains/pets';
+export { weightApi, weightErrorHandler } from './domains/weights';
 
 export type { PetsApiResponse, PetError } from './domains/pets';
+export type { WeightEntriesApiResponse, WeightError } from './domains/weights';

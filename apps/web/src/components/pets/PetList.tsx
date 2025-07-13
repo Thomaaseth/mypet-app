@@ -1,4 +1,3 @@
-// apps/web/src/components/pets/PetList.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,6 +30,7 @@ import PetForm from './PetForm';
 import type { Pet, PetFormData } from '@/types/pet';
 import { petErrorHandler } from '@/lib/api/pets';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
+import { WeightTracker } from './WeightTracker';
 
 export default function PetList() {
   const { pets, isLoading, error, createPet, updatePet, deletePet } = usePets();
@@ -220,18 +220,18 @@ export default function PetList() {
 
         {/* Pet Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="flex justify-center w-full">
+          <TabsList className="flex justify-center w-full">
             {pets.map((pet) => (
-                <TabsTrigger 
+              <TabsTrigger 
                 key={pet.id} 
                 value={pet.id}
                 className="flex items-center gap-2 text-left min-w-[120px]"
-                >
+              >
                 <Heart className="h-4 w-4" />
                 <span className="truncate">{pet.name}</span>
-                </TabsTrigger>
+              </TabsTrigger>
             ))}
-            </TabsList>
+          </TabsList>
 
           {/* Pet Tab Content */}
           {pets.map((pet) => (
@@ -246,7 +246,17 @@ export default function PetList() {
                   />
                 </div>
 
-                {/* Future sections - Weight tracking, food tracking, etc. */}
+                {/* Weight Tracker Section */}
+                <div>
+                  <WeightTracker 
+                    petId={pet.id} 
+                    weightUnit={pet.weightUnit} 
+                  />
+                </div>
+              </div>
+              
+              {/* Additional sections below */}
+              <div className="mt-6">
                 <div className="space-y-4">
                   <Card>
                     <CardHeader>
@@ -275,7 +285,7 @@ export default function PetList() {
                       </div>
                     </CardContent>
                   </Card>
-
+                  
                   {/* Placeholder for future features */}
                   <Card>
                     <CardHeader>
@@ -283,7 +293,7 @@ export default function PetList() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground text-sm">
-                        Weight tracking, food management, and vet records will be available here soon!
+                        Food management and vet records will be available here soon!
                       </p>
                     </CardContent>
                   </Card>
@@ -294,10 +304,10 @@ export default function PetList() {
         </Tabs>
 
         {/* Edit Pet Dialog */}
-        <Dialog open={!!editingPet} onOpenChange={(open: boolean) => !open && setEditingPet(null)}>
+        <Dialog open={!!editingPet} onOpenChange={() => setEditingPet(null)}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit {editingPet?.name}</DialogTitle>
+              <DialogTitle>Edit Pet</DialogTitle>
               <DialogDescription>
                 Update your pet&apos;s information below.
               </DialogDescription>
@@ -313,24 +323,26 @@ export default function PetList() {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deletingPet} onOpenChange={(open: boolean) => !open && setDeletingPet(null)}>
+        {/* Delete Pet Confirmation */}
+        <AlertDialog open={!!deletingPet} onOpenChange={() => setDeletingPet(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete {deletingPet?.name}?</AlertDialogTitle>
+              <AlertDialogTitle>Delete Pet</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete {deletingPet?.name} and all associated data.
+                Are you sure you want to delete {deletingPet?.name}? This will also delete all associated data including weight entries, vet records, and other information. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
+              <AlertDialogCancel disabled={isActionLoading}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction 
                 onClick={handleDeletePet}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 disabled={isActionLoading}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {isActionLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {isActionLoading ? 'Deleting...' : 'Delete Pet'}
+                {isActionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Delete Pet
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
