@@ -4,6 +4,7 @@ export class ApiError extends Error {
   public readonly status: number;
   public readonly code: string;
   public readonly context?: ApiErrorContext;
+  public readonly timestamp: string;
 
   constructor(
     message: string,
@@ -16,12 +17,50 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
     this.context = context;
+    this.timestamp = new Date().toISOString();
 
     // Maintain proper stack trace
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ApiError);
     }
   }
+
+  getDebugInfo(): string {
+    if (!this.context) return this.message;
+
+    return `
+API Error Debug Info:
+- Message: ${this.message}
+- Status: ${this.status}
+- Code: ${this.code}
+- Timestamp: ${this.timestamp}
+- URL: ${this.context.url}
+- Method: ${this.context.method}
+- Request Body: ${JSON.stringify(this.context.requestBody, null, 2)}
+- Response Body: ${JSON.stringify(this.context.responseBody, null, 2)}
+- Correlation ID: ${this.context.correlationId || 'N/A'}
+    `.trim();
+  }
+
+  toLogData(): ErrorLogData {
+    return {
+        message: this.message,
+        status: this.status,
+        code: this.code,
+        timestamp: this.timestamp,
+        stack: this.stack,
+        context: this.context,
+    };
+  }
+}
+
+interface ErrorLogData {
+    message: string;
+    status: number;
+    code: string;
+    timestamp: string;
+    stack?: string;
+    context?: ApiErrorContext;
 }
 
 export class BadRequestError extends ApiError {
@@ -110,5 +149,13 @@ export function createApiError(
         return new ServerError(message, status, context);
       }
       return new ApiError(message, status, 'API_ERROR', context);
+  }
+}
+
+export function logApiError(error: ApiError): void {
+  if (process.env.NODE_ENV === 'development') {
+    console.group(`🚨 API Error: ${error.code}`);
+    console.error(error.getDebugInfo());
+    console.groupEnd();
   }
 }

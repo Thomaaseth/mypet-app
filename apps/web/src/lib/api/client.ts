@@ -1,6 +1,5 @@
-import { makeApiRequest, makeAuthenticatedRequest } from './base';
+import { makeApiRequest, makeAuthenticatedRequest } from './core';
 import type { ApiRequestConfig } from './types';
-
 
 export class ApiClient {
   async request<TResponse = unknown>(endpoint: string, config?: ApiRequestConfig): Promise<TResponse> {

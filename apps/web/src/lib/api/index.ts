@@ -19,6 +19,7 @@ export {
   TimeoutError,
   ServerError,
   createApiError,
+  logApiError,
 } from './errors';
 
 export type {
@@ -33,7 +34,6 @@ export type {
   ExtractApiData,
 } from './types';
 
-export { petApi, petErrorHandler } from './pets';
+export { petApi, petErrorHandler } from './domains/pets';
 
-// Re-export for backward compatibility (if needed during migration)
-export { petApi as petsApi } from './pets';
+export type { PetsApiResponse, PetError } from './domains/pets';

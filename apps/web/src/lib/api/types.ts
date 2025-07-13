@@ -41,6 +41,9 @@ export interface ApiErrorContext {
   status?: number;
   requestBody?: RequestBody;
   responseBody?: string | ApiSuccessResponse<unknown> | ApiErrorResponse;
+  timestamp: string;
+  userAgent?: string;
+  correlationId?: string;
 }
 
 export type ExtractApiData<T> = T extends ApiSuccessResponse<infer U> ? U : never;
