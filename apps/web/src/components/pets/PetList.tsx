@@ -236,69 +236,66 @@ export default function PetList() {
           {/* Pet Tab Content */}
           {pets.map((pet) => (
             <TabsContent key={pet.id} value={pet.id} className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pet Card */}
-                <div>
-                  <PetCard
-                    pet={pet}
-                    onEdit={() => setEditingPet(pet)}
-                    onDelete={() => setDeletingPet(pet)}
-                  />
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                    <PetCard
+                        pet={pet}
+                        onEdit={() => setEditingPet(pet)}
+                        onDelete={() => setDeletingPet(pet)}
+                    />
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div>
+                    <Card>
+                        <CardHeader>
+                        <CardTitle className="text-lg">Quick Stats</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                        <div className="space-y-3">
+                            <div className="flex justify-between">
+                            <span className="text-muted-foreground">Species:</span>
+                            <span>{pet.species || 'Not specified'}</span>
+                            </div>
+                            <div className="flex justify-between">
+                            <span className="text-muted-foreground">Gender:</span>
+                            <span className="capitalize">{pet.gender}</span>
+                            </div>
+                            {pet.weight && (
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Weight:</span>
+                                <span>{pet.weight} {pet.weightUnit}</span>
+                            </div>
+                            )}
+                            <div className="flex justify-between">
+                            <span className="text-muted-foreground">Spayed/Neutered:</span>
+                            <span>{pet.isNeutered ? 'Yes' : 'No'}</span>
+                            </div>
+                        </div>
+                        </CardContent>
+                    </Card>
+                    </div>
                 </div>
 
-                {/* Weight Tracker Section */}
-                <div>
-                  <WeightTracker 
+                {/* Weight Tracker Section - Full Width */}
+                <WeightTracker 
                     petId={pet.id} 
                     weightUnit={pet.weightUnit} 
-                  />
-                </div>
-              </div>
-              
-              {/* Additional sections below */}
-              <div className="mt-6">
-                <div className="space-y-4">
-                  <Card>
+                />
+
+                {/* Coming Soon Card */}
+                <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Quick Stats</CardTitle>
+                    <CardTitle className="text-lg">Coming Soon</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Species:</span>
-                          <span>{pet.species || 'Not specified'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Gender:</span>
-                          <span className="capitalize">{pet.gender}</span>
-                        </div>
-                        {pet.weight && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Weight:</span>
-                            <span>{pet.weight} {pet.weightUnit}</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Spayed/Neutered:</span>
-                          <span>{pet.isNeutered ? 'Yes' : 'No'}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Placeholder for future features */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Coming Soon</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground text-sm">
+                    <p className="text-muted-foreground text-sm">
                         Food management and vet records will be available here soon!
-                      </p>
+                    </p>
                     </CardContent>
-                  </Card>
+                </Card>
                 </div>
-              </div>
             </TabsContent>
           ))}
         </Tabs>

@@ -134,20 +134,42 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
                 strokeLinejoin="round"
               />
               
-              {/* Data points */}
+              {/* Data points with hover labels */}
               {points.map((point, index) => (
                 <g key={index}>
-                  <circle
+                <circle
                     cx={point.x}
                     cy={point.y}
-                    r="4"
+                    r="5"
                     fill="#3b82f6"
                     stroke="white"
                     strokeWidth="2"
-                  />
-                  <title>{`${point.date}: ${point.weight} ${weightUnit}`}</title>
+                    className="hover:r-6 cursor-pointer transition-all"
+                    />
+                    
+                    {/* Hover label */}
+                    <g className="opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+                    <rect
+                        x={point.x - 25}
+                        y={point.y - 30}
+                        width="50"
+                        height="20"
+                        fill="rgba(0,0,0,0.8)"
+                        rx="4"
+                    />
+                    <text
+                        x={point.x}
+                        y={point.y - 15}
+                        textAnchor="middle"
+                        className="text-xs fill-white font-medium"
+                    >
+                        {point.weight} {weightUnit}
+                    </text>
+                    </g>
+                    
+                    <title>{`${point.date}: ${point.weight} ${weightUnit}`}</title>
                 </g>
-              ))}
+                ))}
               
               {/* Y-axis labels */}
               <text x={padding - 10} y={padding} textAnchor="end" className="text-xs fill-gray-600">
@@ -168,15 +190,54 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
                 Weight ({weightUnit})
               </text>
               
-              {/* X-axis title */}
-              <text 
-                x={chartWidth / 2} 
-                y={chartHeight - 10} 
+              {/* X-axis date labels */}
+              {points.length > 0 && (
+              <>
+                {/* First date */}
+                <text 
+                x={points[0].x} 
+                y={chartHeight - 15} 
                 textAnchor="middle" 
-                className="text-xs fill-gray-600 font-medium"
-              >
-                Date
-              </text>
+                className="text-xs fill-gray-600"
+                >
+                {points[0].date}
+                </text>
+                
+                {/* Last date (if different from first) */}
+                {points.length > 1 && (
+                <text 
+                    x={points[points.length - 1].x} 
+                    y={chartHeight - 15} 
+                    textAnchor="middle" 
+                    className="text-xs fill-gray-600"
+                >
+                    {points[points.length - 1].date}
+                </text>
+                )}
+                
+                {/* Middle date (if more than 2 points) */}
+                {points.length > 2 && (
+                <text 
+                    x={points[Math.floor(points.length / 2)].x} 
+                    y={chartHeight - 15} 
+                    textAnchor="middle" 
+                    className="text-xs fill-gray-600"
+                >
+                    {points[Math.floor(points.length / 2)].date}
+                </text>
+                )}
+            </>
+            )}
+
+            {/* X-axis title */}
+            <text 
+            x={chartWidth / 2} 
+            y={chartHeight - 2} 
+            textAnchor="middle" 
+            className="text-xs fill-gray-600 font-medium"
+            >
+            Date
+            </text>
             </svg>
           </div>
 

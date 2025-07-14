@@ -4,8 +4,7 @@ import { useWeightForm } from '@/hooks/useWeightForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
 
@@ -52,10 +51,9 @@ export default function WeightForm({
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
+            {error}
+        </div>
       )}
 
       {/* Weight */}
@@ -64,7 +62,7 @@ export default function WeightForm({
         <Input
           id="weight"
           type="number"
-          step="0.1"
+          step="0.0001"
           min="0"
           placeholder={`Enter weight in ${weightUnit}`}
           {...register('weight')}
