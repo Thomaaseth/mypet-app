@@ -135,7 +135,6 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Always Visible: Weight Chart */}
         <WeightChart 
           data={chartData} 
           weightUnit={weightUnit} 

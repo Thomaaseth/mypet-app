@@ -1,7 +1,14 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 import type { WeightChartData } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
 
@@ -45,31 +52,27 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
 
   const trend = getWeightTrend();
   const latestWeight = data[data.length - 1];
-
-  // Simple SVG chart implementation
-  const chartWidth = 400;
-  const chartHeight = 200;
-  const padding = 40;
-  const innerWidth = chartWidth - (padding * 2);
-  const innerHeight = chartHeight - (padding * 2);
-
-  // Calculate chart scales
   const weights = data.map(d => d.weight);
   const minWeight = Math.min(...weights);
   const maxWeight = Math.max(...weights);
-  const weightRange = maxWeight - minWeight || 1; // Avoid division by zero
 
-  // Create chart points
-  const points = data.map((point, index) => {
-    const x = padding + (index / (data.length - 1 || 1)) * innerWidth;
-    const y = padding + ((maxWeight - point.weight) / weightRange) * innerHeight;
-    return { x, y, ...point };
-  });
+  // Transform data for recharts - use short date format for X-axis
+  const chartData = data.map(point => ({
+    date: point.date, // Full date for tooltip
+    shortDate: point.date.split(',')[0], // Short date for X-axis (e.g., "Jan 15")
+    weight: point.weight,
+  }));
 
-  // Create SVG path
-  const pathData = points
-    .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
-    .join(' ');
+  // Chart configuration
+  const chartConfig = {
+    weight: {
+      label: `${weightUnit}`,
+      color: 'hsl(var(--chart-1))',
+    },
+  } satisfies ChartConfig;
+
+console.log('CSS chart-1:', getComputedStyle(document.documentElement).getPropertyValue('--chart-1'));
+console.log('CSS color-weight:', getComputedStyle(document.documentElement).getPropertyValue('--color-weight'));
 
   return (
     <Card className={className}>
@@ -102,143 +105,71 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
             </p>
           </div>
 
-          {/* SVG Chart */}
-          <div className="flex justify-center">
-            <svg width={chartWidth} height={chartHeight} className="border rounded">
-              {/* Grid lines */}
-              <defs>
-                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" strokeWidth="1"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-              
-              {/* Chart area background */}
-              <rect 
-                x={padding} 
-                y={padding} 
-                width={innerWidth} 
-                height={innerHeight} 
-                fill="white" 
-                stroke="#e2e8f0" 
-                strokeWidth="1"
-              />
-              
-              {/* Weight line */}
-              <path
-                d={pathData}
-                fill="none"
-                stroke="#3b82f6"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              {/* Data points with hover labels */}
-              {points.map((point, index) => (
-                <g key={index}>
-                <circle
-                    cx={point.x}
-                    cy={point.y}
-                    r="5"
-                    fill="#3b82f6"
-                    stroke="white"
-                    strokeWidth="2"
-                    className="hover:r-6 cursor-pointer transition-all"
-                    />
-                    
-                    {/* Hover label */}
-                    <g className="opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
-                    <rect
-                        x={point.x - 25}
-                        y={point.y - 30}
-                        width="50"
-                        height="20"
-                        fill="rgba(0,0,0,0.8)"
-                        rx="4"
-                    />
-                    <text
-                        x={point.x}
-                        y={point.y - 15}
-                        textAnchor="middle"
-                        className="text-xs fill-white font-medium"
-                    >
-                        {point.weight} {weightUnit}
-                    </text>
-                    </g>
-                    
-                    <title>{`${point.date}: ${point.weight} ${weightUnit}`}</title>
-                </g>
-                ))}
-              
-              {/* Y-axis labels */}
-              <text x={padding - 10} y={padding} textAnchor="end" className="text-xs fill-gray-600">
-                {maxWeight.toFixed(1)}
-              </text>
-              <text x={padding - 10} y={chartHeight - padding} textAnchor="end" className="text-xs fill-gray-600">
-                {minWeight.toFixed(1)}
-              </text>
-              
-              {/* Y-axis title */}
-              <text 
-                x={15} 
-                y={chartHeight / 2} 
-                textAnchor="middle" 
-                transform={`rotate(-90, 15, ${chartHeight / 2})`}
-                className="text-xs fill-gray-600 font-medium"
-              >
-                Weight ({weightUnit})
-              </text>
-              
-              {/* X-axis date labels */}
-              {points.length > 0 && (
-              <>
-                {/* First date */}
-                <text 
-                x={points[0].x} 
-                y={chartHeight - 15} 
-                textAnchor="middle" 
-                className="text-xs fill-gray-600"
-                >
-                {points[0].date}
-                </text>
-                
-                {/* Last date (if different from first) */}
-                {points.length > 1 && (
-                <text 
-                    x={points[points.length - 1].x} 
-                    y={chartHeight - 15} 
-                    textAnchor="middle" 
-                    className="text-xs fill-gray-600"
-                >
-                    {points[points.length - 1].date}
-                </text>
-                )}
-                
-                {/* Middle date (if more than 2 points) */}
-                {points.length > 2 && (
-                <text 
-                    x={points[Math.floor(points.length / 2)].x} 
-                    y={chartHeight - 15} 
-                    textAnchor="middle" 
-                    className="text-xs fill-gray-600"
-                >
-                    {points[Math.floor(points.length / 2)].date}
-                </text>
-                )}
-            </>
-            )}
-
-            {/* X-axis title */}
-            <text 
-            x={chartWidth / 2} 
-            y={chartHeight - 2} 
-            textAnchor="middle" 
-            className="text-xs fill-gray-600 font-medium"
+        {/* Chart */}
+        <div className="flex justify-center">
+         <div className="w-full max-w-2xl">
+          <ChartContainer config={chartConfig}>
+           <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                top: 20,
+                left: 20,
+                right: 20,
+                bottom: 12,
+              }}
             >
-            Date
-            </text>
-            </svg>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="shortDate"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                interval={data.length > 6 ? 'preserveStartEnd' : 0}
+                tickFormatter={(value) => value}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                tickFormatter={(value) => `${value}`}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value, payload) => {
+                      // Show full date in tooltip
+                      const fullDate = payload?.[0]?.payload?.date;
+                      return fullDate || value;
+                    }}
+                    formatter={(value) => [
+                      `${value} ${weightUnit}`,
+                    ]}
+                  />
+                }
+              />
+              <Line
+                dataKey="weight"
+                type="natural"
+                stroke="hsl(var(--chart-1))"
+                strokeWidth={3}
+                dot={{
+                  fill: "hsl(var(--chart-1))",
+                  strokeWidth: 2,
+                  r: 4,
+                }}
+                activeDot={{
+                  r: 6,
+                  strokeWidth: 0,
+                }}
+              />
+            </LineChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+          </div>
           </div>
 
           {/* Chart Stats */}
@@ -250,11 +181,11 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
               </div>
               <div>
                 <p className="text-muted-foreground">Min</p>
-                <p className="font-semibold">{minWeight.toFixed(1)} {weightUnit}</p>
+                <p className="font-semibold">{minWeight.toFixed(4)} {weightUnit}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Max</p>
-                <p className="font-semibold">{maxWeight.toFixed(1)} {weightUnit}</p>
+                <p className="font-semibold">{maxWeight.toFixed(4)} {weightUnit}</p>
               </div>
             </div>
           )}
