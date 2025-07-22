@@ -67,12 +67,9 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
   const chartConfig = {
     weight: {
       label: `${weightUnit}`,
-      color: 'hsl(var(--chart-1))',
+      color: 'var(--chart-2)',
     },
   } satisfies ChartConfig;
-
-console.log('CSS chart-1:', getComputedStyle(document.documentElement).getPropertyValue('--chart-1'));
-console.log('CSS color-weight:', getComputedStyle(document.documentElement).getPropertyValue('--color-weight'));
 
   return (
     <Card className={className}>
@@ -154,10 +151,10 @@ console.log('CSS color-weight:', getComputedStyle(document.documentElement).getP
               <Line
                 dataKey="weight"
                 type="natural"
-                stroke="hsl(var(--chart-1))"
+                stroke="var(--color-weight)"
                 strokeWidth={3}
                 dot={{
-                  fill: "hsl(var(--chart-1))",
+                  fill: "var(--color-weight)",
                   strokeWidth: 2,
                   r: 4,
                 }}
@@ -171,6 +168,8 @@ console.log('CSS color-weight:', getComputedStyle(document.documentElement).getP
           </ChartContainer>
           </div>
           </div>
+
+
 
           {/* Chart Stats */}
           {data.length > 1 && (
