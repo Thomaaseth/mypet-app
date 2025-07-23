@@ -14,11 +14,14 @@ import {
   NotFoundError, 
   UserForbiddenError 
 } from '../middleware/errors';
+import weightEntriesRoutes from './weight-entries.routes';
 
 const router = Router();
 
 // Apply auth middleware to all pet routes
 router.use(globalAuthHandler);
+
+router.use('/:petId/weights', weightEntriesRoutes);
 
 // GET /api/pets - Get all user's pets
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

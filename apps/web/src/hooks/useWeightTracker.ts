@@ -20,7 +20,6 @@ export function useWeightTracker({ petId, weightUnit }: UseWeightTrackerOptions)
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch weight entries
   const fetchWeightEntries = useCallback(async () => {
     if (!petId) return;
     
@@ -39,7 +38,6 @@ export function useWeightTracker({ petId, weightUnit }: UseWeightTrackerOptions)
     }
   }, [petId]);
 
-  // Create weight entry
   const createWeightEntry = useCallback(async (weightData: WeightFormData): Promise<WeightEntry | null> => {
     try {
       const newEntry = await weightApi.createWeightEntry(petId, weightData, weightUnit);
@@ -57,7 +55,6 @@ export function useWeightTracker({ petId, weightUnit }: UseWeightTrackerOptions)
     }
   }, [petId, weightUnit]);
 
-  // Update weight entry
   const updateWeightEntry = useCallback(async (
     weightId: string, 
     weightData: Partial<WeightFormData>
@@ -82,7 +79,6 @@ export function useWeightTracker({ petId, weightUnit }: UseWeightTrackerOptions)
     }
   }, [petId, weightUnit]);
 
-  // Delete weight entry
   const deleteWeightEntry = useCallback(async (weightId: string): Promise<boolean> => {
     try {
       await weightApi.deleteWeightEntry(petId, weightId);
@@ -112,7 +108,6 @@ export function useWeightTracker({ petId, weightUnit }: UseWeightTrackerOptions)
     originalDate: entry.date,
   }));
 
-  // Get latest weight entry
   const latestWeight = sortedWeightEntries.length > 0 
     ? sortedWeightEntries[sortedWeightEntries.length - 1] 
     : null;

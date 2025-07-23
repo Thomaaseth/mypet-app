@@ -49,7 +49,6 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
     deleteWeightEntry,
   } = useWeightTracker({ petId, weightUnit });
 
-  // Handle create weight entry
   const handleCreateEntry = async (data: WeightFormData) => {
     return executeAction(async () => {
       const result = await createWeightEntry(data);
@@ -60,14 +59,12 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
     }, weightErrorHandler);
   };
 
-  // Handle update weight entry
   const handleUpdateEntry = async (weightId: string, data: Partial<WeightFormData>) => {
     return executeAction(async () => {
       return await updateWeightEntry(weightId, data);
     }, weightErrorHandler);
   };
 
-  // Handle delete weight entry
   const handleDeleteEntry = async (weightId: string): Promise<boolean> => {
     const result = await executeAction(async () => {
       return await deleteWeightEntry(weightId);

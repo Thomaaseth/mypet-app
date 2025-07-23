@@ -7,6 +7,7 @@ import cors from 'cors';
 import { config } from "./config";
 
 import petRoutes from '@/routes/pets.routes';
+import foodRoutes from '@/routes/food.routes';
 
 export const app = express();
 
@@ -27,6 +28,9 @@ app.use(express.json());
 
 // PET ROUTES
 app.use('/api/pets', petRoutes)
+
+// FOOD ROUTES
+app.use('/api/pets', foodRoutes)
 
 // APP HEALTH
 app.get('/api/health', (req, res, next) => {

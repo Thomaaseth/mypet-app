@@ -42,9 +42,9 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
   const getWeightTrend = () => {
     if (data.length < 2) return null;
     
-    const firstWeight = data[0].weight;
+    const secondToLastWeight = data[data.length - 2].weight;
     const lastWeight = data[data.length - 1].weight;
-    const difference = lastWeight - firstWeight;
+    const difference = lastWeight - secondToLastWeight;
     
     if (Math.abs(difference) < 0.1) return 'stable';
     return difference > 0 ? 'increasing' : 'decreasing';
@@ -56,10 +56,9 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
   const minWeight = Math.min(...weights);
   const maxWeight = Math.max(...weights);
 
-  // Transform data for recharts - use short date format for X-axis
   const chartData = data.map(point => ({
     date: point.date, // Full date for tooltip
-    shortDate: point.date.split(',')[0], // Short date for X-axis (e.g., "Jan 15")
+    shortDate: point.date.split(',')[0], // Short date for X-axis
     weight: point.weight,
   }));
 

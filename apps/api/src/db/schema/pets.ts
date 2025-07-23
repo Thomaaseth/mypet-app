@@ -9,7 +9,6 @@ import {
   timestamp, 
   uuid
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
 import { user } from './auth-schema';
 
 export const petGenderEnum = pgEnum('pet_gender', ['male', 'female', 'unknown']);
@@ -35,14 +34,6 @@ export const pets = pgTable('pets', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
-
-// Relations
-export const petsRelations = relations(pets, ({ one }) => ({
-  user: one(user, {
-    fields: [pets.userId],
-    references: [user.id],
-  }),
-}));
 
 // Types for TypeScript
 export type Pet = typeof pets.$inferSelect;
