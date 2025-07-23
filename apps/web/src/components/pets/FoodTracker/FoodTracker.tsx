@@ -116,7 +116,7 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
                 Add Food Entry
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Add Food Entry</DialogTitle>
                 <DialogDescription>

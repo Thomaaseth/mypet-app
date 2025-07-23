@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,9 @@ defaultValues: {
       brandName: initialData?.brandName || '',
       productName: initialData?.productName || '',
       bagWeight: initialData?.bagWeight || '',
-      bagWeightUnit: initialData?.bagWeightUnit || 'kg',
+       bagWeightUnit: initialData?.bagWeightUnit || (
+        (initialData?.foodType || 'dry') === 'wet' ? 'grams' : 'kg'
+        ),
       dailyAmount: initialData?.dailyAmount || '',
       dailyAmountUnit: initialData?.dailyAmountUnit || 'grams',
       numberOfUnits: initialData?.numberOfUnits || '',
@@ -61,6 +63,15 @@ defaultValues: {
   const watchedBagWeightUnit = watch('bagWeightUnit');
   const watchedDailyAmountUnit = watch('dailyAmountUnit');
   const watchedWeightPerUnitUnit = watch('weightPerUnitUnit')
+
+    useEffect(() => {
+    if (watchedFoodType === 'wet' && !initialData?.bagWeightUnit) {
+      setValue('bagWeightUnit', 'grams');
+      setValue('weightPerUnitUnit', 'grams');
+    } else if (watchedFoodType === 'dry' && !initialData?.bagWeightUnit) {
+      setValue('bagWeightUnit', 'kg');
+    }
+  }, [watchedFoodType, setValue, initialData?.bagWeightUnit]);
 
   const getAllowedBagUnits = () => {
     return watchedFoodType === 'dry' ? DRY_FOOD_UNITS : WET_FOOD_UNITS;
@@ -214,7 +225,7 @@ defaultValues: {
                     aria-invalid={!!errors.weightPerUnit}
                   />
                 </div>
-                <div className="w-16">
+                <div className="w-20">
                   <Select 
                     value={watchedWeightPerUnitUnit} 
                     onValueChange={(value: FoodUnit) => setValue('weightPerUnitUnit', value)}
