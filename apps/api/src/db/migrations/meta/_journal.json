@@ -15,6 +15,13 @@
       "when": 1752422807256,
       "tag": "0001_fuzzy_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753264134218,
+      "tag": "0002_clean_rhino",
+      "breakpoints": true
     }
   ]
 }

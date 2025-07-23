@@ -31,6 +31,7 @@ import type { Pet, PetFormData } from '@/types/pet';
 import { petErrorHandler } from '@/lib/api/pets';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 import { WeightTracker } from './WeightTracker';
+import { FoodTracker } from './FoodTracker';
 
 export default function PetList() {
   const { pets, isLoading, error, createPet, updatePet, deletePet } = usePets();
@@ -282,6 +283,11 @@ export default function PetList() {
                 <WeightTracker 
                     petId={pet.id} 
                     weightUnit={pet.weightUnit} 
+                />
+
+                {/* Food Tracker Section - Full Width */}
+                <FoodTracker 
+                    petId={pet.id}
                 />
 
                 {/* Coming Soon Card */}
