@@ -65,9 +65,9 @@ export default function FoodList({
   const getStatusColor = (entry: FoodEntry) => {
     if (entry.remainingDays <= 0) {
       return 'bg-red-50 border-red-200';
-    } else if (entry.remainingDays <= 3) {
-      return 'bg-orange-50 border-orange-200';
     } else if (entry.remainingDays <= 7) {
+      return 'bg-orange-50 border-orange-200';
+    } else if (entry.remainingDays <= 14) {
       return 'bg-yellow-50 border-yellow-200';
     }
     return 'bg-green-50 border-green-200';
@@ -76,7 +76,7 @@ export default function FoodList({
   const getStatusIcon = (entry: FoodEntry) => {
     if (entry.remainingDays <= 0) {
       return <AlertTriangle className="h-4 w-4 text-red-600" />;
-    } else if (entry.remainingDays <= 3) {
+    } else if (entry.remainingDays <= 7) {
       return <Clock className="h-4 w-4 text-orange-600" />;
     }
     return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -85,9 +85,9 @@ export default function FoodList({
   const getStatusText = (entry: FoodEntry) => {
     if (entry.remainingDays <= 0) {
       return 'Finished';
-    } else if (entry.remainingDays <= 3) {
-      return 'Low Stock';
     } else if (entry.remainingDays <= 7) {
+      return 'Low Stock';
+    } else if (entry.remainingDays <= 14) {
       return 'Running Low';
     }
     return 'Good Stock';
@@ -232,6 +232,9 @@ export default function FoodList({
                 bagWeightUnit: editingEntry.bagWeightUnit,
                 dailyAmount: editingEntry.dailyAmount,
                 dailyAmountUnit: editingEntry.dailyAmountUnit,
+                numberOfUnits: editingEntry.numberOfUnits?.toString() || '',
+                weightPerUnit: editingEntry.weightPerUnit || '',
+                weightPerUnitUnit: editingEntry.weightPerUnitUnit as 'grams' | 'oz' | undefined,
                 datePurchased: editingEntry.datePurchased,
               }}
               onSubmit={handleUpdateEntry}

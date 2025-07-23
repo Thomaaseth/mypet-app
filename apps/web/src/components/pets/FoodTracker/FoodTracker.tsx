@@ -22,6 +22,7 @@ import { FoodTrackerSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
 import type { FoodFormData, FoodType } from '@/types/food';
 import { FOOD_TYPE_LABELS } from '@/types/food';
+import { formatDateForDisplay } from '@/lib/validations/food';
 
 interface FoodTrackerProps {
   petId: string;
@@ -35,7 +36,6 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
   const {
     activeFoodEntries,
     lowStockEntries,
-    finishedEntries,
     isLoading,
     error,
     createFoodEntry,
@@ -55,6 +55,10 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
       return result;
     }, foodErrorHandler);
   };
+
+  const getInitialFoodType = (): FoodType => {
+    return activeTab;
+  }
 
   // Handle update food entry
   const handleUpdateEntry = async (foodId: string, data: Partial<FoodFormData>) => {
@@ -120,6 +124,7 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
                 </DialogDescription>
               </DialogHeader>
               <FoodForm
+                initialData={{ foodType: getInitialFoodType() }}
                 onSubmit={handleCreateEntry}
                 onCancel={() => setIsAddDialogOpen(false)}
                 isLoading={isActionLoading}
@@ -141,34 +146,31 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
           </Alert>
         )}
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <Package className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Active Food Items</p>
-              <p className="text-2xl font-bold">{activeFoodEntries.length}</p>
+        {/* Food Status Summary */}
+        {activeFoodEntries.length > 0 && (
+          <div className="p-4 bg-muted/30 rounded-lg border">
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-1">Food Supply Remaining</p>
+              {activeFoodEntries.map((entry, index) => (
+                <div key={entry.id} className={index > 0 ? "mt-3 pt-3 border-t" : ""}>
+                  <p className="text-2xl font-bold">
+                    {entry.remainingDays > 0 ? `${entry.remainingDays} days` : 'Finished'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {entry.remainingDays > 0 
+                      ? `${FOOD_TYPE_LABELS[entry.foodType]} runs out ${formatDateForDisplay(entry.depletionDate)}`
+                      : `${FOOD_TYPE_LABELS[entry.foodType]} finished`
+                    }
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
-            <AlertCircle className="h-5 w-5 text-orange-600" />
-            <div>
-              <p className="text-sm font-medium text-orange-800">Low Stock</p>
-              <p className="text-2xl font-bold text-orange-900">{lowStockEntries.length}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-            <Package className="h-5 w-5 text-red-600" />
-            <div>
-              <p className="text-sm font-medium text-red-800">Finished</p>
-              <p className="text-2xl font-bold text-red-900">{finishedEntries.length}</p>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Food Tabs */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as FoodType)}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="dry" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               {FOOD_TYPE_LABELS.dry}
@@ -179,7 +181,7 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
             </TabsTrigger>
           </TabsList>
 
-          {(['dry', 'wet', 'treats'] as FoodType[]).map((foodType) => {
+          {(['dry', 'wet'] as FoodType[]).map((foodType) => {
             const entriesForType = getFoodEntriesByType(foodType);
             
             return (

@@ -30,7 +30,7 @@ app.use(express.json());
 app.use('/api/pets', petRoutes)
 
 // FOOD ROUTES
-app.use('/api', foodRoutes)
+app.use('/api/pets', foodRoutes)
 
 // APP HEALTH
 app.get('/api/health', (req, res, next) => {

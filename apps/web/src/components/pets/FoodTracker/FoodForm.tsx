@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { createFoodSchema } from '@/lib/validations/food';
 import type { FoodEntry, FoodFormData, FoodType, FoodUnit } from '@/types/food';
-import { FOOD_TYPE_LABELS, FOOD_UNIT_LABELS } from '@/types/food';
+import { DRY_FOOD_DAILY_UNITS, DRY_FOOD_UNITS, FOOD_TYPE_LABELS, FOOD_UNIT_LABELS, WET_FOOD_DAILY_UNITS, WET_FOOD_UNITS } from '@/types/food';
 
 interface FoodFormProps {
   initialData?: Partial<FoodFormData>;
@@ -40,16 +40,19 @@ export default function FoodForm({
     setValue,
     watch,
     formState: { errors, isSubmitting }
-  } = useForm<FoodFormData>({
+  } = useForm({
     resolver: zodResolver(createFoodSchema),
-    defaultValues: {
+defaultValues: {
       foodType: initialData?.foodType || 'dry',
       brandName: initialData?.brandName || '',
       productName: initialData?.productName || '',
       bagWeight: initialData?.bagWeight || '',
-      bagWeightUnit: initialData?.bagWeightUnit || 'grams',
+      bagWeightUnit: initialData?.bagWeightUnit || 'kg',
       dailyAmount: initialData?.dailyAmount || '',
       dailyAmountUnit: initialData?.dailyAmountUnit || 'grams',
+      numberOfUnits: initialData?.numberOfUnits || '',
+      weightPerUnit: initialData?.weightPerUnit || '',
+      weightPerUnitUnit: initialData?.weightPerUnitUnit || 'grams',
       datePurchased: initialData?.datePurchased || new Date().toISOString().split('T')[0],
     },
   });
@@ -57,6 +60,15 @@ export default function FoodForm({
   const watchedFoodType = watch('foodType');
   const watchedBagWeightUnit = watch('bagWeightUnit');
   const watchedDailyAmountUnit = watch('dailyAmountUnit');
+  const watchedWeightPerUnitUnit = watch('weightPerUnitUnit')
+
+  const getAllowedBagUnits = () => {
+    return watchedFoodType === 'dry' ? DRY_FOOD_UNITS : WET_FOOD_UNITS;
+  };
+
+  const getAllowedDailyUnits = () => {
+    return watchedFoodType === 'dry' ? DRY_FOOD_DAILY_UNITS : WET_FOOD_DAILY_UNITS;
+  };
 
   const handleFormSubmit = async (data: FoodFormData) => {
     try {
@@ -134,6 +146,105 @@ export default function FoodForm({
 
       {/* Bag Weight */}
       <div className="space-y-2">
+        <Label>{watchedFoodType === 'wet' ? 'Total Weight' : 'Bag/Container Weight'} *</Label>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Input
+              placeholder={watchedFoodType === 'wet' ? 'Enter total weight' : 'Enter weight'}
+              {...register('bagWeight')}
+              aria-invalid={!!errors.bagWeight}
+            />
+          </div>
+          <div className="w-20">
+            <Select 
+              value={watchedBagWeightUnit} 
+              onValueChange={(value: FoodUnit) => setValue('bagWeightUnit', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {getAllowedBagUnits().map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {FOOD_UNIT_LABELS[unit]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {errors.bagWeight && (
+          <p className="text-sm text-destructive">{errors.bagWeight.message}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {watchedFoodType === 'wet' 
+            ? 'Total weight of all units combined'
+            : 'Total weight of the food bag/container you purchased'
+          }
+        </p>
+      </div>
+
+      {/* Wet Food: Number of Units and Weight per Unit */}
+      {watchedFoodType === 'wet' && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="numberOfUnits">Number of Units *</Label>
+              <Input
+                id="numberOfUnits"
+                placeholder="e.g., 12"
+                {...register('numberOfUnits')}
+                aria-invalid={!!errors.numberOfUnits}
+              />
+              {errors.numberOfUnits && (
+                <p className="text-sm text-destructive">{errors.numberOfUnits.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Number of cans/pouches
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Weight per Unit *</Label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input
+                    placeholder="e.g., 85"
+                    {...register('weightPerUnit')}
+                    aria-invalid={!!errors.weightPerUnit}
+                  />
+                </div>
+                <div className="w-16">
+                  <Select 
+                    value={watchedWeightPerUnitUnit} 
+                    onValueChange={(value: FoodUnit) => setValue('weightPerUnitUnit', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WET_FOOD_UNITS.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {FOOD_UNIT_LABELS[unit]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {errors.weightPerUnit && (
+                <p className="text-sm text-destructive">{errors.weightPerUnit.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Weight of each can/pouch
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Bag Weight
+      <div className="space-y-2">
         <Label>Bag/Container Weight *</Label>
         <div className="flex gap-2">
           <div className="flex-1">
@@ -165,9 +276,9 @@ export default function FoodForm({
         <p className="text-xs text-muted-foreground">
           Total weight of the food bag/container you purchased
         </p>
-      </div>
+      </div> */}
 
-      {/* Daily Amount */}
+      {/* Daily Amount
       <div className="space-y-2">
         <Label>Daily Amount *</Label>
         <div className="flex gap-2">
@@ -199,6 +310,42 @@ export default function FoodForm({
         )}
         <p className="text-xs text-muted-foreground">
           How much your pet consumes per day
+        </p>
+      </div> */}
+
+      {/* Daily Amount */}
+      <div className="space-y-2">
+        <Label>Daily Amount *</Label>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <Input
+              placeholder="Enter daily amount"
+              {...register('dailyAmount')}
+              aria-invalid={!!errors.dailyAmount}
+            />
+          </div>
+          <div className="w-20">
+            <Select 
+              value={watchedDailyAmountUnit} 
+              onValueChange={(value) => setValue('dailyAmountUnit', value as 'grams' | 'cups' | 'oz')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {getAllowedDailyUnits().map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {FOOD_UNIT_LABELS[unit]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {errors.dailyAmount && (
+          <p className="text-sm text-destructive">{errors.dailyAmount.message}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          How much your pet consumes per day {getAllowedDailyUnits().includes('cups') ? '(use decimals like 0.25 for 1/4 cup)' : ''}
         </p>
       </div>
 

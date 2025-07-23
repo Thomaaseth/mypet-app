@@ -4,6 +4,7 @@ import {
   text, 
   varchar, 
   decimal,
+  integer,
   boolean, 
   date, 
   timestamp, 
@@ -14,7 +15,7 @@ import { pets } from './pets';
 
 // Enums for food tracking
 export const foodTypeEnum = pgEnum('food_type', ['dry', 'wet']);
-export const foodUnitEnum = pgEnum('food_unit', ['grams', 'pounds', 'cups']);
+export const foodUnitEnum = pgEnum('food_unit', ['kg', 'pounds', 'grams', 'cups', 'oz']);
 
 export const foodEntries = pgTable('food_entries', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -26,6 +27,10 @@ export const foodEntries = pgTable('food_entries', {
   bagWeightUnit: foodUnitEnum('bag_weight_unit').notNull(), // Unit for bag weight
   dailyAmount: decimal('daily_amount', { precision: 8, scale: 2 }).notNull(), // Amount consumed per day
   dailyAmountUnit: foodUnitEnum('daily_amount_unit').notNull(), // Unit for daily amount
+  // Wet food specific fields
+  numberOfUnits: integer('number_of_units'), // e.g., 12 cans
+  weightPerUnit: decimal('weight_per_unit', { precision: 8, scale: 2 }), // e.g., 85g per can
+  weightPerUnitUnit: foodUnitEnum('weight_per_unit_unit'), // Unit for weight per unit
   datePurchased: date('date_purchased').notNull(), // When the food was bought
   isActive: boolean('is_active').default(true).notNull(), // For soft deletes and "finished" bags
   createdAt: timestamp('created_at').defaultNow().notNull(),

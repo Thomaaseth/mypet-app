@@ -122,8 +122,8 @@ export function useFoodTracker({ petId }: UseFoodTrackerOptions) {
 
   const activeFoodEntries = sortedFoodEntries.filter(entry => entry.isActive);
 
-  // Get entries that are running low (less than 3 days remaining)
-  const lowStockEntries = activeFoodEntries.filter(entry => entry.remainingDays <= 3 && entry.remainingDays > 0);
+  // Get entries that are running low (less than 7 days remaining)
+  const lowStockEntries = activeFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);
 
   // Get entries that are finished
   const finishedEntries = activeFoodEntries.filter(entry => entry.remainingDays <= 0);
