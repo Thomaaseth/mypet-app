@@ -148,23 +148,60 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
 
         {/* Food Status Summary */}
         {activeFoodEntries.length > 0 && (
-          <div className="p-4 bg-muted/30 rounded-lg border">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-1">Food Supply Remaining</p>
-              {activeFoodEntries.map((entry, index) => (
-                <div key={entry.id} className={index > 0 ? "mt-3 pt-3 border-t" : ""}>
+          <div className="space-y-3">
+            {activeFoodEntries.length === 1 ? (
+              // Single food entry
+              <div className={`p-4 rounded-lg border ${
+                  activeFoodEntries[0].foodType === 'dry' 
+                    ? 'bg-amber-50 border-amber-200' 
+                    : 'bg-blue-50 border-blue-200'
+                }`}>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply
+                  </p>
                   <p className="text-2xl font-bold">
-                    {entry.remainingDays > 0 ? `${entry.remainingDays} days` : 'Finished'}
+                    {activeFoodEntries[0].remainingDays > 0 ? `${activeFoodEntries[0].remainingDays} days` : 'Running out'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {entry.remainingDays > 0 
-                      ? `${FOOD_TYPE_LABELS[entry.foodType]} runs out ${formatDateForDisplay(entry.depletionDate)}`
-                      : `${FOOD_TYPE_LABELS[entry.foodType]} finished`
+                    {activeFoodEntries[0].remainingDays > 0 
+                      ? `Runs out ${formatDateForDisplay(activeFoodEntries[0].depletionDate)}`
+                      : 'Needs restocking'
                     }
                   </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              // Multiple food entries - side by side
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {activeFoodEntries.sort((a) => a.foodType === 'dry' ? -1 : 1)
+                .map((entry) => (
+                  <div 
+                    key={entry.id} 
+                    className={`p-4 rounded-lg border ${
+                      entry.foodType === 'dry' 
+                        ? 'bg-amber-50 border-amber-200' 
+                        : 'bg-blue-50 border-blue-200'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        {FOOD_TYPE_LABELS[entry.foodType]} Supply
+                      </p>
+                      <p className="text-xl font-bold">
+                        {entry.remainingDays > 0 ? `${entry.remainingDays} days` : 'Running out'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.remainingDays > 0 
+                          ? `Runs out ${formatDateForDisplay(entry.depletionDate)}`
+                          : 'Needs restocking'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -188,7 +225,7 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
               <TabsContent key={foodType} value={foodType} className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">
-                    {FOOD_TYPE_LABELS[foodType]} ({entriesForType.length})
+                    {FOOD_TYPE_LABELS[foodType]}
                   </h3>
                 </div>
 

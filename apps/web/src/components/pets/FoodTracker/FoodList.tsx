@@ -252,12 +252,12 @@ export default function FoodList({
             <AlertDialogTitle>Delete Food Entry</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this food entry? This action cannot be undone.
+            </AlertDialogDescription>
               {deletingEntry && (
                 <div className="mt-2 p-2 bg-muted rounded text-sm">
                   <strong>{getDisplayName(deletingEntry)}</strong>
                 </div>
               )}
-            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isLoading}>
