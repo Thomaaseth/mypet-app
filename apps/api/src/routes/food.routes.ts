@@ -1,22 +1,20 @@
+// apps/api/src/routes/food.routes.ts
 import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { FoodService } from '../services/food.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
-import { respondWithSuccess, respondWithCreated, respondWithError } from '../lib/json';
-import { 
-  BadRequestError, 
-  NotFoundError, 
-  UserForbiddenError 
-} from '../middleware/errors';
-import type { FoodEntryFormData, FoodType } from '../db/schema/food';
+import { respondWithSuccess, respondWithCreated } from '../lib/json';
+import { BadRequestError } from '../middleware/errors';
+import type { DryFoodFormData, WetFoodFormData } from '../db/schema/food';
 
 const router = Router();
 
 // Apply auth middleware to all food routes
 router.use(globalAuthHandler);
 
-// GET /api/pets/:petId/food - Get all food entries for a pet
-router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+// 🎯 DRY FOOD ROUTES
+// GET /api/pets/:petId/food/dry - Get all dry food entries
+router.get('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.authSession?.user.id;
     if (!userId) {
@@ -28,85 +26,48 @@ router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next
       throw new BadRequestError('Pet ID is required');
     }
 
-    const foodEntries = await FoodService.getFoodEntries(petId, userId);
+    const dryFoodEntries = await FoodService.getDryFoodEntries(petId, userId);
     
     // Calculate remaining info for each entry
-    const enrichedEntries = foodEntries.map(entry => ({
+    const enrichedEntries = dryFoodEntries.map(entry => ({
       ...entry,
-      ...FoodService.calculateFoodRemaining(entry)
+      ...FoodService.calculateDryFoodRemaining(entry)
     }));
 
     const total = enrichedEntries.length;
-    respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} food entries`);
+    respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} dry food entries`);
   } catch (error) {
     next(error);
   }
 });
 
-// GET /api/pets/:petId/food/type/:foodType - Get food entries by type
-router.get('/:petId/food/type/:foodType', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+// GET /api/pets/:petId/food/dry/:foodId - Get specific dry food entry
+router.get('/:petId/food/dry/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.authSession?.user.id;
     if (!userId) {
       throw new BadRequestError('User session not found');
     }
 
-    const petId = req.params.petId;
-    const foodType = req.params.foodType as FoodType;
-
-    if (!petId) {
-      throw new BadRequestError('Pet ID is required');
-    }
-
-    // Validate food type
-    if (!['dry', 'wet', 'treats'].includes(foodType)) {
-      throw new BadRequestError('Invalid food type. Must be dry, wet, or treats');
-    }
-
-    const foodEntries = await FoodService.getFoodEntriesByType(petId, userId, foodType);
-    
-    // Calculate remaining info for each entry
-    const enrichedEntries = foodEntries.map(entry => ({
-      ...entry,
-      ...FoodService.calculateFoodRemaining(entry)
-    }));
-
-    const total = enrichedEntries.length;
-    respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} ${foodType} food entries`);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// GET /api/pets/:petId/food/:foodId - Get a specific food entry
-router.get('/:petId/food/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.authSession?.user.id;
-    if (!userId) {
-      throw new BadRequestError('User session not found');
-    }
-
-    const petId = req.params.petId;
-    const foodId = req.params.foodId;
-
+    const { petId, foodId } = req.params;
     if (!petId || !foodId) {
       throw new BadRequestError('Pet ID and Food ID are required');
     }
 
-    const foodEntry = await FoodService.getFoodEntryById(petId, foodId, userId);
+    const dryFoodEntry = await FoodService.getDryFoodEntryById(petId, foodId, userId);
     const enrichedEntry = {
-      ...foodEntry,
-      ...FoodService.calculateFoodRemaining(foodEntry)
+      ...dryFoodEntry,
+      ...FoodService.calculateDryFoodRemaining(dryFoodEntry)
     };
 
-    respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Food entry retrieved successfully');
+    respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Dry food entry retrieved successfully');
   } catch (error) {
     next(error);
   }
 });
 
-// POST /api/pets/:petId/food - Create a new food entry
-router.post('/:petId/food', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+// POST /api/pets/:petId/food/dry - Create dry food entry
+router.post('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.authSession?.user.id;
     if (!userId) {
@@ -118,79 +79,245 @@ router.post('/:petId/food', async (req: AuthenticatedRequest, res: Response, nex
       throw new BadRequestError('Pet ID is required');
     }
 
-    const foodData: FoodEntryFormData = req.body;
+    const dryFoodData: DryFoodFormData = req.body;
 
     // Basic validation
-    if (!foodData.foodType || !foodData.bagWeight || !foodData.dailyAmount || !foodData.datePurchased) {
-      throw new BadRequestError('Food type, bag weight, daily amount, and purchase date are required');
+    if (!dryFoodData || typeof dryFoodData !== 'object') {
+      throw new BadRequestError('Request body is required');
     }
 
-    const newFoodEntry = await FoodService.createFoodEntry(petId, userId, {
-      ...foodData,
-      petId, // This will be overridden in the service
-    });
+    if (!dryFoodData.dailyAmount || !dryFoodData.datePurchased) {
+      throw new BadRequestError('Daily amount and purchase date are required');
+    }
+
+    const newDryFoodEntry = await FoodService.createDryFoodEntry(petId, userId, dryFoodData);
 
     const enrichedEntry = {
-      ...newFoodEntry,
-      ...FoodService.calculateFoodRemaining(newFoodEntry)
+      ...newDryFoodEntry,
+      ...FoodService.calculateDryFoodRemaining(newDryFoodEntry)
     };
 
-    respondWithCreated(res, { foodEntry: enrichedEntry }, 'Food entry created successfully');
+    respondWithCreated(res, { foodEntry: enrichedEntry }, 'Dry food entry created successfully');
   } catch (error) {
-    next(error);
-  }
+   next(error);
+ }
 });
 
-// PUT /api/pets/:petId/food/:foodId - Update a food entry
-router.put('/:petId/food/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.authSession?.user.id;
-    if (!userId) {
-      throw new BadRequestError('User session not found');
-    }
+// PUT /api/pets/:petId/food/dry/:foodId - Update dry food entry
+router.put('/:petId/food/dry/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
 
-    const petId = req.params.petId;
-    const foodId = req.params.foodId;
+   const { petId, foodId } = req.params;
+   if (!petId || !foodId) {
+     throw new BadRequestError('Pet ID and Food ID are required');
+   }
 
-    if (!petId || !foodId) {
-      throw new BadRequestError('Pet ID and Food ID are required');
-    }
+   const updateData: Partial<DryFoodFormData> = req.body;
 
-    const updateData: Partial<FoodEntryFormData> = req.body;
+   if (!updateData || typeof updateData !== 'object') {
+     throw new BadRequestError('Request body is required');
+   }
 
-    const updatedFoodEntry = await FoodService.updateFoodEntry(petId, foodId, userId, updateData);
-    const enrichedEntry = {
-      ...updatedFoodEntry,
-      ...FoodService.calculateFoodRemaining(updatedFoodEntry)
-    };
+   const updatedDryFoodEntry = await FoodService.updateDryFoodEntry(petId, foodId, userId, updateData);
+   
+   const enrichedEntry = {
+     ...updatedDryFoodEntry,
+     ...FoodService.calculateDryFoodRemaining(updatedDryFoodEntry)
+   };
 
-    respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Food entry updated successfully');
-  } catch (error) {
-    next(error);
-  }
+   respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Dry food entry updated successfully');
+ } catch (error) {
+   next(error);
+ }
 });
 
-// DELETE /api/pets/:petId/food/:foodId - Delete a food entry
+// 🎯 WET FOOD ROUTES
+// GET /api/pets/:petId/food/wet - Get all wet food entries
+router.get('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
+
+   const petId = req.params.petId;
+   if (!petId) {
+     throw new BadRequestError('Pet ID is required');
+   }
+
+   const wetFoodEntries = await FoodService.getWetFoodEntries(petId, userId);
+   
+   // Calculate remaining info for each entry
+   const enrichedEntries = wetFoodEntries.map(entry => ({
+     ...entry,
+     ...FoodService.calculateWetFoodRemaining(entry)
+   }));
+
+   const total = enrichedEntries.length;
+   respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} wet food entries`);
+ } catch (error) {
+   next(error);
+ }
+});
+
+// GET /api/pets/:petId/food/wet/:foodId - Get specific wet food entry
+router.get('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
+
+   const { petId, foodId } = req.params;
+   if (!petId || !foodId) {
+     throw new BadRequestError('Pet ID and Food ID are required');
+   }
+
+   const wetFoodEntry = await FoodService.getWetFoodEntryById(petId, foodId, userId);
+   const enrichedEntry = {
+     ...wetFoodEntry,
+     ...FoodService.calculateWetFoodRemaining(wetFoodEntry)
+   };
+
+   respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Wet food entry retrieved successfully');
+ } catch (error) {
+   next(error);
+ }
+});
+
+// POST /api/pets/:petId/food/wet - Create wet food entry
+router.post('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
+
+   const petId = req.params.petId;
+   if (!petId) {
+     throw new BadRequestError('Pet ID is required');
+   }
+
+   const wetFoodData: WetFoodFormData = req.body;
+
+   // Basic validation
+   if (!wetFoodData || typeof wetFoodData !== 'object') {
+     throw new BadRequestError('Request body is required');
+   }
+
+   if (!wetFoodData.dailyAmount || !wetFoodData.datePurchased) {
+     throw new BadRequestError('Daily amount and purchase date are required');
+   }
+
+   const newWetFoodEntry = await FoodService.createWetFoodEntry(petId, userId, wetFoodData);
+
+   const enrichedEntry = {
+     ...newWetFoodEntry,
+     ...FoodService.calculateWetFoodRemaining(newWetFoodEntry)
+   };
+
+   respondWithCreated(res, { foodEntry: enrichedEntry }, 'Wet food entry created successfully');
+ } catch (error) {
+   next(error);
+ }
+});
+
+// PUT /api/pets/:petId/food/wet/:foodId - Update wet food entry
+router.put('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
+
+   const { petId, foodId } = req.params;
+   if (!petId || !foodId) {
+     throw new BadRequestError('Pet ID and Food ID are required');
+   }
+
+   const updateData: Partial<WetFoodFormData> = req.body;
+
+   if (!updateData || typeof updateData !== 'object') {
+     throw new BadRequestError('Request body is required');
+   }
+
+   const updatedWetFoodEntry = await FoodService.updateWetFoodEntry(petId, foodId, userId, updateData);
+   
+   const enrichedEntry = {
+     ...updatedWetFoodEntry,
+     ...FoodService.calculateWetFoodRemaining(updatedWetFoodEntry)
+   };
+
+   respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Wet food entry updated successfully');
+ } catch (error) {
+   next(error);
+ }
+});
+
+// 🎯 COMBINED ROUTES
+// GET /api/pets/:petId/food - Get all food entries (both dry and wet)
+router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
+
+   const petId = req.params.petId;
+   if (!petId) {
+     throw new BadRequestError('Pet ID is required');
+   }
+
+   const allFoodEntries = await FoodService.getAllFoodEntries(petId, userId);
+   
+   // Calculate remaining info for each entry based on type
+   const enrichedEntries = allFoodEntries.map(entry => {
+     if (entry.foodType === 'dry') {
+       return {
+         ...entry,
+         ...FoodService.calculateDryFoodRemaining(entry as any)
+       };
+     } else {
+       return {
+         ...entry,
+         ...FoodService.calculateWetFoodRemaining(entry as any)
+       };
+     }
+   });
+
+   const total = enrichedEntries.length;
+   respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} food entries`);
+ } catch (error) {
+   next(error);
+ }
+});
+
+// DELETE /api/pets/:petId/food/:foodId - Delete any food entry (works for both types)
 router.delete('/:petId/food/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.authSession?.user.id;
-    if (!userId) {
-      throw new BadRequestError('User session not found');
-    }
+ try {
+   const userId = req.authSession?.user.id;
+   if (!userId) {
+     throw new BadRequestError('User session not found');
+   }
 
-    const petId = req.params.petId;
-    const foodId = req.params.foodId;
+   const { petId, foodId } = req.params;
+   if (!petId || !foodId) {
+     throw new BadRequestError('Pet ID and Food ID are required');
+   }
 
-    if (!petId || !foodId) {
-      throw new BadRequestError('Pet ID and Food ID are required');
-    }
+   await FoodService.deleteFoodEntry(petId, foodId, userId);
 
-    await FoodService.deleteFoodEntry(petId, foodId, userId);
-
-    respondWithSuccess(res, {}, 'Food entry deleted successfully');
-  } catch (error) {
-    next(error);
-  }
+   respondWithSuccess(res, { 
+     message: 'Food entry deleted successfully',
+     deletedId: foodId 
+   }, 'Food entry deleted successfully');
+ } catch (error) {
+   next(error);
+ }
 });
 
 export default router;

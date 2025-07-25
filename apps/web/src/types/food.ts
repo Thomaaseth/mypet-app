@@ -1,79 +1,86 @@
+// apps/web/src/types/food.ts
 export type FoodType = 'dry' | 'wet';
-export type FoodUnit = 'kg' | 'pounds' | 'grams' | 'cups' | 'oz';
 
-export interface FoodEntry {
+// Separate, clean types - no union hell
+export type DryFoodEntry = {
   id: string;
   petId: string;
-  foodType: FoodType;
+  foodType: 'dry';
   brandName: string | null;
   productName: string | null;
-  bagWeight: string; // Decimal as string for consistency
-  bagWeightUnit: FoodUnit;
-  dailyAmount: string; // Decimal as string for consistency  
-  dailyAmountUnit: 'grams' | 'cups' | 'oz';
-  // For wet food only
-  numberOfUnits?: number | null;
-  weightPerUnit?: string | null;
-  weightPerUnitUnit?: FoodUnit | null;
-  datePurchased: string; // ISO date string (YYYY-MM-DD format)
+  bagWeight: string;
+  bagWeightUnit: 'kg' | 'pounds';
+  dailyAmount: string;
+  dryDailyAmountUnit: 'grams' | 'cups';
+  datePurchased: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  // Calculated fields from backend
+  // Calculated fields
   remainingDays: number;
   remainingWeight: number;
-  depletionDate: string; // ISO date string
-}
+  depletionDate: string;
+};
 
-export interface FoodFormData {
-  foodType: FoodType;
+export type WetFoodEntry = {
+  id: string;
+  petId: string;
+  foodType: 'wet';
+  brandName: string | null;
+  productName: string | null;
+  numberOfUnits: number;
+  weightPerUnit: string;
+  wetWeightUnit: 'grams' | 'oz';
+  dailyAmount: string;
+  wetDailyAmountUnit: 'grams' | 'oz';
+  datePurchased: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Calculated fields
+  remainingDays: number;
+  remainingWeight: number;
+  depletionDate: string;
+};
+
+export type DryFoodFormData = {
   brandName?: string;
   productName?: string;
-  bagWeight: string; // String for form input
-  bagWeightUnit: FoodUnit;
-  dailyAmount: string; // String for form input
-  dailyAmountUnit: 'grams' | 'cups' | 'oz';
-  // For wet food only
-  numberOfUnits?: string; // String for form input
-  weightPerUnit?: string; // String for form input  
-  weightPerUnitUnit?: FoodUnit;
-  datePurchased: string; // HTML date input format: YYYY-MM-DD
-}
+  bagWeight: string;
+  bagWeightUnit: 'kg' | 'pounds';
+  dailyAmount: string;
+  dryDailyAmountUnit: 'grams' | 'cups';
+  datePurchased: string;
+};
+
+export type WetFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  numberOfUnits: string; // String for form input
+  weightPerUnit: string;
+  wetWeightUnit: 'grams' | 'oz';
+  dailyAmount: string;
+  wetDailyAmountUnit: 'grams' | 'oz';
+  datePurchased: string;
+};
 
 // API response types
-export interface FoodEntriesApiResponse {
-  foodEntries: FoodEntry[];
+export type DryFoodEntriesApiResponse = {
+  foodEntries: DryFoodEntry[];
   total: number;
-}
-
-export interface FoodEntryApiResponse {
-  foodEntry: FoodEntry;
-}
-
-// Error types
-export interface FoodError {
-  message: string;
-  field?: keyof FoodFormData;
-  code?: string;
-}
-
-// Helper for food type displays
-export const FOOD_TYPE_LABELS: Record<FoodType, string> = {
-  dry: 'Dry Food',
-  wet: 'Wet Food', 
 };
 
-// Helper for unit displays
-export const FOOD_UNIT_LABELS: Record<FoodUnit, string> = {
-  kg: 'kg',
-  pounds: 'lbs',
-  grams: 'grams',
-  cups: 'cups', 
-  oz: 'oz'
+export type WetFoodEntriesApiResponse = {
+  foodEntries: WetFoodEntry[];
+  total: number;
 };
 
-// Units allowed for different food types
-export const DRY_FOOD_UNITS: FoodUnit[] = ['kg', 'pounds'];
-export const DRY_FOOD_DAILY_UNITS: FoodUnit[] = ['grams', 'cups'];
-export const WET_FOOD_UNITS: FoodUnit[] = ['grams', 'oz'];
-export const WET_FOOD_DAILY_UNITS: FoodUnit[] = ['grams', 'oz'];
+export type AllFoodEntriesApiResponse = {
+  foodEntries: (DryFoodEntry | WetFoodEntry)[];
+  total: number;
+};
+
+// Unit labels
+export const DRY_FOOD_BAG_UNITS = ['kg', 'pounds'] as const;
+export const DRY_FOOD_DAILY_UNITS = ['grams', 'cups'] as const;
+export const WET_FOOD_UNITS = ['grams', 'oz'] as const;

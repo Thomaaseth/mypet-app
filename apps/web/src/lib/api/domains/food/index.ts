@@ -1,28 +1,45 @@
+// apps/web/src/lib/api/domains/food/index.ts
 import { FoodService } from './service';
 import { foodRepository } from './repository';
-import { foodValidator } from './validator';
-import type { FoodFormData, FoodType } from '@/types/food';
+import type { DryFoodFormData, WetFoodFormData } from '@/types/food';
 
-const foodService = new FoodService(foodRepository, foodValidator);
+const foodService = new FoodService(foodRepository);
 
-// Export the same interface pattern as weightApi and petApi
+// Clean, separate API exports
+export const dryFoodApi = {
+  getDryFoodEntries: (petId: string) => foodService.getDryFoodEntries(petId),
+  createDryFoodEntry: (petId: string, foodData: DryFoodFormData) => 
+    foodService.createDryFoodEntry(petId, foodData),
+  updateDryFoodEntry: (petId: string, foodId: string, foodData: Partial<DryFoodFormData>) => 
+    foodService.updateDryFoodEntry(petId, foodId, foodData),
+};
+
+export const wetFoodApi = {
+  getWetFoodEntries: (petId: string) => foodService.getWetFoodEntries(petId),
+  createWetFoodEntry: (petId: string, foodData: WetFoodFormData) => 
+    foodService.createWetFoodEntry(petId, foodData),
+  updateWetFoodEntry: (petId: string, foodId: string, foodData: Partial<WetFoodFormData>) => 
+    foodService.updateWetFoodEntry(petId, foodId, foodData),
+};
+
 export const foodApi = {
-  getFoodEntries: (petId: string) => foodService.getFoodEntries(petId),
-  getFoodEntriesByType: (petId: string, foodType: FoodType) => foodService.getFoodEntriesByType(petId, foodType),
-  getFoodEntryById: (petId: string, foodId: string) => foodService.getFoodEntryById(petId, foodId),
-  createFoodEntry: (petId: string, foodData: FoodFormData) => 
-    foodService.createFoodEntry(petId, foodData),
-  updateFoodEntry: (petId: string, foodId: string, foodData: Partial<FoodFormData>) => 
-    foodService.updateFoodEntry(petId, foodId, foodData),
+  getAllFoodEntries: (petId: string) => foodService.getAllFoodEntries(petId),
   deleteFoodEntry: (petId: string, foodId: string) => foodService.deleteFoodEntry(petId, foodId),
 };
 
-// Export the same error handler interface
+// Export error handler
 export const foodErrorHandler = (error: unknown) => foodService.mapError(error);
 
 // Export types for consumers
-export type { FoodEntriesApiResponse, FoodError } from './types';
+export type { 
+  DryFoodEntry, 
+  WetFoodEntry, 
+  DryFoodFormData, 
+  WetFoodFormData,
+  DryFoodEntriesApiResponse,
+  WetFoodEntriesApiResponse,
+  AllFoodEntriesApiResponse
+} from '@/types/food';
 
 export { FoodRepository } from './repository';
-export { FoodValidator } from './validator';
 export { FoodService } from './service';

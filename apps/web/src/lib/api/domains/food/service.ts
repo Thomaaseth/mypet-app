@@ -1,78 +1,73 @@
+// apps/web/src/lib/api/domains/food/service.ts
 import type { FoodRepository } from './repository';
-import type { FoodValidator } from './validator';
 import type { 
-  FoodEntry, 
-  FoodFormData, 
-  FoodEntriesApiResponse,
-  FoodError,
-  FoodType
+  DryFoodEntry, 
+  WetFoodEntry, 
+  DryFoodFormData, 
+  WetFoodFormData,
+  DryFoodEntriesApiResponse,
+  WetFoodEntriesApiResponse,
+  AllFoodEntriesApiResponse
 } from '@/types/food';
-import { 
-  ApiError,
-//   BadRequestError,
-//   NotFoundError,
-//   ValidationError,
-//   NetworkError,
-//   ServerError,
-//   createApiError 
-} from '../../errors';
+import { ApiError } from '../../errors';
 
 export class FoodService {
-  constructor(
-    private repository: FoodRepository,
-    private validator: FoodValidator
-  ) {}
+  constructor(private repository: FoodRepository) {}
 
-  async getFoodEntries(petId: string): Promise<FoodEntriesApiResponse> {
+  // Dry food methods
+  async getDryFoodEntries(petId: string): Promise<DryFoodEntriesApiResponse> {
     try {
-      const validPetId = this.validator.validatePetId(petId);
-      return await this.repository.getFoodEntries(validPetId);
+      return await this.repository.getDryFoodEntries(petId);
     } catch (error) {
       throw this.mapError(error);
     }
   }
 
-  async getFoodEntriesByType(petId: string, foodType: FoodType): Promise<FoodEntriesApiResponse> {
+  async createDryFoodEntry(petId: string, foodData: DryFoodFormData): Promise<DryFoodEntry> {
     try {
-      const validPetId = this.validator.validatePetId(petId);
-      return await this.repository.getFoodEntriesByType(validPetId, foodType);
+      return await this.repository.createDryFoodEntry(petId, foodData);
     } catch (error) {
       throw this.mapError(error);
     }
   }
 
-  async getFoodEntryById(petId: string, foodId: string): Promise<FoodEntry> {
+  async updateDryFoodEntry(petId: string, foodId: string, foodData: Partial<DryFoodFormData>): Promise<DryFoodEntry> {
     try {
-      const validPetId = this.validator.validatePetId(petId);
-      const validFoodId = this.validator.validateFoodId(foodId);
-      return await this.repository.getFoodEntryById(validPetId, validFoodId);
+      return await this.repository.updateDryFoodEntry(petId, foodId, foodData);
     } catch (error) {
       throw this.mapError(error);
     }
   }
 
-  async createFoodEntry(petId: string, foodData: FoodFormData): Promise<FoodEntry> {
+  // Wet food methods
+  async getWetFoodEntries(petId: string): Promise<WetFoodEntriesApiResponse> {
     try {
-      const validPetId = this.validator.validatePetId(petId);
-      const validFoodData = this.validator.validateCreateFood(foodData);
-      
-      return await this.repository.createFoodEntry(validPetId, validFoodData);
+      return await this.repository.getWetFoodEntries(petId);
     } catch (error) {
       throw this.mapError(error);
     }
   }
 
-  async updateFoodEntry(
-    petId: string, 
-    foodId: string, 
-    foodData: Partial<FoodFormData>
-  ): Promise<FoodEntry> {
+  async createWetFoodEntry(petId: string, foodData: WetFoodFormData): Promise<WetFoodEntry> {
     try {
-      const validPetId = this.validator.validatePetId(petId);
-      const validFoodId = this.validator.validateFoodId(foodId);
-      const validFoodData = this.validator.validateUpdateFood(foodData);
-      
-      return await this.repository.updateFoodEntry(validPetId, validFoodId, validFoodData);
+      return await this.repository.createWetFoodEntry(petId, foodData);
+    } catch (error) {
+      throw this.mapError(error);
+    }
+  }
+
+  async updateWetFoodEntry(petId: string, foodId: string, foodData: Partial<WetFoodFormData>): Promise<WetFoodEntry> {
+    try {
+      return await this.repository.updateWetFoodEntry(petId, foodId, foodData);
+    } catch (error) {
+      throw this.mapError(error);
+    }
+  }
+
+  // Combined methods
+  async getAllFoodEntries(petId: string): Promise<AllFoodEntriesApiResponse> {
+    try {
+      return await this.repository.getAllFoodEntries(petId);
     } catch (error) {
       throw this.mapError(error);
     }
@@ -80,46 +75,17 @@ export class FoodService {
 
   async deleteFoodEntry(petId: string, foodId: string): Promise<void> {
     try {
-      const validPetId = this.validator.validatePetId(petId);
-      const validFoodId = this.validator.validateFoodId(foodId);
-      
-      await this.repository.deleteFoodEntry(validPetId, validFoodId);
+      return await this.repository.deleteFoodEntry(petId, foodId);
     } catch (error) {
       throw this.mapError(error);
     }
   }
 
-  // Error mapping utility
-  mapError(error: unknown): FoodError {
+  mapError(error: unknown): ApiError {
+    // Your existing error mapping logic
     if (error instanceof ApiError) {
-      return {
-        message: error.message,
-        code: error.code || 'API_ERROR'
-      };
+      return error;
     }
-
-    if (error instanceof Error) {
-      // Handle validation errors
-      if (error.message.includes('Validation failed')) {
-        return {
-          message: error.message.replace('Validation failed: ', ''),
-          code: 'VALIDATION_ERROR'
-        };
-      }
-
-      // Handle network and server errors
-      if (error.message.includes('fetch') || error.message.includes('network')) {
-        return {
-          message: 'Network error. Please check your connection and try again.',
-          code: 'NETWORK_ERROR'
-        };
-      }
-    }
-
-    // Default error
-    return {
-      message: 'An unexpected error occurred while processing food data',
-      code: 'UNKNOWN_ERROR'
-    };
+    return new ApiError('An unexpected error occurred');
   }
 }

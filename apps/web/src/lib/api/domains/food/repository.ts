@@ -1,44 +1,71 @@
+// apps/web/src/lib/api/domains/food/repository.ts
 import { get, post, put, del } from '../../base';
 import type { 
-  FoodEntriesApiResponse,
-  FoodEntry,
-  FoodFormData,
-  FoodType
+  DryFoodEntry,
+  WetFoodEntry,
+  DryFoodFormData,
+  WetFoodFormData,
+  DryFoodEntriesApiResponse,
+  WetFoodEntriesApiResponse,
+  AllFoodEntriesApiResponse
 } from '@/types/food';
 
-// Handles data access operations using existing API functions
 export class FoodRepository {
-  async getFoodEntries(petId: string): Promise<FoodEntriesApiResponse> {
-    return await get<FoodEntriesApiResponse>(`/api/pets/${petId}/food`);
+  // Dry food methods
+  async getDryFoodEntries(petId: string): Promise<DryFoodEntriesApiResponse> {
+    return await get<DryFoodEntriesApiResponse>(`/api/pets/${petId}/food/dry`);
   }
 
-  async getFoodEntriesByType(petId: string, foodType: FoodType): Promise<FoodEntriesApiResponse> {
-    return await get<FoodEntriesApiResponse>(`/api/pets/${petId}/food/type/${foodType}`);
-  }
-
-  async getFoodEntryById(petId: string, foodId: string): Promise<FoodEntry> {
-    const result = await get<{ foodEntry: FoodEntry }>(`/api/pets/${petId}/food/${foodId}`);
+  async getDryFoodEntryById(petId: string, foodId: string): Promise<DryFoodEntry> {
+    const result = await get<{ foodEntry: DryFoodEntry }>(`/api/pets/${petId}/food/dry/${foodId}`);
     return result.foodEntry;
   }
 
-  async createFoodEntry(petId: string, foodData: FoodFormData): Promise<FoodEntry> {
-    const result = await post<{ foodEntry: FoodEntry }, FoodFormData>(
-      `/api/pets/${petId}/food`, 
+  async createDryFoodEntry(petId: string, foodData: DryFoodFormData): Promise<DryFoodEntry> {
+    const result = await post<{ foodEntry: DryFoodEntry }, DryFoodFormData>(
+      `/api/pets/${petId}/food/dry`, 
       foodData
     );
     return result.foodEntry;
   }
 
-  async updateFoodEntry(
-    petId: string, 
-    foodId: string, 
-    foodData: Partial<FoodFormData>
-  ): Promise<FoodEntry> {
-    const result = await put<{ foodEntry: FoodEntry }, Partial<FoodFormData>>(
-      `/api/pets/${petId}/food/${foodId}`, 
+  async updateDryFoodEntry(petId: string, foodId: string, foodData: Partial<DryFoodFormData>): Promise<DryFoodEntry> {
+    const result = await put<{ foodEntry: DryFoodEntry }, Partial<DryFoodFormData>>(
+      `/api/pets/${petId}/food/dry/${foodId}`, 
       foodData
     );
     return result.foodEntry;
+  }
+
+  // Wet food methods
+  async getWetFoodEntries(petId: string): Promise<WetFoodEntriesApiResponse> {
+    return await get<WetFoodEntriesApiResponse>(`/api/pets/${petId}/food/wet`);
+  }
+
+  async getWetFoodEntryById(petId: string, foodId: string): Promise<WetFoodEntry> {
+    const result = await get<{ foodEntry: WetFoodEntry }>(`/api/pets/${petId}/food/wet/${foodId}`);
+    return result.foodEntry;
+  }
+
+  async createWetFoodEntry(petId: string, foodData: WetFoodFormData): Promise<WetFoodEntry> {
+    const result = await post<{ foodEntry: WetFoodEntry }, WetFoodFormData>(
+      `/api/pets/${petId}/food/wet`, 
+      foodData
+    );
+    return result.foodEntry;
+  }
+
+  async updateWetFoodEntry(petId: string, foodId: string, foodData: Partial<WetFoodFormData>): Promise<WetFoodEntry> {
+    const result = await put<{ foodEntry: WetFoodEntry }, Partial<WetFoodFormData>>(
+      `/api/pets/${petId}/food/wet/${foodId}`, 
+      foodData
+    );
+    return result.foodEntry;
+  }
+
+  // Combined methods
+  async getAllFoodEntries(petId: string): Promise<AllFoodEntriesApiResponse> {
+    return await get<AllFoodEntriesApiResponse>(`/api/pets/${petId}/food`);
   }
 
   async deleteFoodEntry(petId: string, foodId: string): Promise<void> {
@@ -46,5 +73,4 @@ export class FoodRepository {
   }
 }
 
-// Default repository instance
 export const foodRepository = new FoodRepository();

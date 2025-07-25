@@ -1,43 +1,76 @@
+// apps/api/src/db/schema/food.ts
 import { 
   pgTable, 
   pgEnum, 
-  text, 
   varchar, 
   decimal,
   integer,
   boolean, 
   date, 
   timestamp, 
-  uuid
+  uuid,
+  check
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
 import { pets } from './pets';
 
-// Enums for food tracking
+// Simplified enums
 export const foodTypeEnum = pgEnum('food_type', ['dry', 'wet']);
-export const foodUnitEnum = pgEnum('food_unit', ['kg', 'pounds', 'grams', 'cups', 'oz']);
+export const dryFoodBagUnitEnum = pgEnum('dry_food_bag_unit', ['kg', 'pounds']);
+export const dryFoodDailyUnitEnum = pgEnum('dry_food_daily_unit', ['grams', 'cups']);
+export const wetFoodUnitEnum = pgEnum('wet_food_unit', ['grams', 'oz']);
 
 export const foodEntries = pgTable('food_entries', {
   id: uuid('id').primaryKey().defaultRandom(),
   petId: uuid('pet_id').references(() => pets.id, { onDelete: 'cascade' }).notNull(),
-  foodType: foodTypeEnum('food_type').notNull(), // dry, wet
-  brandName: varchar('brand_name', { length: 100 }), // Optional
-  productName: varchar('product_name', { length: 150 }), // Optional
-  bagWeight: decimal('bag_weight', { precision: 8, scale: 2 }).notNull(), // Total weight purchased
-  bagWeightUnit: foodUnitEnum('bag_weight_unit').notNull(), // Unit for bag weight
-  dailyAmount: decimal('daily_amount', { precision: 8, scale: 2 }).notNull(), // Amount consumed per day
-  dailyAmountUnit: foodUnitEnum('daily_amount_unit').notNull(), // Unit for daily amount
-  // Wet food specific fields
-  numberOfUnits: integer('number_of_units'), // e.g., 12 cans
-  weightPerUnit: decimal('weight_per_unit', { precision: 8, scale: 2 }), // e.g., 85g per can
-  weightPerUnitUnit: foodUnitEnum('weight_per_unit_unit'), // Unit for weight per unit
-  datePurchased: date('date_purchased').notNull(), // When the food was bought
-  isActive: boolean('is_active').default(true).notNull(), // For soft deletes and "finished" bags
+  foodType: foodTypeEnum('food_type').notNull(),
+  
+  // Common fields
+  brandName: varchar('brand_name', { length: 100 }),
+  productName: varchar('product_name', { length: 150 }),
+  dailyAmount: decimal('daily_amount', { precision: 8, scale: 2 }).notNull(),
+  datePurchased: date('date_purchased').notNull(),
+  
+  // DRY FOOD ONLY
+  bagWeight: decimal('bag_weight', { precision: 8, scale: 2 }),
+  bagWeightUnit: dryFoodBagUnitEnum('bag_weight_unit'),
+  dryDailyAmountUnit: dryFoodDailyUnitEnum('dry_daily_amount_unit'),
+  
+  // WET FOOD ONLY
+  numberOfUnits: integer('number_of_units'),
+  weightPerUnit: decimal('weight_per_unit', { precision: 8, scale: 2 }),
+  wetWeightUnit: wetFoodUnitEnum('wet_weight_unit'),
+  wetDailyAmountUnit: wetFoodUnitEnum('wet_daily_amount_unit'),
+  
+  isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Database constraints
+  dryFoodConstraint: check('dry_food_check', sql`
+    (food_type = 'dry' AND 
+     bag_weight IS NOT NULL AND 
+     bag_weight_unit IS NOT NULL AND 
+     dry_daily_amount_unit IS NOT NULL AND
+     number_of_units IS NULL AND 
+     weight_per_unit IS NULL AND 
+     wet_weight_unit IS NULL AND
+     wet_daily_amount_unit IS NULL)
+  `),
+  
+  wetFoodConstraint: check('wet_food_check', sql`
+    (food_type = 'wet' AND 
+     number_of_units IS NOT NULL AND 
+     weight_per_unit IS NOT NULL AND 
+     wet_weight_unit IS NOT NULL AND
+     wet_daily_amount_unit IS NOT NULL AND
+     bag_weight IS NULL AND 
+     bag_weight_unit IS NULL AND
+     dry_daily_amount_unit IS NULL)
+  `),
+}));
 
-// Relations
 export const foodEntriesRelations = relations(foodEntries, ({ one }) => ({
   pet: one(pets, {
     fields: [foodEntries.petId],
@@ -45,11 +78,65 @@ export const foodEntriesRelations = relations(foodEntries, ({ one }) => ({
   }),
 }));
 
-// Types for TypeScript
-export type FoodEntry = typeof foodEntries.$inferSelect;
-export type NewFoodEntry = typeof foodEntries.$inferInsert;
-export type FoodType = typeof foodTypeEnum.enumValues[number];
-export type FoodUnit = typeof foodUnitEnum.enumValues[number];
+// 🎯 SEPARATE TYPES - NO UNIONS
+export type BaseFoodEntry = {
+  id: string;
+  petId: string;
+  brandName: string | null;
+  productName: string | null;
+  dailyAmount: string;
+  datePurchased: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-// Form data type for API
-export type FoodEntryFormData = Omit<NewFoodEntry, 'id' | 'petId' | 'createdAt' | 'updatedAt' | 'isActive'>;
+export type DryFoodEntry = BaseFoodEntry & {
+  foodType: 'dry';
+  bagWeight: string;
+  bagWeightUnit: 'kg' | 'pounds';
+  dryDailyAmountUnit: 'grams' | 'cups';
+  // Wet fields are null
+  numberOfUnits: null;
+  weightPerUnit: null;
+  wetWeightUnit: null;
+  wetDailyAmountUnit: null;
+};
+
+export type WetFoodEntry = BaseFoodEntry & {
+  foodType: 'wet';
+  numberOfUnits: number;
+  weightPerUnit: string;
+  wetWeightUnit: 'grams' | 'oz';
+  wetDailyAmountUnit: 'grams' | 'oz';
+  // Dry fields are null
+  bagWeight: null;
+  bagWeightUnit: null;
+  dryDailyAmountUnit: null;
+};
+
+// 🎯 SEPARATE FORM TYPES
+export type DryFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  bagWeight: string;
+  bagWeightUnit: 'kg' | 'pounds';
+  dailyAmount: string;
+  dryDailyAmountUnit: 'grams' | 'cups';
+  datePurchased: string;
+};
+
+export type WetFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  numberOfUnits: number;
+  weightPerUnit: string;
+  wetWeightUnit: 'grams' | 'oz';
+  dailyAmount: string;
+  wetDailyAmountUnit: 'grams' | 'oz';
+  datePurchased: string;
+};
+
+// Utility types
+export type FoodType = 'dry' | 'wet';
+export type AnyFoodEntry = DryFoodEntry | WetFoodEntry;

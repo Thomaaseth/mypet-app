@@ -32,7 +32,7 @@ app.use('/api/pets', petRoutes)
 // FOOD ROUTES
 app.use('/api/pets', foodRoutes)
 
-// APP HEALTH
+// APP HEALTH   
 app.get('/api/health', (req, res, next) => {
     Promise.resolve(healthCheck(req, res)).catch(next);
 });

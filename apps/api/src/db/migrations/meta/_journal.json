@@ -29,6 +29,13 @@
       "when": 1753288706779,
       "tag": "0003_wonderful_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1753458688813,
+      "tag": "0004_omniscient_talos",
+      "breakpoints": true
     }
   ]
 }
