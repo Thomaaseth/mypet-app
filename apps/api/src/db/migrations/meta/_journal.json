@@ -36,6 +36,13 @@
       "when": 1753458688813,
       "tag": "0004_omniscient_talos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753459877263,
+      "tag": "0005_amusing_captain_cross",
+      "breakpoints": true
     }
   ]
 }

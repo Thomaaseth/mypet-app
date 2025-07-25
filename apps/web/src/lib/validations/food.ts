@@ -43,8 +43,23 @@ export const dryFoodSchema = z.object({
   const bagWeight = parseFloat(data.bagWeight.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
   
-  // Simple check - daily amount shouldn't be more than total bag weight
-  if (dailyAmount >= bagWeight) {
+  // Convert bag weight to grams for comparison
+  let bagWeightInGrams = bagWeight;
+  if (data.bagWeightUnit === 'kg') {
+    bagWeightInGrams = bagWeight * 1000; // kg to grams
+  } else if (data.bagWeightUnit === 'pounds') {
+    bagWeightInGrams = bagWeight * 453.592; // pounds to grams
+  }
+
+  // Convert daily amount to grams for comparison
+  let dailyAmountInGrams = dailyAmount;
+  if (data.dryDailyAmountUnit === 'cups') {
+    // Approximate: 1 cup dry food ≈ 120 grams (varies by density)
+    dailyAmountInGrams = dailyAmount * 120;
+  }
+
+  // Check if daily amount exceeds total bag weight
+  if (dailyAmountInGrams >= bagWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Daily amount should be less than total bag weight',
@@ -87,17 +102,19 @@ export const wetFoodSchema = z.object({
   const totalWeight = data.numberOfUnits * parseFloat(data.weightPerUnit.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
   
-  // Convert to same units for comparison if needed
-  let dailyAmountConverted = dailyAmount;
-  if (data.wetWeightUnit !== data.wetDailyAmountUnit) {
-    if (data.wetWeightUnit === 'grams' && data.wetDailyAmountUnit === 'oz') {
-      dailyAmountConverted = dailyAmount * 28.3495; // oz to grams
-    } else if (data.wetWeightUnit === 'oz' && data.wetDailyAmountUnit === 'grams') {
-      dailyAmountConverted = dailyAmount / 28.3495; // grams to oz
-    }
+  // Convert total weight to grams
+  let totalWeightInGrams = totalWeight;
+  if (data.wetWeightUnit === 'oz') {
+    totalWeightInGrams = totalWeight * 28.3495; // oz to grams
+  }
+
+  // Convert daily amount to grams
+  let dailyAmountInGrams = dailyAmount;
+  if (data.wetDailyAmountUnit === 'oz') {
+    dailyAmountInGrams = dailyAmount * 28.3495; // oz to grams
   }
   
-  if (dailyAmountConverted >= totalWeight) {
+  if (dailyAmountInGrams >= totalWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Daily amount should be less than total weight',
