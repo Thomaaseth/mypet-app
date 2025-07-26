@@ -25,12 +25,14 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
 
  const {
    activeDryFoodEntries,
-   isLoading: isDryLoading
+   isLoading: isDryLoading,
+   refetchDryFoodEntries,
  } = useDryFoodTracker({ petId });
 
  const {
    activeWetFoodEntries, 
-   isLoading: isWetLoading
+   isLoading: isWetLoading,
+   refetchWetFoodEntries
  } = useWetFoodTracker({ petId });
 
  // Combine active entries for summary
@@ -111,11 +113,11 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
          </TabsList>
          
          <TabsContent value="dry" className="mt-6">
-           <DryFoodTracker petId={petId} />
+           <DryFoodTracker petId={petId} onDataChange={refetchDryFoodEntries} />
          </TabsContent>
          
          <TabsContent value="wet" className="mt-6">
-           <WetFoodTracker petId={petId} />
+           <WetFoodTracker petId={petId} onDataChange={refetchWetFoodEntries}/>
          </TabsContent>
        </Tabs>
      </CardContent>

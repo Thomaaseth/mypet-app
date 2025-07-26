@@ -1,4 +1,3 @@
-// apps/web/src/components/pets/FoodTracker/WetFoodForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -14,12 +13,21 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import type { WetFoodFormData } from '@/types/food';
-import { WET_FOOD_UNITS } from '@/types/food';
+import { WET_FOOD_UNITS, WetFoodEntry } from '@/types/food';
 import { validateWetFoodData } from '@/lib/validations/food';
 
 interface WetFoodFormProps {
   initialData?: Partial<WetFoodFormData>;
-  onSubmit: (data: WetFoodFormData) => Promise<any>;
+  onSubmit: (data: {
+    brandName?: string;
+    productName?: string;
+    numberOfUnits: number;  // ← Number, not string
+    weightPerUnit: string;
+    wetWeightUnit: 'grams' | 'oz';
+    dailyAmount: string;
+    wetDailyAmountUnit: 'grams' | 'oz';
+    datePurchased: string; 
+  }) => Promise<WetFoodEntry | null>;
   isLoading?: boolean;
   submitLabel?: string;
 }
@@ -56,12 +64,8 @@ export function WetFoodForm({
 
       // Validate form data
       const validatedData = validateWetFoodData(dataToValidate);
-      // Convert back to form data type (numberOfUnits as string)
-      const formDataToSubmit: WetFoodFormData = {
-        ...validatedData,
-        numberOfUnits: validatedData.numberOfUnits.toString(),
-        };
-      await onSubmit(formDataToSubmit);
+
+      await onSubmit(validatedData);
     } catch (error) {
       if (error instanceof Error) {
         // Parse validation errors

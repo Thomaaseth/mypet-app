@@ -20,12 +20,14 @@ import { WetFoodList } from './WetFoodList';
 import { FoodTrackerSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
 import type { WetFoodFormData } from '@/types/food';
+import type { WetFoodEntry } from '@/types/food';
 
 interface WetFoodTrackerProps {
   petId: string;
+  onDataChange?: () => Promise<void>;
 }
 
-export function WetFoodTracker({ petId }: WetFoodTrackerProps) {
+export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
   const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -39,7 +41,16 @@ export function WetFoodTracker({ petId }: WetFoodTrackerProps) {
     deleteWetFoodEntry,
   } = useWetFoodTracker({ petId });
 
-  const handleCreateEntry = async (data: WetFoodFormData) => {
+  const handleCreateEntry = async (data: {
+    brandName?: string;
+    productName?: string;
+    numberOfUnits: number;  // ← Now expects number
+    weightPerUnit: string;
+    wetWeightUnit: 'grams' | 'oz';
+    dailyAmount: string;
+    wetDailyAmountUnit: 'grams' | 'oz';
+    datePurchased: string;
+    }): Promise<WetFoodEntry | null>  => {
     return executeAction(async () => {
       const result = await createWetFoodEntry(data);
       if (result) {
@@ -51,7 +62,11 @@ export function WetFoodTracker({ petId }: WetFoodTrackerProps) {
 
   const handleUpdateEntry = async (foodId: string, data: Partial<WetFoodFormData>) => {
     return executeAction(async () => {
-      return await updateWetFoodEntry(foodId, data);
+        const result = await updateWetFoodEntry(foodId, data);
+        if (result && onDataChange) {
+        await onDataChange();
+        }
+        return result;
     }, foodErrorHandler);
   };
 

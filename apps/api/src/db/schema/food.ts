@@ -78,7 +78,6 @@ export const foodEntriesRelations = relations(foodEntries, ({ one }) => ({
   }),
 }));
 
-// 🎯 SEPARATE TYPES - NO UNIONS
 export type BaseFoodEntry = {
   id: string;
   petId: string;
@@ -115,7 +114,6 @@ export type WetFoodEntry = BaseFoodEntry & {
   dryDailyAmountUnit: null;
 };
 
-// 🎯 SEPARATE FORM TYPES
 export type DryFoodFormData = {
   brandName?: string;
   productName?: string;

@@ -32,7 +32,7 @@ export class FoodService {
     }
   }
 
-  // 🎯 DRY FOOD METHODS
+  // DRY FOOD METHODS
   static async createDryFoodEntry(petId: string, userId: string, data: DryFoodFormData): Promise<DryFoodEntry> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -171,7 +171,7 @@ export class FoodService {
     }
   }
 
-  // 🎯 WET FOOD METHODS
+  // WET FOOD METHODS
   static async createWetFoodEntry(petId: string, userId: string, data: WetFoodFormData): Promise<WetFoodEntry> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -310,7 +310,7 @@ export class FoodService {
     }
   }
 
-  // 🎯 COMBINED METHODS (for when you need both types)
+  // COMBINED METHODS
   static async getAllFoodEntries(petId: string, userId: string): Promise<AnyFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -334,7 +334,6 @@ export class FoodService {
     }
   }
 
-  // 🎯 DELETE METHODS (work for both types)
   static async deleteFoodEntry(petId: string, foodId: string, userId: string): Promise<void> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -370,7 +369,7 @@ export class FoodService {
     }
   }
 
-  // 🎯 CALCULATION METHODS
+  // CALCULATION METHODS
 static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
   const today = new Date();
   const purchaseDate = new Date(entry.datePurchased);
@@ -411,6 +410,14 @@ static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; 
 }
 
 static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
+    console.log('WET FOOD DEBUG:', {
+    dailyAmount: entry.dailyAmount,
+    wetDailyAmountUnit: entry.wetDailyAmountUnit,
+    numberOfUnits: entry.numberOfUnits,
+    weightPerUnit: entry.weightPerUnit,
+    wetWeightUnit: entry.wetWeightUnit
+  });
+  
   const today = new Date();
   const purchaseDate = new Date(entry.datePurchased);
   
@@ -424,10 +431,14 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
   
   // Convert daily amount to grams for calculation
   let dailyAmountInGrams = parseFloat(entry.dailyAmount);
+  console.log('🐛 Before conversion:', dailyAmountInGrams, entry.wetDailyAmountUnit);
+
   if (entry.wetDailyAmountUnit === 'oz') {
     dailyAmountInGrams = dailyAmountInGrams * 28.3495; // oz to grams
   }
   
+  console.log('🐛 After conversion:', dailyAmountInGrams);
+
   const foodConsumedInGrams = Math.max(0, daysSincePurchase * dailyAmountInGrams);
   const remainingWeightInGrams = Math.max(0, totalWeightInGrams - foodConsumedInGrams);
   
@@ -445,7 +456,6 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
   return { remainingDays, depletionDate, remainingWeight };
 }
 
-  // 🎯 VALIDATION METHODS
   private static validateDryFoodData(data: DryFoodFormData): void {
     if (!data.bagWeight || !data.bagWeightUnit || !data.dryDailyAmountUnit) {
       throw new BadRequestError('Bag weight, bag weight unit, and daily amount unit are required for dry food');

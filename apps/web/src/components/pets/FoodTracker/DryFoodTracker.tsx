@@ -23,9 +23,10 @@ import type { DryFoodFormData } from '@/types/food';
 
 interface DryFoodTrackerProps {
   petId: string;
+  onDataChange?: () => Promise<void>; 
 }
 
-export function DryFoodTracker({ petId }: DryFoodTrackerProps) {
+export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
   const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -51,7 +52,11 @@ export function DryFoodTracker({ petId }: DryFoodTrackerProps) {
 
   const handleUpdateEntry = async (foodId: string, data: Partial<DryFoodFormData>) => {
     return executeAction(async () => {
-      return await updateDryFoodEntry(foodId, data);
+      const result = await updateDryFoodEntry(foodId, data);
+      if (result && onDataChange) {
+        await onDataChange();
+      }
+      return result;
     }, foodErrorHandler);
   };
 
