@@ -16,18 +16,20 @@ import type { WetFoodFormData } from '@/types/food';
 import { WET_FOOD_UNITS, WetFoodEntry } from '@/types/food';
 import { validateWetFoodData } from '@/lib/validations/food';
 
+// type WetFoodSubmitData = {
+//   brandName?: string;
+//   productName?: string;
+//   numberOfUnits: number; // Number for submission
+//   weightPerUnit: string;
+//   wetWeightUnit: 'grams' | 'oz';
+//   dailyAmount: string;
+//   wetDailyAmountUnit: 'grams' | 'oz';
+//   datePurchased: string;
+// };
+
 interface WetFoodFormProps {
   initialData?: Partial<WetFoodFormData>;
-  onSubmit: (data: {
-    brandName?: string;
-    productName?: string;
-    numberOfUnits: number;  // ← Number, not string
-    weightPerUnit: string;
-    wetWeightUnit: 'grams' | 'oz';
-    dailyAmount: string;
-    wetDailyAmountUnit: 'grams' | 'oz';
-    datePurchased: string; 
-  }) => Promise<WetFoodEntry | null>;
+  onSubmit: (data: WetFoodFormData) => Promise<WetFoodEntry | null>;
   isLoading?: boolean;
   submitLabel?: string;
 }
@@ -56,16 +58,12 @@ export function WetFoodForm({
     setErrors({});
 
     try {
-      // Convert numberOfUnits to number for validation
-      const dataToValidate = {
-        ...formData,
-        numberOfUnits: parseInt(formData.numberOfUnits),
-      };
+      // Validate the form data
+      validateWetFoodData(formData);
 
-      // Validate form data
-      const validatedData = validateWetFoodData(dataToValidate);
+      // Submit the converted data
+      await onSubmit(formData);
 
-      await onSubmit(validatedData);
     } catch (error) {
       if (error instanceof Error) {
         // Parse validation errors

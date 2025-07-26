@@ -6,8 +6,8 @@ import { eq, and, desc } from 'drizzle-orm';
 import type { 
   DryFoodEntry, 
   WetFoodEntry, 
-  DryFoodFormData, 
-  WetFoodFormData,
+  // DryFoodFormData, 
+  // WetFoodFormData,
   AnyFoodEntry,
   FoodType 
 } from '../db/schema/food';
@@ -15,6 +15,28 @@ import {
   BadRequestError, 
   NotFoundError 
 } from '../middleware/errors';
+
+
+type DryFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  bagWeight: string;
+  bagWeightUnit: 'kg' | 'pounds';
+  dailyAmount: string;
+  dryDailyAmountUnit: 'grams' | 'cups';
+  datePurchased: string;
+};
+
+type WetFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  numberOfUnits: string; // String from form
+  weightPerUnit: string;
+  wetWeightUnit: 'grams' | 'oz';
+  dailyAmount: string;
+  wetDailyAmountUnit: 'grams' | 'oz';
+  datePurchased: string;
+};
 
 export class FoodService {
   private static async verifyPetOwnership(petId: string, userId: string): Promise<void> {
@@ -184,7 +206,7 @@ export class FoodService {
           foodType: 'wet',
           brandName: data.brandName || null,
           productName: data.productName || null,
-          numberOfUnits: data.numberOfUnits,
+          numberOfUnits: parseInt(data.numberOfUnits, 10),
           weightPerUnit: data.weightPerUnit,
           wetWeightUnit: data.wetWeightUnit,
           dailyAmount: data.dailyAmount,
@@ -534,7 +556,8 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
     const weightPerUnit = parseFloat(data.weightPerUnit);
     const dailyAmount = parseFloat(data.dailyAmount);
 
-    if (data.numberOfUnits <= 0 || weightPerUnit <= 0 || dailyAmount <= 0) {
+    const numberOfUnits = parseInt(data.numberOfUnits, 10);
+    if (numberOfUnits <= 0 || isNaN(numberOfUnits) || weightPerUnit <= 0 || dailyAmount <= 0) {
       throw new BadRequestError('Number of units, weight per unit, and daily amount must be positive values');
     }
 
@@ -549,7 +572,8 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
 
   private static validatePartialWetFoodData(data: Partial<WetFoodFormData>): void {
     if (data.numberOfUnits !== undefined) {
-      if (!Number.isInteger(data.numberOfUnits) || data.numberOfUnits <= 0) {
+      const numberOfUnits = parseInt(data.numberOfUnits, 10);
+      if (!Number.isInteger(numberOfUnits) || numberOfUnits <= 0 || isNaN(numberOfUnits)) {
         throw new BadRequestError('Number of units must be a positive integer');
       }
     }

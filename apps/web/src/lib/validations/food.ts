@@ -80,9 +80,12 @@ export const dryFoodSchema = z.object({
 // 🎯 WET FOOD VALIDATION
 export const wetFoodSchema = z.object({
   ...baseFoodValidation,
-  numberOfUnits: z.number()
-    .int('Number of units must be a whole number')
-    .positive('Number of units must be greater than 0'),
+  numberOfUnits: z.string()  // ✅ Expects string (from form)
+    .min(1, 'Number of units is required')
+    .refine((val) => {
+      const num = parseInt(val, 10);
+      return !isNaN(num) && Number.isInteger(num) && num > 0;
+    }, 'Number of units must be a positive whole number'),
   weightPerUnit: z.string()
     .min(1, 'Weight per unit is required')
     .refine((val) => {
@@ -99,7 +102,8 @@ export const wetFoodSchema = z.object({
   }),
 }).superRefine((data, ctx) => {
   // Calculate total weight for validation
-  const totalWeight = data.numberOfUnits * parseFloat(data.weightPerUnit.replace(',', '.'));
+  const numberOfUnits = parseInt(data.numberOfUnits, 10);
+  const totalWeight = numberOfUnits * parseFloat(data.weightPerUnit.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
   
   // Convert total weight to grams

@@ -114,26 +114,26 @@ export type WetFoodEntry = BaseFoodEntry & {
   dryDailyAmountUnit: null;
 };
 
-export type DryFoodFormData = {
-  brandName?: string;
-  productName?: string;
-  bagWeight: string;
-  bagWeightUnit: 'kg' | 'pounds';
-  dailyAmount: string;
-  dryDailyAmountUnit: 'grams' | 'cups';
-  datePurchased: string;
-};
+// export type DryFoodFormData = {
+//   brandName?: string;
+//   productName?: string;
+//   bagWeight: string;
+//   bagWeightUnit: 'kg' | 'pounds';
+//   dailyAmount: string;
+//   dryDailyAmountUnit: 'grams' | 'cups';
+//   datePurchased: string;
+// };
 
-export type WetFoodFormData = {
-  brandName?: string;
-  productName?: string;
-  numberOfUnits: number;
-  weightPerUnit: string;
-  wetWeightUnit: 'grams' | 'oz';
-  dailyAmount: string;
-  wetDailyAmountUnit: 'grams' | 'oz';
-  datePurchased: string;
-};
+// export type WetFoodFormData = {
+//   brandName?: string;
+//   productName?: string;
+//   numberOfUnits: number;
+//   weightPerUnit: string;
+//   wetWeightUnit: 'grams' | 'oz';
+//   dailyAmount: string;
+//   wetDailyAmountUnit: 'grams' | 'oz';
+//   datePurchased: string;
+// };
 
 // Utility types
 export type FoodType = 'dry' | 'wet';

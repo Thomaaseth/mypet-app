@@ -24,21 +24,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Edit, Trash2, Calendar, Package, Utensils } from 'lucide-react';
 import { WetFoodForm } from './WetFoodForm';
-import type { WetFoodEntry } from '@/types/food';
+import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 
 interface WetFoodListProps {
   entries: WetFoodEntry[];
-  onUpdate: (foodId: string, data: {
-    brandName?: string;
-    productName?: string;
-    numberOfUnits?: number;
-    weightPerUnit?: string;
-    wetWeightUnit?: 'grams' | 'oz';
-    dailyAmount?: string;
-    wetDailyAmountUnit?: 'grams' | 'oz';
-    datePurchased?: string;
-  }) => Promise<WetFoodEntry | null>;
+  onUpdate: (foodId: string, data: Partial<WetFoodFormData>) => Promise<WetFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   isLoading?: boolean;
 }
@@ -46,33 +37,14 @@ export function WetFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
 
- const handleUpdate = async (data: {
-    brandName?: string;
-    productName?: string;
-    numberOfUnits: number;
-    weightPerUnit: string;
-    wetWeightUnit: 'grams' | 'oz';
-    dailyAmount: string;
-    wetDailyAmountUnit: 'grams' | 'oz';
-    datePurchased: string;
-    }) => {
-   if (!editingEntry) return null;
-    
-   const updateData = {
-    brandName: data.brandName,
-    productName: data.productName,
-    numberOfUnits: data.numberOfUnits,
-    weightPerUnit: data.weightPerUnit,
-    wetWeightUnit: data.wetWeightUnit,
-    dailyAmount: data.dailyAmount,
-    wetDailyAmountUnit: data.wetDailyAmountUnit,
-    datePurchased: data.datePurchased,
-  };
-   const result = await onUpdate(editingEntry.id, updateData);
-   if (result) {
-     setEditingEntry(null);
-   }
-   return result;
+ const handleUpdate = async (data: WetFoodFormData) => { // ✅ Receive WetFoodFormData (strings)
+  if (!editingEntry) return null;
+   
+  const result = await onUpdate(editingEntry.id, data); // ✅ Pass strings directly
+  if (result) {
+    setEditingEntry(null);
+  }
+  return result;
  };
 
  const handleDelete = async () => {

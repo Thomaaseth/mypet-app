@@ -5,7 +5,27 @@ import { FoodService } from '../services/food.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
-import type { DryFoodFormData, WetFoodFormData } from '../db/schema/food';
+
+type DryFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  bagWeight: string;
+  bagWeightUnit: 'kg' | 'pounds';
+  dailyAmount: string;
+  dryDailyAmountUnit: 'grams' | 'cups';
+  datePurchased: string;
+};
+
+type WetFoodFormData = {
+  brandName?: string;
+  productName?: string;
+  numberOfUnits: string; // String from form
+  weightPerUnit: string;
+  wetWeightUnit: 'grams' | 'oz';
+  dailyAmount: string;
+  wetDailyAmountUnit: 'grams' | 'oz';
+  datePurchased: string;
+};
 
 const router = Router();
 

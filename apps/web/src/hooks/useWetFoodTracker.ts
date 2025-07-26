@@ -8,9 +8,6 @@ interface UseWetFoodTrackerOptions {
   petId: string;
 }
 
-type WetFoodCreateData = Omit<WetFoodEntry, 'id' | 'petId' | 'foodType' | 'isActive' | 'createdAt' | 'updatedAt' | 'remainingDays' | 'remainingWeight' | 'depletionDate'>;
-
-type WetFoodUpdateData = Partial<WetFoodCreateData>;
 
 export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
   const [wetFoodEntries, setWetFoodEntries] = useState<WetFoodEntry[]>([]);
@@ -35,7 +32,7 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
     }
   }, [petId]);
 
-  const createWetFoodEntry = useCallback(async (foodData: WetFoodCreateData): Promise<WetFoodEntry | null> => {
+const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promise<WetFoodEntry | null> => {
     try {
       const newEntry = await wetFoodApi.createWetFoodEntry(petId, foodData);
       setWetFoodEntries(prev => [newEntry, ...prev]);
