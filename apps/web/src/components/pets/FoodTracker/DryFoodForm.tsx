@@ -13,13 +13,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import type { DryFoodFormData } from '@/types/food';
+import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { DRY_FOOD_BAG_UNITS, DRY_FOOD_DAILY_UNITS } from '@/types/food';
 import { validateDryFoodData } from '@/lib/validations/food';
 
 interface DryFoodFormProps {
   initialData?: Partial<DryFoodFormData>;
-  onSubmit: (data: DryFoodFormData) => Promise<any>;
+  onSubmit: (data: DryFoodFormData) => Promise<DryFoodEntry | null>;
   isLoading?: boolean;
   submitLabel?: string;
 }

@@ -29,7 +29,7 @@ import { formatDateForDisplay } from '@/lib/validations/food';
 
 interface DryFoodListProps {
   entries: DryFoodEntry[];
-  onUpdate: (foodId: string, data: Partial<DryFoodFormData>) => Promise<any>;
+  onUpdate: (foodId: string, data: Partial<DryFoodFormData>) => Promise<DryFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   isLoading?: boolean;
 }
@@ -39,12 +39,13 @@ export function DryFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
 
   const handleUpdate = async (data: DryFoodFormData) => {
-    if (!editingEntry) return;
+    if (!editingEntry) return null;
     
     const result = await onUpdate(editingEntry.id, data);
     if (result) {
       setEditingEntry(null);
     }
+    return result;
   };
 
   const handleDelete = async () => {
