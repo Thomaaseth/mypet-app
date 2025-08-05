@@ -194,18 +194,6 @@ export function WetFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
                    />
                  </div>
                </div>
-
-               {/* Additional Info */}
-               <div className="mt-3 pt-3 border-t border-gray-100">
-                 <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
-                   <div>
-                     <span className="font-medium">Created:</span> {formatDateForDisplay(entry.createdAt)}
-                   </div>
-                   <div>
-                     <span className="font-medium">Last Updated:</span> {formatDateForDisplay(entry.updatedAt)}
-                   </div>
-                 </div>
-               </div>
              </CardContent>
            </Card>
          );

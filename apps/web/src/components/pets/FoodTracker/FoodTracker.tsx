@@ -38,6 +38,13 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
  // Combine active entries for summary
  const activeFoodEntries = [...activeDryFoodEntries, ...activeWetFoodEntries];
 
+ const handleDataChange = async () => {
+  await Promise.all([
+    refetchDryFoodEntries(),
+    refetchWetFoodEntries()
+  ]);
+};
+
  return (
    <Card className="w-full">
      <CardHeader>
@@ -113,11 +120,11 @@ export default function FoodTracker({ petId }: FoodTrackerProps) {
          </TabsList>
          
          <TabsContent value="dry" className="mt-6">
-           <DryFoodTracker petId={petId} onDataChange={refetchDryFoodEntries} />
+           <DryFoodTracker petId={petId} onDataChange={handleDataChange} />
          </TabsContent>
          
          <TabsContent value="wet" className="mt-6">
-           <WetFoodTracker petId={petId} onDataChange={refetchWetFoodEntries}/>
+           <WetFoodTracker petId={petId} onDataChange={handleDataChange}/>
          </TabsContent>
        </Tabs>
      </CardContent>

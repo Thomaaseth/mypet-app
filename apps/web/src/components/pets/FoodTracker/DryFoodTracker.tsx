@@ -45,6 +45,9 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
       const result = await createDryFoodEntry(data);
       if (result) {
         setIsAddDialogOpen(false);
+        if (onDataChange) {
+          await onDataChange();
+        }
       }
       return result;
     }, foodErrorHandler);
@@ -62,7 +65,11 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
 
   const handleDeleteEntry = async (foodId: string): Promise<boolean> => {
     const result = await executeAction(async () => {
-      return await deleteDryFoodEntry(foodId);
+      const success = await deleteDryFoodEntry(foodId);
+      if (success && onDataChange) {
+        await onDataChange();
+      }
+      return success;
     }, foodErrorHandler);
     
     return result !== null;

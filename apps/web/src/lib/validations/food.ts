@@ -1,9 +1,7 @@
-// apps/web/src/lib/validations/food.ts
 import { z } from 'zod';
 
-// 🎯 SEPARATE VALIDATION SCHEMAS - NO UNIONS
 
-// Base validation for common fields
+// Base validation
 const baseFoodValidation = {
   brandName: z.string().trim().max(100, 'Brand name must be 100 characters or less').optional(),
   productName: z.string().trim().max(150, 'Product name must be 150 characters or less').optional(),
@@ -21,7 +19,7 @@ const baseFoodValidation = {
     }, 'Purchase date must be valid and not in the future'),
 };
 
-// 🎯 DRY FOOD VALIDATION
+// DRY FOOD VALIDATION
 export const dryFoodSchema = z.object({
   ...baseFoodValidation,
   bagWeight: z.string()
@@ -77,7 +75,7 @@ export const dryFoodSchema = z.object({
   }
 });
 
-// 🎯 WET FOOD VALIDATION
+// WET FOOD VALIDATION
 export const wetFoodSchema = z.object({
   ...baseFoodValidation,
   numberOfUnits: z.string()  // ✅ Expects string (from form)
@@ -127,7 +125,7 @@ export const wetFoodSchema = z.object({
   }
 });
 
-// 🎯 PARTIAL UPDATE SCHEMAS
+// PARTIAL UPDATE SCHEMAS
 export const updateDryFoodSchema = z.object({
   brandName: z.string().trim().max(100).optional(),
   productName: z.string().trim().max(150).optional(),
@@ -173,7 +171,7 @@ export const updateWetFoodSchema = z.object({
   }, 'Invalid date or date cannot be in the future').optional(),
 });
 
-// 🎯 HELPER FUNCTIONS
+// HELPER FUNCTIONS
 export function validateDryFoodData(data: unknown) {
   const result = dryFoodSchema.safeParse(data);
   if (!result.success) {
@@ -210,7 +208,7 @@ export function validateUpdateWetFoodData(data: unknown) {
   return result.data;
 }
 
-// 🎯 DATE HELPER
+// DATE HELPER
 export const formatDateForDisplay = (dateString: string): string => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', {

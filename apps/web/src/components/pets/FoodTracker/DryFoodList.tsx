@@ -131,7 +131,7 @@ export function DryFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
                 <div>
                   <p className="font-medium text-muted-foreground">Remaining</p>
                   <p className="text-lg font-semibold">
@@ -150,18 +150,29 @@ export function DryFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
                     {formatDateForDisplay(entry.depletionDate)}
                   </p>
                 </div>
-                <div>
-                  <p className="font-medium text-muted-foreground">Progress</p>
-                  <div className="mt-1">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full" 
-                        style={{ 
-                          width: `${Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100))}%` 
-                        }}
-                      />
-                    </div>
-                  </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <p className="font-medium text-muted-foreground text-sm">Progress</p>
+                  <p className="text-sm text-muted-foreground">
+                    {Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)).toFixed(1)}% remaining
+                  </p>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 50 
+                        ? 'bg-green-600' 
+                        : Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 25 
+                        ? 'bg-yellow-600' 
+                        : 'bg-red-600'
+                    }`}
+                    style={{ 
+                      width: `${Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100))}%` 
+                    }}
+                  />
                 </div>
               </div>
             </CardContent>

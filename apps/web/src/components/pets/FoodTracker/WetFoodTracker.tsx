@@ -46,6 +46,9 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
       const result = await createWetFoodEntry(data);
       if (result) {
         setIsAddDialogOpen(false);
+        if (onDataChange) {
+          await onDataChange();
+        }
       }
       return result;
     }, foodErrorHandler);
@@ -63,7 +66,11 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
 
   const handleDeleteEntry = async (foodId: string): Promise<boolean> => {
     const result = await executeAction(async () => {
-      return await deleteWetFoodEntry(foodId);
+      const success = await deleteWetFoodEntry(foodId);
+      if (success && onDataChange) {
+        await onDataChange();
+      }
+      return success;
     }, foodErrorHandler);
     
     return result !== null;

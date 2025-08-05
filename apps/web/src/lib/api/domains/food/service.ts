@@ -1,4 +1,3 @@
-// apps/web/src/lib/api/domains/food/service.ts
 import type { FoodRepository } from './repository';
 import type { 
   DryFoodEntry, 

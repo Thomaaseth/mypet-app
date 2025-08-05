@@ -38,46 +38,66 @@ export function FoodTrackerSkeleton() {
             ))}
           </div>
           
-          {/* Food List Skeleton */}
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <Card key={i} className="bg-muted/20">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-5 w-16" />
-                        <Skeleton className="h-5 w-20" />
+        {/* Food List Skeleton */}
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <Card key={i} className="bg-muted/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-6 w-48" /> {/* Title */}
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Skeleton className="h-4 w-4" /> {/* Icon */}
+                        <Skeleton className="h-4 w-16" /> {/* Weight/Units */}
                       </div>
-                      <Skeleton className="h-6 w-48" />
-                    </div>
-                    <div className="flex gap-2">
-                      <Skeleton className="h-8 w-8" />
-                      <Skeleton className="h-8 w-8" />
+                      <div className="flex items-center gap-1">
+                        <Skeleton className="h-4 w-4" /> {/* Icon */}
+                        <Skeleton className="h-4 w-20" /> {/* Daily amount */}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Skeleton className="h-4 w-4" /> {/* Icon */}
+                        <Skeleton className="h-4 w-24" /> {/* Date */}
+                      </div>
                     </div>
                   </div>
-                </CardHeader>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Skeleton className="h-6 w-16" /> {/* Status badge */}
+                    <Skeleton className="h-8 w-8" /> {/* Edit button */}
+                    <Skeleton className="h-8 w-8" /> {/* Delete button */}
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-16" /> {/* Label */}
+                    <Skeleton className="h-6 w-20" /> {/* Value */}
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-16" /> {/* Label */}
+                    <Skeleton className="h-6 w-8" /> {/* Value */}
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-20" /> {/* Label */}
+                    <Skeleton className="h-6 w-24" /> {/* Value */}
+                  </div>
+                </div>
                 
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map((j) => (
-                      <div key={j} className="space-y-2">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-5 w-16" />
-                      </div>
-                    ))}
+                {/* Progress Bar Section */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-4 w-12" /> {/* Progress label */}
+                    <Skeleton className="h-4 w-20" /> {/* Percentage */}
                   </div>
-                  
-                  <div className="mt-3 pt-3 border-t border-border/50">
-                    <div className="flex items-center justify-between">
-                      <Skeleton className="h-3 w-32" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <Skeleton className="h-2 w-full rounded-full" /> {/* Progress bar */}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
         </div>
       </CardContent>
     </Card>
