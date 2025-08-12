@@ -1,10 +1,11 @@
 import { FoodService } from './service';
 import { foodRepository } from './repository';
+import { foodValidator } from './validator';
 import type { DryFoodFormData, WetFoodFormData } from '@/types/food';
 
-const foodService = new FoodService(foodRepository);
+const foodService = new FoodService(foodRepository, foodValidator);
 
-// Clean, separate API exports
+// API exports
 export const dryFoodApi = {
   getDryFoodEntries: (petId: string) => foodService.getDryFoodEntries(petId),
   createDryFoodEntry: (petId: string, foodData: DryFoodFormData) => 
@@ -41,4 +42,5 @@ export type {
 } from '@/types/food';
 
 export { FoodRepository } from './repository';
+export { FoodValidator } from './validator';
 export { FoodService } from './service';

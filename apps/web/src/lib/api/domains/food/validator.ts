@@ -1,39 +1,69 @@
-import { createFoodSchema, updateFoodSchema } from '@/lib/validations/food';
-import type { FoodFormData } from '@/types/food';
+import { validateDryFoodData, validateWetFoodData, validateUpdateDryFoodData, validateUpdateWetFoodData } from '@/lib/validations/food';
+import type { DryFoodFormData, WetFoodFormData } from '@/types/food';
+import { ValidationError } from '../../errors';
 
 export class FoodValidator {
-  validateCreateFood(data: unknown): FoodFormData {
-    const result = createFoodSchema.safeParse(data);
-    
-    if (!result.success) {
-      const errorMessage = result.error.errors.map(err => err.message).join(', ');
-      throw new Error(`Validation failed: ${errorMessage}`);
+  validateDryFoodData(data: unknown): DryFoodFormData {
+    try {
+      return validateDryFoodData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ValidationError(error.message, 'validation');
+      }
+      throw new ValidationError('Dry food validation failed', 'validation');
     }
-    
-    return result.data;
   }
 
-  validateUpdateFood(data: unknown): Partial<FoodFormData> {
-    const result = updateFoodSchema.safeParse(data);
-    
-    if (!result.success) {
-      const errorMessage = result.error.errors.map(err => err.message).join(', ');
-      throw new Error(`Validation failed: ${errorMessage}`);
+  validateWetFoodData(data: unknown): WetFoodFormData {
+    try {
+      return validateWetFoodData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ValidationError(error.message, 'validation');
+      }
+      throw new ValidationError('Wet food validation failed', 'validation');
     }
-    
-    return result.data;
+  }
+
+  validateUpdateDryFoodData(data: unknown): Partial<DryFoodFormData> {
+    try {
+      return validateUpdateDryFoodData(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ValidationError(error.message, 'validation');
+      }
+      throw new ValidationError('Dry food update validation failed', 'validation');
+    }
+  }
+
+  validateUpdateWetFoodData(data: unknown): Partial<WetFoodFormData> {
+    try {
+      const validated = validateUpdateWetFoodData(data);
+
+      return {
+        ...validated,
+        numberOfUnits: validated.numberOfUnits !== undefined 
+            ? String(validated.numberOfUnits) 
+            : undefined,
+        };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ValidationError(error.message, 'validation');
+      }
+      throw new ValidationError('Wet food update validation failed', 'validation');
+    }
   }
 
   validateFoodId(foodId: string): string {
     if (!foodId || typeof foodId !== 'string' || foodId.trim().length === 0) {
-      throw new Error('Valid food ID is required');
+      throw new ValidationError('Valid food ID is required', 'foodId');
     }
     return foodId.trim();
   }
 
   validatePetId(petId: string): string {
     if (!petId || typeof petId !== 'string' || petId.trim().length === 0) {
-      throw new Error('Valid pet ID is required');
+      throw new ValidationError('Valid pet ID is required', 'petId');
     }
     return petId.trim();
   }
