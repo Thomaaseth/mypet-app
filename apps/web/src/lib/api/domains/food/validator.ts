@@ -38,14 +38,7 @@ export class FoodValidator {
 
   validateUpdateWetFoodData(data: unknown): Partial<WetFoodFormData> {
     try {
-      const validated = validateUpdateWetFoodData(data);
-
-      return {
-        ...validated,
-        numberOfUnits: validated.numberOfUnits !== undefined 
-            ? String(validated.numberOfUnits) 
-            : undefined,
-        };
+      return validateUpdateWetFoodData(data);
     } catch (error) {
       if (error instanceof Error) {
         throw new ValidationError(error.message, 'validation');

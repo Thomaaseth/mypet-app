@@ -151,7 +151,13 @@ export const updateDryFoodSchema = z.object({
 export const updateWetFoodSchema = z.object({
   brandName: z.string().trim().max(100).optional(),
   productName: z.string().trim().max(150).optional(),
-  numberOfUnits: z.number().int().positive().optional(),
+  numberOfUnits: z.string()
+    .min(1, 'Number of units is required')
+    .refine((val) => {
+      const num = parseInt(val, 10);
+      return !isNaN(num) && Number.isInteger(num) && num > 0;
+    }, 'Number of units must be a positive whole number')
+    .optional(),
   weightPerUnit: z.string().refine(val => {
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
