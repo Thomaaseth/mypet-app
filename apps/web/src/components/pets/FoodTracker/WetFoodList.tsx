@@ -1,4 +1,3 @@
-// apps/web/src/components/pets/FoodTracker/WetFoodList.tsx
 'use client';
 
 import { useState } from 'react';
@@ -26,21 +25,23 @@ import { Edit, Trash2, Calendar, Package, Utensils } from 'lucide-react';
 import { WetFoodForm } from './WetFoodForm';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
+import { FoodHistorySection } from './FoodHistorySection';
 
 interface WetFoodListProps {
   entries: WetFoodEntry[];
+  finishedEntries: WetFoodEntry[];
   onUpdate: (foodId: string, data: Partial<WetFoodFormData>) => Promise<WetFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   isLoading?: boolean;
 }
-export function WetFoodList({ entries, onUpdate, onDelete, isLoading = false }: WetFoodListProps) {
+export function WetFoodList({ entries, finishedEntries, onUpdate, onDelete, isLoading = false }: WetFoodListProps) {
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
 
- const handleUpdate = async (data: WetFoodFormData) => { // ✅ Receive WetFoodFormData (strings)
+ const handleUpdate = async (data: WetFoodFormData) => { // Receive WetFoodFormData (strings)
   if (!editingEntry) return null;
    
-  const result = await onUpdate(editingEntry.id, data); // ✅ Pass strings directly
+  const result = await onUpdate(editingEntry.id, data); // Pass strings directly
   if (result) {
     setEditingEntry(null);
   }
@@ -199,6 +200,14 @@ export function WetFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
          );
        })}
      </div>
+
+    {/* History section */}
+      {finishedEntries.length > 0 && (
+        <FoodHistorySection 
+          entries={finishedEntries}
+          foodType="wet"
+        />
+    )}
 
      {/* Edit Dialog */}
      <Dialog open={!!editingEntry} onOpenChange={() => setEditingEntry(null)}>

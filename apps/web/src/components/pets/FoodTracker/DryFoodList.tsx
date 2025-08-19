@@ -1,4 +1,3 @@
-// apps/web/src/components/pets/FoodTracker/DryFoodList.tsx
 'use client';
 
 import { useState } from 'react';
@@ -26,15 +25,17 @@ import { Edit, Trash2, Calendar, Weight, Utensils } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
+import { FoodHistorySection } from './FoodHistorySection';
 
 interface DryFoodListProps {
   entries: DryFoodEntry[];
+  finishedEntries: DryFoodEntry[];
   onUpdate: (foodId: string, data: Partial<DryFoodFormData>) => Promise<DryFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   isLoading?: boolean;
 }
 
-export function DryFoodList({ entries, onUpdate, onDelete, isLoading = false }: DryFoodListProps) {
+export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLoading = false }: DryFoodListProps) {
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
 
@@ -151,7 +152,7 @@ export function DryFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
                   </p>
                 </div>
               </div>
-              
+
               {/* Progress Bar */}
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -179,6 +180,14 @@ export function DryFoodList({ entries, onUpdate, onDelete, isLoading = false }: 
           </Card>
         ))}
       </div>
+
+      {/* History section */}
+      {finishedEntries.length > 0 && (
+        <FoodHistorySection 
+          entries={finishedEntries}
+            foodType="dry"
+            />
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={!!editingEntry} onOpenChange={() => setEditingEntry(null)}>

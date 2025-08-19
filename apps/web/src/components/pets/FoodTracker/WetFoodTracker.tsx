@@ -32,7 +32,9 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const {
-    wetFoodEntries,
+    // wetFoodEntries,
+    activeWetFoodEntries,
+    finishedWetFoodEntries,
     lowStockWetFoodEntries,
     isLoading,
     error,
@@ -127,7 +129,8 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
 
       {/* Food List */}
       <WetFoodList
-        entries={wetFoodEntries}
+        entries={activeWetFoodEntries}
+        finishedEntries={finishedWetFoodEntries}
         onUpdate={handleUpdateEntry}
         onDelete={handleDeleteEntry}
         isLoading={isActionLoading}

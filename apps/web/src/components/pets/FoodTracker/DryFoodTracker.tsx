@@ -31,7 +31,9 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const {
-    dryFoodEntries,
+    // dryFoodEntries,
+    activeDryFoodEntries,
+    finishedDryFoodEntries,
     lowStockDryFoodEntries,
     isLoading,
     error,
@@ -126,7 +128,8 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
 
       {/* Food List */}
       <DryFoodList
-        entries={dryFoodEntries}
+        entries={activeDryFoodEntries}
+        finishedEntries={finishedDryFoodEntries}
         onUpdate={handleUpdateEntry}
         onDelete={handleDeleteEntry}
         isLoading={isActionLoading}

@@ -83,13 +83,15 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     fetchWetFoodEntries();
   }, [fetchWetFoodEntries]);
 
-  const activeWetFoodEntries = wetFoodEntries.filter(entry => entry.isActive && entry.remainingDays > 0);
+  const activeWetFoodEntries = wetFoodEntries.filter(entry => entry.isActive);
   const lowStockWetFoodEntries = activeWetFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);
+  const finishedWetFoodEntries = wetFoodEntries.filter(entry => !entry.isActive);
 
   return {
     wetFoodEntries: wetFoodEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     activeWetFoodEntries,
     lowStockWetFoodEntries,
+    finishedWetFoodEntries,
     isLoading,
     error,
     createWetFoodEntry,

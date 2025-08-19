@@ -82,13 +82,15 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     fetchDryFoodEntries();
   }, [fetchDryFoodEntries]);
 
-  const activeDryFoodEntries = dryFoodEntries.filter(entry => entry.isActive && entry.remainingDays > 0);
+  const activeDryFoodEntries = dryFoodEntries.filter(entry => entry.isActive);
   const lowStockDryFoodEntries = activeDryFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);
+  const finishedDryFoodEntries = dryFoodEntries.filter(entry => !entry.isActive);
 
   return {
     dryFoodEntries: dryFoodEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     activeDryFoodEntries,
     lowStockDryFoodEntries,
+    finishedDryFoodEntries,
     isLoading,
     error,
     createDryFoodEntry,

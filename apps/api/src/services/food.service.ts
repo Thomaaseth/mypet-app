@@ -104,7 +104,14 @@ export class FoodService {
         ))
         .orderBy(desc(foodEntries.createdAt));
 
-      return result as DryFoodEntry[];
+      // Process each entry to update isActive
+      const processedEntries = await Promise.all(
+        result.map(async (entry) => {
+          const entryWithCalculations = entry as DryFoodEntry;
+          return await this.updateFoodActiveStatus(entryWithCalculations) as DryFoodEntry;
+        })
+      )
+      return processedEntries;
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -243,7 +250,14 @@ export class FoodService {
         ))
         .orderBy(desc(foodEntries.createdAt));
 
-      return result as WetFoodEntry[];
+      // Process each entry to update isActive status and add calculations
+      const processedEntries = await Promise.all(
+        result.map(async (entry) => {
+          const entryWithCalculations = entry as WetFoodEntry;
+          return await this.updateFoodActiveStatus(entryWithCalculations) as WetFoodEntry;
+        })
+      );
+      return processedEntries;
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -391,7 +405,103 @@ export class FoodService {
     }
   }
 
-  // CALCULATION METHODS
+static async getFinishedFoodEntries(petId: string, userId: string, foodType?: 'dry' | 'wet'): Promise<(DryFoodEntry | WetFoodEntry)[]> {
+    try {
+      await this.verifyPetOwnership(petId, userId);
+
+      const whereConditions = [
+        eq(foodEntries.petId, petId),
+        eq(foodEntries.isActive, false) // Only finished entries
+      ];
+
+      if (foodType) {
+        whereConditions.push(eq(foodEntries.foodType, foodType));
+      }
+
+      const result = await db
+        .select()
+        .from(foodEntries)
+        .where(and(...whereConditions))
+        .orderBy(desc(foodEntries.updatedAt)) // Most recently finished first
+        .limit(5); // Only get last 5 finished items
+
+      return result as (DryFoodEntry | WetFoodEntry)[];
+    } catch (error) {
+      console.error('Error fetching finished food entries:', error);
+      throw new BadRequestError('Failed to fetch finished food entries');
+    }
+  }
+
+private static async cleanupFinishedEntries(petId: string, foodType: 'dry' | 'wet'): Promise<void> {
+  try {
+    console.log(`Starting cleanup for ${foodType} food entries for pet ${petId}`);
+
+    // Get all finished entries for this pet and food type, ordered by updatedAt
+    const finishedEntries = await db
+      .select()
+      .from(foodEntries)
+      .where(and(
+        eq(foodEntries.petId, petId),
+        eq(foodEntries.foodType, foodType),
+        eq(foodEntries.isActive, false) // Finished items have isActive: false
+      ))
+      .orderBy(desc(foodEntries.updatedAt));
+
+    // If more than 5 finished entries, delete the oldest ones
+    if (finishedEntries.length > 5) {
+      const entriesToDelete = finishedEntries.slice(5); // Keep first 5, delete rest
+      
+      for (const entry of entriesToDelete) {
+        await db
+          .delete(foodEntries)
+          .where(eq(foodEntries.id, entry.id));
+      }
+      
+      console.log(`Cleaned up ${entriesToDelete.length} old finished ${foodType} food entries for pet ${petId}`);
+    } else {
+      console.log(`No cleanup needed - only ${finishedEntries.length} finished ${foodType} entries for pet ${petId}`);
+    }
+  } catch (error) {
+    console.error('Error cleaning up finished entries:', error);
+  }
+}
+
+private static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
+    let calculations;
+    
+    if (entry.foodType === 'dry') {
+      calculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
+    } else {
+      calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
+    }
+
+    // If food is finished but still marked as active, update it
+    if (calculations.remainingDays <= 0 && entry.isActive) {
+      const [updatedEntry] = await db
+        .update(foodEntries)
+        .set({ 
+          isActive: false,
+          updatedAt: new Date()
+        })
+        .where(eq(foodEntries.id, entry.id))
+        .returning();
+
+      console.log(`Marked ${entry.foodType} food entry ${entry.id} as finished`);
+      
+      // Trigger cleanup after marking as inactive
+      this.cleanupFinishedEntries(entry.petId, entry.foodType).catch(error => {
+        console.error(`Cleanup failed for ${entry.foodType} food:`, error);
+      });
+
+      return { 
+        ...updatedEntry, 
+        ...calculations 
+      } as DryFoodEntry | WetFoodEntry;
+    }
+    return { ...entry, ...calculations };
+  }
+
+// CALCULATION METHODS
 static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
   const today = new Date();
   const purchaseDate = new Date(entry.datePurchased);
@@ -459,8 +569,6 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
     dailyAmountInGrams = dailyAmountInGrams * 28.3495; // oz to grams
   }
   
-  console.log('🐛 After conversion:', dailyAmountInGrams);
-
   const foodConsumedInGrams = Math.max(0, daysSincePurchase * dailyAmountInGrams);
   const remainingWeightInGrams = Math.max(0, totalWeightInGrams - foodConsumedInGrams);
   
@@ -609,4 +717,5 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
       }
     }
   }
+
 }
