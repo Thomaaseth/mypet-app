@@ -34,7 +34,10 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
   const createDryFoodEntry = useCallback(async (foodData: DryFoodFormData): Promise<DryFoodEntry | null> => {
     try {
       const newEntry = await dryFoodApi.createDryFoodEntry(petId, foodData);
-      setDryFoodEntries(prev => [newEntry, ...prev]);
+      
+      await fetchDryFoodEntries();
+
+      // setDryFoodEntries(prev => [newEntry, ...prev]);
       toastService.success('Dry food entry added successfully');
       return newEntry;
     } catch (err) {
@@ -43,7 +46,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
       console.error('Failed to create dry food entry:', err);
       return null;
     }
-  }, [petId]);
+  }, [petId, fetchDryFoodEntries]);
 
   const updateDryFoodEntry = useCallback(async (
     foodId: string, 

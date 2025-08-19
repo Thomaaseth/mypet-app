@@ -35,7 +35,9 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
 const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promise<WetFoodEntry | null> => {
     try {
       const newEntry = await wetFoodApi.createWetFoodEntry(petId, foodData);
-      setWetFoodEntries(prev => [newEntry, ...prev]);
+      await fetchWetFoodEntries();
+
+      // setWetFoodEntries(prev => [newEntry, ...prev]);
       toastService.success('Wet food entry added successfully');
       return newEntry;
     } catch (err) {
@@ -44,7 +46,7 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
       console.error('Failed to create wet food entry:', err);
       return null;
     }
-  }, [petId]);
+  }, [petId, fetchWetFoodEntries]);
 
   const updateWetFoodEntry = useCallback(async (
     foodId: string, 

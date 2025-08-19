@@ -100,7 +100,7 @@ export class FoodService {
         .where(and(
           eq(foodEntries.petId, petId),
           eq(foodEntries.foodType, 'dry'),
-          eq(foodEntries.isActive, true)
+          // eq(foodEntries.isActive, true)
         ))
         .orderBy(desc(foodEntries.createdAt));
 
@@ -246,7 +246,7 @@ export class FoodService {
         .where(and(
           eq(foodEntries.petId, petId),
           eq(foodEntries.foodType, 'wet'),
-          eq(foodEntries.isActive, true)
+          // eq(foodEntries.isActive, true)
         ))
         .orderBy(desc(foodEntries.createdAt));
 
@@ -381,7 +381,6 @@ export class FoodService {
         .where(and(
           eq(foodEntries.id, foodId),
           eq(foodEntries.petId, petId),
-          eq(foodEntries.isActive, true)
         ));
 
       if (!entry) {
@@ -389,12 +388,11 @@ export class FoodService {
       }
 
       await db
-        .update(foodEntries)
-        .set({ 
-          isActive: false, 
-          updatedAt: new Date() 
-        })
+        .delete(foodEntries)
         .where(eq(foodEntries.id, foodId));
+
+        console.log(`Permanently deleted ${entry.foodType} food entry ${foodId}`);
+
 
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
@@ -535,20 +533,30 @@ static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; 
   
   const remainingDays = dailyAmountInGrams > 0 ? Math.floor(remainingWeightInGrams / dailyAmountInGrams) : 0;
   
-  const depletionDate = new Date();
-  depletionDate.setDate(depletionDate.getDate() + remainingDays);
+  // Calculate depletion date for both active and finished items
+  let depletionDate: Date;
+  if (remainingDays > 0) {
+    // Active item: today + remaining days
+    depletionDate = new Date();
+    depletionDate.setDate(depletionDate.getDate() + remainingDays);
+  } else {
+    // Finished item: purchase date + total consumption days
+    const totalConsumptionDays = dailyAmountInGrams > 0 ? Math.ceil(bagWeightInGrams / dailyAmountInGrams) : 0;
+    depletionDate = new Date(purchaseDate);
+    depletionDate.setDate(depletionDate.getDate() + totalConsumptionDays);
+  }
   
   return { remainingDays, depletionDate, remainingWeight };
 }
 
 static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
-    console.log('WET FOOD DEBUG:', {
-    dailyAmount: entry.dailyAmount,
-    wetDailyAmountUnit: entry.wetDailyAmountUnit,
-    numberOfUnits: entry.numberOfUnits,
-    weightPerUnit: entry.weightPerUnit,
-    wetWeightUnit: entry.wetWeightUnit
-  });
+  //   console.log('WET FOOD DEBUG:', {
+  //   dailyAmount: entry.dailyAmount,
+  //   wetDailyAmountUnit: entry.wetDailyAmountUnit,
+  //   numberOfUnits: entry.numberOfUnits,
+  //   weightPerUnit: entry.weightPerUnit,
+  //   wetWeightUnit: entry.wetWeightUnit
+  // });
   
   const today = new Date();
   const purchaseDate = new Date(entry.datePurchased);
@@ -563,7 +571,6 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
   
   // Convert daily amount to grams for calculation
   let dailyAmountInGrams = parseFloat(entry.dailyAmount);
-  console.log('🐛 Before conversion:', dailyAmountInGrams, entry.wetDailyAmountUnit);
 
   if (entry.wetDailyAmountUnit === 'oz') {
     dailyAmountInGrams = dailyAmountInGrams * 28.3495; // oz to grams
@@ -580,8 +587,18 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
   
   const remainingDays = dailyAmountInGrams > 0 ? Math.floor(remainingWeightInGrams / dailyAmountInGrams) : 0;
   
-  const depletionDate = new Date();
-  depletionDate.setDate(depletionDate.getDate() + remainingDays);
+  // Calculate depletion date correctly for both active and finished items
+  let depletionDate: Date;
+  if (remainingDays > 0) {
+    // Active item: today + remaining days
+    depletionDate = new Date();
+    depletionDate.setDate(depletionDate.getDate() + remainingDays);
+  } else {
+    // Finished item: purchase date + total consumption days
+    const totalConsumptionDays = dailyAmountInGrams > 0 ? Math.ceil(totalWeightInGrams / dailyAmountInGrams) : 0;
+    depletionDate = new Date(purchaseDate);
+    depletionDate.setDate(depletionDate.getDate() + totalConsumptionDays);
+  }
   
   return { remainingDays, depletionDate, remainingWeight };
 }

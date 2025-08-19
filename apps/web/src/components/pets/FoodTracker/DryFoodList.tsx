@@ -68,7 +68,10 @@ export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLo
     }
   };
 
-  if (entries.length === 0) {
+  const activeEntries = entries.filter(entry => entry.isActive);
+
+
+  if (activeEntries.length === 0 && finishedEntries.length === 0) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -84,109 +87,125 @@ export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLo
 
   return (
     <>
-      <div className="grid gap-4">
-        {entries.map((entry) => (
-          <Card key={entry.id} className="relative">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">
-                    {entry.brandName && entry.productName 
-                      ? `${entry.brandName} - ${entry.productName}`
-                      : entry.brandName || entry.productName || 'Dry Food'}
-                  </CardTitle>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Weight className="h-4 w-4" />
-                      {entry.bagWeight} {entry.bagWeightUnit}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Utensils className="h-4 w-4" />
-                      {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      {formatDateForDisplay(entry.datePurchased)}
-                    </span>
+      {/* Active Entries Section */}
+      {activeEntries.length > 0 && (
+        <div className="grid gap-4">
+          {activeEntries.map((entry) => (
+            <Card key={entry.id} className="relative">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg">
+                      {entry.brandName && entry.productName 
+                        ? `${entry.brandName} - ${entry.productName}`
+                        : entry.brandName || entry.productName || 'Dry Food'}
+                    </CardTitle>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Weight className="h-4 w-4" />
+                        {entry.bagWeight} {entry.bagWeightUnit}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Utensils className="h-4 w-4" />
+                        {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {formatDateForDisplay(entry.datePurchased)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(entry)}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingEntry(entry)}
+                      disabled={isLoading}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeletingEntry(entry)}
+                      disabled={isLoading}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(entry)}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingEntry(entry)}
-                    disabled={isLoading}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDeletingEntry(entry)}
-                    disabled={isLoading}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                  <div>
+                    <p className="font-medium text-muted-foreground">Remaining</p>
+                    <p className="text-lg font-semibold">
+                      {entry.remainingWeight.toFixed(1)} {entry.bagWeightUnit}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-muted-foreground">Days Left</p>
+                    <p className="text-lg font-semibold">
+                      {entry.remainingDays > 0 ? entry.remainingDays : 0}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-muted-foreground">Depletion Date</p>
+                    <p className="text-lg font-semibold">
+                      {formatDateForDisplay(entry.depletionDate)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                
+                {/* Progress Bar */}
                 <div>
-                  <p className="font-medium text-muted-foreground">Remaining</p>
-                  <p className="text-lg font-semibold">
-                    {entry.remainingWeight.toFixed(1)} {entry.bagWeightUnit}
-                  </p>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="font-medium text-muted-foreground text-sm">Progress</p>
+                    <p className="text-sm text-muted-foreground">
+                      {Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)).toFixed(1)}% remaining
+                    </p>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 50 
+                          ? 'bg-green-600' 
+                          : Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 25 
+                          ? 'bg-yellow-600' 
+                          : 'bg-red-600'
+                      }`}
+                      style={{ 
+                        width: `${Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100))}%` 
+                      }}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-muted-foreground">Days Left</p>
-                  <p className="text-lg font-semibold">
-                    {entry.remainingDays > 0 ? entry.remainingDays : 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium text-muted-foreground">Depletion Date</p>
-                  <p className="text-lg font-semibold">
-                    {formatDateForDisplay(entry.depletionDate)}
-                  </p>
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-              {/* Progress Bar */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <p className="font-medium text-muted-foreground text-sm">Progress</p>
-                  <p className="text-sm text-muted-foreground">
-                    {Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)).toFixed(1)}% remaining
-                  </p>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 50 
-                        ? 'bg-green-600' 
-                        : Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 25 
-                        ? 'bg-yellow-600' 
-                        : 'bg-red-600'
-                    }`}
-                    style={{ 
-                      width: `${Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100))}%` 
-                    }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* No Active Entries Message (but show if there are finished entries) */}
+      {activeEntries.length === 0 && finishedEntries.length > 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center text-muted-foreground">
+              <Weight className="mx-auto h-8 w-8 mb-2 opacity-50" />
+              <p>No active dry food entries.</p>
+              <p className="text-sm">All current food has been finished.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* History section */}
+      {/* History Section - Always show if there are finished entries */}
       {finishedEntries.length > 0 && (
         <FoodHistorySection 
           entries={finishedEntries}
-            foodType="dry"
-            />
+          foodType="dry"
+        />
       )}
 
       {/* Edit Dialog */}

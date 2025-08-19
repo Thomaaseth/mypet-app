@@ -1,7 +1,6 @@
-// apps/web/src/types/food.ts
 export type FoodType = 'dry' | 'wet';
 
-// Separate, clean types - no union hell
+// Separate, clean types
 export type DryFoodEntry = {
   id: string;
   petId: string;

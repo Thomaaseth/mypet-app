@@ -62,7 +62,7 @@ export function FoodHistorySection({ entries, foodType, onReorder }: FoodHistory
                     ) : (
                       <span>📦 {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}</span>
                     )}
-                    <span>🗓️ Finished {formatDateForDisplay(entry.updatedAt)}</span>
+                    <span>🗓️ Finished {formatDateForDisplay(entry.depletionDate)}</span>
                   </div>
                 </div>
                 
