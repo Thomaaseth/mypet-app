@@ -69,20 +69,8 @@ export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLo
   };
 
   const activeEntries = entries.filter(entry => entry.isActive);
-
-
   if (activeEntries.length === 0 && finishedEntries.length === 0) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">
-            <Weight className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <p>No dry food entries yet.</p>
-            <p className="text-sm">Add your first bag of dry food to start tracking!</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
@@ -185,19 +173,6 @@ export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLo
             </Card>
           ))}
         </div>
-      )}
-
-      {/* No Active Entries Message (but show if there are finished entries) */}
-      {activeEntries.length === 0 && finishedEntries.length > 0 && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center text-muted-foreground">
-              <Weight className="mx-auto h-8 w-8 mb-2 opacity-50" />
-              <p>No active dry food entries.</p>
-              <p className="text-sm">All current food has been finished.</p>
-            </div>
-          </CardContent>
-        </Card>
       )}
 
       {/* History Section - Always show if there are finished entries */}

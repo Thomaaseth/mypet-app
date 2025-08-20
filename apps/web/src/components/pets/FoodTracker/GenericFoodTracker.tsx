@@ -144,10 +144,13 @@ export function GenericFoodTracker<TEntry, TFormData>({
     );
   }
 
-  // Empty state - no ACTIVE entries (but may have finished ones)
+  // Empty state logic - show enhanced CTA when no active entries, but still render list for history
   const hasActiveEntries = activeFoodEntries.length > 0;
+  const hasFinishedEntries = finishedFoodEntries.length > 0;
+  const hasAnyEntries = hasActiveEntries || hasFinishedEntries;
   
-  if (!hasActiveEntries) {
+  // Show enhanced empty state only if NO entries at all
+  if (!hasAnyEntries) {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -265,7 +268,57 @@ export function GenericFoodTracker<TEntry, TFormData>({
         </Alert>
       )}
 
-      {/* Food List - Pass individual action loading state */}
+      {/* Enhanced Empty State for No Active Entries (but may have finished entries) */}
+      {!hasActiveEntries && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
+              <p className="text-muted-foreground mb-4 text-sm">
+                {hasFinishedEntries 
+                  ? `All current ${foodType} food has been finished. Add new ${foodType} food to continue tracking.`
+                  : labels.emptyDescription
+                }
+              </p>
+              
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="min-w-[140px]">
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        {hasFinishedEntries ? `Add New ${foodType === 'dry' ? 'Bag' : 'Cans'}` : labels.emptyButtonText}
+                      </>
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>{labels.dialogTitle}</DialogTitle>
+                    <DialogDescription>
+                      {labels.dialogDescription}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <FormComponent
+                    onSubmit={handleCreateEntry}
+                    isLoading={isCreating}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Food List - Always render for history when there are finished entries */}
       <ListComponent
         entries={activeFoodEntries}
         finishedEntries={finishedFoodEntries}
