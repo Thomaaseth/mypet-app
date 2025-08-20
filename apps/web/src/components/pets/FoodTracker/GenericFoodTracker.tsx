@@ -11,11 +11,14 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, AlertCircle } from 'lucide-react';
+import { Plus, AlertCircle, UtensilsCrossed, Loader2 } from 'lucide-react';
 import { useErrorState } from '@/hooks/useErrorsState';
-import { FoodTrackerSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
+import { FoodEntriesSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
 
+// Generic hook interface that both food trackers must conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
   activeFoodEntries: TEntry[];
   finishedFoodEntries: TEntry[];
@@ -29,12 +32,13 @@ interface GenericFoodHookReturn<TEntry, TFormData> {
 
 // Generic props interface
 interface GenericFoodTrackerProps<TEntry, TFormData> {
-  petId: string;
   foodType: 'dry' | 'wet';
   onDataChange?: () => Promise<void>;
   
+  // Hook and data dependencies (injected by specific tracker)
   hookResult: GenericFoodHookReturn<TEntry, TFormData>;
   
+  // Component dependencies (injected by specific tracker)
   FormComponent: React.ComponentType<{
     onSubmit: (data: TFormData) => Promise<TEntry | null>;
     isLoading?: boolean;
@@ -47,6 +51,7 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
     isLoading?: boolean;
   }>;
   
+  // Labels and text (injected by specific tracker)
   labels: {
     addButton: string;
     dialogTitle: string;
@@ -54,6 +59,9 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
     entriesTitle: string;
     alertSingular: string;
     alertPlural: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    emptyButtonText: string;
   };
 }
 
@@ -67,6 +75,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
 }: GenericFoodTrackerProps<TEntry, TFormData>) {
   const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const {
     activeFoodEntries,
@@ -80,7 +89,8 @@ export function GenericFoodTracker<TEntry, TFormData>({
   } = hookResult;
 
   const handleCreateEntry = async (data: TFormData) => {
-    return executeAction(async () => {
+    setIsCreating(true);
+    const result = await executeAction(async () => {
       const result = await createFoodEntry(data);
       if (result) {
         setIsAddDialogOpen(false);
@@ -90,6 +100,8 @@ export function GenericFoodTracker<TEntry, TFormData>({
       }
       return result;
     }, foodErrorHandler);
+    setIsCreating(false);
+    return result;
   };
 
   const handleUpdateEntry = async (foodId: string, data: Partial<TFormData>) => {
@@ -114,10 +126,91 @@ export function GenericFoodTracker<TEntry, TFormData>({
     return result !== null;
   };
 
+  // Initial loading state - show appropriate skeleton based on what we expect
   if (isLoading) {
-    return <FoodTrackerSkeleton />;
+    // During loading, we can't know the final count, but we can make it smarter
+    // Show a skeleton that matches the most common case (1 entry) rather than assuming 2
+    return (
+      <div className="space-y-6">
+        {/* Header with Add Button */}
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-7 w-40" /> {/* Title */}
+          <Skeleton className="h-10 w-32" /> {/* Add Button */}
+        </div>
+
+        {/* Show skeleton for 1 entry (most common case) */}
+        <FoodEntriesSkeleton count={1} />
+      </div>
+    );
   }
 
+  // Empty state - no ACTIVE entries (but may have finished ones)
+  const hasActiveEntries = activeFoodEntries.length > 0;
+  
+  if (!hasActiveEntries) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Enhanced Empty State - Match food entry card size */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
+              <p className="text-muted-foreground mb-4 text-sm">
+                {labels.emptyDescription}
+              </p>
+              
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="min-w-[140px]">
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        {labels.emptyButtonText}
+                      </>
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>{labels.dialogTitle}</DialogTitle>
+                    <DialogDescription>
+                      {labels.dialogDescription}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <FormComponent
+                    onSubmit={handleCreateEntry}
+                    isLoading={isCreating}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Normal state with entries
   return (
     <div className="space-y-6">
       {/* Low Stock Alert */}
@@ -130,14 +223,23 @@ export function GenericFoodTracker<TEntry, TFormData>({
         </Alert>
       )}
 
-      {/* Add New Entry */}
+      {/* Add New Entry Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              {labels.addButton}
+            <Button disabled={isCreating} className="min-w-[140px]">
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {labels.addButton}
+                </>
+              )}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
@@ -149,7 +251,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
             </DialogHeader>
             <FormComponent
               onSubmit={handleCreateEntry}
-              isLoading={isActionLoading}
+              isLoading={isCreating}
             />
           </DialogContent>
         </Dialog>
@@ -163,7 +265,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
         </Alert>
       )}
 
-      {/* Food List */}
+      {/* Food List - Pass individual action loading state */}
       <ListComponent
         entries={activeFoodEntries}
         finishedEntries={finishedFoodEntries}

@@ -6,3 +6,6 @@ export { DryFoodForm } from './DryFoodForm';
 export { WetFoodForm } from './WetFoodForm';
 export { DryFoodList } from './DryFoodList';
 export { WetFoodList } from './WetFoodList';
+
+// Re-export used skeletons only
+export { FoodTrackerSkeleton, FoodEntriesSkeleton } from '@/components/ui/skeletons/FoodSkeleton';

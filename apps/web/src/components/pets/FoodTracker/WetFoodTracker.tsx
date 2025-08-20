@@ -1,3 +1,5 @@
+'use client';
+
 import { useWetFoodTracker } from '@/hooks/useWetFoodTracker';
 import { WetFoodForm } from './WetFoodForm';
 import { WetFoodList } from './WetFoodList';
@@ -14,7 +16,6 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
 
   return (
     <GenericFoodTracker<WetFoodEntry, WetFoodFormData>
-      petId={petId}
       foodType="wet"
       onDataChange={onDataChange}
       hookResult={{
@@ -36,6 +37,9 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
         entriesTitle: 'Wet Food Entries',
         alertSingular: 'entry',
         alertPlural: 'entries',
+        emptyTitle: 'No wet food tracked yet',
+        emptyDescription: 'Start tracking your pet\'s wet food supply to monitor consumption and ensure fresh meals.',
+        emptyButtonText: 'Add First Cans',
       }}
     />
   );

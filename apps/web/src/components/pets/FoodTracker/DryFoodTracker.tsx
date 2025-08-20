@@ -16,7 +16,6 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
 
   return (
     <GenericFoodTracker<DryFoodEntry, DryFoodFormData>
-      petId={petId}
       foodType="dry"
       onDataChange={onDataChange}
       hookResult={{
@@ -38,6 +37,9 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
         entriesTitle: 'Dry Food Entries',
         alertSingular: 'entry',
         alertPlural: 'entries',
+        emptyTitle: 'No dry food tracked yet',
+        emptyDescription: 'Start tracking your pet\'s dry food supply to monitor consumption and never run out.',
+        emptyButtonText: 'Add First Bag',
       }}
     />
   );
