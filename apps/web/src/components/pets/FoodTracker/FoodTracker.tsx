@@ -1,4 +1,3 @@
-// apps/web/src/components/pets/FoodTracker/FoodTracker.tsx
 'use client';
 
 import { useState } from 'react';
