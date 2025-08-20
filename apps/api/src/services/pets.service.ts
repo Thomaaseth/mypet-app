@@ -1,4 +1,3 @@
-// apps/api/src/services/pets.service.ts
 import { db } from '../db';
 import { pets } from '../db/schema/pets';
 import { eq, and, desc } from 'drizzle-orm';

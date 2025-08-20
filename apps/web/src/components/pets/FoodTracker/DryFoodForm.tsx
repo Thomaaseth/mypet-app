@@ -73,7 +73,6 @@ export function DryFoodForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Brand Name */}
       <div className="space-y-2">
         <Label htmlFor="brandName">Brand Name (Optional)</Label>
         <Input
@@ -88,7 +87,6 @@ export function DryFoodForm({
         )}
       </div>
 
-      {/* Product Name */}
       <div className="space-y-2">
         <Label htmlFor="productName">Product Name (Optional)</Label>
         <Input
@@ -103,7 +101,6 @@ export function DryFoodForm({
         )}
       </div>
 
-      {/* Bag Weight */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="bagWeight">Bag Weight *</Label>
@@ -140,7 +137,6 @@ export function DryFoodForm({
         </div>
       </div>
 
-      {/* Daily Amount */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="dailyAmount">Daily Amount *</Label>
@@ -177,7 +173,6 @@ export function DryFoodForm({
         </div>
       </div>
 
-      {/* Date Purchased */}
       <div className="space-y-2">
         <Label htmlFor="datePurchased">Date Purchased *</Label>
         <Input
@@ -193,14 +188,12 @@ export function DryFoodForm({
         )}
       </div>
 
-      {/* General Errors */}
       {errors.general && (
         <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
           {errors.general}
         </div>
       )}
 
-      {/* Submit Button */}
       <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {submitLabel}

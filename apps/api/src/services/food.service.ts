@@ -1,4 +1,3 @@
-// apps/api/src/services/food.service.ts
 import { db } from '../db';
 import { foodEntries } from '../db/schema/food';
 import { pets } from '../db/schema/pets';
