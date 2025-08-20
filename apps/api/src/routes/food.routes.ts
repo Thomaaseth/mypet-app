@@ -1,4 +1,3 @@
-// apps/api/src/routes/food.routes.ts
 import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { FoodService } from '../services/food.service';
@@ -32,7 +31,7 @@ const router = Router();
 // Apply auth middleware to all food routes
 router.use(globalAuthHandler);
 
-// 🎯 DRY FOOD ROUTES
+// DRY FOOD ROUTES
 // GET /api/pets/:petId/food/dry - Get all dry food entries
 router.get('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -111,9 +110,10 @@ router.post('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response,
     }
 
     const newDryFoodEntry = await FoodService.createDryFoodEntry(petId, userId, dryFoodData);
+    const processedEntry = await FoodService.processEntryForResponse(newDryFoodEntry);
 
     const enrichedEntry = {
-      ...newDryFoodEntry,
+      ...processedEntry,
       ...FoodService.calculateDryFoodRemaining(newDryFoodEntry)
     };
 
@@ -155,7 +155,7 @@ router.put('/:petId/food/dry/:foodId', async (req: AuthenticatedRequest, res: Re
  }
 });
 
-// 🎯 WET FOOD ROUTES
+// WET FOOD ROUTES
 // GET /api/pets/:petId/food/wet - Get all wet food entries
 router.get('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
  try {
@@ -234,9 +234,10 @@ router.post('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response,
    }
 
    const newWetFoodEntry = await FoodService.createWetFoodEntry(petId, userId, wetFoodData);
+   const processedEntry = await FoodService.processEntryForResponse(newWetFoodEntry);
 
    const enrichedEntry = {
-     ...newWetFoodEntry,
+     ...processedEntry,
      ...FoodService.calculateWetFoodRemaining(newWetFoodEntry)
    };
 
@@ -278,7 +279,7 @@ router.put('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Re
  }
 });
 
-// 🎯 COMBINED ROUTES
+// COMBINED ROUTES
 // GET /api/pets/:petId/food - Get all food entries (both dry and wet)
 router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
  try {

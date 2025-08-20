@@ -39,6 +39,10 @@ type WetFoodFormData = {
 };
 
 export class FoodService {
+  private static ongoingCleanups = new Map<string, Promise<void>>();
+  static async processEntryForResponse(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
+    return await this.updateFoodActiveStatus(entry);
+}
   private static async verifyPetOwnership(petId: string, userId: string): Promise<void> {
     const [pet] = await db
       .select()
@@ -430,39 +434,66 @@ static async getFinishedFoodEntries(petId: string, userId: string, foodType?: 'd
     }
   }
 
-private static async cleanupFinishedEntries(petId: string, foodType: 'dry' | 'wet'): Promise<void> {
-  try {
-    console.log(`Starting cleanup for ${foodType} food entries for pet ${petId}`);
-
-    // Get all finished entries for this pet and food type, ordered by updatedAt
-    const finishedEntries = await db
-      .select()
-      .from(foodEntries)
-      .where(and(
-        eq(foodEntries.petId, petId),
-        eq(foodEntries.foodType, foodType),
-        eq(foodEntries.isActive, false) // Finished items have isActive: false
-      ))
-      .orderBy(desc(foodEntries.updatedAt));
-
-    // If more than 5 finished entries, delete the oldest ones
-    if (finishedEntries.length > 5) {
-      const entriesToDelete = finishedEntries.slice(5); // Keep first 5, delete rest
-      
-      for (const entry of entriesToDelete) {
-        await db
-          .delete(foodEntries)
-          .where(eq(foodEntries.id, entry.id));
-      }
-      
-      console.log(`Cleaned up ${entriesToDelete.length} old finished ${foodType} food entries for pet ${petId}`);
-    } else {
-      console.log(`No cleanup needed - only ${finishedEntries.length} finished ${foodType} entries for pet ${petId}`);
+ private static async cleanupFinishedEntries(petId: string, foodType: 'dry' | 'wet'): Promise<void> {
+    const cleanupKey = `${petId}-${foodType}`;
+    
+    // If cleanup is already running for this pet/foodType, wait for it
+    if (this.ongoingCleanups.has(cleanupKey)) {
+      console.log(`Cleanup already running for ${foodType} food for pet ${petId}, waiting...`);
+      await this.ongoingCleanups.get(cleanupKey);
+      return;
     }
-  } catch (error) {
-    console.error('Error cleaning up finished entries:', error);
+
+    // Start new cleanup
+    const cleanupPromise = this.performCleanup(petId, foodType);
+    this.ongoingCleanups.set(cleanupKey, cleanupPromise);
+
+    try {
+      await cleanupPromise;
+    } finally {
+      // Remove from ongoing cleanups when done
+      this.ongoingCleanups.delete(cleanupKey);
+    }
   }
-}
+
+  private static async performCleanup(petId: string, foodType: 'dry' | 'wet'): Promise<void> {
+    try {
+      console.log(`Starting cleanup for ${foodType} food entries for pet ${petId}`);
+
+      // Get all finished entries for this pet and food type, ordered by updatedAt
+      const finishedEntries = await db
+        .select()
+        .from(foodEntries)
+        .where(and(
+          eq(foodEntries.petId, petId),
+          eq(foodEntries.foodType, foodType),
+          eq(foodEntries.isActive, false) // Finished items have isActive: false
+        ))
+        .orderBy(desc(foodEntries.updatedAt));
+
+      console.log(`Found ${finishedEntries.length} finished ${foodType} entries`);
+
+      // If more than 5 finished entries, delete the oldest ones
+      if (finishedEntries.length > 5) {
+        const entriesToDelete = finishedEntries.slice(5); // Keep first 5, delete rest
+        
+        console.log(`Will delete ${entriesToDelete.length} entries:`, entriesToDelete.map(e => e.id));
+        
+        for (const entry of entriesToDelete) {
+          await db
+            .delete(foodEntries)
+            .where(eq(foodEntries.id, entry.id));
+        }
+        
+        console.log(`✅ Cleaned up ${entriesToDelete.length} old finished ${foodType} food entries for pet ${petId}`);
+      } else {
+        console.log(`No cleanup needed - only ${finishedEntries.length} finished ${foodType} entries for pet ${petId}`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up finished entries:', error);
+      throw error; // Re-throw to ensure failed cleanup is noticed
+    }
+  }
 
 private static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
     let calculations;
@@ -487,9 +518,12 @@ private static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry):
       console.log(`Marked ${entry.foodType} food entry ${entry.id} as finished`);
       
       // Trigger cleanup after marking as inactive
-      this.cleanupFinishedEntries(entry.petId, entry.foodType).catch(error => {
+      try {
+        await this.cleanupFinishedEntries(entry.petId, entry.foodType)
+      } catch (error) {
         console.error(`Cleanup failed for ${entry.foodType} food:`, error);
-      });
+      }
+    
 
       return { 
         ...updatedEntry, 
