@@ -1,4 +1,3 @@
-// apps/web/src/components/pets/FoodTracker/DryFoodForm.tsx
 'use client';
 
 import { useState } from 'react';
