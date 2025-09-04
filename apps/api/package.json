@@ -9,16 +9,23 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.3",
     "@types/pg": "^8.15.4",
+    "@types/supertest": "^6.0.3",
     "drizzle-kit": "^0.31.1",
     "nodemon": "^3.1.10",
-    "tsx": "^4.20.3"
+    "supertest": "^7.1.4",
+    "tsx": "^4.20.3",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "dev": "bun run db:migrate && bun run src/server.ts",
     "start": "bun run src/server.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "test:db:setup": "TEST_DATABASE_URL=postgresql://localhost:5432/pettr_test bun run db:migrate",
+    "test": "NODE_ENV=test DATABASE_URL=postgresql://localhost:5432/pettr_test BETTER_AUTH_SECRET=test-key RESEND_API_KEY=test-key vitest",
+    "test:ui": "NODE_ENV=test vitest --ui", 
+    "test:run": "NODE_ENV=test vitest run"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"

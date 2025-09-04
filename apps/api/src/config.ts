@@ -10,6 +10,31 @@ function envOrThrow(key: string): string {
     return value;
 }
 
+// Helper to get database URL with test support
+function getDatabaseUrl(): string {
+    const isTest = process.env.NODE_ENV === 'test';
+    
+    if (isTest) {
+        // In tests, allow TEST_DATABASE_URL or fallback to test database
+        return process.env.TEST_DATABASE_URL || 
+               process.env.DATABASE_URL?.replace('/pettr', '/pettr_test') ||
+               'postgresql://localhost:5432/pettr_test';
+    }
+    
+    // In non-test environments, DATABASE_URL is required
+    return envOrThrow("DATABASE_URL");
+}
+
+// Helper to get required env vars with test fallbacks
+function getRequiredEnv(key: string, testFallback?: string): string {
+    const isTest = process.env.NODE_ENV === 'test';
+    
+    if (isTest && testFallback) {
+        return process.env[key] || testFallback;
+    }
+    
+    return envOrThrow(key);
+}
 
 const envConfig = getConfig();
 
@@ -42,13 +67,13 @@ export const config: Config = {
         webUrl: envConfig.WEB_URL,
     },
     db: {
-        url: envOrThrow("DATABASE_URL"),
+        url: getDatabaseUrl(),
         migrationConfig: migrationConfig
     },
     auth: {
-        secret: envOrThrow("BETTER_AUTH_SECRET"),
+        secret: getRequiredEnv("BETTER_AUTH_SECRET", "test-secret-key"),
     },
     email: {
-        resendApiKey: envOrThrow("RESEND_API_KEY"),
+        resendApiKey: getRequiredEnv("RESEND_API_KEY", "test-resend-key"),
     }
 }
