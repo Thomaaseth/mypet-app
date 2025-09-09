@@ -19,7 +19,7 @@ export default defineConfig({
         '**/*.config.*',
       ],
     },
-    // Make vi available globally
+    // vi available globally
     deps: {
       inline: ['vitest'],
     },

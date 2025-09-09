@@ -1,20 +1,21 @@
 import { beforeAll, afterAll, beforeEach } from 'vitest';
-import { setupTestDatabase, cleanTestDatabase, closeTestDatabase } from './database';
+import { cleanTestDatabase } from './database';
 
 
 beforeAll(async () => {
   // Set test environment
-  process.env.NODE_ENV = 'test';
-  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://localhost:5432/pettr_test';
-  process.env.BETTER_AUTH_SECRET = 'test-secret-key';
-  process.env.RESEND_API_KEY = 'test-resend-key';
-  console.log('Test database connected');
+  // process.env.NODE_ENV = 'test';
+  // process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://localhost:5432/pettr_test';
+  // process.env.BETTER_AUTH_SECRET = 'test-secret-key';
+  // process.env.RESEND_API_KEY = 'test-resend-key';
+  console.log('Test environment initialized');
+  console.log('Database URL:', process.env.DATABASE_URL?.replace(/\/\/.*@/, '//***@'));
 });  
 
 afterAll(async () => {
   // Close test database connection
-  await closeTestDatabase();
-  console.log('Test database disconnected');
+  // await closeTestDatabase();
+  console.log('Test environment cleaned up');
 });
 
 beforeEach(async () => {

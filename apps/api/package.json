@@ -22,10 +22,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "test:db:setup": "TEST_DATABASE_URL=postgresql://localhost:5432/pettr_test bun run db:migrate",
-    "test": "NODE_ENV=test DATABASE_URL=postgresql://localhost:5432/pettr_test BETTER_AUTH_SECRET=test-key RESEND_API_KEY=test-key vitest",
-    "test:ui": "NODE_ENV=test vitest --ui", 
-    "test:run": "NODE_ENV=test vitest run"
+    "test:db:migrate": "drizzle-kit migrate --config=drizzle.config.test.ts",
+    "test": "NODE_ENV=test DATABASE_URL=postgresql://thomas:pettrtest@localhost:5432/pettr_test BETTER_AUTH_SECRET=test-key RESEND_API_KEY=test-key vitest",
+    "test:ui": "NODE_ENV=test DATABASE_URL=postgresql://thomas@localhost:5432/pettr_test BETTER_AUTH_SECRET=test-key RESEND_API_KEY=test-key vitest --ui", 
+    "test:run": "NODE_ENV=test DATABASE_URL=postgresql://thomas@localhost:5432/pettr_test BETTER_AUTH_SECRET=test-key RESEND_API_KEY=test-key vitest run"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
