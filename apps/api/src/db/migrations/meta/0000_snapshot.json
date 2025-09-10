@@ -1,5 +1,5 @@
 {
-  "id": "b0765e70-6583-4733-b9ae-e0f31aa8975b",
+  "id": "70191fde-6d24-44ba-af58-d94d67a19049",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -436,6 +436,219 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.weight_entries": {
+      "name": "weight_entries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pet_id": {
+          "name": "pet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight": {
+          "name": "weight",
+          "type": "numeric(6, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "weight_entries_pet_id_pets_id_fk": {
+          "name": "weight_entries_pet_id_pets_id_fk",
+          "tableFrom": "weight_entries",
+          "tableTo": "pets",
+          "columnsFrom": [
+            "pet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.food_entries": {
+      "name": "food_entries",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pet_id": {
+          "name": "pet_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "food_type": {
+          "name": "food_type",
+          "type": "food_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "brand_name": {
+          "name": "brand_name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "product_name": {
+          "name": "product_name",
+          "type": "varchar(150)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "daily_amount": {
+          "name": "daily_amount",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_purchased": {
+          "name": "date_purchased",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bag_weight": {
+          "name": "bag_weight",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bag_weight_unit": {
+          "name": "bag_weight_unit",
+          "type": "dry_food_bag_unit",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dry_daily_amount_unit": {
+          "name": "dry_daily_amount_unit",
+          "type": "dry_food_daily_unit",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_units": {
+          "name": "number_of_units",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weight_per_unit": {
+          "name": "weight_per_unit",
+          "type": "numeric(8, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wet_weight_unit": {
+          "name": "wet_weight_unit",
+          "type": "wet_food_unit",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "wet_daily_amount_unit": {
+          "name": "wet_daily_amount_unit",
+          "type": "wet_food_unit",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "food_entries_pet_id_pets_id_fk": {
+          "name": "food_entries_pet_id_pets_id_fk",
+          "tableFrom": "food_entries",
+          "tableTo": "pets",
+          "columnsFrom": [
+            "pet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "dry_food_check": {
+          "name": "dry_food_check",
+          "value": "\n  (food_type != 'dry' OR (\n   bag_weight IS NOT NULL AND \n   bag_weight_unit IS NOT NULL AND \n   dry_daily_amount_unit IS NOT NULL AND\n   number_of_units IS NULL AND \n   weight_per_unit IS NULL AND \n   wet_weight_unit IS NULL AND\n   wet_daily_amount_unit IS NULL))\n"
+        },
+        "wet_food_check": {
+          "name": "wet_food_check",
+          "value": "\n  (food_type != 'wet' OR (\n   number_of_units IS NOT NULL AND \n   weight_per_unit IS NOT NULL AND \n   wet_weight_unit IS NOT NULL AND\n   wet_daily_amount_unit IS NOT NULL AND\n   bag_weight IS NULL AND \n   bag_weight_unit IS NULL AND\n   dry_daily_amount_unit IS NULL))\n"
+        }
+      },
+      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -462,6 +675,38 @@
       "values": [
         "kg",
         "lbs"
+      ]
+    },
+    "public.dry_food_bag_unit": {
+      "name": "dry_food_bag_unit",
+      "schema": "public",
+      "values": [
+        "kg",
+        "pounds"
+      ]
+    },
+    "public.dry_food_daily_unit": {
+      "name": "dry_food_daily_unit",
+      "schema": "public",
+      "values": [
+        "grams",
+        "cups"
+      ]
+    },
+    "public.food_type": {
+      "name": "food_type",
+      "schema": "public",
+      "values": [
+        "dry",
+        "wet"
+      ]
+    },
+    "public.wet_food_unit": {
+      "name": "wet_food_unit",
+      "schema": "public",
+      "values": [
+        "grams",
+        "oz"
       ]
     }
   },

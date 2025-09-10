@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1752226846524,
-      "tag": "0000_true_wolverine",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1752422807256,
-      "tag": "0001_fuzzy_the_twelve",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1753264134218,
-      "tag": "0002_clean_rhino",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1753288706779,
-      "tag": "0003_wonderful_golden_guardian",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1753458688813,
-      "tag": "0004_omniscient_talos",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1753459877263,
-      "tag": "0005_amusing_captain_cross",
+      "when": 1757499940470,
+      "tag": "0000_sleepy_the_phantom",
       "breakpoints": true
     }
   ]

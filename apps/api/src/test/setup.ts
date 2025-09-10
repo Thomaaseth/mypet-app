@@ -9,7 +9,7 @@ beforeAll(async () => {
   // process.env.BETTER_AUTH_SECRET = 'test-secret-key';
   // process.env.RESEND_API_KEY = 'test-resend-key';
   console.log('Test environment initialized');
-  console.log('Database URL:', process.env.DATABASE_URL?.replace(/\/\/.*@/, '//***@'));
+  console.log('Database URL:', process.env.TEST_DATABASE_URL?.replace(/\/\/.*@/, '//***@'));
 });  
 
 afterAll(async () => {
