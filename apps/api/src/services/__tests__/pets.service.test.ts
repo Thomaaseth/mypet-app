@@ -1,44 +1,27 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'crypto';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import * as schema from '../../db/schema';
 import type { NewPet } from '../../db/schema/pets';
 import { BadRequestError, NotFoundError } from '../../middleware/errors';
-import { getDatabaseUrl } from './../../config'
 import { PetsService } from '../pets.service';
 import { db } from '../../db';
+import { DatabaseTestUtils } from '../../test/database-test-utils';
 
 describe('PetsService', () => {
-  beforeEach(async () => {
-    // Clean database before each test
-    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
-    console.log('🔍 TEST_DATABASE_URL:', process.env.TEST_DATABASE_URL);
-    console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL);
-    console.log('🔍 getDatabaseUrl():', getDatabaseUrl());
-    await db.delete(schema.pets);
-    await db.delete(schema.user);
-
-    // Insert test user
-    await db.insert(schema.user).values({
-      id: 'test-user-123',
-      name: 'Test User',
-      email: 'test@example.com',
-    });
-  });
-
   describe('getUserPets', () => {
     it('should return all active pets for a user', async () => {
-      // Arrange - Insert test pets
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       await db.insert(schema.pets).values([
         {
-          userId: 'test-user-123',
+          userId: primary.id,
           name: 'Fluffy',
           animalType: 'cat',
           species: 'Persian',
           isActive: true,
         },
         {
-          userId: 'test-user-123',
+          userId: primary.id,
           name: 'Buddy',
           animalType: 'dog',
           species: 'Golden Retriever',
@@ -46,12 +29,10 @@ describe('PetsService', () => {
         },
       ]);
 
-      // Act
-      const result = await PetsService.getUserPets('test-user-123');
+      const result = await PetsService.getUserPets(primary.id);
 
-      // Assert
       expect(result).toHaveLength(2);
-      expect(result.every(pet => pet.userId === 'test-user-123')).toBe(true);
+      expect(result.every(pet => pet.userId === primary.id)).toBe(true);
       expect(result.every(pet => pet.isActive)).toBe(true);
       
       const names = result.map(pet => pet.name);
@@ -60,227 +41,202 @@ describe('PetsService', () => {
     });
 
     it('should return pets in newest-first order', async () => {
-      // Arrange - Insert pets with slight delay to ensure different timestamps
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      
       const [firstPet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'First Pet',
         animalType: 'cat',
       }).returning();
       
-      // Small delay to ensure different creation time
       await new Promise(resolve => setTimeout(resolve, 10));
       
       const [secondPet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Second Pet',
         animalType: 'dog',
       }).returning();
 
-      // Act
-      const result = await PetsService.getUserPets('test-user-123');
+      const result = await PetsService.getUserPets(primary.id);
 
-      // Assert - Should be ordered by newest first
       expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('Second Pet'); // Newer pet first
+      expect(result[0].name).toBe('Second Pet');
       expect(result[1].name).toBe('First Pet');
     });
 
     it('should not return inactive pets', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      
       await db.insert(schema.pets).values([
         {
-          userId: 'test-user-123',
+          userId: primary.id,
           name: 'Active Pet',
           animalType: 'cat',
           isActive: true,
         },
         {
-          userId: 'test-user-123',
+          userId: primary.id,
           name: 'Inactive Pet',
           animalType: 'dog',
           isActive: false,
         },
       ]);
 
-      // Act
-      const result = await PetsService.getUserPets('test-user-123');
+      const result = await PetsService.getUserPets(primary.id);
 
-      // Assert
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Active Pet');
     });
 
     it('should return empty array when user has no pets', async () => {
-      // Act
-      const result = await PetsService.getUserPets('test-user-123');
+      const { primary } = await DatabaseTestUtils.createTestUsers();
 
-      // Assert
+      const result = await PetsService.getUserPets(primary.id);
+
       expect(result).toEqual([]);
       expect(result).toHaveLength(0);
     });
 
     it('should only return pets for the specified user', async () => {
-      // Arrange
-      await db.insert(schema.user).values({
-        id: 'other-user-456',
-        name: 'Other User',
-        email: 'other@example.com',
-      });
+      const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
 
       await db.insert(schema.pets).values([
         {
-          userId: 'test-user-123',
+          userId: primary.id,
           name: 'My Pet',
           animalType: 'cat',
         },
         {
-          userId: 'other-user-456',
+          userId: secondary.id,
           name: 'Other Pet',
           animalType: 'dog',
         },
       ]);
 
-      // Act
-      const result = await PetsService.getUserPets('test-user-123');
+      const result = await PetsService.getUserPets(primary.id);
 
-      // Assert
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('My Pet');
-      expect(result[0].userId).toBe('test-user-123');
+      expect(result[0].userId).toBe(primary.id);
     });
 
     it('should handle empty userId gracefully', async () => {
-      // Act
       const result = await PetsService.getUserPets('');
 
-      // Assert
       expect(result).toEqual([]);
     });
   });
 
   describe('getPetById', () => {
     it('should return pet when found and belongs to user', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const [insertedPet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Fluffy',
         animalType: 'cat',
         species: 'Persian',
       }).returning();
 
-      // Act
-      const result = await PetsService.getPetById(insertedPet.id, 'test-user-123');
+      const result = await PetsService.getPetById(insertedPet.id, primary.id);
 
-      // Assert
       expect(result.id).toBe(insertedPet.id);
       expect(result.name).toBe('Fluffy');
-      expect(result.userId).toBe('test-user-123');
+      expect(result.userId).toBe(primary.id);
     });
 
     it('should throw NotFoundError when pet does not exist', async () => {
-      // Use a properly formatted UUID that doesn't exist
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const nonExistentId = randomUUID();
       
-      // Act & Assert
       await expect(
-        PetsService.getPetById(nonExistentId, 'test-user-123')
+        PetsService.getPetById(nonExistentId, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet belongs to different user', async () => {
-      // Arrange
-      await db.insert(schema.user).values({
-        id: 'other-user-456',
-        name: 'Other User',
-        email: 'other@example.com',
-      });
+      const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
 
       const [insertedPet] = await db.insert(schema.pets).values({
-        userId: 'other-user-456',
+        userId: secondary.id,
         name: 'Other User Pet',
         animalType: 'cat',
       }).returning();
 
-      // Act & Assert
       await expect(
-        PetsService.getPetById(insertedPet.id, 'test-user-123')
+        PetsService.getPetById(insertedPet.id, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet is inactive', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const [insertedPet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Inactive Pet',
         animalType: 'cat',
         isActive: false,
       }).returning();
 
-      // Act & Assert
       await expect(
-        PetsService.getPetById(insertedPet.id, 'test-user-123')
+        PetsService.getPetById(insertedPet.id, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should handle invalid UUID format', async () => {
-      // Act & Assert - Should throw BadRequestError due to UUID format error
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+
       await expect(
-        PetsService.getPetById('invalid-uuid', 'test-user-123')
+        PetsService.getPetById('invalid-uuid', primary.id)
       ).rejects.toThrow(BadRequestError);
     });
   });
 
   describe('createPet', () => {
     it('should create pet with valid data', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
         name: 'Fluffy',
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'cat',
         species: 'Persian',
         gender: 'female',
         weightUnit: 'kg',
       };
 
-      // Act
       const result = await PetsService.createPet(newPetData);
 
-      // Assert
       expect(result.name).toBe('Fluffy');
-      expect(result.userId).toBe('test-user-123');
+      expect(result.userId).toBe(primary.id);
       expect(result.animalType).toBe('cat');
       expect(result.species).toBe('Persian');
       expect(result.isActive).toBe(true);
       expect(result.id).toBeDefined();
       
-      // Verify it was saved to database
       const savedPets = await db.select().from(schema.pets);
       expect(savedPets).toHaveLength(1);
     });
 
     it('should create pet with minimal required data', async () => {
-      // Arrange - Only required fields
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
         name: 'Basic Pet',
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'dog',
       };
 
-      // Act
       const result = await PetsService.createPet(newPetData);
 
-      // Assert
       expect(result.name).toBe('Basic Pet');
-      expect(result.userId).toBe('test-user-123');
+      expect(result.userId).toBe(primary.id);
       expect(result.animalType).toBe('dog');
       expect(result.species).toBeNull();
-      expect(result.gender).toBe('unknown'); // Default value
-      expect(result.weightUnit).toBe('kg'); // Default value
+      expect(result.gender).toBe('unknown');
+      expect(result.weightUnit).toBe('kg');
     });
 
     it('should throw BadRequestError when name is missing', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const invalidData = {
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'cat',
       } as NewPet;
 
@@ -298,9 +254,10 @@ describe('PetsService', () => {
     });
 
     it('should throw BadRequestError when name is empty string', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const invalidData: NewPet = {
         name: '',
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'cat',
       };
 
@@ -318,9 +275,10 @@ describe('PetsService', () => {
     });
 
     it('should convert empty strings to null for optional fields', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
         name: 'Fluffy',
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'cat',
         species: '',
         notes: '',
@@ -335,9 +293,10 @@ describe('PetsService', () => {
     });
 
     it('should handle all optional fields with proper values', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
         name: 'Max',
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'dog',
         species: 'Golden Retriever',
         gender: 'male',
@@ -354,7 +313,7 @@ describe('PetsService', () => {
       expect(result.species).toBe('Golden Retriever');
       expect(result.gender).toBe('male');
       expect(result.birthDate).toBe('2020-01-15');
-      expect(result.weight).toBe('25.50'); // Database returns decimal with trailing zeros
+      expect(result.weight).toBe('25.50');
       expect(result.isNeutered).toBe(true);
       expect(result.microchipNumber).toBe('ABC123456789');
       expect(result.notes).toBe('Very friendly dog');
@@ -362,294 +321,280 @@ describe('PetsService', () => {
   });
 
   describe('updatePet', () => {
-    let testPetId: string;
-
-    beforeEach(async () => {
-      // Create a test pet for update operations
+    it('should update pet with valid data', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const [pet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Original Name',
         animalType: 'cat',
         species: 'Persian',
       }).returning();
-      testPetId = pet.id;
-    });
 
-    it('should update pet with valid data', async () => {
-      // Arrange
       const updateData = {
         name: 'Updated Name',
         species: 'Maine Coon',
         weight: '4.5',
       };
 
-      // Act
-      const result = await PetsService.updatePet(testPetId, 'test-user-123', updateData);
+      const result = await PetsService.updatePet(pet.id, primary.id, updateData);
 
-      // Assert
       expect(result.name).toBe('Updated Name');
       expect(result.species).toBe('Maine Coon');
-      expect(result.weight).toBe('4.50'); // Database returns decimal with trailing zeros
+      expect(result.weight).toBe('4.50');
       expect(result.updatedAt).toBeDefined();
     });
 
     it('should update only provided fields', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: primary.id,
+        name: 'Original Name',
+        animalType: 'cat',
+        species: 'Persian',
+      }).returning();
+
       const updateData = { name: 'New Name Only' };
 
-      // Act
-      const result = await PetsService.updatePet(testPetId, 'test-user-123', updateData);
+      const result = await PetsService.updatePet(pet.id, primary.id, updateData);
 
-      // Assert
       expect(result.name).toBe('New Name Only');
-      expect(result.species).toBe('Persian'); // Original value unchanged
+      expect(result.species).toBe('Persian');
     });
 
     it('should convert empty strings to null', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: primary.id,
+        name: 'Test Pet',
+        animalType: 'cat',
+        species: 'Persian',
+      }).returning();
+
       const updateData = {
         species: '',
         notes: '',
         microchipNumber: '',
       };
 
-      // Act
-      const result = await PetsService.updatePet(testPetId, 'test-user-123', updateData);
+      const result = await PetsService.updatePet(pet.id, primary.id, updateData);
 
-      // Assert
       expect(result.species).toBeNull();
       expect(result.notes).toBeNull();
       expect(result.microchipNumber).toBeNull();
     });
 
     it('should throw NotFoundError when pet does not exist', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const nonExistentId = randomUUID();
       const updateData = { name: 'New Name' };
 
       await expect(
-        PetsService.updatePet(nonExistentId, 'test-user-123', updateData)
+        PetsService.updatePet(nonExistentId, primary.id, updateData)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet belongs to different user', async () => {
-      // Arrange
-      await db.insert(schema.user).values({
-        id: 'other-user-456',
-        name: 'Other User',
-        email: 'other@example.com',
-      });
+      const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: secondary.id,
+        name: 'Other User Pet',
+        animalType: 'cat',
+      }).returning();
 
       const updateData = { name: 'Hacker Name' };
 
-      // Act & Assert
       await expect(
-        PetsService.updatePet(testPetId, 'other-user-456', updateData)
+        PetsService.updatePet(pet.id, primary.id, updateData)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet is inactive', async () => {
-      // Arrange - Make pet inactive first
-      await db.update(schema.pets)
-        .set({ isActive: false })
-        .where(eq(schema.pets.id, testPetId));
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: primary.id,
+        name: 'Test Pet',
+        animalType: 'cat',
+        isActive: false,
+      }).returning();
 
       const updateData = { name: 'Should Not Work' };
 
-      // Act & Assert
       await expect(
-        PetsService.updatePet(testPetId, 'test-user-123', updateData)
+        PetsService.updatePet(pet.id, primary.id, updateData)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should handle invalid UUID format', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const updateData = { name: 'New Name' };
 
       await expect(
-        PetsService.updatePet('invalid-uuid', 'test-user-123', updateData)
+        PetsService.updatePet('invalid-uuid', primary.id, updateData)
       ).rejects.toThrow(BadRequestError);
     });
   });
 
   describe('deletePet (soft delete)', () => {
-    let testPetId: string;
-
-    beforeEach(async () => {
+    it('should soft delete pet', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const [pet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Pet to Delete',
         animalType: 'cat',
       }).returning();
-      testPetId = pet.id;
-    });
 
-    it('should soft delete pet', async () => {
-      // Act
-      await PetsService.deletePet(testPetId, 'test-user-123');
+      await PetsService.deletePet(pet.id, primary.id);
 
-      // Assert - Pet should be marked as inactive
       const [deletedPet] = await db.select()
         .from(schema.pets)
-        .where(eq(schema.pets.id, testPetId));
+        .where(eq(schema.pets.id, pet.id));
 
       expect(deletedPet.isActive).toBe(false);
       expect(deletedPet.updatedAt).toBeDefined();
     });
 
     it('should not affect getPetById after soft delete', async () => {
-      // Act
-      await PetsService.deletePet(testPetId, 'test-user-123');
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: primary.id,
+        name: 'Pet to Delete',
+        animalType: 'cat',
+      }).returning();
 
-      // Assert - getPetById should throw NotFoundError for soft deleted pet
+      await PetsService.deletePet(pet.id, primary.id);
+
       await expect(
-        PetsService.getPetById(testPetId, 'test-user-123')
+        PetsService.getPetById(pet.id, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet does not exist', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const nonExistentId = randomUUID();
 
       await expect(
-        PetsService.deletePet(nonExistentId, 'test-user-123')
+        PetsService.deletePet(nonExistentId, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet belongs to different user', async () => {
-      await db.insert(schema.user).values({
-        id: 'other-user-456',
-        name: 'Other User',
-        email: 'other@example.com',
-      });
+      const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: secondary.id,
+        name: 'Other User Pet',
+        animalType: 'cat',
+      }).returning();
 
       await expect(
-        PetsService.deletePet(testPetId, 'other-user-456')
+        PetsService.deletePet(pet.id, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('hardDeletePet', () => {
-    let testPetId: string;
-
-    beforeEach(async () => {
+    it('should permanently delete pet', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const [pet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Pet to Hard Delete',
         animalType: 'dog',
       }).returning();
-      testPetId = pet.id;
-    });
 
-    it('should permanently delete pet', async () => {
-      // Act
-      await PetsService.hardDeletePet(testPetId, 'test-user-123');
+      await PetsService.hardDeletePet(pet.id, primary.id);
 
-      // Assert - Pet should be completely removed
       const deletedPets = await db.select()
         .from(schema.pets)
-        .where(eq(schema.pets.id, testPetId));
+        .where(eq(schema.pets.id, pet.id));
 
       expect(deletedPets).toHaveLength(0);
     });
 
     it('should throw NotFoundError when pet does not exist', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const nonExistentId = randomUUID();
 
       await expect(
-        PetsService.hardDeletePet(nonExistentId, 'test-user-123')
+        PetsService.hardDeletePet(nonExistentId, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
 
     it('should throw NotFoundError when pet belongs to different user', async () => {
-      await db.insert(schema.user).values({
-        id: 'other-user-456',
-        name: 'Other User',
-        email: 'other@example.com',
-      });
+      const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
+      const [pet] = await db.insert(schema.pets).values({
+        userId: secondary.id,
+        name: 'Other User Pet',
+        animalType: 'dog',
+      }).returning();
 
       await expect(
-        PetsService.hardDeletePet(testPetId, 'other-user-456')
+        PetsService.hardDeletePet(pet.id, primary.id)
       ).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('getUserPetCount', () => {
     it('should return correct count of active pets', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      
       await db.insert(schema.pets).values([
-        { userId: 'test-user-123', name: 'Pet 1', animalType: 'cat', isActive: true },
-        { userId: 'test-user-123', name: 'Pet 2', animalType: 'dog', isActive: true },
-        { userId: 'test-user-123', name: 'Pet 3', animalType: 'cat', isActive: false }, // Inactive
+        { userId: primary.id, name: 'Pet 1', animalType: 'cat', isActive: true },
+        { userId: primary.id, name: 'Pet 2', animalType: 'dog', isActive: true },
+        { userId: primary.id, name: 'Pet 3', animalType: 'cat', isActive: false },
       ]);
 
-      // Act
-      const result = await PetsService.getUserPetCount('test-user-123');
+      const result = await PetsService.getUserPetCount(primary.id);
 
-      // Assert
       expect(result).toBe(2);
     });
 
     it('should return 0 when user has no pets', async () => {
-      // Act
-      const result = await PetsService.getUserPetCount('test-user-123');
+      const { primary } = await DatabaseTestUtils.createTestUsers();
 
-      // Assert
+      const result = await PetsService.getUserPetCount(primary.id);
+
       expect(result).toBe(0);
     });
 
     it('should return 0 when user has only inactive pets', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      
       await db.insert(schema.pets).values([
-        { userId: 'test-user-123', name: 'Inactive Pet 1', animalType: 'cat', isActive: false },
-        { userId: 'test-user-123', name: 'Inactive Pet 2', animalType: 'dog', isActive: false },
+        { userId: primary.id, name: 'Inactive Pet 1', animalType: 'cat', isActive: false },
+        { userId: primary.id, name: 'Inactive Pet 2', animalType: 'dog', isActive: false },
       ]);
 
-      // Act
-      const result = await PetsService.getUserPetCount('test-user-123');
+      const result = await PetsService.getUserPetCount(primary.id);
 
-      // Assert
       expect(result).toBe(0);
     });
 
     it('should not count other users pets', async () => {
-      // Arrange
-      await db.insert(schema.user).values({
-        id: 'other-user-456',
-        name: 'Other User',
-        email: 'other@example.com',
-      });
+      const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
 
       await db.insert(schema.pets).values([
-        { userId: 'test-user-123', name: 'My Pet', animalType: 'cat', isActive: true },
-        { userId: 'other-user-456', name: 'Other Pet 1', animalType: 'dog', isActive: true },
-        { userId: 'other-user-456', name: 'Other Pet 2', animalType: 'cat', isActive: true },
+        { userId: primary.id, name: 'My Pet', animalType: 'cat', isActive: true },
+        { userId: secondary.id, name: 'Other Pet 1', animalType: 'dog', isActive: true },
+        { userId: secondary.id, name: 'Other Pet 2', animalType: 'cat', isActive: true },
       ]);
 
-      // Act
-      const result = await PetsService.getUserPetCount('test-user-123');
+      const result = await PetsService.getUserPetCount(primary.id);
 
-      // Assert
-      expect(result).toBe(1); // Only counts test-user-123's pets
+      expect(result).toBe(1);
     });
 
     it('should handle invalid userId gracefully', async () => {
-      // Act
       const result = await PetsService.getUserPetCount('non-existent-user');
 
-      // Assert
       expect(result).toBe(0);
     });
 
     it('should handle empty userId gracefully', async () => {
-      // Act
       const result = await PetsService.getUserPetCount('');
 
-      // Assert
       expect(result).toBe(0);
     });
 
     it('should handle database errors gracefully', async () => {
-      // Note: This is harder to test without mocking the database
-      // In a real scenario, you might want to mock the db call to throw an error
-      // For now, we test normal error handling by passing null/undefined
       const result = await PetsService.getUserPetCount(null as any);
       expect(result).toBe(0);
     });
@@ -657,66 +602,60 @@ describe('PetsService', () => {
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle concurrent operations on the same pet', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const [pet] = await db.insert(schema.pets).values({
-        userId: 'test-user-123',
+        userId: primary.id,
         name: 'Concurrent Pet',
         animalType: 'cat',
       }).returning();
 
-      // Act - Simulate concurrent updates
       const updatePromises = [
-        PetsService.updatePet(pet.id, 'test-user-123', { name: 'Updated Name 1' }),
-        PetsService.updatePet(pet.id, 'test-user-123', { species: 'Persian' }),
-        PetsService.updatePet(pet.id, 'test-user-123', { weight: '5.0' }),
+        PetsService.updatePet(pet.id, primary.id, { name: 'Updated Name 1' }),
+        PetsService.updatePet(pet.id, primary.id, { species: 'Persian' }),
+        PetsService.updatePet(pet.id, primary.id, { weight: '5.0' }),
       ];
 
       const results = await Promise.all(updatePromises);
 
-      // Assert - All operations should succeed
       results.forEach(result => {
         expect(result.id).toBe(pet.id);
       });
     });
 
     it('should handle very long names and strings', async () => {
-      // Arrange
-      const longName = 'A'.repeat(100); // Test name at limit
-      const longSpecies = 'B'.repeat(50); // Test species at limit
-      const longNotes = 'C'.repeat(1000); // Very long notes
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const longName = 'A'.repeat(100);
+      const longSpecies = 'B'.repeat(50);
+      const longNotes = 'C'.repeat(1000);
 
       const newPetData: NewPet = {
         name: longName,
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'cat',
         species: longSpecies,
         notes: longNotes,
       };
 
-      // Act
       const result = await PetsService.createPet(newPetData);
 
-      // Assert
       expect(result.name).toBe(longName);
       expect(result.species).toBe(longSpecies);
       expect(result.notes).toBe(longNotes);
     });
 
     it('should preserve data types correctly', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
         name: 'Type Test Pet',
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'dog',
-        weight: '25.75', // Decimal as string
-        isNeutered: true, // Boolean
-        birthDate: '2020-12-25', // Date string
+        weight: '25.75',
+        isNeutered: true,
+        birthDate: '2020-12-25',
       };
 
-      // Act
       const result = await PetsService.createPet(newPetData);
 
-      // Assert
       expect(result.weight).toBe('25.75');
       expect(result.isNeutered).toBe(true);
       expect(result.birthDate).toBe('2020-12-25');
@@ -725,19 +664,17 @@ describe('PetsService', () => {
     });
 
     it('should handle special characters in text fields', async () => {
-      // Arrange
+      const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
         name: "Fluffy's Pet & Co. (2024)",
-        userId: 'test-user-123',
+        userId: primary.id,
         animalType: 'cat',
         species: 'Maine Coon™',
         notes: 'Special chars: àáâãäå æç èéêë ìíîï ñ òóôõö øù úûüý',
       };
 
-      // Act
       const result = await PetsService.createPet(newPetData);
 
-      // Assert
       expect(result.name).toBe("Fluffy's Pet & Co. (2024)");
       expect(result.species).toBe('Maine Coon™');
       expect(result.notes).toBe('Special chars: àáâãäå æç èéêë ìíîï ñ òóôõö øù úûüý');

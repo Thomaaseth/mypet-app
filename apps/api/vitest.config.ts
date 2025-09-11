@@ -7,6 +7,21 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.{test,spec}.{js,ts}'],
     exclude: ['node_modules', 'dist'],
+
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        maxThreads: 1, // Force sequential execution for database tests
+        minThreads: 1,
+      },
+    },
+    
+    // Setup file to clean database before each test
+    setupFiles: ['./src/test/setup.ts'],
+    
+    // Test timeout - increase if needed for database operations
+    testTimeout: 30000, // 30 seconds
+    
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
