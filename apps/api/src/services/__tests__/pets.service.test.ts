@@ -4,12 +4,17 @@ import { eq, and } from 'drizzle-orm';
 import * as schema from '../../db/schema';
 import type { NewPet } from '../../db/schema/pets';
 import { BadRequestError, NotFoundError } from '../../middleware/errors';
+import { getDatabaseUrl } from './../../config'
 import { PetsService } from '../pets.service';
 import { db } from '../../db';
 
 describe('PetsService', () => {
   beforeEach(async () => {
     // Clean database before each test
+    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+    console.log('🔍 TEST_DATABASE_URL:', process.env.TEST_DATABASE_URL);
+    console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL);
+    console.log('🔍 getDatabaseUrl():', getDatabaseUrl());
     await db.delete(schema.pets);
     await db.delete(schema.user);
 

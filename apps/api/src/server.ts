@@ -3,5 +3,5 @@ import { config } from './config';
 
 
 app.listen(config.env.port, () => {
-    console.log(`Better Auth app listening on port ${config.env.port}`);
+    console.log(`API server listening on port ${config.env.port}`);
 });

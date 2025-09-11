@@ -5,6 +5,6 @@ export default defineConfig({
   schema: './src/db/schema/index.ts',
   out: './src/db/migrations',
   dbCredentials: {
-    url: 'postgresql://thomas:pettrtest@localhost:5432/pettr_test',
+    url: 'postgresql://localhost:5432/pettr_test',
 },
 });

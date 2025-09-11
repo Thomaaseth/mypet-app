@@ -11,7 +11,7 @@ function envOrThrow(key: string): string {
 }
 
 // Helper to get database URL with test support
-function getDatabaseUrl(): string {
+export function getDatabaseUrl(): string {
     const isTest = process.env.NODE_ENV === 'test';
     
     if (isTest) {
