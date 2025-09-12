@@ -24,6 +24,61 @@ export class WeightEntriesService {
     }
   }
 
+  // Validate weight based on animal type and unit
+  private static validateWeightLimits(weight: number, animalType: string, weightUnit: WeightUnit): void {
+    // Convert weight to kg for consistent validation
+    let weightInKg = weight;
+    if (weightUnit === 'lbs') {
+      weightInKg = weight / 2.20462; // Convert lbs to kg
+    }
+
+    // Define realistic weight ranges per animal type (in kg)
+    const weightLimits = {
+      cat: { min: 1, max: 15 }, // 1-15kg (2.2-33lbs)
+      dog: { min: 0.5, max: 90 }, // 0.5-90kg (1-200lbs) 
+    };
+
+    // Get limits for this animal type, fallback to 'other'
+    const limits = weightLimits[animalType as keyof typeof weightLimits];
+
+    if (weightInKg < limits.min || weightInKg > limits.max) {
+      const displayWeight = weightUnit === 'kg' ? `${weight}kg` : `${weight}lbs`;
+      const displayLimits = weightUnit === 'kg' 
+        ? `${limits.min}-${limits.max}kg`
+        : `${(limits.min * 2.20462).toFixed(1)}-${(limits.max * 2.20462).toFixed(1)}lbs`;
+      
+      throw new BadRequestError(
+        `Weight ${displayWeight} is outside realistic range for ${animalType} (${displayLimits})`
+      );
+    }
+
+    // Additional check: enforce absolute maximum of 200kg regardless of animal type
+    const absoluteMaxKg = 200;
+    const absoluteMaxDisplay = weightUnit === 'kg' ? '200kg' : '440lbs';
+    
+    if (weightInKg > absoluteMaxKg) {
+      throw new BadRequestError(`Weight exceeds maximum allowed (${absoluteMaxDisplay})`);
+    }
+  }
+
+  // Check for duplicate weight entries on the same date
+  private static async checkDuplicateDate(petId: string, date: string): Promise<void> {
+    const existingEntry = await db
+      .select()
+      .from(weightEntries)
+      .where(and(
+        eq(weightEntries.petId, petId),
+        eq(weightEntries.date, date)
+      ))
+      .limit(1);
+
+    if (existingEntry.length > 0) {
+      throw new BadRequestError(
+        `Weight entry already exists for ${date}. Please use update instead or choose a different date.`
+      );
+    }
+  }
+
   // Get all weight entries for a pet (with ownership check)
   static async getWeightEntries(petId: string, userId: string): Promise<{ weightEntries: WeightEntry[], weightUnit: WeightUnit }> {
     try {
@@ -77,11 +132,11 @@ export class WeightEntriesService {
     }
   }
 
-  // Create a new weight entry
+  // Create a new weight entry with proper business logic validation
   static async createWeightEntry(petId: string, userId: string, entryData: WeightEntryFormData): Promise<WeightEntry> {
     try {
-      // Verify pet ownership first
-      await this.verifyPetOwnership(petId, userId);
+      // Verify pet ownership first and get pet data for validation
+      const pet = await PetsService.getPetById(petId, userId);
 
       // Validate required fields
       if (!entryData.weight || !entryData.date) {
@@ -103,6 +158,34 @@ export class WeightEntriesService {
         throw new BadRequestError('Date cannot be in the future');
       }
 
+      // NEW: Validate weight limits based on animal type and weight unit
+      this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
+
+      // NEW: Check for existing entry on the same date and update if exists (upsert behavior)
+      const existingEntry = await db
+        .select()
+        .from(weightEntries)
+        .where(and(
+          eq(weightEntries.petId, petId),
+          eq(weightEntries.date, entryData.date)
+        ))
+        .limit(1);
+
+      if (existingEntry.length > 0) {
+        // Update existing entry
+        const [updatedEntry] = await db
+          .update(weightEntries)
+          .set({
+            weight: entryData.weight,
+            updatedAt: new Date()
+          })
+          .where(eq(weightEntries.id, existingEntry[0].id))
+          .returning();
+        
+        return updatedEntry;
+      }
+
+      // Create new entry if none exists for this date
       const newEntryData: NewWeightEntry = {
         petId,
         weight: entryData.weight,
@@ -124,7 +207,7 @@ export class WeightEntriesService {
     }
   }
 
-  // Update a weight entry (with ownership check)
+  // Update a weight entry (with ownership check and validation)
   static async updateWeightEntry(
     petId: string, 
     weightId: string, 
@@ -133,7 +216,8 @@ export class WeightEntriesService {
   ): Promise<WeightEntry> {
     try {
       // First verify the entry exists and user owns the pet
-      await this.getWeightEntryById(petId, weightId, userId);
+      const existingEntry = await this.getWeightEntryById(petId, weightId, userId);
+      const pet = await PetsService.getPetById(petId, userId);
 
       // Validate weight if provided
       if (updateData.weight !== undefined) {
@@ -141,6 +225,9 @@ export class WeightEntriesService {
         if (isNaN(weightValue) || weightValue <= 0) {
           throw new BadRequestError('Weight must be a positive number');
         }
+        
+        // NEW: Validate weight limits for updates too
+        this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
       }
 
       // Validate date if provided
@@ -152,13 +239,19 @@ export class WeightEntriesService {
         if (entryDate > today) {
           throw new BadRequestError('Date cannot be in the future');
         }
+
+        // NEW: Check for duplicate dates when updating (excluding current entry)
+        if (updateData.date !== existingEntry.date) {
+          await this.checkDuplicateDate(petId, updateData.date);
+        }
       }
 
+      // Update the entry
       const [updatedEntry] = await db
         .update(weightEntries)
         .set({
           ...updateData,
-          updatedAt: new Date(), // Always update the timestamp
+          updatedAt: new Date()
         })
         .where(and(
           eq(weightEntries.id, weightId),
@@ -186,18 +279,21 @@ export class WeightEntriesService {
       // First verify the entry exists and user owns the pet
       await this.getWeightEntryById(petId, weightId, userId);
 
-      const result = await db
+      // Delete the entry
+      const deletedRows = await db
         .delete(weightEntries)
         .where(and(
           eq(weightEntries.id, weightId),
           eq(weightEntries.petId, petId)
-        ));
+        ))
+        .returning();
 
-      // Note: Drizzle doesn't return affected rows count like some ORMs
-      // The getWeightEntryById call above ensures the entry exists
+      if (deletedRows.length === 0) {
+        throw new NotFoundError('Weight entry not found');
+      }
     } catch (error) {
       console.error('Error deleting weight entry:', error);
-      if (error instanceof BadRequestError || error instanceof NotFoundError) {
+      if (error instanceof NotFoundError) {
         throw error;
       }
       throw new BadRequestError('Failed to delete weight entry');

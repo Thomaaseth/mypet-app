@@ -441,48 +441,62 @@ describe('WeightEntriesService', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle very small and large weights', async () => {
+    it('should enforce realistic weight limits based on animal type', async () => {
+        const { primary } = await DatabaseTestUtils.createTestUsers();
+        
+        // Cat realistic range: 2-10kg (4-22lbs)
+        const [cat] = await db.insert(schema.pets).values({
+          userId: primary.id,
+          name: 'Test Cat',
+          animalType: 'cat',
+        }).returning();
+        
+        // Dog realistic range: 1-90kg (2-200lbs) 
+        const [dog] = await db.insert(schema.pets).values({
+          userId: primary.id,
+          name: 'Test Dog', 
+          animalType: 'dog',
+        }).returning();
+      
+        // Valid weights should work
+        await expect(
+          WeightEntriesService.createWeightEntry(cat.id, primary.id, { weight: '4.5', date: '2024-01-15' })
+        ).resolves.toBeDefined();
+        
+        await expect(
+          WeightEntriesService.createWeightEntry(dog.id, primary.id, { weight: '25.0', date: '2024-01-15' })
+        ).resolves.toBeDefined();
+      
+        // Unrealistic weights should fail
+        await expect(
+          WeightEntriesService.createWeightEntry(cat.id, primary.id, { weight: '50.0', date: '2024-01-16' })
+        ).rejects.toThrow('Weight 50kg is outside realistic range for cat (1-15kg)');
+        
+        await expect(
+          WeightEntriesService.createWeightEntry(dog.id, primary.id, { weight: '150.0', date: '2024-01-16' })
+        ).rejects.toThrow('Weight 150kg is outside realistic range for dog (0.5-90kg)');
+      });
+
+    it('should update existing entry when same date is provided (upsert)', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
       const [testPet] = await DatabaseTestUtils.createTestPets(primary.id, 1);
       
-      const smallWeightData: WeightEntryFormData = {
-        weight: '0.01',
-        date: '2024-01-15',
-      };
-
-      const largeWeightData: WeightEntryFormData = {
-        weight: '999.99',
-        date: '2024-01-16',
-      };
-
-      const smallResult = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, smallWeightData);
-      const largeResult = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, largeWeightData);
-
-      expect(smallResult.weight).toBe('0.01');
-      expect(largeResult.weight).toBe('999.99');
-    });
-
-    it('should handle duplicate entries for same date', async () => {
-      const { primary } = await DatabaseTestUtils.createTestUsers();
-      const [testPet] = await DatabaseTestUtils.createTestPets(primary.id, 1);
+      const firstEntry = { weight: '5.50', date: '2024-01-15' };
+      const updatedEntry = { weight: '5.75', date: '2024-01-15' }; // Same date, different weight
       
-      const firstEntry: WeightEntryFormData = {
-        weight: '5.50',
-        date: '2024-01-15',
-      };
-
-      const secondEntry: WeightEntryFormData = {
-        weight: '5.75',
-        date: '2024-01-15',
-      };
-
-      await WeightEntriesService.createWeightEntry(testPet.id, primary.id, firstEntry);
-      const result = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, secondEntry);
-
-      expect(result.weight).toBe('5.75');
+      // Create first entry
+      const first = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, firstEntry);
       
+      // "Create" second entry with same date - should update existing
+      const updated = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, updatedEntry);
+      
+      // Should be same entry ID (updated, not new)
+      expect(updated.id).toBe(first.id);
+      expect(updated.weight).toBe('5.75');
+      
+      // Should still have only 1 entry in database
       const allEntries = await db.select().from(schema.weightEntries);
-      expect(allEntries).toHaveLength(2);
+      expect(allEntries).toHaveLength(1);
     });
   });
 });
