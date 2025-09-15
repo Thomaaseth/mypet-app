@@ -61,6 +61,12 @@ export class WeightEntriesService {
     }
   }
 
+  private static validateUUID(id: string, fieldName: string = 'ID'): void {
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      throw new BadRequestError(`Invalid ${fieldName} format`);
+    }
+  }
+
   // Check for duplicate weight entries on the same date
   private static async checkDuplicateDate(petId: string, date: string): Promise<void> {
     const existingEntry = await db
@@ -107,6 +113,7 @@ export class WeightEntriesService {
   // Get a single weight entry by ID (with ownership check)
   static async getWeightEntryById(petId: string, weightId: string, userId: string): Promise<WeightEntry> {
     try {
+      this.validateUUID(weightId, 'weight entry ID');
       // Verify pet ownership first
       await this.verifyPetOwnership(petId, userId);
 
@@ -124,7 +131,7 @@ export class WeightEntriesService {
 
       return entry;
     } catch (error) {
-      if (error instanceof NotFoundError) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
       console.error('Error fetching weight entry by ID:', error);
@@ -208,6 +215,7 @@ export class WeightEntriesService {
     updateData: Partial<WeightEntryFormData>
   ): Promise<WeightEntry> {
     try {
+      this.validateUUID(weightId, 'weight entry ID');
       // First verify the entry exists and user owns the pet
       const existingEntry = await this.getWeightEntryById(petId, weightId, userId);
       const pet = await PetsService.getPetById(petId, userId);
@@ -233,7 +241,7 @@ export class WeightEntriesService {
           throw new BadRequestError('Date cannot be in the future');
         }
 
-        // NEW: Check for duplicate dates when updating (excluding current entry)
+        // Check for duplicate dates when updating (excluding current entry)
         if (updateData.date !== existingEntry.date) {
           await this.checkDuplicateDate(petId, updateData.date);
         }
@@ -269,6 +277,7 @@ export class WeightEntriesService {
   // Delete a weight entry (with ownership check)
   static async deleteWeightEntry(petId: string, weightId: string, userId: string): Promise<void> {
     try {
+      this.validateUUID(weightId, 'weight entry ID');
       // First verify the entry exists and user owns the pet
       await this.getWeightEntryById(petId, weightId, userId);
 
@@ -286,7 +295,7 @@ export class WeightEntriesService {
       }
     } catch (error) {
       console.error('Error deleting weight entry:', error);
-      if (error instanceof NotFoundError) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
       throw new BadRequestError('Failed to delete weight entry');

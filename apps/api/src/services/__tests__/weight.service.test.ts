@@ -505,5 +505,45 @@ describe('WeightEntriesService', () => {
         WeightEntriesService.createWeightEntry(lbsPet.id, primary.id, { weight: '35', date: '2024-01-15' })
       ).rejects.toThrow('Weight 35lbs is outside realistic range for cat');
     });
+
+    describe('UUID Validation', () => {
+      it('should throw BadRequestError for invalid weightId format', async () => {
+        const { primary } = await DatabaseTestUtils.createTestUsers();
+        const [testPet] = await DatabaseTestUtils.createTestPets(primary.id, 1);
+    
+        // Test all methods that take weightId
+        await expect(
+          WeightEntriesService.getWeightEntryById(testPet.id, 'invalid-id', primary.id)
+        ).rejects.toThrow('Invalid weight entry ID format');
+    
+        await expect(
+          WeightEntriesService.updateWeightEntry(testPet.id, 'invalid-id', primary.id, { weight: '6.00' })
+        ).rejects.toThrow('Invalid weight entry ID format');
+    
+        await expect(
+          WeightEntriesService.deleteWeightEntry(testPet.id, 'invalid-id', primary.id)
+        ).rejects.toThrow('Invalid weight entry ID format');
+      });
+    
+      it('should work with valid UUID format', async () => {
+        const { primary } = await DatabaseTestUtils.createTestUsers();
+        const [testPet] = await DatabaseTestUtils.createTestPets(primary.id, 1);
+        const [entry] = await db.insert(schema.weightEntries).values({
+          petId: testPet.id,
+          weight: '5.50',
+          date: '2024-01-15',
+        }).returning();
+    
+        // Should not throw validation errors (will throw NotFoundError for non-existent, but not format error)
+        const validUUID = randomUUID();
+        await expect(
+          WeightEntriesService.getWeightEntryById(testPet.id, validUUID, primary.id)
+        ).rejects.toThrow('Weight entry not found'); // Not a format error
+    
+        // Should work with existing entry
+        const result = await WeightEntriesService.getWeightEntryById(testPet.id, entry.id, primary.id);
+        expect(result.id).toBe(entry.id);
+      });
+    });
   });
 });

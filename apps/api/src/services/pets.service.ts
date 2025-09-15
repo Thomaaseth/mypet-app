@@ -68,6 +68,12 @@ export class PetsService {
   // Get a single pet by ID (with ownership check)
   static async getPetById(petId: string, userId: string): Promise<Pet> {
     try {
+
+      // UUID validation BEFORE database query
+      if (!petId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(petId)) {
+        throw new BadRequestError('Invalid pet ID format');
+      }
+
       const [pet] = await db
         .select()
         .from(pets)
@@ -141,6 +147,12 @@ export class PetsService {
     updateData: Partial<NewPet>
   ): Promise<Pet> {
     try {
+
+      // UUID validation BEFORE database query
+      if (!petId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(petId)) {
+        throw new BadRequestError('Invalid pet ID format');
+      }
+
       // First verify the pet exists and belongs to the user
       const existingPet = await this.getPetById(petId, userId);
 

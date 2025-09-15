@@ -78,11 +78,11 @@ export class PetValidator {
       throw new ValidationError('Birth date cannot be in the future', 'birthDate');
     }
 
-    // Check for unreasonably old dates (50+ years)
-    const fiftyYearsAgo = new Date();
-    fiftyYearsAgo.setFullYear(now.getFullYear() - 50);
+    // Check for unreasonably old dates (30+ years)
+    const thirtyYearsAgo = new Date();
+    thirtyYearsAgo.setFullYear(now.getFullYear() - 30);
     
-    if (date < fiftyYearsAgo) {
+    if (date < thirtyYearsAgo) {
       throw new ValidationError('Birth date seems too far in the past', 'birthDate');
     }
   }
