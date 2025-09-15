@@ -28,6 +28,43 @@ export class PetsService {
     }
   }
 
+  // Add this helper method to the PetsService class
+  private static validateWeightLimits(weight: number, animalType: string, weightUnit: string = 'kg'): void {
+    // Convert weight to kg for consistent validation
+    let weightInKg = weight;
+    if (weightUnit === 'lbs') {
+      weightInKg = weight / 2.20462; // Convert lbs to kg
+    }
+
+    // weight ranges per animal type (in kg)
+    const weightLimits = {
+      cat: { min: 0.05, max: 15 }, // 0.05-15kg
+      dog: { min: 0.5, max: 90 }, // 0.5-90kg
+    };
+
+    // Get limits for this animal type, fallback to 'other'
+    const limits = weightLimits[animalType as keyof typeof weightLimits];
+
+    if (weightInKg < limits.min || weightInKg > limits.max) {
+      const displayWeight = weightUnit === 'kg' ? `${weight}kg` : `${weight}lbs`;
+      const displayLimits = weightUnit === 'kg' 
+        ? `${limits.min}-${limits.max}kg`
+        : `${(limits.min * 2.20462).toFixed(1)}-${(limits.max * 2.20462).toFixed(1)}lbs`;
+      
+      throw new BadRequestError(
+        `Weight ${displayWeight} is outside realistic range for ${animalType} (${displayLimits})`
+      );
+    }
+
+    // Additional check: enforce absolute maximum of 200kg regardless of animal type
+    const absoluteMaxKg = 200;
+    const absoluteMaxDisplay = weightUnit === 'kg' ? '200kg' : '440lbs';
+    
+    if (weightInKg > absoluteMaxKg) {
+      throw new BadRequestError(`Weight exceeds maximum allowed (${absoluteMaxDisplay})`);
+    }
+  }
+
   // Get a single pet by ID (with ownership check)
   static async getPetById(petId: string, userId: string): Promise<Pet> {
     try {
@@ -62,6 +99,16 @@ export class PetsService {
         throw new BadRequestError('Pet name and user ID are required');
       }
 
+      if (petData.weight) {
+        const weightValue = parseFloat(petData.weight);
+        if (isNaN(weightValue) || weightValue <= 0) {
+          throw new BadRequestError('Weight must be a positive number');
+        }
+        
+        // Validate weight limits based on animal type and weight unit
+        this.validateWeightLimits(weightValue, petData.animalType, petData.weightUnit || 'kg');
+      }  
+
       // Convert empty strings to null for optional fields
       const cleanedData: NewPet = {
         ...petData,
@@ -95,7 +142,22 @@ export class PetsService {
   ): Promise<Pet> {
     try {
       // First verify the pet exists and belongs to the user
-      await this.getPetById(petId, userId);
+      const existingPet = await this.getPetById(petId, userId);
+
+      // Validate weight if provided in update
+      if (updateData.weight !== undefined && updateData.weight !== null && updateData.weight !== '') {
+        const weightValue = parseFloat(updateData.weight.toString());
+        if (isNaN(weightValue) || weightValue <= 0) {
+          throw new BadRequestError('Weight must be a positive number');
+        }
+        
+        // Use the animal type from existing pet and weight unit from update or existing pet
+        const animalType = updateData.animalType || existingPet.animalType;
+        const weightUnit = updateData.weightUnit || existingPet.weightUnit || 'kg';
+        
+        // Validate weight limits
+        this.validateWeightLimits(weightValue, animalType, weightUnit);
+      }
 
       // Clean the update data (convert empty strings to null)
       const cleanedData: Partial<NewPet> = {

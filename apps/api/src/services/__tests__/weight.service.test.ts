@@ -444,14 +444,14 @@ describe('WeightEntriesService', () => {
     it('should enforce realistic weight limits based on animal type', async () => {
         const { primary } = await DatabaseTestUtils.createTestUsers();
         
-        // Cat realistic range: 2-10kg (4-22lbs)
+        // Cat range
         const [cat] = await db.insert(schema.pets).values({
           userId: primary.id,
           name: 'Test Cat',
           animalType: 'cat',
         }).returning();
         
-        // Dog realistic range: 1-90kg (2-200lbs) 
+        // Dog range
         const [dog] = await db.insert(schema.pets).values({
           userId: primary.id,
           name: 'Test Dog', 
@@ -470,33 +470,40 @@ describe('WeightEntriesService', () => {
         // Unrealistic weights should fail
         await expect(
           WeightEntriesService.createWeightEntry(cat.id, primary.id, { weight: '50.0', date: '2024-01-16' })
-        ).rejects.toThrow('Weight 50kg is outside realistic range for cat (1-15kg)');
+        ).rejects.toThrow('Weight 50kg is outside realistic range for cat');
         
         await expect(
           WeightEntriesService.createWeightEntry(dog.id, primary.id, { weight: '150.0', date: '2024-01-16' })
-        ).rejects.toThrow('Weight 150kg is outside realistic range for dog (0.5-90kg)');
+        ).rejects.toThrow('Weight 150kg is outside realistic range for dog');
       });
 
-    it('should update existing entry when same date is provided (upsert)', async () => {
+    it('should prevent duplicate entries for same date', async () => {
+        const { primary } = await DatabaseTestUtils.createTestUsers();
+        const [testPet] = await DatabaseTestUtils.createTestPets(primary.id, 1);
+        
+        const firstEntry = { weight: '5.50', date: '2024-01-15' };
+        const duplicateEntry = { weight: '5.75', date: '2024-01-15' };
+        
+        await WeightEntriesService.createWeightEntry(testPet.id, primary.id, firstEntry);
+        
+        await expect(
+          WeightEntriesService.createWeightEntry(testPet.id, primary.id, duplicateEntry)
+        ).rejects.toThrow('Weight entry already exists for 2024-01-15. Use update to modify existing entry.');
+      });
+
+    it('should validate weight limits correctly for lbs pets', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
-      const [testPet] = await DatabaseTestUtils.createTestPets(primary.id, 1);
-      
-      const firstEntry = { weight: '5.50', date: '2024-01-15' };
-      const updatedEntry = { weight: '5.75', date: '2024-01-15' }; // Same date, different weight
-      
-      // Create first entry
-      const first = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, firstEntry);
-      
-      // "Create" second entry with same date - should update existing
-      const updated = await WeightEntriesService.createWeightEntry(testPet.id, primary.id, updatedEntry);
-      
-      // Should be same entry ID (updated, not new)
-      expect(updated.id).toBe(first.id);
-      expect(updated.weight).toBe('5.75');
-      
-      // Should still have only 1 entry in database
-      const allEntries = await db.select().from(schema.weightEntries);
-      expect(allEntries).toHaveLength(1);
+      const [lbsPet] = await db.insert(schema.pets).values({
+        userId: primary.id,
+        name: 'LBS Pet',
+        animalType: 'cat',
+        weightUnit: 'lbs',
+      }).returning();
+    
+      // 35 lbs is about 16kg exceeds cat limit of 15kg
+      await expect(
+        WeightEntriesService.createWeightEntry(lbsPet.id, primary.id, { weight: '35', date: '2024-01-15' })
+      ).rejects.toThrow('Weight 35lbs is outside realistic range for cat');
     });
   });
 });

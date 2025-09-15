@@ -34,8 +34,8 @@ export class WeightEntriesService {
 
     // Define realistic weight ranges per animal type (in kg)
     const weightLimits = {
-      cat: { min: 1, max: 15 }, // 1-15kg (2.2-33lbs)
-      dog: { min: 0.5, max: 90 }, // 0.5-90kg (1-200lbs) 
+      cat: { min: 0.05, max: 15 }, // 0.05-15kg
+      dog: { min: 0.5, max: 90 }, // 0.5-90kg
     };
 
     // Get limits for this animal type, fallback to 'other'
@@ -52,7 +52,7 @@ export class WeightEntriesService {
       );
     }
 
-    // Additional check: enforce absolute maximum of 200kg regardless of animal type
+    // enforce absolute maximum of 200kg regardless of animal type
     const absoluteMaxKg = 200;
     const absoluteMaxDisplay = weightUnit === 'kg' ? '200kg' : '440lbs';
     
@@ -158,44 +158,37 @@ export class WeightEntriesService {
         throw new BadRequestError('Date cannot be in the future');
       }
 
-      // NEW: Validate weight limits based on animal type and weight unit
-      this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
+      // NEW: Check for duplicate entries on the same date (prevent duplicates)
+    const existingEntry = await db
+    .select()
+    .from(weightEntries)
+    .where(and(
+      eq(weightEntries.petId, petId),
+      eq(weightEntries.date, entryData.date)
+    ))
+    .limit(1);
 
-      // NEW: Check for existing entry on the same date and update if exists (upsert behavior)
-      const existingEntry = await db
-        .select()
-        .from(weightEntries)
-        .where(and(
-          eq(weightEntries.petId, petId),
-          eq(weightEntries.date, entryData.date)
-        ))
-        .limit(1);
+    if (existingEntry.length > 0) {
+      throw new BadRequestError(
+        `Weight entry already exists for ${entryData.date}. Use update to modify existing entry.`
+      );
+    }
 
-      if (existingEntry.length > 0) {
-        // Update existing entry
-        const [updatedEntry] = await db
-          .update(weightEntries)
-          .set({
-            weight: entryData.weight,
-            updatedAt: new Date()
-          })
-          .where(eq(weightEntries.id, existingEntry[0].id))
-          .returning();
-        
-        return updatedEntry;
-      }
+    // Validate weight limits based on animal type and weight unit
+    this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
 
-      // Create new entry if none exists for this date
-      const newEntryData: NewWeightEntry = {
-        petId,
-        weight: entryData.weight,
-        date: entryData.date,
-      };
+     
+    // Create new entry if none exists for this date
+    const newEntryData: NewWeightEntry = {
+      petId,
+      weight: entryData.weight,
+      date: entryData.date,
+    };
 
-      const [newEntry] = await db
-        .insert(weightEntries)
-        .values(newEntryData)
-        .returning();
+    const [newEntry] = await db
+      .insert(weightEntries)
+      .values(newEntryData)
+      .returning();
 
       return newEntry;
     } catch (error) {
