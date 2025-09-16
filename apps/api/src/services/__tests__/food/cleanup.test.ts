@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { FoodService } from '../../food.service';
 import { setupUserAndPet } from './helpers/setup';
+import { makeDryFoodData } from './helpers/factories';
 
 describe('Cleanup Mechanism Tests', () => {
   describe('cleanupFinishedEntries', () => {
@@ -11,15 +12,7 @@ describe('Cleanup Mechanism Tests', () => {
         const pastDate = new Date();
         pastDate.setDate(pastDate.getDate() - (30 + i));
 
-        const dryFoodData = {
-          brandName: `Finished Brand ${i}`,
-          bagWeight: '0.5',
-          bagWeightUnit: 'kg',
-          dailyAmount: '100',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: pastDate.toISOString().split('T')[0],
-        } as const;
-
+        const dryFoodData = makeDryFoodData({brandName: `Finished Brand ${i}` });
         const entry = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
         await FoodService.processEntryForResponse(entry);
         return entry;

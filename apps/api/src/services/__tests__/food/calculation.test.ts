@@ -1,12 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { randomUUID } from 'crypto';
 import { FoodService } from '../../food.service';
 import { setupUserAndPet } from './helpers/setup';
-import { makeDryFoodEntry, makeWetFoodEntry, makeDryFoodData, makeWetFoodData } from './helpers/factories';
+import { makeDryFoodEntry, makeWetFoodEntry, makeDryFoodData } from './helpers/factories';
 import { db } from '../../../db';
 import { eq } from 'drizzle-orm';
 import * as schema from '../../../db/schema';
-import { randomUUID as uuid } from 'crypto';
 
 describe('Business Logic Calculations', () => {
   describe('calculateDryFoodRemaining', () => {
@@ -14,16 +12,14 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(purchaseDate.getDate() - 5); // 5 days ago
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.00',
-          bagWeightUnit: 'kg',
-          dailyAmount: '100.00',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -37,16 +33,14 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(purchaseDate.getDate() - 2);
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '4.41', // pounds to grams conversion case
-          bagWeightUnit: 'pounds' as const,
-          dailyAmount: '1.00', // cups -> grams mapping inside service
-          dryDailyAmountUnit: 'cups' as const,
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '4.41', // pounds to grams conversion case
+        bagWeightUnit: 'pounds',
+        dailyAmount: '1.00', // cups -> grams mapping inside service
+        dryDailyAmountUnit: 'cups',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -60,16 +54,14 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(purchaseDate.getDate() - 30); // 30 days ago
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.00',
-          bagWeightUnit: 'kg',
-          dailyAmount: '100.00',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: false,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: false,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -83,17 +75,15 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(purchaseDate.getDate() - 3); // 3 days ago
 
-      const wetFoodEntry = {
-        ...makeWetFoodEntry({
-          numberOfUnits: 12,
-          weightPerUnit: '85.00',
-          wetWeightUnit: 'grams' as const,
-          dailyAmount: '170.00',
-          wetDailyAmountUnit: 'grams' as const,
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const wetFoodEntry = makeWetFoodEntry({
+        numberOfUnits: 12,
+        weightPerUnit: '85.00',
+        wetWeightUnit: 'grams',
+        dailyAmount: '170.00',
+        wetDailyAmountUnit: 'grams',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
 
@@ -108,17 +98,15 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(purchaseDate.getDate() - 1);
 
-      const wetFoodEntry = {
-        ...makeWetFoodEntry({
-          numberOfUnits: 6,
-          weightPerUnit: '3.00',
-          wetWeightUnit: 'oz' as const,
-          dailyAmount: '6.00',
-          wetDailyAmountUnit: 'oz' as const,
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const wetFoodEntry = makeWetFoodEntry({
+        numberOfUnits: 6,
+        weightPerUnit: '3.00',
+        wetWeightUnit: 'oz',
+        dailyAmount: '6.00',
+        wetDailyAmountUnit: 'oz',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
 
@@ -137,15 +125,13 @@ describe('Business Logic Calculations', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 30);
 
-      const dryFoodData = {
-        ...makeDryFoodData({
-          bagWeight: '1.0',
-          bagWeightUnit: 'kg',
-          dailyAmount: '50',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: pastDate.toISOString().split('T')[0],
-        }),
-      };
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '1.0',
+        bagWeightUnit: 'kg',
+        dailyAmount: '50',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: pastDate.toISOString().split('T')[0],
+      });
 
       let created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
 
@@ -165,15 +151,13 @@ describe('Business Logic Calculations', () => {
     it('should keep active food as active', async () => {
       const { primary, testPet } = await setupUserAndPet();
 
-      const dryFoodData = {
-        ...makeDryFoodData({
-          bagWeight: '5.0',
-          bagWeightUnit: 'kg',
-          dailyAmount: '100',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: new Date().toISOString().split('T')[0],
-        }),
-      };
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '5.0',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: new Date().toISOString().split('T')[0],
+      });
 
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
       const processed = await FoodService.processEntryForResponse(created);
@@ -188,16 +172,14 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(today.getDate() - 5); // 5 days ago
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '3.00',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '150.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '3.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '150.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -213,16 +195,14 @@ describe('Business Logic Calculations', () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(today.getDate() - 25); // 25 days ago
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.00',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '100.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: purchaseDate.toISOString().split('T')[0],
-          isActive: false,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: purchaseDate.toISOString().split('T')[0],
+        isActive: false,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 

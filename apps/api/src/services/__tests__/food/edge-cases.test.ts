@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'crypto';
 import { FoodService } from '../../food.service';
 import { setupUserAndPet } from './helpers/setup';
-import { makeDryFoodEntry, makeDryFoodData, makeInvalidDryFoodData, makeInvalidWetFoodData } from './helpers/factories';
+import { makeDryFoodEntry, makeDryFoodData, makeInvalidDryFoodData, makeInvalidWetFoodData, makeWetFoodEntry } from './helpers/factories';
 import { db } from '../../../db';
 import * as schema from '../../../db/schema';
 import { eq } from 'drizzle-orm';
@@ -12,16 +12,14 @@ import type { DryFoodFormData, WetFoodFormData } from '../../../services/food.se
 describe('Edge Cases and Error Scenarios', () => {
   describe('Zero and Negative Values', () => {
     it('should handle zero daily amount gracefully in calculations', async () => {
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.00',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '0.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: new Date().toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '0.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: new Date().toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -33,16 +31,14 @@ describe('Edge Cases and Error Scenarios', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 100);
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '1.00',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '100.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: pastDate.toISOString().split('T')[0],
-          isActive: false,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '1.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: pastDate.toISOString().split('T')[0],
+        isActive: false,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -51,16 +47,14 @@ describe('Edge Cases and Error Scenarios', () => {
     });
 
     it('should handle very small decimal amounts correctly', async () => {
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '0.01',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '1.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: new Date().toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '0.01',
+        bagWeightUnit: 'kg',
+        dailyAmount: '1.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: new Date().toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -73,15 +67,13 @@ describe('Edge Cases and Error Scenarios', () => {
     it('should handle large bag weights correctly', async () => {
       const { primary, testPet } = await setupUserAndPet();
 
-      const largeBagData = {
-        ...makeDryFoodData({
-          bagWeight: '50.00',
-          bagWeightUnit: 'kg',
-          dailyAmount: '200',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: new Date().toISOString().split('T')[0],
-        }),
-      };
+      const largeBagData = makeDryFoodData({
+        bagWeight: '50.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '200',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: new Date().toISOString().split('T')[0],
+      });
 
       const result = await FoodService.createDryFoodEntry(testPet.id, primary.id, largeBagData);
 
@@ -92,16 +84,14 @@ describe('Edge Cases and Error Scenarios', () => {
     });
 
     it('should maintain precision with decimal values', async () => {
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.55',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '123.45',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: new Date().toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.55',
+        bagWeightUnit: 'kg',
+        dailyAmount: '123.45',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: new Date().toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -114,16 +104,14 @@ describe('Edge Cases and Error Scenarios', () => {
     it('should handle same-day purchase correctly', async () => {
       const today = new Date();
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.00',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '100.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: today.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: today.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -135,16 +123,14 @@ describe('Edge Cases and Error Scenarios', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 5);
 
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '2.00',
-          bagWeightUnit: 'kg' as const,
-          dailyAmount: '100.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: futureDate.toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '2.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: futureDate.toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
@@ -157,48 +143,33 @@ describe('Edge Cases and Error Scenarios', () => {
     it('should prevent creating dry food with wet food fields', async () => {
       const { primary, testPet } = await setupUserAndPet();
 
-      const invalidData = {
-        numberOfUnits: '12',
-        weightPerUnit: '85',
-        wetWeightUnit: 'grams',
-        wetDailyAmountUnit: 'grams',
-        datePurchased: '2024-01-01',
-      };
-
       await expect(
         FoodService.createDryFoodEntry(
-            testPet.id,
-            primary.id,
-            makeInvalidDryFoodData({
-              numberOfUnits: '12',
-              weightPerUnit: '85',
-              wetWeightUnit: 'grams',
-              wetDailyAmountUnit: 'grams',
-            }) as unknown as DryFoodFormData
-          )
+          testPet.id,
+          primary.id,
+          makeInvalidDryFoodData({
+            numberOfUnits: '12',
+            weightPerUnit: '85',
+            wetWeightUnit: 'grams',
+            wetDailyAmountUnit: 'grams',
+          }) as unknown as DryFoodFormData
+        )
       ).rejects.toThrow(BadRequestError);
     });
 
     it('should prevent creating wet food with dry food fields', async () => {
       const { primary, testPet } = await setupUserAndPet();
 
-      const invalidData = {
-        bagWeight: '2.0',
-        bagWeightUnit: 'kg',
-        dryDailyAmountUnit: 'grams',
-        datePurchased: '2024-01-01',
-      };
-
       await expect(
         FoodService.createWetFoodEntry(
-            testPet.id,
-            primary.id,
-            makeInvalidWetFoodData({
-              bagWeight: '2.0',
-              bagWeightUnit: 'kg',
-              dryDailyAmountUnit: 'grams',
-            }) as unknown as WetFoodFormData
-          )
+          testPet.id,
+          primary.id,
+          makeInvalidWetFoodData({
+            bagWeight: '2.0',
+            bagWeightUnit: 'kg',
+            dryDailyAmountUnit: 'grams',
+          }) as unknown as WetFoodFormData
+        )
       ).rejects.toThrow(BadRequestError);
     });
   });
@@ -224,13 +195,13 @@ describe('Edge Cases and Error Scenarios', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 30);
 
-      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, {
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({
         bagWeight: '1.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
         dryDailyAmountUnit: 'grams',
         datePurchased: pastDate.toISOString().split('T')[0],
-      });
+      }));
 
       const promises = Array.from({ length: 3 }, () => FoodService.processEntryForResponse(created));
 
@@ -247,14 +218,7 @@ describe('Edge Cases and Error Scenarios', () => {
       const { primary, testPet } = await setupUserAndPet();
 
       const createPromises = Array.from({ length: 10 }, (_, i) => {
-        const dryFoodData = {
-          brandName: `Brand ${i}`,
-          bagWeight: '2.0',
-          bagWeightUnit: 'kg',
-          dailyAmount: '100',
-          dryDailyAmountUnit: 'grams',
-          datePurchased: '2024-01-01',
-        } as const;
+        const dryFoodData = makeDryFoodData({ brandName: `Brand ${i}` });
         return FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
       });
 
@@ -303,25 +267,15 @@ describe('Edge Cases and Error Scenarios', () => {
 
   describe('Unit Conversion Edge Cases', () => {
     it('should handle very small unit conversions accurately', async () => {
-      const wetFoodEntry = {
-        id: randomUUID(),
-        petId: randomUUID(),
-        foodType: 'wet' as const,
+      const wetFoodEntry = makeWetFoodEntry({
         numberOfUnits: 1,
         weightPerUnit: '0.01',
-        wetWeightUnit: 'oz' as const,
+        wetWeightUnit: 'oz',
         dailyAmount: '0.005',
-        wetDailyAmountUnit: 'oz' as const,
+        wetDailyAmountUnit: 'oz',
         datePurchased: new Date().toISOString().split('T')[0],
         isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        brandName: null,
-        productName: null,
-        bagWeight: null,
-        bagWeightUnit: null,
-        dryDailyAmountUnit: null,
-      };
+      });
 
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
 
@@ -330,16 +284,14 @@ describe('Edge Cases and Error Scenarios', () => {
     });
 
     it('should handle mixed unit systems correctly', async () => {
-      const dryFoodEntry = {
-        ...makeDryFoodEntry({
-          bagWeight: '1.00',
-          bagWeightUnit: 'pounds' as const,
-          dailyAmount: '50.00',
-          dryDailyAmountUnit: 'grams' as const,
-          datePurchased: new Date().toISOString().split('T')[0],
-          isActive: true,
-        }),
-      };
+      const dryFoodEntry = makeDryFoodEntry({
+        bagWeight: '1.00',
+        bagWeightUnit: 'pounds',
+        dailyAmount: '50.00',
+        dryDailyAmountUnit: 'grams',
+        datePurchased: new Date().toISOString().split('T')[0],
+        isActive: true,
+      });
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
