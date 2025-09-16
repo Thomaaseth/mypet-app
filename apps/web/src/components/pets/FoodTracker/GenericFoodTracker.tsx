@@ -128,8 +128,6 @@ export function GenericFoodTracker<TEntry, TFormData>({
 
   // Initial loading state - show appropriate skeleton based on what we expect
   if (isLoading) {
-    // During loading, we can't know the final count, but we can make it smarter
-    // Show a skeleton that matches the most common case (1 entry) rather than assuming 2
     return (
       <div className="space-y-6">
         {/* Header with Add Button */}

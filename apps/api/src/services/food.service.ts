@@ -16,7 +16,7 @@ import {
 } from '../middleware/errors';
 
 
-type DryFoodFormData = {
+export type DryFoodFormData = {
   brandName?: string;
   productName?: string;
   bagWeight: string;
@@ -26,7 +26,7 @@ type DryFoodFormData = {
   datePurchased: string;
 };
 
-type WetFoodFormData = {
+export type WetFoodFormData = {
   brandName?: string;
   productName?: string;
   numberOfUnits: string; // String from form
@@ -42,6 +42,13 @@ export class FoodService {
   static async processEntryForResponse(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
     return await this.updateFoodActiveStatus(entry);
 }
+
+  private static validateUUID(id: string, fieldName: string = 'ID'): void {
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      throw new BadRequestError(`Invalid ${fieldName} format`);
+    }
+  }
+
   private static async verifyPetOwnership(petId: string, userId: string): Promise<void> {
     const [pet] = await db
       .select()
@@ -126,6 +133,7 @@ export class FoodService {
 
   static async updateDryFoodEntry(petId: string, foodId: string, userId: string, data: Partial<DryFoodFormData>): Promise<DryFoodEntry> {
     try {
+      this.validateUUID(foodId, 'food entry ID')
       await this.verifyPetOwnership(petId, userId);
       
       // Get existing entry to ensure it's a dry food entry
@@ -177,6 +185,7 @@ export class FoodService {
 
   static async getDryFoodEntryById(petId: string, foodId: string, userId: string): Promise<DryFoodEntry> {
     try {
+      this.validateUUID(foodId, 'food entry ID')
       await this.verifyPetOwnership(petId, userId);
 
       const [entry] = await db
@@ -195,7 +204,7 @@ export class FoodService {
 
       return entry as DryFoodEntry;
     } catch (error) {
-      if (error instanceof NotFoundError) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
       console.error('Error fetching dry food entry:', error);
@@ -272,6 +281,8 @@ export class FoodService {
 
   static async updateWetFoodEntry(petId: string, foodId: string, userId: string, data: Partial<WetFoodFormData>): Promise<WetFoodEntry> {
     try {
+      this.validateUUID(foodId, 'food entry ID')
+
       await this.verifyPetOwnership(petId, userId);
       
       // Get existing entry to ensure it's a wet food entry
@@ -323,6 +334,8 @@ export class FoodService {
 
   static async getWetFoodEntryById(petId: string, foodId: string, userId: string): Promise<WetFoodEntry> {
     try {
+      this.validateUUID(foodId, 'food entry ID')
+
       await this.verifyPetOwnership(petId, userId);
 
       const [entry] = await db
@@ -341,7 +354,7 @@ export class FoodService {
 
       return entry as WetFoodEntry;
     } catch (error) {
-      if (error instanceof NotFoundError) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
       console.error('Error fetching wet food entry:', error);
@@ -375,6 +388,8 @@ export class FoodService {
 
   static async deleteFoodEntry(petId: string, foodId: string, userId: string): Promise<void> {
     try {
+      this.validateUUID(foodId, 'food entry ID')
+
       await this.verifyPetOwnership(petId, userId);
 
       // Check if entry exists (either type)
@@ -583,13 +598,6 @@ static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; 
 }
 
 static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
-  //   console.log('WET FOOD DEBUG:', {
-  //   dailyAmount: entry.dailyAmount,
-  //   wetDailyAmountUnit: entry.wetDailyAmountUnit,
-  //   numberOfUnits: entry.numberOfUnits,
-  //   weightPerUnit: entry.weightPerUnit,
-  //   wetWeightUnit: entry.wetWeightUnit
-  // });
   
   const today = new Date();
   const purchaseDate = new Date(entry.datePurchased);
