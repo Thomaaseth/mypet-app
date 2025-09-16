@@ -113,6 +113,7 @@ export class WeightEntriesService {
   // Get a single weight entry by ID (with ownership check)
   static async getWeightEntryById(petId: string, weightId: string, userId: string): Promise<WeightEntry> {
     try {
+      
       this.validateUUID(weightId, 'weight entry ID');
       // Verify pet ownership first
       await this.verifyPetOwnership(petId, userId);
@@ -215,7 +216,6 @@ export class WeightEntriesService {
     updateData: Partial<WeightEntryFormData>
   ): Promise<WeightEntry> {
     try {
-      this.validateUUID(weightId, 'weight entry ID');
       // First verify the entry exists and user owns the pet
       const existingEntry = await this.getWeightEntryById(petId, weightId, userId);
       const pet = await PetsService.getPetById(petId, userId);
@@ -227,7 +227,7 @@ export class WeightEntriesService {
           throw new BadRequestError('Weight must be a positive number');
         }
         
-        // NEW: Validate weight limits for updates too
+        // Validate weight limits for updates too
         this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
       }
 
@@ -277,7 +277,6 @@ export class WeightEntriesService {
   // Delete a weight entry (with ownership check)
   static async deleteWeightEntry(petId: string, weightId: string, userId: string): Promise<void> {
     try {
-      this.validateUUID(weightId, 'weight entry ID');
       // First verify the entry exists and user owns the pet
       await this.getWeightEntryById(petId, weightId, userId);
 

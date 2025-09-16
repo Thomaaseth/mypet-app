@@ -65,14 +65,17 @@ export class PetsService {
     }
   }
 
+  private static validateUUID(id: string, fieldName: string = 'ID'): void {
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      throw new BadRequestError(`Invalid ${fieldName} format`);
+    }
+  }
+
   // Get a single pet by ID (with ownership check)
   static async getPetById(petId: string, userId: string): Promise<Pet> {
     try {
 
-      // UUID validation BEFORE database query
-      if (!petId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(petId)) {
-        throw new BadRequestError('Invalid pet ID format');
-      }
+      this.validateUUID(petId, 'pet id format')
 
       const [pet] = await db
         .select()
@@ -89,7 +92,7 @@ export class PetsService {
 
       return pet;
     } catch (error) {
-      if (error instanceof NotFoundError) {
+      if (error instanceof NotFoundError|| error instanceof BadRequestError) {
         throw error;
       }
       console.error('Error fetching pet by ID:', error);
@@ -148,12 +151,7 @@ export class PetsService {
   ): Promise<Pet> {
     try {
 
-      // UUID validation BEFORE database query
-      if (!petId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(petId)) {
-        throw new BadRequestError('Invalid pet ID format');
-      }
-
-      // First verify the pet exists and belongs to the user
+      // verify the pet exists and belongs to the user
       const existingPet = await this.getPetById(petId, userId);
 
       // Validate weight if provided in update
