@@ -366,17 +366,25 @@ export class FoodService {
   static async getAllFoodEntries(petId: string, userId: string): Promise<AnyFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
-
+  
+      // Fetch ALL entries (both active and inactive) - just like individual methods
       const result = await db
         .select()
         .from(foodEntries)
         .where(and(
           eq(foodEntries.petId, petId),
-          eq(foodEntries.isActive, true)
         ))
         .orderBy(desc(foodEntries.createdAt));
-
-      return result as AnyFoodEntry[];
+  
+      // Process each entry to update isActive status
+      const processedEntries = await Promise.all(
+        result.map(async (entry) => {
+          const entryWithCalculations = entry as AnyFoodEntry;
+          return await this.updateFoodActiveStatus(entryWithCalculations) as AnyFoodEntry;
+        })
+      );
+  
+      return processedEntries;
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -385,6 +393,7 @@ export class FoodService {
       throw new BadRequestError('Failed to fetch food entries');
     }
   }
+
 
   static async deleteFoodEntry(petId: string, foodId: string, userId: string): Promise<void> {
     try {
