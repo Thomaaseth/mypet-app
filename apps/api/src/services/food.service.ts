@@ -429,26 +429,31 @@ export class FoodService {
     }
   }
 
-static async getFinishedFoodEntries(petId: string, userId: string, foodType?: 'dry' | 'wet'): Promise<(DryFoodEntry | WetFoodEntry)[]> {
+  static async getFinishedFoodEntries(
+    petId: string, 
+    userId: string, 
+    foodType?: 'dry' | 'wet',
+    limit: number = 5
+  ): Promise<(DryFoodEntry | WetFoodEntry)[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
-
+  
       const whereConditions = [
         eq(foodEntries.petId, petId),
-        eq(foodEntries.isActive, false) // Only finished entries
+        eq(foodEntries.isActive, false)
       ];
-
+  
       if (foodType) {
         whereConditions.push(eq(foodEntries.foodType, foodType));
       }
-
+  
       const result = await db
         .select()
         .from(foodEntries)
         .where(and(...whereConditions))
-        .orderBy(desc(foodEntries.updatedAt)) // Most recently finished first
-        .limit(5); // Only get last 5 finished items
-
+        .orderBy(desc(foodEntries.updatedAt))
+        .limit(limit); // Frontend limit, not data constraint
+  
       return result as (DryFoodEntry | WetFoodEntry)[];
     } catch (error) {
       console.error('Error fetching finished food entries:', error);
@@ -465,94 +470,26 @@ static async getFinishedFoodEntries(petId: string, userId: string, foodType?: 'd
       calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
     }
   
-    if (calculations.remainingDays <= 0 && entry.isActive === true) {
-      try {
-        const result = await db.transaction(async (tx) => {
-          // Update the entry status (WHERE condition handles race conditions)
-          const [updatedEntry] = await tx
-            .update(foodEntries)
-            .set({ 
-              isActive: false,
-              updatedAt: new Date()
-            })
-            .where(and(
-              eq(foodEntries.id, entry.id),
-              eq(foodEntries.isActive, true) // Only update if still active
-            ))
-            .returning();
+    // Simple status update - no cleanup logic
+    if (calculations.remainingDays <= 0 && entry.isActive) {
+      const [updatedEntry] = await db
+        .update(foodEntries)
+        .set({ 
+          isActive: false,
+          updatedAt: new Date()
+        })
+        .where(eq(foodEntries.id, entry.id))
+        .returning();
   
-          // If no entry was updated, it was already inactive - get current state
-          if (!updatedEntry) {
-            const [currentEntry] = await tx
-              .select()
-              .from(foodEntries)
-              .where(eq(foodEntries.id, entry.id));
-            return currentEntry || entry;
-          }
-  
-          console.log(`Marked ${entry.foodType} food entry ${entry.id} as finished`);
-          await this.cleanupFinishedEntriesInTransaction(tx, entry.petId, entry.foodType);
-          return updatedEntry;
-        });
-  
-        return { ...result, ...calculations } as DryFoodEntry | WetFoodEntry;
-      } catch (error) {
-        console.error(`Failed to update entry ${entry.id}:`, error);
-        return { ...entry, ...calculations };
-      }
+      console.log(`Marked ${entry.foodType} food entry ${entry.id} as finished`);
+      
+      return { 
+        ...updatedEntry, 
+        ...calculations 
+      } as DryFoodEntry | WetFoodEntry;
     }
     
     return { ...entry, ...calculations };
-  }
-
-  private static async cleanupFinishedEntriesInTransaction(
-    tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
-    petId: string, 
-    foodType: 'dry' | 'wet'
-  ): Promise<void> {
-    try {
-      console.log(`Starting cleanup for ${foodType} food entries for pet ${petId}`);
-  
-      // Get all finished entries for this pet and food type, ordered by updatedAt
-      // Using the transaction ensures the most recent state including current update
-      const finishedEntries = await tx
-        .select({
-          id: foodEntries.id,
-          updatedAt: foodEntries.updatedAt,
-        })
-        .from(foodEntries)
-        .where(and(
-          eq(foodEntries.petId, petId),
-          eq(foodEntries.foodType, foodType),
-          eq(foodEntries.isActive, false) // Finished items have isActive: false
-        ))
-        .orderBy(desc(foodEntries.updatedAt));
-  
-      console.log(`Found ${finishedEntries.length} finished ${foodType} entries:`, finishedEntries);
-  
-      // If more than 5 finished entries, delete the oldest ones
-      if (finishedEntries.length > 5) {
-        const entriesToDelete = finishedEntries.slice(5); // Keep first 5, delete rest
-        
-        console.log(`Will delete ${entriesToDelete.length} entries:`, entriesToDelete.map((entry) => entry.id));
-        
-        // Delete entries within the transaction
-        for (const entry of entriesToDelete) {
-          await tx
-            .delete(foodEntries)
-            .where(eq(foodEntries.id, entry.id));
-          
-          console.log(`Deleted entry ${entry.id}`);
-        }
-        
-        console.log(`Cleaned up ${entriesToDelete.length} old finished ${foodType} food entries for pet ${petId}`);
-      } else {
-        console.log(`No cleanup needed - only ${finishedEntries.length} finished ${foodType} entries for pet ${petId}`);
-      }
-    } catch (error) {
-      console.error('Error cleaning up finished entries:', error);
-      throw error; // Let transaction handle the rollback
-    }
   }
 
 // CALCULATION METHODS
