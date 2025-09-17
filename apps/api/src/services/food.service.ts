@@ -494,7 +494,8 @@ static async getFinishedFoodEntries(petId: string, userId: string, foodType?: 'd
         ))
         .orderBy(desc(foodEntries.updatedAt));
 
-      console.log(`Found ${finishedEntries.length} finished ${foodType} entries`);
+        console.log(`🔍 Found ${finishedEntries.length} finished ${foodType} entries:`, 
+          finishedEntries.map(e => ({ id: e.id, updatedAt: e.updatedAt })));
 
       // If more than 5 finished entries, delete the oldest ones
       if (finishedEntries.length > 5) {
@@ -506,6 +507,7 @@ static async getFinishedFoodEntries(petId: string, userId: string, foodType?: 'd
           await db
             .delete(foodEntries)
             .where(eq(foodEntries.id, entry.id));
+            console.log(`🗑️  Deleted entry ${entry.id}`);
         }
         
         console.log(`✅ Cleaned up ${entriesToDelete.length} old finished ${foodType} food entries for pet ${petId}`);
