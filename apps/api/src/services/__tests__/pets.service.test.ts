@@ -121,10 +121,14 @@ describe('PetsService', () => {
     });
 
     it('should handle empty userId gracefully', async () => {
-      const result = await PetsService.getUserPets('');
-
-      expect(result).toEqual([]);
+      // const result = await PetsService.getUserPets('');
+      
+      await expect(
+        PetsService.getUserPets('')
+      ).rejects.toThrow(BadRequestError);
     });
+      // expect(result).toEqual([]);
+    // });
   });
 
   describe('getPetById', () => {
@@ -241,7 +245,7 @@ describe('PetsService', () => {
       } as NewPet;
 
       await expect(PetsService.createPet(invalidData)).rejects.toThrow(BadRequestError);
-      await expect(PetsService.createPet(invalidData)).rejects.toThrow('Pet name and user ID are required');
+      await expect(PetsService.createPet(invalidData)).rejects.toThrow('Pet name, user ID, and animal type are required');
     });
 
     it('should throw BadRequestError when userId is missing', async () => {

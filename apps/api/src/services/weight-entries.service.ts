@@ -24,6 +24,46 @@ export class WeightEntriesService {
     }
   }
 
+  // Input validation helper
+  private static validateInputs(entryData: Partial<WeightEntryFormData>, isUpdate = false): void {
+    // Required fields validation (only for create)
+    if (!isUpdate) {
+      if (!entryData.weight || !entryData.date) {
+        throw new BadRequestError('Weight and date are required');
+      }
+    }
+
+    // Weight validation (if provided)
+    if (entryData.weight !== undefined) {
+      const weightValue = parseFloat(entryData.weight.toString());
+      if (isNaN(weightValue) || weightValue <= 0) {
+        throw new BadRequestError('Weight must be a positive number');
+      }
+    }
+
+    // Date validation (if provided)
+    if (entryData.date !== undefined) {
+      const entryDate = new Date(entryData.date);
+      if (isNaN(entryDate.getTime())) {
+        throw new BadRequestError('Invalid date format');
+      }
+
+      // Future date validation
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      
+      if (entryDate > today) {
+        throw new BadRequestError('Date cannot be in the future');
+      }
+    }
+  }
+
+  // business rules validation helper
+  private static validateBusinessRules(entryData: WeightEntryFormData, pet: any): void {
+    const weightValue = parseFloat(entryData.weight.toString());
+    this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
+  }
+
   // Validate weight based on animal type and unit
   private static validateWeightLimits(weight: number, animalType: string, weightUnit: WeightUnit): void {
     // Convert weight to kg for consistent validation
@@ -80,7 +120,7 @@ export class WeightEntriesService {
 
     if (existingEntry.length > 0) {
       throw new BadRequestError(
-        `Weight entry already exists for ${date}. Please use update instead or choose a different date.`
+        `Weight entry already exists for ${date}. Use update to modify existing entry.`
       );
     }
   }
@@ -113,7 +153,6 @@ export class WeightEntriesService {
   // Get a single weight entry by ID (with ownership check)
   static async getWeightEntryById(petId: string, weightId: string, userId: string): Promise<WeightEntry> {
     try {
-      
       this.validateUUID(weightId, 'weight entry ID');
       // Verify pet ownership first
       await this.verifyPetOwnership(petId, userId);
@@ -140,79 +179,44 @@ export class WeightEntriesService {
     }
   }
 
-  // Create a new weight entry with proper business logic validation
+  // Create a new weight entry 
   static async createWeightEntry(petId: string, userId: string, entryData: WeightEntryFormData): Promise<WeightEntry> {
     try {
-      // Verify pet ownership first and get pet data for validation
-      const pet = await PetsService.getPetById(petId, userId);
-
-      // Validate required fields
-      if (!entryData.weight || !entryData.date) {
-        throw new BadRequestError('Weight and date are required');
-      }
-
-      // Validate weight is a positive number
-      const weightValue = parseFloat(entryData.weight.toString());
-      if (isNaN(weightValue) || weightValue <= 0) {
-        throw new BadRequestError('Weight must be a positive number');
-      }
-
-      // Validate date format
-      const entryDate = new Date(entryData.date);
-      if (isNaN(entryDate.getTime())) {
-        throw new BadRequestError('Invalid date format');
-      }
-      // Validate date is not in the future
-      const today = new Date();
-      today.setHours(23, 59, 59, 999); // End of today
+      // Input validation
+      this.validateInputs(entryData, false);
       
-      if (entryDate > today) {
-        throw new BadRequestError('Date cannot be in the future');
-      }
+      // Authorization check
+      const pet = await PetsService.getPetById(petId, userId);
+      
+      // Business logic validation
+      this.validateBusinessRules(entryData, pet);
+      
+      //  Database operations
+      await this.checkDuplicateDate(petId, entryData.date);
+      
+      // Execute transaction
+      const newEntryData: NewWeightEntry = {
+        petId,
+        weight: entryData.weight,
+        date: entryData.date,
+      };
 
-      // Check for duplicate entries on the same date (prevent duplicates)
-    const existingEntry = await db
-    .select()
-    .from(weightEntries)
-    .where(and(
-      eq(weightEntries.petId, petId),
-      eq(weightEntries.date, entryData.date)
-    ))
-    .limit(1);
-
-    if (existingEntry.length > 0) {
-      throw new BadRequestError(
-        `Weight entry already exists for ${entryData.date}. Use update to modify existing entry.`
-      );
-    }
-
-    // Validate weight limits based on animal type and weight unit
-    this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
-
-     
-    // Create new entry if none exists for this date
-    const newEntryData: NewWeightEntry = {
-      petId,
-      weight: entryData.weight,
-      date: entryData.date,
-    };
-
-    const [newEntry] = await db
-      .insert(weightEntries)
-      .values(newEntryData)
-      .returning();
+      const [newEntry] = await db
+        .insert(weightEntries)
+        .values(newEntryData)
+        .returning();
 
       return newEntry;
     } catch (error) {
-      console.error('Error creating weight entry:', error);
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
+      console.error('Error creating weight entry:', error);
       throw new BadRequestError('Failed to create weight entry');
     }
   }
 
-  // Update a weight entry (with ownership check and validation)
+  // Update a weight entry
   static async updateWeightEntry(
     petId: string, 
     weightId: string, 
@@ -220,38 +224,30 @@ export class WeightEntriesService {
     updateData: Partial<WeightEntryFormData>
   ): Promise<WeightEntry> {
     try {
-      // First verify the entry exists and user owns the pet
+      // Input validation
+      this.validateInputs(updateData, true);
+
+      // Check if at least one field is provided
+      if (Object.keys(updateData).length === 0) {
+        throw new BadRequestError('At least one field must be provided for update');
+      }
+      
+      // Authorization & existence check
       const existingEntry = await this.getWeightEntryById(petId, weightId, userId);
       const pet = await PetsService.getPetById(petId, userId);
 
-      // Validate weight if provided
+      // Business logic validation for weight
       if (updateData.weight !== undefined) {
         const weightValue = parseFloat(updateData.weight.toString());
-        if (isNaN(weightValue) || weightValue <= 0) {
-          throw new BadRequestError('Weight must be a positive number');
-        }
-        
-        // Validate weight limits for updates too
         this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
       }
 
-      // Validate date if provided
-      if (updateData.date !== undefined) {
-        const entryDate = new Date(updateData.date);
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        
-        if (entryDate > today) {
-          throw new BadRequestError('Date cannot be in the future');
-        }
-
-        // Check for duplicate dates when updating (excluding current entry)
-        if (updateData.date !== existingEntry.date) {
-          await this.checkDuplicateDate(petId, updateData.date);
-        }
+      // Database operations (duplicate check)
+      if (updateData.date !== undefined && updateData.date !== existingEntry.date) {
+        await this.checkDuplicateDate(petId, updateData.date);
       }
 
-      // Update the entry
+      // Execute update
       const [updatedEntry] = await db
         .update(weightEntries)
         .set({
@@ -270,10 +266,10 @@ export class WeightEntriesService {
 
       return updatedEntry;
     } catch (error) {
-      console.error('Error updating weight entry:', error);
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
+      console.error('Error updating weight entry:', error);
       throw new BadRequestError('Failed to update weight entry');
     }
   }
@@ -297,10 +293,10 @@ export class WeightEntriesService {
         throw new NotFoundError('Weight entry not found');
       }
     } catch (error) {
-      console.error('Error deleting weight entry:', error);
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
+      console.error('Error deleting weight entry:', error);
       throw new BadRequestError('Failed to delete weight entry');
     }
   }
