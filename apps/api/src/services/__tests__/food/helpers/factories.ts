@@ -52,11 +52,12 @@ export function makeInvalidWetFoodData(
   ): Record<string, unknown> {
     return {
       brandName: 'Test Brand',
-      productName: 'Test Food',
-      bagWeight: '2.0',
-      bagWeightUnit: 'kg',
-      dailyAmount: '100',
-      dryDailyAmountUnit: 'grams',
+      productName: 'Test Food', 
+      numberOfUnits: '12',
+      weightPerUnit: '85',
+      wetWeightUnit: 'grams',
+      dailyAmount: '170',
+      wetDailyAmountUnit: 'grams',
       datePurchased: '2024-01-01',
       ...overrides,
     };

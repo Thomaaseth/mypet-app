@@ -140,37 +140,54 @@ describe('Edge Cases and Error Scenarios', () => {
   });
 
   describe('Database Constraint Validation', () => {
-    it('should prevent creating dry food with wet food fields', async () => {
+    it('should ignore wet food fields when creating dry food', async () => {    
       const { primary, testPet } = await setupUserAndPet();
-
-      await expect(
-        FoodService.createDryFoodEntry(
-          testPet.id,
-          primary.id,
-          makeInvalidDryFoodData({
-            numberOfUnits: '12',
-            weightPerUnit: '85',
-            wetWeightUnit: 'grams',
-            wetDailyAmountUnit: 'grams',
-          }) as unknown as DryFoodFormData
-        )
-      ).rejects.toThrow(BadRequestError);
+    
+      const result = await FoodService.createDryFoodEntry(
+        testPet.id,
+        primary.id,
+        makeInvalidDryFoodData({
+          numberOfUnits: '12',
+          weightPerUnit: '85',
+          wetWeightUnit: 'grams',
+          wetDailyAmountUnit: 'grams',
+        }) as unknown as DryFoodFormData
+      );
+    
+      // Should succeed and create valid dry food entry
+      expect(result.foodType).toBe('dry');
+      expect(result.bagWeight).toBe('2.00');
+      expect(result.bagWeightUnit).toBe('kg');
+      
+      // Wet food fields should be null (ignored)
+      expect(result.numberOfUnits).toBeNull();
+      expect(result.weightPerUnit).toBeNull();
+      expect(result.wetWeightUnit).toBeNull();
+      expect(result.wetDailyAmountUnit).toBeNull();
     });
-
-    it('should prevent creating wet food with dry food fields', async () => {
+    
+    it('should ignore dry food fields when creating wet food', async () => {    
       const { primary, testPet } = await setupUserAndPet();
-
-      await expect(
-        FoodService.createWetFoodEntry(
-          testPet.id,
-          primary.id,
-          makeInvalidWetFoodData({
-            bagWeight: '2.0',
-            bagWeightUnit: 'kg',
-            dryDailyAmountUnit: 'grams',
-          }) as unknown as WetFoodFormData
-        )
-      ).rejects.toThrow(BadRequestError);
+    
+      const result = await FoodService.createWetFoodEntry(
+        testPet.id,
+        primary.id,
+        makeInvalidWetFoodData({
+          bagWeight: '2.0',
+          bagWeightUnit: 'kg',
+          dryDailyAmountUnit: 'grams',
+        }) as unknown as WetFoodFormData
+      );
+    
+      // Should succeed and create valid wet food entry
+      expect(result.foodType).toBe('wet');
+      expect(result.numberOfUnits).toBe(12);
+      expect(result.wetWeightUnit).toBe('grams');
+      
+      // Dry food fields should be null (ignored)  
+      expect(result.bagWeight).toBeNull();
+      expect(result.bagWeightUnit).toBeNull();
+      expect(result.dryDailyAmountUnit).toBeNull();
     });
   });
 

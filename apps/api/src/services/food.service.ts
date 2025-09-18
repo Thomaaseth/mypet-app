@@ -617,7 +617,7 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
       throw new BadRequestError('Purchase date cannot be in the future');
     }
   }
-
+  
   private static validatePartialDryFoodData(data: Partial<DryFoodFormData>): void {
     if (data.bagWeight !== undefined) {
       const bagWeight = parseFloat(data.bagWeight);
@@ -680,6 +680,7 @@ static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; 
       throw new BadRequestError('Purchase date cannot be in the future');
     }
   }
+
 
   private static validatePartialWetFoodData(data: Partial<WetFoodFormData>): void {
     if (data.numberOfUnits !== undefined) {
