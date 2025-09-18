@@ -29,6 +29,7 @@ export async function setupMultiplePetsWithDifferentUnits() {
     name: 'KG Pet',
     animalType: 'cat',
     weightUnit: 'kg',
+    isActive: true,
   }).returning();
 
   const [lbsPet] = await db.insert(schema.pets).values({
@@ -36,6 +37,7 @@ export async function setupMultiplePetsWithDifferentUnits() {
     name: 'LBS Pet',
     animalType: 'dog',
     weightUnit: 'lbs',
+    isActive: true,
   }).returning();
 
   return { primary, kgPet, lbsPet };

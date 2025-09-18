@@ -157,8 +157,12 @@ export class WeightEntriesService {
         throw new BadRequestError('Weight must be a positive number');
       }
 
-      // Validate date is not in the future
+      // Validate date format
       const entryDate = new Date(entryData.date);
+      if (isNaN(entryDate.getTime())) {
+        throw new BadRequestError('Invalid date format');
+      }
+      // Validate date is not in the future
       const today = new Date();
       today.setHours(23, 59, 59, 999); // End of today
       
@@ -166,7 +170,7 @@ export class WeightEntriesService {
         throw new BadRequestError('Date cannot be in the future');
       }
 
-      // NEW: Check for duplicate entries on the same date (prevent duplicates)
+      // Check for duplicate entries on the same date (prevent duplicates)
     const existingEntry = await db
     .select()
     .from(weightEntries)

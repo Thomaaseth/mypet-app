@@ -427,8 +427,7 @@ describe('WeightEntriesService', () => {
       });
   
       it('should handle different weight units correctly', async () => {
-        const { kgPet, lbsPet } = await setupMultiplePetsWithDifferentUnits();
-        const { primary } = await setupUserAndPet();
+        const { primary,kgPet, lbsPet } = await setupMultiplePetsWithDifferentUnits();
   
         await WeightEntriesService.createWeightEntry(kgPet.id, primary.id, makeWeightEntryData({
           weight: '5.50',
