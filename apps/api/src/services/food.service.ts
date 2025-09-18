@@ -417,7 +417,7 @@ export class FoodService {
         .delete(foodEntries)
         .where(eq(foodEntries.id, foodId));
 
-        console.log(`Permanently deleted ${entry.foodType} food entry ${foodId}`);
+        // console.log(`Permanently deleted ${entry.foodType} food entry ${foodId}`);
 
 
     } catch (error) {
@@ -481,7 +481,7 @@ export class FoodService {
         .where(eq(foodEntries.id, entry.id))
         .returning();
   
-      console.log(`Marked ${entry.foodType} food entry ${entry.id} as finished`);
+      // console.log(`Marked ${entry.foodType} food entry ${entry.id} as finished`);
       
       return { 
         ...updatedEntry, 
