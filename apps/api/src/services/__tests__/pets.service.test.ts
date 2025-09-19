@@ -120,15 +120,11 @@ describe('PetsService', () => {
       expect(result[0].userId).toBe(primary.id);
     });
 
-    it('should handle empty userId gracefully', async () => {
-      // const result = await PetsService.getUserPets('');
-      
+    it('should throw BadRequestError when userId is empty', async () => {      
       await expect(
         PetsService.getUserPets('')
       ).rejects.toThrow(BadRequestError);
     });
-      // expect(result).toEqual([]);
-    // });
   });
 
   describe('getPetById', () => {

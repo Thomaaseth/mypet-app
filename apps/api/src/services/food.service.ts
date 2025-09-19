@@ -89,9 +89,14 @@ export class FoodService {
       if (isNaN(bagWeight) || bagWeight <= 0) {
         throw new BadRequestError('Bag weight must be a positive number');
       }
-      if (bagWeight > 100) { // Reasonable upper limit
-        throw new BadRequestError('Bag weight seems unreasonably large (max 100kg/pounds)');
-      }
+
+    // Unit-specific upper limits
+    if (data.bagWeightUnit === 'kg' && bagWeight > 50) {
+      throw new BadRequestError('Bag weight seems unreasonably large (max 50kg)');
+    }
+    if (data.bagWeightUnit === 'pounds' && bagWeight > 110) { // ~50kg
+      throw new BadRequestError('Bag weight seems unreasonably large (max 110 pounds)');
+    }
     }
 
     if (data.dailyAmount !== undefined) {
@@ -103,8 +108,8 @@ export class FoodService {
       if (data.dryDailyAmountUnit === 'grams' && dailyAmount > 2000) {
         throw new BadRequestError('Daily amount seems unreasonably large (max 2000 grams)');
       }
-      if (data.dryDailyAmountUnit === 'cups' && dailyAmount > 20) {
-        throw new BadRequestError('Daily amount seems unreasonably large (max 20 cups)');
+      if (data.dryDailyAmountUnit === 'cups' && dailyAmount > 16) {
+        throw new BadRequestError('Daily amount seems unreasonably large (max 16 cups)');
       }
     }
 
