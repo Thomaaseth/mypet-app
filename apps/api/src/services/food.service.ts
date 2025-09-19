@@ -614,7 +614,7 @@ export class FoodService {
     }
   }
 
-  private static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
+  static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
     let calculations;
     
     if (entry.foodType === 'dry') {

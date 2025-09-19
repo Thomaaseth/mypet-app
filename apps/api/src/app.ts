@@ -8,6 +8,7 @@ import { config } from "./config";
 
 import petRoutes from '@/routes/pets.routes';
 import foodRoutes from '@/routes/food.routes';
+import adminRoutes from '@/routes/admin.routes';
 
 export const app = express();
 
@@ -39,5 +40,9 @@ app.get('/api/health', (req, res, next) => {
 app.get('/api/ready', (req, res, next) => {
     Promise.resolve(readinessCheck(req, res)).catch(next);
 });
+
+// ADMIN ROUTES
+app.use('/api/admin', adminRoutes);
+
  
 app.use(errorMiddleware);
