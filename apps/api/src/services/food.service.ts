@@ -39,6 +39,30 @@ export class FoodService {
     return await this.updateFoodActiveStatus(entry);
   }
 
+  // Update computed fields
+  static async updateFoodComputedFields(entry: DryFoodEntry | WetFoodEntry): Promise<void> {
+    let calculations;
+    
+    if (entry.foodType === 'dry') {
+      calculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
+    } else {
+      calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
+    }
+
+    // Update computed fields AND isActive status in one query
+    await db
+      .update(foodEntries)
+      .set({ 
+        remainingDays: calculations.remainingDays,
+        remainingWeight: calculations.remainingWeight.toString(),
+        depletionDate: calculations.depletionDate.toISOString().split('T')[0], // Convert Date to string
+        isActive: calculations.remainingDays > 0,
+        computedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(foodEntries.id, entry.id));
+  }
+
   // Centralized input validation helpers
   private static validateCommonInputs(data: { datePurchased?: string; brandName?: string; productName?: string }): void {
     // Date format validation
@@ -199,6 +223,44 @@ export class FoodService {
     }
   }
 
+  // HYBRID GETTER HELPER
+  private static applyHybridCalculations(entry: DryFoodEntry | WetFoodEntry): DryFoodEntry | WetFoodEntry {
+    const lastComputedTime = entry.computedAt || entry.createdAt;
+
+    const hoursOld = (Date.now() - lastComputedTime.getTime()) / (1000 * 60 * 60);
+    
+    // Recalculate if data is >6 hours old OR if showing as nearly depleted
+    if (hoursOld > 6 || (entry.remainingDays !== null && entry.remainingDays <= 1)) {
+      let liveCalculations;
+      
+      if (entry.foodType === 'dry') {
+        liveCalculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
+      } else {
+        liveCalculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
+      }
+      
+      // Background update (non-blocking) if status changed
+      const newIsActive = liveCalculations.remainingDays > 0;
+      if (entry.isActive !== newIsActive || hoursOld > 24) {
+        setImmediate(() => {
+          this.updateFoodComputedFields(entry).catch(console.error);
+        });
+      }
+      
+      // Convert number to string and Date to string for type compatibility
+      return {
+        ...entry,
+        remainingDays: liveCalculations.remainingDays,
+        remainingWeight: liveCalculations.remainingWeight.toString(),
+        depletionDate: liveCalculations.depletionDate.toISOString().split('T')[0],
+        isActive: newIsActive
+      } as DryFoodEntry | WetFoodEntry; // Explicit cast to fix type issues
+    }
+    
+    // Use cached computed values (fast path)
+    return entry;
+  }
+
   // DRY FOOD METHODS //
   // Create DRY food entry
   static async createDryFoodEntry(petId: string, userId: string, data: DryFoodFormData): Promise<DryFoodEntry> {
@@ -230,7 +292,18 @@ export class FoodService {
         })
         .returning();
 
-      return newEntry as DryFoodEntry;
+      // Immediately compute and store calculated fields
+      const entryWithComputed = newEntry as DryFoodEntry;
+      await this.updateFoodComputedFields(entryWithComputed);
+      
+      // Return entry with fresh computed fields
+      const calculations = this.calculateDryFoodRemaining(entryWithComputed);
+      return {
+        ...entryWithComputed,
+        remainingDays: calculations.remainingDays,
+        remainingWeight: calculations.remainingWeight.toString(),
+        depletionDate: calculations.depletionDate.toISOString().split('T')[0],
+      };
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
@@ -240,6 +313,7 @@ export class FoodService {
     }
   }
 
+  // Clean getter with hybrid approach
   static async getDryFoodEntries(petId: string, userId: string): Promise<DryFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -253,14 +327,10 @@ export class FoodService {
         ))
         .orderBy(desc(foodEntries.createdAt));
 
-      // Process each entry to update isActive
-      const processedEntries = await Promise.all(
-        result.map(async (entry) => {
-          const entryWithCalculations = entry as DryFoodEntry;
-          return await this.updateFoodActiveStatus(entryWithCalculations) as DryFoodEntry;
-        })
-      )
-      return processedEntries;
+      // Apply hybrid calculations instead of updateFoodActiveStatus
+      return result.map(entry => 
+        this.applyHybridCalculations(entry as DryFoodEntry)
+      ) as DryFoodEntry[];
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -314,7 +384,12 @@ export class FoodService {
         throw new NotFoundError('Dry food entry not found');
       }
 
-      return updatedEntry as DryFoodEntry;
+      // Recalculate computed fields after update
+      const entryWithComputed = updatedEntry as DryFoodEntry;
+      await this.updateFoodComputedFields(entryWithComputed);
+      
+      // Return with fresh calculations
+      return this.applyHybridCalculations(entryWithComputed) as DryFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
@@ -343,7 +418,8 @@ export class FoodService {
         throw new NotFoundError('Dry food entry not found');
       }
 
-      return entry as DryFoodEntry;
+      // Apply hybrid calculations
+      return this.applyHybridCalculations(entry as DryFoodEntry) as DryFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
@@ -360,7 +436,7 @@ export class FoodService {
       // Input validation
       this.validateWetFoodInputs(data, false);
       
-      // uthorization check
+      // Authorization check
       await this.verifyPetOwnership(petId, userId);
       
       // Execute db transaction
@@ -384,7 +460,18 @@ export class FoodService {
         })
         .returning();
 
-      return newEntry as WetFoodEntry;
+      // Immediately compute and store calculated fields
+      const entryWithComputed = newEntry as WetFoodEntry;
+      await this.updateFoodComputedFields(entryWithComputed);
+      
+      // Return entry with fresh computed fields
+      const calculations = this.calculateWetFoodRemaining(entryWithComputed);
+      return {
+        ...entryWithComputed,
+        remainingDays: calculations.remainingDays,
+        remainingWeight: calculations.remainingWeight.toString(),
+        depletionDate: calculations.depletionDate.toISOString().split('T')[0],
+      };
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
@@ -394,6 +481,7 @@ export class FoodService {
     }
   }
 
+  // Clean getter with hybrid approach
   static async getWetFoodEntries(petId: string, userId: string): Promise<WetFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -407,14 +495,10 @@ export class FoodService {
         ))
         .orderBy(desc(foodEntries.createdAt));
 
-      // Process each entry to update isActive status and add calculations
-      const processedEntries = await Promise.all(
-        result.map(async (entry) => {
-          const entryWithCalculations = entry as WetFoodEntry;
-          return await this.updateFoodActiveStatus(entryWithCalculations) as WetFoodEntry;
-        })
-      );
-      return processedEntries;
+      // Apply hybrid calculations instead of updateFoodActiveStatus
+      return result.map(entry => 
+        this.applyHybridCalculations(entry as WetFoodEntry)
+      ) as WetFoodEntry[];
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -427,7 +511,7 @@ export class FoodService {
   // Update WET food entry
   static async updateWetFoodEntry(petId: string, foodId: string, userId: string, data: Partial<WetFoodFormData>): Promise<WetFoodEntry> {
     try {
-      // 🔒 STEP 1: Input validation (fail fast)
+      // Input validation
       this.validateUUID(foodId, 'food entry ID');
       
       if (Object.keys(data).length === 0) {
@@ -468,7 +552,12 @@ export class FoodService {
         throw new NotFoundError('Wet food entry not found');
       }
 
-      return updatedEntry as WetFoodEntry;
+      // Recalculate computed fields after update
+      const entryWithComputed = updatedEntry as WetFoodEntry;
+      await this.updateFoodComputedFields(entryWithComputed);
+      
+      // Return with fresh calculations
+      return this.applyHybridCalculations(entryWithComputed) as WetFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
@@ -497,7 +586,8 @@ export class FoodService {
         throw new NotFoundError('Wet food entry not found');
       }
 
-      return entry as WetFoodEntry;
+      // Apply hybrid calculations
+      return this.applyHybridCalculations(entry as WetFoodEntry) as WetFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
@@ -508,6 +598,7 @@ export class FoodService {
   }
 
   // COMBINED METHODS //
+  // Clean getter with hybrid approach
   static async getAllFoodEntries(petId: string, userId: string): Promise<AnyFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
@@ -518,15 +609,10 @@ export class FoodService {
         .where(eq(foodEntries.petId, petId))
         .orderBy(desc(foodEntries.createdAt));
   
-      // Process each entry to update isActive status
-      const processedEntries = await Promise.all(
-        result.map(async (entry) => {
-          const entryWithCalculations = entry as AnyFoodEntry;
-          return await this.updateFoodActiveStatus(entryWithCalculations) as AnyFoodEntry;
-        })
-      );
-  
-      return processedEntries;
+      // Apply hybrid calculations instead of updateFoodActiveStatus
+      return result.map(entry => 
+        this.applyHybridCalculations(entry as AnyFoodEntry)
+      ) as AnyFoodEntry[];
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -614,6 +700,7 @@ export class FoodService {
     }
   }
 
+  // For cron job access
   static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
     let calculations;
     
@@ -634,13 +721,22 @@ export class FoodService {
         .where(eq(foodEntries.id, entry.id))
         .returning();
       
+      // Convert calculation results to proper types
       return { 
         ...updatedEntry, 
-        ...calculations 
+        remainingDays: calculations.remainingDays,
+        remainingWeight: calculations.remainingWeight.toString(),
+        depletionDate: calculations.depletionDate.toISOString().split('T')[0],
       } as DryFoodEntry | WetFoodEntry;
     }
     
-    return { ...entry, ...calculations };
+    // Convert calculation results to proper types
+    return { 
+      ...entry, 
+      remainingDays: calculations.remainingDays,
+      remainingWeight: calculations.remainingWeight.toString(),
+      depletionDate: calculations.depletionDate.toISOString().split('T')[0],
+    } as DryFoodEntry | WetFoodEntry;
   }
 
   // CALCULATION METHODS

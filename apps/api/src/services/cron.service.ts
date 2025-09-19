@@ -2,6 +2,7 @@ import { db } from '../db';
 import { foodEntries } from '../db/schema/food';
 import { eq } from 'drizzle-orm';
 import { FoodService } from './food.service';
+import { BadRequestError } from '../middleware/errors';
 import type { DryFoodEntry, WetFoodEntry } from '../db/schema/food';
 
 export interface CronJobResult {
@@ -16,7 +17,7 @@ export interface CronJobResult {
 export class CronService {
   /**
    * Daily food status update job
-   * Processes all active food entries and updates their isActive status if finished
+   * Processes all active food entries and updates their isActive status if depleted
    */
   static async runDailyFoodStatusUpdate(): Promise<CronJobResult> {
     const startTime = Date.now();
@@ -26,30 +27,18 @@ export class CronService {
     try {
       console.log('🕐 Starting daily food status update at', new Date().toISOString());
 
-      // Get all active food entries across all pets
-      const activeEntries = await db
-        .select()
-        .from(foodEntries)
-        .where(eq(foodEntries.isActive, true));
-
-      console.log(`📊 Found ${activeEntries.length} active food entries to process`);
+      // Get ALL food entries (both active and inactive to update computed fields)
+      const allEntries = await db.select().from(foodEntries);
+      console.log(`📊 Found ${allEntries.length} food entries to process`);
 
       // Process each entry and track updates
-      for (const entry of activeEntries) {
+      for (const entry of allEntries) {
         entriesProcessed++;
         
         try {
-          // Get the entry before processing
-          const beforeUpdate = entry.isActive;
-          
-          // Update status if needed
-          const processedEntry = await FoodService.updateFoodActiveStatus(entry as DryFoodEntry | WetFoodEntry);
-          
-          // Track if status changed
-          if (beforeUpdate && !processedEntry.isActive) {
-            entriesUpdated++;
-            console.log(`✅ Food entry ${entry.id} marked as inactive (finished)`);
-          }
+          // Use updateFoodComputedFields instead of updateFoodActiveStatus
+          await FoodService.updateFoodComputedFields(entry as DryFoodEntry | WetFoodEntry);
+          entriesUpdated++;
 
         } catch (entryError) {
           console.error(`❌ Error processing entry ${entry.id}:`, entryError);

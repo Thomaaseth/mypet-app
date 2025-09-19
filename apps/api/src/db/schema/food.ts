@@ -43,6 +43,12 @@ export const foodEntries = pgTable('food_entries', {
   wetWeightUnit: wetFoodUnitEnum('wet_weight_unit'),
   wetDailyAmountUnit: wetFoodUnitEnum('wet_daily_amount_unit'),
   
+  // Computed/cached fields (updated by hybrid approach + cron job)q
+  remainingDays: integer('remaining_days'),
+  remainingWeight: decimal('remaining_weight', { precision: 8, scale: 2 }),
+  depletionDate: date('depletion_date'),
+  computedAt: timestamp('computed_at'),
+
   isActive: boolean('is_active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -86,6 +92,10 @@ export type BaseFoodEntry = {
   dailyAmount: string;
   datePurchased: string;
   isActive: boolean;
+  remainingDays: number | null;
+  remainingWeight: string | null;
+  depletionDate: string | null;
+  computedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
