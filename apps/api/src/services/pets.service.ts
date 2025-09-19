@@ -86,20 +86,20 @@ export class PetsService {
     if (petData.species && petData.species.length > 50) {
       throw new BadRequestError('Species must be 50 characters or less');
     }
-    if (petData.microchipNumber && petData.microchipNumber.length > 100) {
-      throw new BadRequestError('Microchip number must be 100 characters or less');
+    if (petData.microchipNumber && petData.microchipNumber.length > 20) {
+      throw new BadRequestError('Microchip number must be 20 characters or less');
     }
     if (petData.notes && petData.notes.length > 1000) {
       throw new BadRequestError('Notes must be 1000 characters or less');
     }
 
     // Microchip number format validation (if provided)
-    if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
-      // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)
-      if (!/^[a-zA-Z0-9]{8,20}$/.test(petData.microchipNumber.trim())) {
-        throw new BadRequestError('Microchip number must be 8-20 alphanumeric characters');
-      }
-    }
+    // if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
+    //   // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)
+    //   if (!/^[a-zA-Z0-9]{8,20}$/.test(petData.microchipNumber.trim())) {
+    //     throw new BadRequestError('Microchip number must be 8-20 alphanumeric characters');
+    //   }
+    // }
   }
 
   // Weight validation with business logic
