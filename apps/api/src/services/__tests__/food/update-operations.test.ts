@@ -14,6 +14,8 @@ describe('Update Operations', () => {
       const updated = await FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { brandName: 'Updated Brand', dailyAmount: '150' });
       expect(updated.brandName).toBe('Updated Brand');
       expect(updated.dailyAmount).toBe('150.00');
+      expect(updated.computedAt).toBeDefined();
+      expect(updated.remainingDays).toBeDefined();
     });
 
     it('should handle null/undefined brand and product names', async () => {
@@ -47,6 +49,8 @@ describe('Update Operations', () => {
       const updated = await FoodService.updateWetFoodEntry(testPet.id, created.id, primary.id, { brandName: 'Updated Wet Brand', numberOfUnits: '24' });
       expect(updated.brandName).toBe('Updated Wet Brand');
       expect(updated.numberOfUnits).toBe(24);
+      expect(updated.computedAt).toBeDefined();
+      expect(updated.remainingDays).toBeDefined();
     });
 
     it('should validate partial wet food data correctly', async () => {

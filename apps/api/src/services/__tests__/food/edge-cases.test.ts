@@ -158,6 +158,8 @@ describe('Edge Cases and Error Scenarios', () => {
       expect(result.foodType).toBe('dry');
       expect(result.bagWeight).toBe('2.00');
       expect(result.bagWeightUnit).toBe('kg');
+      expect(result.remainingDays).toBeDefined();
+      expect(result.computedAt).toBeDefined();
       
       // Wet food fields should be null (ignored)
       expect(result.numberOfUnits).toBeNull();
@@ -183,6 +185,8 @@ describe('Edge Cases and Error Scenarios', () => {
       expect(result.foodType).toBe('wet');
       expect(result.numberOfUnits).toBe(12);
       expect(result.wetWeightUnit).toBe('grams');
+      expect(result.remainingDays).toBeDefined();
+      expect(result.computedAt).toBeDefined();
       
       // Dry food fields should be null (ignored)  
       expect(result.bagWeight).toBeNull();
@@ -315,5 +319,19 @@ describe('Edge Cases and Error Scenarios', () => {
       expect(result.remainingDays).toBe(9);
       expect(result.remainingWeight).toBeCloseTo(1.0, 2);
     });
+  });
+
+  describe('Hybrid Logic', () => {
+  it('should use cached values for fresh entries', async () => {
+    const { primary, testPet } = await setupUserAndPet();
+    
+    // Create entry (will have fresh computedAt)
+    const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
+    
+    // Get entries immediately (should use cached values)
+    const result = await FoodService.getDryFoodEntries(testPet.id, primary.id);
+    
+    expect(result[0].computedAt).toEqual(created.computedAt);
+  });
   });
 });

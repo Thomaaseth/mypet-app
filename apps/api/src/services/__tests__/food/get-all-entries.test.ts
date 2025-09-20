@@ -27,6 +27,10 @@ describe('getAllFoodEntries', () => {
 
     expect(dryEntries[0].brandName).toBe('Dry Brand');
     expect(wetEntries[0].brandName).toBe('Wet Brand');
+    expect(dryEntries[0].remainingDays).toBeDefined();
+    expect(dryEntries[0].computedAt).toBeDefined();
+    expect(wetEntries[0].remainingDays).toBeDefined();
+    expect(wetEntries[0].computedAt).toBeDefined();
   });
 
   it('should return entries sorted by creation date (newest first)', async () => {

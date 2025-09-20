@@ -15,6 +15,12 @@ describe('Dry Food Operations', () => {
       const result = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
       expect(result.bagWeight).toBe('2.00');
       expect(result.isActive).toBe(true);
+      expect(result.remainingDays).toBeGreaterThan(0);
+      expect(result.remainingWeight).toBeDefined();
+      expect(result.depletionDate).toBeDefined();
+      expect(result.computedAt).toBeDefined();
+      expect(typeof result.remainingWeight).toBe('string');
+      expect(typeof result.depletionDate).toBe('string');
     });
 
     it('should throw BadRequestError when required fields are missing', async () => {
@@ -51,6 +57,10 @@ describe('Dry Food Operations', () => {
       await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({ brandName: 'Brand B' }));
       const result = await FoodService.getDryFoodEntries(testPet.id, primary.id);
       expect(result.length).toBe(2);
+      expect(result[0].remainingDays).toBeDefined();
+      expect(result[0].remainingWeight).toBeDefined();
+      expect(result[0].depletionDate).toBeDefined();
+      expect(result[0].computedAt).toBeDefined();
     });
   });
 
@@ -60,6 +70,8 @@ describe('Dry Food Operations', () => {
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
       const result = await FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { brandName: 'Updated Brand' });
       expect(result.brandName).toBe('Updated Brand');
+      expect(result.computedAt).toBeDefined();
+      expect(result.remainingDays).toBeDefined();
     });
   });
 

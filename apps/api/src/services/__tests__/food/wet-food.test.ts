@@ -15,6 +15,10 @@ describe('Wet Food Operations', () => {
       const result = await FoodService.createWetFoodEntry(testPet.id, primary.id, makeWetFoodData());
       expect(result.numberOfUnits).toBe(12);
       expect(result.isActive).toBe(true);
+      expect(result.remainingDays).toBeGreaterThan(0);
+      expect(result.remainingWeight).toBeDefined();
+      expect(result.depletionDate).toBeDefined();
+      expect(result.computedAt).toBeDefined();
     });
 
     it('should throw BadRequestError for invalid number of units', async () => {
@@ -36,6 +40,10 @@ describe('Wet Food Operations', () => {
       const result = await FoodService.getWetFoodEntries(testPet.id, primary.id);
       expect(result.length).toBe(1);
       expect(result[0].foodType).toBe('wet');
+      expect(result[0].remainingDays).toBeDefined();
+      expect(result[0].remainingWeight).toBeDefined();
+      expect(result[0].depletionDate).toBeDefined();
+      expect(result[0].computedAt).toBeDefined();
     });
   });
 

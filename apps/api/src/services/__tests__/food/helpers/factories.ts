@@ -84,6 +84,10 @@ export function makeDryFoodEntry(
     weightPerUnit: null,
     wetWeightUnit: null,
     wetDailyAmountUnit: null,
+    remainingDays: 20, // Default reasonable values
+    remainingWeight: '2.00',
+    depletionDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 20 days from now
+    computedAt: new Date(),
     ...overrides,
   };
 }
@@ -109,6 +113,10 @@ export function makeWetFoodEntry(
     bagWeight: null,
     bagWeightUnit: null,
     dryDailyAmountUnit: null,
+    remainingDays: 6, // 12 * 85g = 1020g, 1020g / 170g per day = 6 days
+    remainingWeight: '1020',
+    depletionDate: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 6 days from now
+    computedAt: new Date(),
     ...overrides,
   };
 }
