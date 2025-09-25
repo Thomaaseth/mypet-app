@@ -46,15 +46,10 @@ router.get('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response, 
     }
 
     const dryFoodEntries = await FoodService.getDryFoodEntries(petId, userId);
+    // Service already returns entries with calculations - no need to calculate again
     
-    // Calculate remaining info for each entry
-    const enrichedEntries = dryFoodEntries.map(entry => ({
-      ...entry,
-      ...FoodService.calculateDryFoodRemaining(entry)
-    }));
-
-    const total = enrichedEntries.length;
-    respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} dry food entries`);
+    const total = dryFoodEntries.length;
+    respondWithSuccess(res, { foodEntries: dryFoodEntries, total }, `Retrieved ${total} dry food entries`);
   } catch (error) {
     next(error);
   }
@@ -74,12 +69,9 @@ router.get('/:petId/food/dry/:foodId', async (req: AuthenticatedRequest, res: Re
     }
 
     const dryFoodEntry = await FoodService.getDryFoodEntryById(petId, foodId, userId);
-    const enrichedEntry = {
-      ...dryFoodEntry,
-      ...FoodService.calculateDryFoodRemaining(dryFoodEntry)
-    };
+    // Service already returns entry with calculations - no need to calculate again
 
-    respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Dry food entry retrieved successfully');
+    respondWithSuccess(res, { foodEntry: dryFoodEntry }, 'Dry food entry retrieved successfully');
   } catch (error) {
     next(error);
   }
@@ -110,11 +102,12 @@ router.post('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response,
     }
 
     const newDryFoodEntry = await FoodService.createDryFoodEntry(petId, userId, dryFoodData);
-    const processedEntry = await FoodService.processEntryForResponse(newDryFoodEntry);
+    // Create method returns raw entry, so we need to add calculations
+    const calculations = FoodService.calculateDryFoodRemaining(newDryFoodEntry);
 
     const enrichedEntry = {
-      ...processedEntry,
-      ...FoodService.calculateDryFoodRemaining(newDryFoodEntry)
+      ...newDryFoodEntry,
+      ...calculations
     };
 
     respondWithCreated(res, { foodEntry: enrichedEntry }, 'Dry food entry created successfully');
@@ -143,13 +136,9 @@ router.put('/:petId/food/dry/:foodId', async (req: AuthenticatedRequest, res: Re
    }
 
    const updatedDryFoodEntry = await FoodService.updateDryFoodEntry(petId, foodId, userId, updateData);
-   
-   const enrichedEntry = {
-     ...updatedDryFoodEntry,
-     ...FoodService.calculateDryFoodRemaining(updatedDryFoodEntry)
-   };
+   // Service already returns entry with calculations - no need to calculate again
 
-   respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Dry food entry updated successfully');
+   respondWithSuccess(res, { foodEntry: updatedDryFoodEntry }, 'Dry food entry updated successfully');
  } catch (error) {
    next(error);
  }
@@ -170,15 +159,10 @@ router.get('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response, 
    }
 
    const wetFoodEntries = await FoodService.getWetFoodEntries(petId, userId);
+   // Service already returns entries with calculations - no need to calculate again
    
-   // Calculate remaining info for each entry
-   const enrichedEntries = wetFoodEntries.map(entry => ({
-     ...entry,
-     ...FoodService.calculateWetFoodRemaining(entry)
-   }));
-
-   const total = enrichedEntries.length;
-   respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} wet food entries`);
+   const total = wetFoodEntries.length;
+   respondWithSuccess(res, { foodEntries: wetFoodEntries, total }, `Retrieved ${total} wet food entries`);
  } catch (error) {
    next(error);
  }
@@ -198,12 +182,9 @@ router.get('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Re
    }
 
    const wetFoodEntry = await FoodService.getWetFoodEntryById(petId, foodId, userId);
-   const enrichedEntry = {
-     ...wetFoodEntry,
-     ...FoodService.calculateWetFoodRemaining(wetFoodEntry)
-   };
+   // Service already returns entry with calculations - no need to calculate again
 
-   respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Wet food entry retrieved successfully');
+   respondWithSuccess(res, { foodEntry: wetFoodEntry }, 'Wet food entry retrieved successfully');
  } catch (error) {
    next(error);
  }
@@ -234,11 +215,12 @@ router.post('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response,
    }
 
    const newWetFoodEntry = await FoodService.createWetFoodEntry(petId, userId, wetFoodData);
-   const processedEntry = await FoodService.processEntryForResponse(newWetFoodEntry);
+   // Create method returns raw entry, so we need to add calculations
+   const calculations = FoodService.calculateWetFoodRemaining(newWetFoodEntry);
 
    const enrichedEntry = {
-     ...processedEntry,
-     ...FoodService.calculateWetFoodRemaining(newWetFoodEntry)
+     ...newWetFoodEntry,
+     ...calculations
    };
 
    respondWithCreated(res, { foodEntry: enrichedEntry }, 'Wet food entry created successfully');
@@ -267,13 +249,9 @@ router.put('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Re
    }
 
    const updatedWetFoodEntry = await FoodService.updateWetFoodEntry(petId, foodId, userId, updateData);
-   
-   const enrichedEntry = {
-     ...updatedWetFoodEntry,
-     ...FoodService.calculateWetFoodRemaining(updatedWetFoodEntry)
-   };
+   // Service already returns entry with calculations - no need to calculate again
 
-   respondWithSuccess(res, { foodEntry: enrichedEntry }, 'Wet food entry updated successfully');
+   respondWithSuccess(res, { foodEntry: updatedWetFoodEntry }, 'Wet food entry updated successfully');
  } catch (error) {
    next(error);
  }
@@ -294,24 +272,10 @@ router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next
    }
 
    const allFoodEntries = await FoodService.getAllFoodEntries(petId, userId);
+   // Service already returns entries with calculations - no need to calculate again
    
-   // Calculate remaining info for each entry based on type
-   const enrichedEntries = allFoodEntries.map(entry => {
-     if (entry.foodType === 'dry') {
-       return {
-         ...entry,
-         ...FoodService.calculateDryFoodRemaining(entry as any)
-       };
-     } else {
-       return {
-         ...entry,
-         ...FoodService.calculateWetFoodRemaining(entry as any)
-       };
-     }
-   });
-
-   const total = enrichedEntries.length;
-   respondWithSuccess(res, { foodEntries: enrichedEntries, total }, `Retrieved ${total} food entries`);
+   const total = allFoodEntries.length;
+   respondWithSuccess(res, { foodEntries: allFoodEntries, total }, `Retrieved ${total} food entries`);
  } catch (error) {
    next(error);
  }

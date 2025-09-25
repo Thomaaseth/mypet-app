@@ -43,13 +43,13 @@ export class CronService {
           const beforeUpdate = entry.isActive;
           
           // Update status if needed
-          const processedEntry = await FoodService.updateFoodActiveStatus(entry as DryFoodEntry | WetFoodEntry);
+          // const processedEntry = await FoodService.updateFoodActiveStatus(entry as DryFoodEntry | WetFoodEntry);
           
           // Track if status changed
-          if (beforeUpdate && !processedEntry.isActive) {
-            entriesUpdated++;
-            console.log(`✅ Food entry ${entry.id} marked as inactive (finished)`);
-          }
+          // if (beforeUpdate && !processedEntry.isActive) {
+          //   entriesUpdated++;
+          //   console.log(`✅ Food entry ${entry.id} marked as inactive (finished)`);
+          // }
 
         } catch (entryError) {
           console.error(`❌ Error processing entry ${entry.id}:`, entryError);

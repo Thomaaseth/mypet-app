@@ -35,9 +35,9 @@ export type WetFoodFormData = {
 };
 
 export class FoodService {
-  static async processEntryForResponse(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
-    return await this.updateFoodActiveStatus(entry);
-  }
+  // static async processEntryForResponse(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
+  //   return await this.updateFoodActiveStatus(entry);
+  // }
 
   // Centralized input validation helpers
   private static validateCommonInputs(data: { datePurchased?: string; brandName?: string; productName?: string }): void {
@@ -243,7 +243,7 @@ export class FoodService {
   static async getDryFoodEntries(petId: string, userId: string): Promise<DryFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
-
+  
       const result = await db
         .select()
         .from(foodEntries)
@@ -252,15 +252,12 @@ export class FoodService {
           eq(foodEntries.foodType, 'dry'),
         ))
         .orderBy(desc(foodEntries.createdAt));
-
-      // Process each entry to update isActive
-      const processedEntries = await Promise.all(
-        result.map(async (entry) => {
-          const entryWithCalculations = entry as DryFoodEntry;
-          return await this.updateFoodActiveStatus(entryWithCalculations) as DryFoodEntry;
-        })
-      )
-      return processedEntries;
+  
+      // CHANGED: Just add calculations, don't update database
+      return result.map(entry => {
+        const calculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
+        return { ...entry, ...calculations };
+      }) as DryFoodEntry[];
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -313,8 +310,8 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Dry food entry not found');
       }
-
-      return updatedEntry as DryFoodEntry;
+      const calculations = this.calculateDryFoodRemaining(updatedEntry as DryFoodEntry);
+      return { ...updatedEntry, ...calculations } as DryFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
@@ -342,8 +339,8 @@ export class FoodService {
       if (!entry) {
         throw new NotFoundError('Dry food entry not found');
       }
-
-      return entry as DryFoodEntry;
+      const calculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
+      return { ...entry, ...calculations } as DryFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
@@ -397,7 +394,7 @@ export class FoodService {
   static async getWetFoodEntries(petId: string, userId: string): Promise<WetFoodEntry[]> {
     try {
       await this.verifyPetOwnership(petId, userId);
-
+  
       const result = await db
         .select()
         .from(foodEntries)
@@ -406,15 +403,12 @@ export class FoodService {
           eq(foodEntries.foodType, 'wet'),
         ))
         .orderBy(desc(foodEntries.createdAt));
-
-      // Process each entry to update isActive status and add calculations
-      const processedEntries = await Promise.all(
-        result.map(async (entry) => {
-          const entryWithCalculations = entry as WetFoodEntry;
-          return await this.updateFoodActiveStatus(entryWithCalculations) as WetFoodEntry;
-        })
-      );
-      return processedEntries;
+  
+      // CHANGED: Just add calculations, don't update database
+      return result.map(entry => {
+        const calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
+        return { ...entry, ...calculations };
+      }) as WetFoodEntry[];
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -467,8 +461,8 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Wet food entry not found');
       }
-
-      return updatedEntry as WetFoodEntry;
+      const calculations = this.calculateWetFoodRemaining(updatedEntry as WetFoodEntry);
+      return { ...updatedEntry, ...calculations } as WetFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
@@ -497,7 +491,8 @@ export class FoodService {
         throw new NotFoundError('Wet food entry not found');
       }
 
-      return entry as WetFoodEntry;
+      const calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
+      return { ...entry, ...calculations } as WetFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
@@ -518,15 +513,15 @@ export class FoodService {
         .where(eq(foodEntries.petId, petId))
         .orderBy(desc(foodEntries.createdAt));
   
-      // Process each entry to update isActive status
-      const processedEntries = await Promise.all(
-        result.map(async (entry) => {
-          const entryWithCalculations = entry as AnyFoodEntry;
-          return await this.updateFoodActiveStatus(entryWithCalculations) as AnyFoodEntry;
-        })
-      );
-  
-      return processedEntries;
+      return result.map(entry => {
+        let calculations;
+        if (entry.foodType === 'dry') {
+          calculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
+        } else {
+          calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
+        }
+        return { ...entry, ...calculations };
+      }) as AnyFoodEntry[];
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
@@ -614,34 +609,6 @@ export class FoodService {
     }
   }
 
-  static async updateFoodActiveStatus(entry: DryFoodEntry | WetFoodEntry): Promise<DryFoodEntry | WetFoodEntry> {
-    let calculations;
-    
-    if (entry.foodType === 'dry') {
-      calculations = this.calculateDryFoodRemaining(entry as DryFoodEntry);
-    } else {
-      calculations = this.calculateWetFoodRemaining(entry as WetFoodEntry);
-    }
-  
-    // Simple status update - no cleanup logic
-    if (calculations.remainingDays <= 0 && entry.isActive) {
-      const [updatedEntry] = await db
-        .update(foodEntries)
-        .set({ 
-          isActive: false,
-          updatedAt: new Date()
-        })
-        .where(eq(foodEntries.id, entry.id))
-        .returning();
-      
-      return { 
-        ...updatedEntry, 
-        ...calculations 
-      } as DryFoodEntry | WetFoodEntry;
-    }
-    
-    return { ...entry, ...calculations };
-  }
 
   // CALCULATION METHODS
   static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
@@ -737,5 +704,45 @@ export class FoodService {
     }
     
     return { remainingDays, depletionDate, remainingWeight };
+  }
+
+  static async markFoodAsFinished(petId: string, foodId: string, userId: string): Promise<DryFoodEntry | WetFoodEntry> {
+    try {
+      this.validateUUID(foodId, 'food entry ID');
+      await this.verifyPetOwnership(petId, userId);
+  
+      const [updatedEntry] = await db
+        .update(foodEntries)
+        .set({ 
+          isActive: false,
+          updatedAt: new Date()
+        })
+        .where(and(
+          eq(foodEntries.id, foodId),
+          eq(foodEntries.petId, petId),
+          eq(foodEntries.isActive, true)
+        ))
+        .returning();
+  
+      if (!updatedEntry) {
+        throw new NotFoundError('Active food entry not found');
+      }
+  
+      // Return with calculations
+      let calculations;
+      if (updatedEntry.foodType === 'dry') {
+        calculations = this.calculateDryFoodRemaining(updatedEntry as DryFoodEntry);
+      } else {
+        calculations = this.calculateWetFoodRemaining(updatedEntry as WetFoodEntry);
+      }
+  
+      return { ...updatedEntry, ...calculations } as DryFoodEntry | WetFoodEntry;
+    } catch (error) {
+      if (error instanceof BadRequestError || error instanceof NotFoundError) {
+        throw error;
+      }
+      console.error('Error marking food as finished:', error);
+      throw new BadRequestError('Failed to mark food as finished');
+    }
   }
 }
