@@ -211,8 +211,11 @@ describe('PetsService', () => {
       expect(result.isActive).toBe(true);
       expect(result.id).toBeDefined();
       
-      const savedPets = await db.select().from(schema.pets);
+      const savedPets = await db.select()
+      .from(schema.pets)
+      .where(eq(schema.pets.userId, primary.id));
       expect(savedPets).toHaveLength(1);
+      expect(savedPets[0].name).toBe('Fluffy');
     });
 
     it('should create pet with minimal required data', async () => {

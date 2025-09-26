@@ -111,7 +111,9 @@ describe('WeightEntriesService', () => {
         expect(result.petId).toBe(testPet.id);
         expect(result.id).toBeDefined();
   
-        const savedEntries = await db.select().from(schema.weightEntries);
+        const savedEntries = await db.select()
+        .from(schema.weightEntries)
+        .where(eq(schema.weightEntries.petId, testPet.id));
         expect(savedEntries).toHaveLength(1);
       });
   
@@ -339,8 +341,11 @@ describe('WeightEntriesService', () => {
   
         await WeightEntriesService.deleteWeightEntry(testPet.id, firstCreated.id, primary.id);
   
-        const remainingEntries = await db.select().from(schema.weightEntries);
+        const remainingEntries = await db.select()
+        .from(schema.weightEntries)
+        .where(eq(schema.weightEntries.petId, testPet.id));
         expect(remainingEntries).toHaveLength(1);
+        
         expect(remainingEntries[0].id).toBe(secondCreated.id);
       });
   
