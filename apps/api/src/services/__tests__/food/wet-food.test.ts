@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { FoodService } from '../../food.service';
+import { FoodService } from '../../food';
 import { BadRequestError } from '../../../middleware/errors';
 import { setupUserAndPet } from './helpers/setup';
 import { makeWetFoodData, makeInvalidWetFoodData } from './helpers/factories';
 import { db } from '../../../db';
 import { eq } from 'drizzle-orm';
 import * as schema from '../../../db/schema';
-import type { DryFoodFormData, WetFoodFormData } from '../../../services/food.service';
+import type { WetFoodFormData } from '../../../services/food';
 
 describe('Wet Food Operations', () => {
   describe('createWetFoodEntry', () => {

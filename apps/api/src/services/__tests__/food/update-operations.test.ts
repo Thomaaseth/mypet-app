@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'crypto';
-import { FoodService } from '../../food.service';
+import { FoodService } from '../../food';
 import { BadRequestError, NotFoundError } from '../../../middleware/errors';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';

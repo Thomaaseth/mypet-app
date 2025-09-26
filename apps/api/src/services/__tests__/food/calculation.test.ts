@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FoodService } from '../../food.service';
+import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodEntry, makeWetFoodEntry, makeDryFoodData } from './helpers/factories';
 import { db } from '../../../db';
@@ -118,13 +118,13 @@ describe('Business Logic Calculations', () => {
     });
   });
 
-  describe('updateFoodActiveStatus', () => {
+  describe('markFoodAsFinished', () => {
     it('should mark dry food as inactive when finished', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
+  
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 30);
-
+  
       const dryFoodData = makeDryFoodData({
         bagWeight: '1.0',
         bagWeightUnit: 'kg',
@@ -132,25 +132,27 @@ describe('Business Logic Calculations', () => {
         dryDailyAmountUnit: 'grams',
         datePurchased: pastDate.toISOString().split('T')[0],
       });
-
-      let created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
-
+  
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
       expect(created.isActive).toBe(true);
-
-      const processed = await FoodService.processEntryForResponse(created);
-
-      expect(processed.isActive).toBe(false);
-
+  
+      // Mark as finished and verify
+      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
+      expect(finished.isActive).toBe(false);
+  
+      // Verify in database
       const [dbEntry] = await db.select()
         .from(schema.foodEntries)
         .where(eq(schema.foodEntries.id, created.id));
-
+  
       expect(dbEntry.isActive).toBe(false);
     });
+  });
 
-    it('should keep active food as active', async () => {
+  describe('calculateDryFoodRemaining', () => {
+    it('should calculate remaining food without changing isActive status', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
+  
       const dryFoodData = makeDryFoodData({
         bagWeight: '5.0',
         bagWeightUnit: 'kg',
@@ -158,11 +160,18 @@ describe('Business Logic Calculations', () => {
         dryDailyAmountUnit: 'grams',
         datePurchased: new Date().toISOString().split('T')[0],
       });
-
+  
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
-      const processed = await FoodService.processEntryForResponse(created);
-
-      expect(processed.isActive).toBe(true);
+      expect(created.isActive).toBe(true);
+  
+      // Calculate remaining food
+      const calculations = FoodService.calculateDryFoodRemaining(created);
+      expect(calculations.remainingDays).toBeGreaterThan(0);
+      expect(calculations.remainingWeight).toBeCloseTo(5.0, 1);
+  
+      // Verify the original entry is still active (calculations don't modify the entry)
+      const fetched = await FoodService.getDryFoodEntryById(testPet.id, created.id, primary.id);
+      expect(fetched.isActive).toBe(true);
     });
   });
 

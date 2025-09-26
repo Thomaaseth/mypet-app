@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'crypto';
-import { FoodService } from '../../food.service';
+import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodEntry, makeDryFoodData, makeInvalidDryFoodData, makeInvalidWetFoodData, makeWetFoodEntry } from './helpers/factories';
 import { db } from '../../../db';
 import * as schema from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { BadRequestError } from '../../../middleware/errors';
-import type { DryFoodFormData, WetFoodFormData } from '../../../services/food.service';
+import type { DryFoodFormData, WetFoodFormData } from '../../../services/food';
 
 describe('Edge Cases and Error Scenarios', () => {
   describe('Zero and Negative Values', () => {
@@ -194,24 +194,24 @@ describe('Edge Cases and Error Scenarios', () => {
   describe('Concurrent Operations', () => {
     it('should handle concurrent updates to same food entry', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
+  
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
-
+  
       const update1Promise = FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { brandName: 'Brand A' });
       const update2Promise = FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { productName: 'Product B' });
-
+  
       const results = await Promise.allSettled([update1Promise, update2Promise]);
-
+  
       expect(results[0].status).toBe('fulfilled');
       expect(results[1].status).toBe('fulfilled');
     });
-
-    it('should handle concurrent active status updates', async () => {
+  
+    it('should handle concurrent calculation operations', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
+  
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 30);
-
+  
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({
         bagWeight: '1.0',
         bagWeightUnit: 'kg',
@@ -219,14 +219,45 @@ describe('Edge Cases and Error Scenarios', () => {
         dryDailyAmountUnit: 'grams',
         datePurchased: pastDate.toISOString().split('T')[0],
       }));
-
-      const promises = Array.from({ length: 3 }, () => FoodService.processEntryForResponse(created));
-
+  
+      // Test concurrent calculations (these are pure functions, no database operations)
+      const promises = Array.from({ length: 3 }, () => FoodService.calculateDryFoodRemaining(created));
+  
       const results = await Promise.all(promises);
-
+  
+      // All calculations should return the same results
       results.forEach(result => {
-        expect(result.isActive).toBe(false);
+        expect(result.remainingDays).toBe(0); // Food should be finished after 30 days
+        expect(result.remainingWeight).toBe(0);
       });
+  
+      // Verify the original entry is still active (calculations don't modify database)
+      const fetched = await FoodService.getDryFoodEntryById(testPet.id, created.id, primary.id);
+      expect(fetched.isActive).toBe(true);
+    });
+
+    it('should handle concurrent markFoodAsFinished operations', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+    
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
+    
+      // Try to mark as finished concurrently
+      const promises = Array.from({ length: 3 }, () => 
+        FoodService.markFoodAsFinished(testPet.id, created.id, primary.id)
+      );
+    
+      const results = await Promise.allSettled(promises);
+    
+      // Only one should succeed, others should fail (already marked as finished)
+      const successful = results.filter(r => r.status === 'fulfilled');
+      const failed = results.filter(r => r.status === 'rejected');
+    
+      expect(successful).toHaveLength(1);
+      expect(failed).toHaveLength(2);
+    
+      if (successful[0].status === 'fulfilled') {
+        expect(successful[0].value.isActive).toBe(false);
+      }
     });
   });
 

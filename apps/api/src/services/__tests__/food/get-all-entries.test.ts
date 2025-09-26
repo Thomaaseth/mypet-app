@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FoodService } from '../../food.service';
+import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';
 
@@ -57,18 +57,21 @@ describe('getAllFoodEntries', () => {
 
   it('should include both active and inactive entries', async () => {
     const { primary, testPet } = await setupUserAndPet();
-
+  
     const pastDate = new Date();
     pastDate.setDate(pastDate.getDate() - 30);
-
-    await FoodService.createDryFoodEntry(testPet.id, primary.id, {
+  
+    const dryFood = await FoodService.createDryFoodEntry(testPet.id, primary.id, {
       bagWeight: '0.5',
       bagWeightUnit: 'kg',
       dailyAmount: '50',
       dryDailyAmountUnit: 'grams',
       datePurchased: pastDate.toISOString().split('T')[0],
     });
-
+  
+    // Explicitly mark the finished food as inactive
+    await FoodService.markFoodAsFinished(testPet.id, dryFood.id, primary.id);
+  
     await FoodService.createWetFoodEntry(testPet.id, primary.id, {
       numberOfUnits: '12',
       weightPerUnit: '85',
@@ -77,14 +80,14 @@ describe('getAllFoodEntries', () => {
       wetDailyAmountUnit: 'grams',
       datePurchased: new Date().toISOString().split('T')[0],
     });
-
+  
     const result = await FoodService.getAllFoodEntries(testPet.id, primary.id);
-
+  
     expect(result).toHaveLength(2);
-
+  
     const activeEntries = result.filter(entry => entry.isActive);
     const inactiveEntries = result.filter(entry => !entry.isActive);
-
+  
     expect(activeEntries).toHaveLength(1);
     expect(inactiveEntries).toHaveLength(1);
   });

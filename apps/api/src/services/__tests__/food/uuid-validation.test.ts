@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FoodService } from '../../food.service';
+import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
 
 describe('UUID Validation', () => {
