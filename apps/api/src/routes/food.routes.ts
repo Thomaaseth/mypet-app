@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
-import { FoodService } from '../services/food.service';
+import { FoodService } from '../services/food';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
