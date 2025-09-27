@@ -51,4 +51,17 @@ export async function del<TResponse = unknown>(
   return response.data;
 }
 
+export async function patch<TResponse = unknown, TBody = RequestBody>(
+  endpoint: string,
+  body?: TBody,
+  config?: Omit<ApiRequestConfig, 'method' | 'body'>
+): Promise<TResponse> {
+  const response = await makeAuthenticatedRequest<TResponse>(endpoint, {
+    method: 'PATCH',
+    body: body as RequestBody,
+    ...config,
+  });
+  return response.data;
+}
+
 export { makeApiRequest, makeAuthenticatedRequest } from './core';

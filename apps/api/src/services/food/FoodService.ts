@@ -95,7 +95,7 @@ export class FoodService {
         ))
         .orderBy(desc(foodEntries.createdAt));
   
-      // CHANGED: Just add calculations, don't update database
+      // calculations only, don't update database
       return result.map(entry => {
         const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry);
         return { ...entry, ...calculations };

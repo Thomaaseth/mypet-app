@@ -1,4 +1,3 @@
-// apps/web/src/hooks/useWetFoodTracker.ts
 import { useState, useEffect, useCallback } from 'react';
 import { wetFoodApi, foodApi, foodErrorHandler } from '@/lib/api/domains/food';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
@@ -81,6 +80,29 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     }
   }, [petId]);
 
+const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolean> => {
+  try {
+    const finishedEntry = await foodApi.markFoodAsFinished(petId, foodId);
+    
+    // Update the local state to reflect the finished entry
+    setWetFoodEntries(prev => 
+      prev.map(entry => 
+        entry.id === foodId 
+          ? { ...finishedEntry } as WetFoodEntry
+          : entry
+      )
+    );
+    
+    toastService.success('Food entry marked as finished');
+    return true;
+  } catch (err) {
+    const foodError = foodErrorHandler(err);
+    toastService.error(foodError.message);
+    console.error('Failed to mark food entry as finished:', err);
+    return false;
+  }
+}, [petId]);
+
   useEffect(() => {
     fetchWetFoodEntries();
   }, [fetchWetFoodEntries]);
@@ -99,6 +121,7 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     createWetFoodEntry,
     updateWetFoodEntry,
     deleteWetFoodEntry,
+    markWetFoodAsFinished,
     refetchWetFoodEntries: fetchWetFoodEntries,
   };
 }

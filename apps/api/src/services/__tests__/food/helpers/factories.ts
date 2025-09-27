@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import type { DryFoodFormData, WetFoodFormData } from '../../../food.service';
+import type { DryFoodFormData, WetFoodFormData } from '../../../food';
 
 export function makeDryFoodData(
     overrides: Partial<DryFoodFormData> = {}

@@ -281,6 +281,27 @@ router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next
  }
 });
 
+// PATCH /api/pets/:petId/food/:foodId/finish - Mark food entry as finished
+router.patch('/:petId/food/:foodId/finish', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const { petId, foodId } = req.params;
+    if (!petId || !foodId) {
+      throw new BadRequestError('Pet ID and Food ID are required');
+    }
+
+    const finishedEntry = await FoodService.markFoodAsFinished(petId, foodId, userId);
+
+    respondWithSuccess(res, { foodEntry: finishedEntry }, 'Food entry marked as finished successfully');
+  } catch (error) {
+    next(error);
+  }
+});
+
 // DELETE /api/pets/:petId/food/:foodId - Delete any food entry (works for both types)
 router.delete('/:petId/food/:foodId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
  try {

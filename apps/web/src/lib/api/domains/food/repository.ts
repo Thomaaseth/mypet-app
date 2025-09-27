@@ -1,4 +1,4 @@
-import { get, post, put, del } from '../../base';
+import { get, post, put, del, patch } from '../../base';
 import type { 
   DryFoodEntry,
   WetFoodEntry,
@@ -69,6 +69,11 @@ export class FoodRepository {
 
   async deleteFoodEntry(petId: string, foodId: string): Promise<void> {
     await del<{ message: string }>(`/api/pets/${petId}/food/${foodId}`);
+  }
+
+  async markFoodAsFinished(petId: string, foodId: string): Promise<DryFoodEntry | WetFoodEntry> {
+    const result = await patch<{ foodEntry: DryFoodEntry | WetFoodEntry }>(`/api/pets/${petId}/food/${foodId}/finish`);
+    return result.foodEntry;
   }
 }
 

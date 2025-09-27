@@ -1,4 +1,3 @@
-// apps/web/src/hooks/useDryFoodTracker.ts
 import { useState, useEffect, useCallback } from 'react';
 import { dryFoodApi, foodApi, foodErrorHandler } from '@/lib/api/domains/food';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
@@ -81,6 +80,29 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     }
   }, [petId]);
 
+  const markDryFoodAsFinished = useCallback(async (foodId: string): Promise<boolean> => {
+    try {
+      const finishedEntry = await foodApi.markFoodAsFinished(petId, foodId);
+      
+      // Update the local state to reflect the finished entry
+      setDryFoodEntries(prev => 
+        prev.map(entry => 
+          entry.id === foodId 
+            ? { ...finishedEntry } as DryFoodEntry
+            : entry
+        )
+      );
+      
+      toastService.success('Food entry marked as finished');
+      return true;
+    } catch (err) {
+      const foodError = foodErrorHandler(err);
+      toastService.error(foodError.message);
+      console.error('Failed to mark food entry as finished:', err);
+      return false;
+    }
+  }, [petId]);
+
   useEffect(() => {
     fetchDryFoodEntries();
   }, [fetchDryFoodEntries]);
@@ -99,6 +121,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     createDryFoodEntry,
     updateDryFoodEntry,
     deleteDryFoodEntry,
+    markDryFoodAsFinished,
     refetchDryFoodEntries: fetchDryFoodEntries,
   };
 }

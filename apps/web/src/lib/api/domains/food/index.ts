@@ -25,6 +25,7 @@ export const wetFoodApi = {
 export const foodApi = {
   getAllFoodEntries: (petId: string) => foodService.getAllFoodEntries(petId),
   deleteFoodEntry: (petId: string, foodId: string) => foodService.deleteFoodEntry(petId, foodId),
+  markFoodAsFinished: (petId: string, foodId: string) => foodService.markFoodAsFinished(petId, foodId),
 };
 
 // Export error handler

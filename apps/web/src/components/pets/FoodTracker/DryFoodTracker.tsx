@@ -27,6 +27,7 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
         createFoodEntry: hookResult.createDryFoodEntry,
         updateFoodEntry: hookResult.updateDryFoodEntry,
         deleteFoodEntry: hookResult.deleteDryFoodEntry,
+        markFoodAsFinished: hookResult.markDryFoodAsFinished,
       }}
       FormComponent={DryFoodForm}
       ListComponent={DryFoodList}

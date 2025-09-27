@@ -27,6 +27,8 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
         createFoodEntry: hookResult.createWetFoodEntry,
         updateFoodEntry: hookResult.updateWetFoodEntry,
         deleteFoodEntry: hookResult.deleteWetFoodEntry,
+        markFoodAsFinished: hookResult.markWetFoodAsFinished,
+
       }}
       FormComponent={WetFoodForm}
       ListComponent={WetFoodList}

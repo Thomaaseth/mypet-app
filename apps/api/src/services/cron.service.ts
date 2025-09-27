@@ -1,7 +1,7 @@
 import { db } from '../db';
 import { foodEntries } from '../db/schema/food';
 import { eq } from 'drizzle-orm';
-import { FoodService } from './food.service';
+import { FoodService } from '../services/food';
 import type { DryFoodEntry, WetFoodEntry } from '../db/schema/food';
 
 export interface CronJobResult {

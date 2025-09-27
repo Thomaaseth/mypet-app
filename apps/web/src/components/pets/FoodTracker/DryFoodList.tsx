@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Calendar, Weight, Utensils } from 'lucide-react';
+import { Edit, Trash2, Calendar, Weight, Utensils, Loader2 } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
@@ -32,12 +32,21 @@ interface DryFoodListProps {
   finishedEntries: DryFoodEntry[];
   onUpdate: (foodId: string, data: Partial<DryFoodFormData>) => Promise<DryFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
+  onMarkAsFinished: (foodId: string) => Promise<boolean>;
   isLoading?: boolean;
 }
 
-export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLoading = false }: DryFoodListProps) {
+export function DryFoodList({ 
+  entries, 
+  finishedEntries, 
+  onUpdate, 
+  onDelete, 
+  onMarkAsFinished, 
+  isLoading = false 
+}: DryFoodListProps) {
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
+  const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
 
   const handleUpdate = async (data: DryFoodFormData) => {
     if (!editingEntry) return null;
@@ -58,10 +67,40 @@ export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLo
     }
   };
 
-  const getStatusBadge = (entry: DryFoodEntry) => {
-    if (entry.remainingDays <= 0) {
-      return <Badge variant="destructive">Finished</Badge>;
-    } else if (entry.remainingDays <= 7) {
+  const handleMarkAsFinished = async(foodId: string) => {
+    setMarkingAsFinished(foodId);
+    const success = await onMarkAsFinished(foodId);
+    setMarkingAsFinished(null);
+  }
+
+  const getStatusSection = (entry: DryFoodEntry) => {
+    const isCalculatedFinished = entry.remainingDays <= 0;
+    const isMarking = markingAsFinished === entry.id;
+    
+    if (isCalculatedFinished && entry.isActive) {
+      // Show "Mark as finished" button for calculated finished but still active entries
+      return (
+        <div className="flex items-center gap-2">
+          <Badge variant="destructive">Ready to Finish</Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleMarkAsFinished(entry.id)}
+            disabled={isLoading || isMarking}
+            className="text-xs px-2 py-1 h-7"
+          >
+            {isMarking ? (
+              <>
+                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                Marking...
+              </>
+            ) : (
+              'Mark as Finished'
+            )}
+          </Button>
+        </div>
+      );
+    } else if (entry.remainingDays <= 7 && entry.remainingDays > 0) {
       return <Badge variant="secondary">Low Stock</Badge>;
     } else {
       return <Badge variant="default">Active</Badge>;
@@ -104,7 +143,7 @@ export function DryFoodList({ entries, finishedEntries, onUpdate, onDelete, isLo
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {getStatusBadge(entry)}
+                    {getStatusSection(entry)}
                     <Button
                       variant="outline"
                       size="sm"

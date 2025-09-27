@@ -139,6 +139,16 @@ export class FoodService {
     }
   }
 
+  async markFoodAsFinished(petId: string, foodId: string): Promise<DryFoodEntry | WetFoodEntry> {
+    try {
+      this.validator.validatePetId(petId);
+      this.validator.validateFoodId(foodId);
+      return await this.repository.markFoodAsFinished(petId, foodId);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   //Error handling
   private handleError(error: unknown): Error {
     if (error instanceof ApiError) {
