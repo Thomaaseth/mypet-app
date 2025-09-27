@@ -128,6 +128,17 @@ export function GenericFoodTracker<TEntry, TFormData>({
     
     return result !== null;
   };
+  
+  const handleMarkAsFinished = async (foodId: string): Promise<boolean> => {
+    const result = await executeAction(async () => {
+      const success = await markFoodAsFinished(foodId);
+      if (success && onDataChange) {
+        await onDataChange();
+      }
+      return success;
+    }, foodErrorHandler);
+    return result || false;
+  };
 
   // Initial loading state - show appropriate skeleton based on what we expect
   if (isLoading) {
@@ -326,7 +337,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
         onUpdate={handleUpdateEntry}
         onDelete={handleDeleteEntry}
         isLoading={isActionLoading}
-        onMarkAsFinished={markFoodAsFinished}
+        onMarkAsFinished={handleMarkAsFinished}
       />
     </div>
   );
