@@ -30,13 +30,15 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     }
   }, [petId]);
 
+  useEffect(() => {
+    fetchDryFoodEntries();
+  }, [fetchDryFoodEntries]);
+
   const createDryFoodEntry = useCallback(async (foodData: DryFoodFormData): Promise<DryFoodEntry | null> => {
     try {
       const newEntry = await dryFoodApi.createDryFoodEntry(petId, foodData);
-      
-      await fetchDryFoodEntries();
+      setDryFoodEntries(prev => [newEntry, ...prev]);
 
-      // setDryFoodEntries(prev => [newEntry, ...prev]);
       toastService.success('Dry food entry added successfully');
       return newEntry;
     } catch (err) {
@@ -45,7 +47,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
       console.error('Failed to create dry food entry:', err);
       return null;
     }
-  }, [petId, fetchDryFoodEntries]);
+  }, [petId]);
 
   const updateDryFoodEntry = useCallback(async (
     foodId: string, 
@@ -102,10 +104,6 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
       return false;
     }
   }, [petId]);
-
-  useEffect(() => {
-    fetchDryFoodEntries();
-  }, [fetchDryFoodEntries]);
 
   const activeDryFoodEntries = dryFoodEntries.filter(entry => entry.isActive);
   const lowStockDryFoodEntries = activeDryFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);

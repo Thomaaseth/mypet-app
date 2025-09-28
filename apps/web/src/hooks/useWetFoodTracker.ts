@@ -31,12 +31,15 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
     }
   }, [petId]);
 
+  useEffect(() => {
+    fetchWetFoodEntries();
+  }, [fetchWetFoodEntries]);
+
 const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promise<WetFoodEntry | null> => {
     try {
       const newEntry = await wetFoodApi.createWetFoodEntry(petId, foodData);
-      await fetchWetFoodEntries();
+      setWetFoodEntries(prev => [newEntry, ...prev]);
 
-      // setWetFoodEntries(prev => [newEntry, ...prev]);
       toastService.success('Wet food entry added successfully');
       return newEntry;
     } catch (err) {
@@ -45,7 +48,7 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
       console.error('Failed to create wet food entry:', err);
       return null;
     }
-  }, [petId, fetchWetFoodEntries]);
+  }, [petId]);
 
   const updateWetFoodEntry = useCallback(async (
     foodId: string, 
@@ -102,10 +105,6 @@ const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolea
     return false;
   }
 }, [petId]);
-
-  useEffect(() => {
-    fetchWetFoodEntries();
-  }, [fetchWetFoodEntries]);
 
   const activeWetFoodEntries = wetFoodEntries.filter(entry => entry.isActive);
   const lowStockWetFoodEntries = activeWetFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);
