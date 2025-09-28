@@ -18,7 +18,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
 
-// Generic hook interface that both food trackers must conform to
+// Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
   activeFoodEntries: TEntry[];
   finishedFoodEntries: TEntry[];
@@ -34,7 +34,6 @@ interface GenericFoodHookReturn<TEntry, TFormData> {
 // Generic props interface
 interface GenericFoodTrackerProps<TEntry, TFormData> {
   foodType: 'dry' | 'wet';
-  onDataChange?: () => Promise<void>;
   
   // Hook and data dependencies (injected by specific tracker)
   hookResult: GenericFoodHookReturn<TEntry, TFormData>;
@@ -69,7 +68,6 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
 
 export function GenericFoodTracker<TEntry, TFormData>({
   foodType,
-  onDataChange,
   hookResult,
   FormComponent,
   ListComponent,
@@ -97,9 +95,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
       const result = await createFoodEntry(data);
       if (result) {
         setIsAddDialogOpen(false);
-        if (onDataChange) {
-          await onDataChange();
-        }
+        // no onDataChange call - hook already updates local state optimistically
       }
       return result;
     }, foodErrorHandler);
@@ -110,9 +106,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const handleUpdateEntry = async (foodId: string, data: Partial<TFormData>) => {
     return executeAction(async () => {
       const result = await updateFoodEntry(foodId, data);
-      if (result && onDataChange) {
-        await onDataChange();
-      }
+      // no onDataChange call - hook already updates local state optimistically
       return result;
     }, foodErrorHandler);
   };
@@ -120,9 +114,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const handleDeleteEntry = async (foodId: string): Promise<boolean> => {
     const result = await executeAction(async () => {
       const success = await deleteFoodEntry(foodId);
-      if (success && onDataChange) {
-        await onDataChange();
-      }
+      // no onDataChange call - hook already updates local state optimistically
       return success;
     }, foodErrorHandler);
     
@@ -132,9 +124,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const handleMarkAsFinished = async (foodId: string): Promise<boolean> => {
     const result = await executeAction(async () => {
       const success = await markFoodAsFinished(foodId);
-      if (success && onDataChange) {
-        await onDataChange();
-      }
+      // no onDataChange call - hook already updates local state optimistically
       return success;
     }, foodErrorHandler);
     return result || false;
@@ -156,13 +146,13 @@ export function GenericFoodTracker<TEntry, TFormData>({
     );
   }
 
-  // Empty state logic - show enhanced CTA when no active entries, but still render list for history
+  // Empty state logic - show enhanced CTA when no active entries
   const hasActiveEntries = activeFoodEntries.length > 0;
   const hasFinishedEntries = finishedFoodEntries.length > 0;
-  const hasAnyEntries = hasActiveEntries || hasFinishedEntries;
   
-  // Show enhanced empty state only if NO entries at all
-  if (!hasAnyEntries) {
+  // Show enhanced empty state when NO ACTIVE entries (even if there are finished ones)
+  if (!hasActiveEntries && !hasFinishedEntries) {
+    // Truly empty - no active AND no finished entries
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -225,36 +215,16 @@ export function GenericFoodTracker<TEntry, TFormData>({
     );
   }
 
-  // Normal state with entries
+  // Normal state OR no active entries but HAS finished entries
   return (
     <div className="space-y-6">
-      {/* Low Stock Alert */}
-      {lowStockFoodEntries.length > 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {lowStockFoodEntries.length} {foodType} food {lowStockFoodEntries.length === 1 ? labels.alertSingular : labels.alertPlural} running low (≤7 days remaining)
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Add New Entry Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button disabled={isCreating} className="min-w-[140px]">
-              {isCreating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Adding...
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {labels.addButton}
-                </>
-              )}
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              {labels.addButton}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
@@ -280,8 +250,8 @@ export function GenericFoodTracker<TEntry, TFormData>({
         </Alert>
       )}
 
-      {/* Enhanced Empty State for No Active Entries (but may have finished entries) */}
-      {!hasActiveEntries && (
+      {/* Show CTA card when no active entries but has finished entries */}
+      {!hasActiveEntries && hasFinishedEntries && (
         <Card>
           <CardContent className="p-6">
             <div className="text-center">
@@ -290,10 +260,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
               </div>
               <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
               <p className="text-muted-foreground mb-4 text-sm">
-                {hasFinishedEntries 
-                  ? `All current ${foodType} food has been finished. Add new ${foodType} food to continue tracking.`
-                  : labels.emptyDescription
-                }
+                {labels.emptyDescription}
               </p>
               
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -307,7 +274,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
                     ) : (
                       <>
                         <Plus className="h-4 w-4 mr-2" />
-                        {hasFinishedEntries ? `Add New ${foodType === 'dry' ? 'Bag' : 'Cans'}` : labels.emptyButtonText}
+                        {labels.emptyButtonText}
                       </>
                     )}
                   </Button>
@@ -330,7 +297,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
         </Card>
       )}
 
-      {/* Food List - Always render for history when there are finished entries */}
+      {/* Food List - Always render (includes history when there are finished entries) */}
       <ListComponent
         entries={activeFoodEntries}
         finishedEntries={finishedFoodEntries}

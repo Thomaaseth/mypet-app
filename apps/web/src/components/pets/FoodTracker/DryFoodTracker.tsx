@@ -1,33 +1,38 @@
 'use client';
 
-import { useDryFoodTracker } from '@/hooks/useDryFoodTracker';
 import { DryFoodForm } from './DryFoodForm';
 import { DryFoodList } from './DryFoodList';
 import { GenericFoodTracker } from './GenericFoodTracker';
+import { useFoodTrackerContext } from './FoodTrackerContext';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 
-interface DryFoodTrackerProps {
-  petId: string;
-  onDataChange?: () => Promise<void>; 
-}
-
-export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
-  const hookResult = useDryFoodTracker({ petId });
+export function DryFoodTracker() {
+  // Use context
+  const {
+    activeDryFoodEntries,
+    finishedDryFoodEntries,
+    lowStockDryFoodEntries,
+    isDryLoading,
+    dryError,
+    createDryFoodEntry,
+    updateDryFoodEntry,
+    deleteDryFoodEntry,
+    markDryFoodAsFinished,
+  } = useFoodTrackerContext();
 
   return (
     <GenericFoodTracker<DryFoodEntry, DryFoodFormData>
       foodType="dry"
-      onDataChange={onDataChange}
       hookResult={{
-        activeFoodEntries: hookResult.activeDryFoodEntries,
-        finishedFoodEntries: hookResult.finishedDryFoodEntries,
-        lowStockFoodEntries: hookResult.lowStockDryFoodEntries,
-        isLoading: hookResult.isLoading,
-        error: hookResult.error,
-        createFoodEntry: hookResult.createDryFoodEntry,
-        updateFoodEntry: hookResult.updateDryFoodEntry,
-        deleteFoodEntry: hookResult.deleteDryFoodEntry,
-        markFoodAsFinished: hookResult.markDryFoodAsFinished,
+        activeFoodEntries: activeDryFoodEntries,
+        finishedFoodEntries: finishedDryFoodEntries,
+        lowStockFoodEntries: lowStockDryFoodEntries,
+        isLoading: isDryLoading,
+        error: dryError,
+        createFoodEntry: createDryFoodEntry,
+        updateFoodEntry: updateDryFoodEntry,
+        deleteFoodEntry: deleteDryFoodEntry,
+        markFoodAsFinished: markDryFoodAsFinished,
       }}
       FormComponent={DryFoodForm}
       ListComponent={DryFoodList}
@@ -39,8 +44,8 @@ export function DryFoodTracker({ petId, onDataChange }: DryFoodTrackerProps) {
         alertSingular: 'entry',
         alertPlural: 'entries',
         emptyTitle: 'No dry food tracked yet',
-        emptyDescription: 'Start tracking your pet\'s dry food supply to monitor consumption and never run out.',
-        emptyButtonText: 'Add First Bag',
+        emptyDescription: 'All current dry food has been finished. Add new dry food to continue tracking.',
+        emptyButtonText: 'Add New Bag',
       }}
     />
   );

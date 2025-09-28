@@ -1,34 +1,38 @@
 'use client';
 
-import { useWetFoodTracker } from '@/hooks/useWetFoodTracker';
 import { WetFoodForm } from './WetFoodForm';
 import { WetFoodList } from './WetFoodList';
 import { GenericFoodTracker } from './GenericFoodTracker';
+import { useFoodTrackerContext } from './FoodTrackerContext';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 
-interface WetFoodTrackerProps {
-  petId: string;
-  onDataChange?: () => Promise<void>;
-}
-
-export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
-  const hookResult = useWetFoodTracker({ petId });
+export function WetFoodTracker() {
+  // Use context
+  const {
+    activeWetFoodEntries,
+    finishedWetFoodEntries,
+    lowStockWetFoodEntries,
+    isWetLoading,
+    wetError,
+    createWetFoodEntry,
+    updateWetFoodEntry,
+    deleteWetFoodEntry,
+    markWetFoodAsFinished,
+  } = useFoodTrackerContext();
 
   return (
     <GenericFoodTracker<WetFoodEntry, WetFoodFormData>
       foodType="wet"
-      onDataChange={onDataChange}
       hookResult={{
-        activeFoodEntries: hookResult.activeWetFoodEntries,
-        finishedFoodEntries: hookResult.finishedWetFoodEntries,
-        lowStockFoodEntries: hookResult.lowStockWetFoodEntries,
-        isLoading: hookResult.isLoading,
-        error: hookResult.error,
-        createFoodEntry: hookResult.createWetFoodEntry,
-        updateFoodEntry: hookResult.updateWetFoodEntry,
-        deleteFoodEntry: hookResult.deleteWetFoodEntry,
-        markFoodAsFinished: hookResult.markWetFoodAsFinished,
-
+        activeFoodEntries: activeWetFoodEntries,
+        finishedFoodEntries: finishedWetFoodEntries,
+        lowStockFoodEntries: lowStockWetFoodEntries,
+        isLoading: isWetLoading,
+        error: wetError,
+        createFoodEntry: createWetFoodEntry,
+        updateFoodEntry: updateWetFoodEntry,
+        deleteFoodEntry: deleteWetFoodEntry,
+        markFoodAsFinished: markWetFoodAsFinished,
       }}
       FormComponent={WetFoodForm}
       ListComponent={WetFoodList}
@@ -40,7 +44,7 @@ export function WetFoodTracker({ petId, onDataChange }: WetFoodTrackerProps) {
         alertSingular: 'entry',
         alertPlural: 'entries',
         emptyTitle: 'No wet food tracked yet',
-        emptyDescription: 'Start tracking your pet\'s wet food supply to monitor consumption and ensure fresh meals.',
+        emptyDescription: 'All current wet food has been finished. Add new wet food to continue tracking.',
         emptyButtonText: 'Add First Cans',
       }}
     />
