@@ -1,5 +1,6 @@
 'use client';
 
+import { useSessionContext } from '@/contexts/SessionContext';
 import { useUserSession } from '@/hooks/useUserSession';
 import PetList from '@/components/pets/PetList';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
@@ -7,17 +8,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export default function PetsPage() {
-  const { user, isLoading: isLoadingUser, error: sessionError } = useUserSession({
-    redirectOnError: true,
-    redirectTo: '/login'
-  });
+  const { user, isLoading: isLoadingUser, error: sessionError } = useSessionContext();
+
 
   // Loading state
   if (isLoadingUser) {
     return <PetListSkeleton />;
   }
 
-  // Error state
+  // Error state (not needed - middleware protects the route)
   if (sessionError) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -31,7 +30,7 @@ export default function PetsPage() {
     );
   }
 
-  // User will always exist here due to redirect logic in hook
+  // Middleware ensures user exists, but safety check
   if (!user) return null;
 
   return <PetList />;

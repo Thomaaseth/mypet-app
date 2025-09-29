@@ -1,28 +1,22 @@
 'use client';
 
-import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
 import { useErrorState } from '@/hooks/useErrorsState';
-import { useUserSession } from '@/hooks/useUserSession';
 import { authErrorHandler } from '@/lib/errors/handlers';
+import { useSessionContext } from '@/contexts/SessionContext';
 
 export const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   
-  // Use hook instead of manual change
-  const { user, isLoading, refreshSession, clearSession } = useUserSession();
+  // Use session context
+  const { user, isLoading, clearSession } = useSessionContext();
   
   const { isLoading: isLoggingOut, executeAction } = useErrorState();
-
-  // Use refreshSession instead of manual loadUserSession
-  useEffect(() => {
-    refreshSession();
-  }, [pathname, refreshSession]);
 
   // Use clearSession from hook
   const handleLogout = async () => {
@@ -37,7 +31,7 @@ export const Navbar = () => {
         }
 
         console.log('✅ Navbar: Logout successful, clearing user state');
-        clearSession(); // Use hook method instead of setUser(null)
+        clearSession(); // Use hook method
         return { success: true };
       },
       authErrorHandler

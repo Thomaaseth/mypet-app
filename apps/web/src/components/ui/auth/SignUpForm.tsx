@@ -58,6 +58,7 @@ export default function SignUpForm() {
     if (result) {
       toastService.auth.signUpSuccess();
       router.push('/');
+      router.refresh();
     }
   };
 

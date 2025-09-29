@@ -1,11 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '@/lib/auth-client';
 import { useErrorState } from '@/hooks/useErrorsState';
-import { useUserSession } from '@/hooks/useUserSession';
+import { useSessionContext } from '@/contexts/SessionContext';
 import { authErrorHandler } from '@/lib/errors/handlers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,11 +32,9 @@ type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
 type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
 
 export default function MyProfilePage() {
-  // user session state
-  const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useUserSession({
-    redirectOnError: true,
-    redirectTo: '/login'
-  });
+  // user session context
+  const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
+
 
   // UI-specific state remains as separate useState
   const [passwordVisibility, setPasswordVisibility] = useState({

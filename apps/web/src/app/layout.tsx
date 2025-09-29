@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Navbar } from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner"
+import { SessionProvider } from "@/contexts/SessionContext";
 
 import "./globals.css";
 
@@ -30,11 +31,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
+      <SessionProvider>
+       <Navbar />
         <main className="min-h-screen">
         {children}
         </main>
         <Toaster position="bottom-right" />
+       </SessionProvider>
       </body>
     </html>
   );
