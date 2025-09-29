@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { toastService } from '@/lib/toast';
+import { useSessionContext } from '@/contexts/SessionContext';
 
 // Zod schema for sign in
 const signInSchema = z.object({
@@ -24,6 +25,7 @@ type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
   const router = useRouter();
+  const { refreshSession } = useSessionContext();
   const { isLoading, error, clearError, executeAction } = useErrorState({
     showErrorToast: true,
     toastCriticalOnly: true
@@ -57,6 +59,7 @@ export default function SignInForm() {
 
     if (result) {
       toastService.auth.signInSuccess();
+      await refreshSession();
       router.push('/');
       router.refresh();
     }

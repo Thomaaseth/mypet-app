@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { authErrorHandler } from '../../../lib/errors/handlers';
 import { signUpPasswordSchema } from '@/lib/validations/password';
+import { useSessionContext } from '@/contexts/SessionContext';
 
 
 const signUpSchema = z.object({
@@ -26,6 +27,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
   const router = useRouter();
+  const { refreshSession } = useSessionContext();
   const { isLoading, error, clearError, executeAction } = useErrorState();
 
   const {
@@ -57,6 +59,8 @@ export default function SignUpForm() {
 
     if (result) {
       toastService.auth.signUpSuccess();
+      await refreshSession();
+
       router.push('/');
       router.refresh();
     }
