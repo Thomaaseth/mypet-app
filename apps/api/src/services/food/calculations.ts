@@ -3,7 +3,7 @@ import type { DryFoodEntry, WetFoodEntry } from '../../db/schema/food';
 export class FoodCalculations {
   static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
     const today = new Date();
-    const purchaseDate = new Date(entry.datePurchased);
+    const purchaseDate = new Date(entry.dateStarted);
     
     const daysSincePurchase = Math.floor((today.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
     
@@ -52,7 +52,7 @@ export class FoodCalculations {
 
   static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
     const today = new Date();
-    const purchaseDate = new Date(entry.datePurchased);
+    const purchaseDate = new Date(entry.dateStarted);
     
     const daysSincePurchase = Math.floor((today.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
     

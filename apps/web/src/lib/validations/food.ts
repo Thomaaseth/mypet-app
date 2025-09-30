@@ -11,7 +11,7 @@ const baseFoodValidation = {
       const num = parseFloat(val.replace(',', '.'));
       return !isNaN(num) && num > 0;
     }, 'Daily amount must be a positive number'),
-  datePurchased: z.string()
+    dateStarted: z.string()
     .min(1, 'Purchase date is required')
     .refine((val) => {
       const date = new Date(val);
@@ -141,7 +141,7 @@ export const updateDryFoodSchema = z.object({
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
   dryDailyAmountUnit: z.enum(['grams', 'cups']).optional(),
-  datePurchased: z.string().refine(val => {
+  dateStarted: z.string().refine(val => {
     if (!val) return true;
     const date = new Date(val);
     return !isNaN(date.getTime()) && date <= new Date();
@@ -170,7 +170,7 @@ export const updateWetFoodSchema = z.object({
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
   wetDailyAmountUnit: z.enum(['grams', 'oz']).optional(),
-  datePurchased: z.string().refine(val => {
+  dateStarted: z.string().refine(val => {
     if (!val) return true;
     const date = new Date(val);
     return !isNaN(date.getTime()) && date <= new Date();

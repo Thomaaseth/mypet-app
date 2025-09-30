@@ -151,7 +151,7 @@ if (activeEntries.length === 0 && finishedEntries.length === 0) {
                        </span>
                        <span className="flex items-center gap-1">
                          <Calendar className="h-4 w-4" />
-                         {formatDateForDisplay(entry.datePurchased)}
+                         {formatDateForDisplay(entry.dateStarted)}
                        </span>
                      </div>
                    </div>
@@ -261,7 +261,7 @@ if (activeEntries.length === 0 && finishedEntries.length === 0) {
                wetWeightUnit: editingEntry.wetWeightUnit,
                dailyAmount: editingEntry.dailyAmount,
                wetDailyAmountUnit: editingEntry.wetDailyAmountUnit,
-               datePurchased: editingEntry.datePurchased,
+               dateStarted: editingEntry.dateStarted,
              }}
              onSubmit={handleUpdate}
              isLoading={isLoading}

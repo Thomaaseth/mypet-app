@@ -11,7 +11,7 @@ export type DryFoodEntry = {
   bagWeightUnit: 'kg' | 'pounds';
   dailyAmount: string;
   dryDailyAmountUnit: 'grams' | 'cups';
-  datePurchased: string;
+  dateStarted: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -32,7 +32,7 @@ export type WetFoodEntry = {
   wetWeightUnit: 'grams' | 'oz';
   dailyAmount: string;
   wetDailyAmountUnit: 'grams' | 'oz';
-  datePurchased: string;
+  dateStarted: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -49,7 +49,7 @@ export type DryFoodFormData = {
   bagWeightUnit: 'kg' | 'pounds';
   dailyAmount: string;
   dryDailyAmountUnit: 'grams' | 'cups';
-  datePurchased: string;
+  dateStarted: string;
 };
 
 export type WetFoodFormData = {
@@ -60,7 +60,7 @@ export type WetFoodFormData = {
   wetWeightUnit: 'grams' | 'oz';
   dailyAmount: string;
   wetDailyAmountUnit: 'grams' | 'oz';
-  datePurchased: string;
+  dateStarted: string;
 };
 
 // API response types

@@ -11,7 +11,7 @@ export function makeDryFoodData(
     bagWeightUnit: 'kg',
     dailyAmount: '100',
     dryDailyAmountUnit: 'grams',
-    datePurchased: '2024-01-01',
+    dateStarted: '2024-01-01',
     ...overrides,
   };
 }
@@ -26,7 +26,7 @@ export function makeInvalidDryFoodData(
       bagWeightUnit: 'kg',
       dailyAmount: '100',
       dryDailyAmountUnit: 'grams',
-      datePurchased: '2024-01-01',
+      dateStarted: '2024-01-01',
       ...overrides,
     };
   }
@@ -42,7 +42,7 @@ export function makeWetFoodData(
     wetWeightUnit: 'grams',
     dailyAmount: '170',
     wetDailyAmountUnit: 'grams',
-    datePurchased: '2024-01-01',
+    dateStarted: '2024-01-01',
     ...overrides,
   };
 }
@@ -58,7 +58,7 @@ export function makeInvalidWetFoodData(
       wetWeightUnit: 'grams',
       dailyAmount: '170',
       wetDailyAmountUnit: 'grams',
-      datePurchased: '2024-01-01',
+      dateStarted: '2024-01-01',
       ...overrides,
     };
   }
@@ -74,7 +74,8 @@ export function makeDryFoodEntry(
     bagWeightUnit: 'kg' as const,
     dailyAmount: '100.00',
     dryDailyAmountUnit: 'grams' as const,
-    datePurchased: new Date().toISOString().split('T')[0],
+    dateStarted: new Date().toISOString().split('T')[0],
+    dateFinished: null,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -100,7 +101,8 @@ export function makeWetFoodEntry(
     wetWeightUnit: 'grams' as const,
     dailyAmount: '170.00',
     wetDailyAmountUnit: 'grams' as const,
-    datePurchased: new Date().toISOString().split('T')[0],
+    dateStarted: new Date().toISOString().split('T')[0],
+    dateFinished: null,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),

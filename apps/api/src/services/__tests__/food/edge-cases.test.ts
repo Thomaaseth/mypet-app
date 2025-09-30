@@ -17,7 +17,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '0.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -36,7 +36,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: pastDate.toISOString().split('T')[0],
+        dateStarted: pastDate.toISOString().split('T')[0],
         isActive: false,
       });
 
@@ -52,7 +52,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '1.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -72,7 +72,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '200',
         dryDailyAmountUnit: 'grams',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
       });
 
       const result = await FoodService.createDryFoodEntry(testPet.id, primary.id, largeBagData);
@@ -89,7 +89,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '123.45',
         dryDailyAmountUnit: 'grams',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -109,7 +109,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: today.toISOString().split('T')[0],
+        dateStarted: today.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -128,7 +128,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: futureDate.toISOString().split('T')[0],
+        dateStarted: futureDate.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -217,7 +217,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100',
         dryDailyAmountUnit: 'grams',
-        datePurchased: pastDate.toISOString().split('T')[0],
+        dateStarted: pastDate.toISOString().split('T')[0],
       }));
   
       // Test concurrent calculations (these are pure functions, no database operations)
@@ -321,7 +321,7 @@ describe('Edge Cases and Error Scenarios', () => {
         wetWeightUnit: 'oz',
         dailyAmount: '0.005',
         wetDailyAmountUnit: 'oz',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -337,7 +337,7 @@ describe('Edge Cases and Error Scenarios', () => {
         bagWeightUnit: 'pounds',
         dailyAmount: '50.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
 

@@ -76,7 +76,7 @@ describe('Update Operations', () => {
       const { primary, testPet } = await setupUserAndPet();
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
       await expect(
-        FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { datePurchased: 'invalid-date' })
+        FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { dateStarted: 'invalid-date' })
       ).rejects.toThrow(BadRequestError);
     });
   });

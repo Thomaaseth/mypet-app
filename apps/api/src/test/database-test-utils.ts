@@ -133,7 +133,7 @@ export class DatabaseTestUtils {
           brandName: `Test Brand ${index + 1}`,
           productName: `Test Dry Food ${index + 1}`,
           dailyAmount: '120.00', // grams
-          datePurchased: date.toISOString().split('T')[0],
+          dateStarted: date.toISOString().split('T')[0],
           bagWeight: '2.00', // kg
           bagWeightUnit: 'kg' as const,
           dryDailyAmountUnit: 'grams' as const,
@@ -150,7 +150,7 @@ export class DatabaseTestUtils {
           brandName: `Test Brand ${index + 1}`,
           productName: `Test Wet Food ${index + 1}`,
           dailyAmount: '85.00', // grams
-          datePurchased: date.toISOString().split('T')[0],
+          dateStarted: date.toISOString().split('T')[0],
           numberOfUnits: 12,
           weightPerUnit: '85.00', // grams per can
           wetWeightUnit: 'grams' as const,

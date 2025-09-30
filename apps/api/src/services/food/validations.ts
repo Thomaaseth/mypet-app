@@ -2,10 +2,10 @@ import { BadRequestError } from '../../middleware/errors';
 import type { DryFoodFormData, WetFoodFormData } from './types';
 
 export class FoodValidations {
-  static validateCommonInputs(data: { datePurchased?: string; brandName?: string; productName?: string }): void {
+  static validateCommonInputs(data: { dateStarted?: string; brandName?: string; productName?: string }): void {
     // Date format validation
-    if (data.datePurchased !== undefined) {
-      const purchaseDate = new Date(data.datePurchased);
+    if (data.dateStarted !== undefined) {
+      const purchaseDate = new Date(data.dateStarted);
       if (isNaN(purchaseDate.getTime())) {
         throw new BadRequestError('Invalid date format for purchase date');
       }
@@ -30,7 +30,7 @@ export class FoodValidations {
   static validateDryFoodInputs(data: Partial<DryFoodFormData>, isUpdate = false): void {
     // Required fields validation (only for create)
     if (!isUpdate) {
-      if (!data.bagWeight || !data.bagWeightUnit || !data.dailyAmount || !data.dryDailyAmountUnit || !data.datePurchased) {
+      if (!data.bagWeight || !data.bagWeightUnit || !data.dailyAmount || !data.dryDailyAmountUnit || !data.dateStarted) {
         throw new BadRequestError('Bag weight, bag weight unit, daily amount, daily amount unit, and purchase date are required for dry food');
       }
     }
@@ -83,7 +83,7 @@ export class FoodValidations {
     // Required fields validation (only for create)
     if (!isUpdate) {
       if (!data.numberOfUnits || !data.weightPerUnit || !data.wetWeightUnit || 
-          !data.dailyAmount || !data.wetDailyAmountUnit || !data.datePurchased) {
+          !data.dailyAmount || !data.wetDailyAmountUnit || !data.dateStarted) {
         throw new BadRequestError('Number of units, weight per unit, weight unit, daily amount, daily amount unit, and purchase date are required for wet food');
       }
     }

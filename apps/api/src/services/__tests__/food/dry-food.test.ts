@@ -39,7 +39,7 @@ describe('Dry Food Operations', () => {
       const { primary, testPet } = await setupUserAndPet();
       const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
       await expect(
-        FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({ datePurchased: futureDate }))
+        FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({ dateStarted: futureDate }))
       ).rejects.toThrow('Purchase date cannot be in the future');
     });
   });

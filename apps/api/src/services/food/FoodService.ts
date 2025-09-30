@@ -63,7 +63,7 @@ export class FoodService {
           bagWeightUnit: data.bagWeightUnit,
           dailyAmount: data.dailyAmount,
           dryDailyAmountUnit: data.dryDailyAmountUnit,
-          datePurchased: data.datePurchased,
+          dateStarted: data.dateStarted,
           // Explicitly set wet food fields to null
           numberOfUnits: null,
           weightPerUnit: null,
@@ -215,7 +215,7 @@ export class FoodService {
           wetWeightUnit: data.wetWeightUnit,
           dailyAmount: data.dailyAmount,
           wetDailyAmountUnit: data.wetDailyAmountUnit,
-          datePurchased: data.datePurchased,
+          dateStarted: data.dateStarted,
           // Explicitly set dry food fields to null
           bagWeight: null,
           bagWeightUnit: null,

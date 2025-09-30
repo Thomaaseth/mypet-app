@@ -12,7 +12,7 @@ describe('getAllFoodEntries', () => {
     });
 
     await FoodService.createWetFoodEntry(testPet.id, primary.id, {
-      ...makeWetFoodData({ brandName: 'Wet Brand', datePurchased: '2024-01-02' }),
+      ...makeWetFoodData({ brandName: 'Wet Brand', dateStarted: '2024-01-02' }),
     });
 
     const result = await FoodService.getAllFoodEntries(testPet.id, primary.id);
@@ -66,7 +66,7 @@ describe('getAllFoodEntries', () => {
       bagWeightUnit: 'kg',
       dailyAmount: '50',
       dryDailyAmountUnit: 'grams',
-      datePurchased: pastDate.toISOString().split('T')[0],
+      dateStarted: pastDate.toISOString().split('T')[0],
     });
   
     // Explicitly mark the finished food as inactive
@@ -78,7 +78,7 @@ describe('getAllFoodEntries', () => {
       wetWeightUnit: 'grams',
       dailyAmount: '50',
       wetDailyAmountUnit: 'grams',
-      datePurchased: new Date().toISOString().split('T')[0],
+      dateStarted: new Date().toISOString().split('T')[0],
     });
   
     const result = await FoodService.getAllFoodEntries(testPet.id, primary.id);

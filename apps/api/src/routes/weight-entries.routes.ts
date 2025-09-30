@@ -140,7 +140,7 @@ router.put('/:weightId', async (req: AuthenticatedRequest, res) => {
   }
 });
 
-// DELETE /api/pets/:petId/weights/:weightId - Delete a weight entry
+// DELETE /api/pets/:petId/weights/:weightId - Delete a weight bu
 router.delete('/:weightId', async (req: AuthenticatedRequest, res) => {
   try {
     const { petId, weightId } = req.params;

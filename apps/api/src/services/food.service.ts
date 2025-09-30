@@ -20,7 +20,7 @@
 //   bagWeightUnit: 'kg' | 'pounds';
 //   dailyAmount: string;
 //   dryDailyAmountUnit: 'grams' | 'cups';
-//   datePurchased: string;
+//   dateStarted: string;
 // };
 
 // export type WetFoodFormData = {
@@ -31,15 +31,15 @@
 //   wetWeightUnit: 'grams' | 'oz';
 //   dailyAmount: string;
 //   wetDailyAmountUnit: 'grams' | 'oz';
-//   datePurchased: string;
+//   dateStarted: string;
 // };
 
 // export class FoodService {
 //   // Centralized input validation helpers
-//   private static validateCommonInputs(data: { datePurchased?: string; brandName?: string; productName?: string }): void {
+//   private static validateCommonInputs(data: { dateStarted?: string; brandName?: string; productName?: string }): void {
 //     // Date format validation
-//     if (data.datePurchased !== undefined) {
-//       const purchaseDate = new Date(data.datePurchased);
+//     if (data.dateStarted !== undefined) {
+//       const purchaseDate = new Date(data.dateStarted);
 //       if (isNaN(purchaseDate.getTime())) {
 //         throw new BadRequestError('Invalid date format for purchase date');
 //       }
@@ -64,7 +64,7 @@
 //   private static validateDryFoodInputs(data: Partial<DryFoodFormData>, isUpdate = false): void {
 //     // Required fields validation (only for create)
 //     if (!isUpdate) {
-//       if (!data.bagWeight || !data.bagWeightUnit || !data.dailyAmount || !data.dryDailyAmountUnit || !data.datePurchased) {
+//       if (!data.bagWeight || !data.bagWeightUnit || !data.dailyAmount || !data.dryDailyAmountUnit || !data.dateStarted) {
 //         throw new BadRequestError('Bag weight, bag weight unit, daily amount, daily amount unit, and purchase date are required for dry food');
 //       }
 //     }
@@ -117,7 +117,7 @@
 //     // Required fields validation (only for create)
 //     if (!isUpdate) {
 //       if (!data.numberOfUnits || !data.weightPerUnit || !data.wetWeightUnit || 
-//           !data.dailyAmount || !data.wetDailyAmountUnit || !data.datePurchased) {
+//           !data.dailyAmount || !data.wetDailyAmountUnit || !data.dateStarted) {
 //         throw new BadRequestError('Number of units, weight per unit, weight unit, daily amount, daily amount unit, and purchase date are required for wet food');
 //       }
 //     }
@@ -217,7 +217,7 @@
 //           bagWeightUnit: data.bagWeightUnit,
 //           dailyAmount: data.dailyAmount,
 //           dryDailyAmountUnit: data.dryDailyAmountUnit,
-//           datePurchased: data.datePurchased,
+//           dateStarted: data.dateStarted,
 //           // Explicitly set wet food fields to null
 //           numberOfUnits: null,
 //           weightPerUnit: null,
@@ -369,7 +369,7 @@
 //           wetWeightUnit: data.wetWeightUnit,
 //           dailyAmount: data.dailyAmount,
 //           wetDailyAmountUnit: data.wetDailyAmountUnit,
-//           datePurchased: data.datePurchased,
+//           dateStarted: data.dateStarted,
 //           // Explicitly set dry food fields to null
 //           bagWeight: null,
 //           bagWeightUnit: null,
@@ -609,7 +609,7 @@
 //   // CALCULATION METHODS
 //   static calculateDryFoodRemaining(entry: DryFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
 //     const today = new Date();
-//     const purchaseDate = new Date(entry.datePurchased);
+//     const purchaseDate = new Date(entry.dateStarted);
     
 //     const daysSincePurchase = Math.floor((today.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
     
@@ -658,7 +658,7 @@
 
 //   static calculateWetFoodRemaining(entry: WetFoodEntry): { remainingDays: number; depletionDate: Date; remainingWeight: number } {
 //     const today = new Date();
-//     const purchaseDate = new Date(entry.datePurchased);
+//     const purchaseDate = new Date(entry.dateStarted);
     
 //     const daysSincePurchase = Math.floor((today.getTime() - purchaseDate.getTime()) / (1000 * 60 * 60 * 24));
     

@@ -17,7 +17,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -38,7 +38,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'pounds',
         dailyAmount: '1.00', // cups -> grams mapping inside service
         dryDailyAmountUnit: 'cups',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -59,7 +59,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: false,
       });
 
@@ -81,7 +81,7 @@ describe('Business Logic Calculations', () => {
         wetWeightUnit: 'grams',
         dailyAmount: '170.00',
         wetDailyAmountUnit: 'grams',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -104,7 +104,7 @@ describe('Business Logic Calculations', () => {
         wetWeightUnit: 'oz',
         dailyAmount: '6.00',
         wetDailyAmountUnit: 'oz',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -130,7 +130,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '50',
         dryDailyAmountUnit: 'grams',
-        datePurchased: pastDate.toISOString().split('T')[0],
+        dateStarted: pastDate.toISOString().split('T')[0],
       });
   
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
@@ -158,7 +158,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100',
         dryDailyAmountUnit: 'grams',
-        datePurchased: new Date().toISOString().split('T')[0],
+        dateStarted: new Date().toISOString().split('T')[0],
       });
   
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
@@ -186,7 +186,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '150.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: true,
       });
 
@@ -209,7 +209,7 @@ describe('Business Logic Calculations', () => {
         bagWeightUnit: 'kg',
         dailyAmount: '100.00',
         dryDailyAmountUnit: 'grams',
-        datePurchased: purchaseDate.toISOString().split('T')[0],
+        dateStarted: purchaseDate.toISOString().split('T')[0],
         isActive: false,
       });
 

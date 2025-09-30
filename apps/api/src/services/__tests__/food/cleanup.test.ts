@@ -44,7 +44,7 @@
 //           bagWeightUnit: 'kg',
 //           dailyAmount: '100',
 //           dryDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         entries.push(entry);
@@ -79,7 +79,7 @@
 //           bagWeightUnit: 'kg',
 //           dailyAmount: '100',
 //           dryDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         await FoodService.processEntryForResponse(entry);
@@ -113,7 +113,7 @@
 //           bagWeightUnit: 'kg',
 //           dailyAmount: '100',
 //           dryDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         await FoodService.processEntryForResponse(dryEntry);
@@ -131,7 +131,7 @@
 //           wetWeightUnit: 'grams',
 //           dailyAmount: '170',
 //           wetDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         await FoodService.processEntryForResponse(wetEntry);
@@ -168,7 +168,7 @@
 //           bagWeightUnit: 'kg',
 //           dailyAmount: '100',
 //           dryDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         entries.push(entry);
@@ -197,7 +197,7 @@
 //         bagWeightUnit: 'kg',
 //         dailyAmount: '100',
 //         dryDailyAmountUnit: 'grams',
-//         datePurchased: new Date().toISOString().split('T')[0],
+//         dateStarted: new Date().toISOString().split('T')[0],
 //       });
 
 //       await FoodService.createDryFoodEntry(testPet.id, primary.id, {
@@ -206,7 +206,7 @@
 //         bagWeightUnit: 'kg',
 //         dailyAmount: '100',
 //         dryDailyAmountUnit: 'grams',
-//         datePurchased: new Date().toISOString().split('T')[0],
+//         dateStarted: new Date().toISOString().split('T')[0],
 //       });
 
 //       // Create 7 finished entries
@@ -220,7 +220,7 @@
 //           bagWeightUnit: 'kg',
 //           dailyAmount: '100',
 //           dryDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         await FoodService.processEntryForResponse(entry);
@@ -256,7 +256,7 @@
 //           bagWeightUnit: 'kg',
 //           dailyAmount: '100',
 //           dryDailyAmountUnit: 'grams',
-//           datePurchased: pastDate.toISOString().split('T')[0],
+//           dateStarted: pastDate.toISOString().split('T')[0],
 //         });
 
 //         await FoodService.processEntryForResponse(entry);

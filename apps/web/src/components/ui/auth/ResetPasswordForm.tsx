@@ -58,8 +58,6 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       if (result) {
         toastService.auth.passwordResetSuccess();
         router.push('/login');
-        router.refresh();
-
       }
     };
 

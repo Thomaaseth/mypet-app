@@ -138,7 +138,7 @@ export function DryFoodList({
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {formatDateForDisplay(entry.datePurchased)}
+                        {formatDateForDisplay(entry.dateStarted)}
                       </span>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export function DryFoodList({
                 bagWeightUnit: editingEntry.bagWeightUnit,
                 dailyAmount: editingEntry.dailyAmount,
                 dryDailyAmountUnit: editingEntry.dryDailyAmountUnit,
-                datePurchased: editingEntry.datePurchased,
+                dateStarted: editingEntry.dateStarted,
               }}
               onSubmit={handleUpdate}
               isLoading={isLoading}

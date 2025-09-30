@@ -30,7 +30,7 @@ export const foodEntries = pgTable('food_entries', {
   brandName: varchar('brand_name', { length: 100 }),
   productName: varchar('product_name', { length: 150 }),
   dailyAmount: decimal('daily_amount', { precision: 8, scale: 2 }).notNull(),
-  datePurchased: date('date_purchased').notNull(),
+  dateStarted: date('date_started').notNull(),
   
   // DRY FOOD ONLY
   bagWeight: decimal('bag_weight', { precision: 8, scale: 2 }),
@@ -43,7 +43,11 @@ export const foodEntries = pgTable('food_entries', {
   wetWeightUnit: wetFoodUnitEnum('wet_weight_unit'),
   wetDailyAmountUnit: wetFoodUnitEnum('wet_daily_amount_unit'),
   
+  // STATUS FIELDS
   isActive: boolean('is_active').default(true).notNull(),
+  dateFinished: date('date_finished'),  // ← NEW
+
+  // TIMESTAMPS
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
@@ -84,7 +88,8 @@ export type BaseFoodEntry = {
   brandName: string | null;
   productName: string | null;
   dailyAmount: string;
-  datePurchased: string;
+  dateStarted: string;
+  dateFinished: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -113,27 +118,6 @@ export type WetFoodEntry = BaseFoodEntry & {
   bagWeightUnit: null;
   dryDailyAmountUnit: null;
 };
-
-// export type DryFoodFormData = {
-//   brandName?: string;
-//   productName?: string;
-//   bagWeight: string;
-//   bagWeightUnit: 'kg' | 'pounds';
-//   dailyAmount: string;
-//   dryDailyAmountUnit: 'grams' | 'cups';
-//   datePurchased: string;
-// };
-
-// export type WetFoodFormData = {
-//   brandName?: string;
-//   productName?: string;
-//   numberOfUnits: number;
-//   weightPerUnit: string;
-//   wetWeightUnit: 'grams' | 'oz';
-//   dailyAmount: string;
-//   wetDailyAmountUnit: 'grams' | 'oz';
-//   datePurchased: string;
-// };
 
 // Utility types
 export type FoodType = 'dry' | 'wet';

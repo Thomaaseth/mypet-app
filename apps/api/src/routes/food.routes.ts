@@ -12,7 +12,7 @@ type DryFoodFormData = {
   bagWeightUnit: 'kg' | 'pounds';
   dailyAmount: string;
   dryDailyAmountUnit: 'grams' | 'cups';
-  datePurchased: string;
+  dateStarted: string;
 };
 
 type WetFoodFormData = {
@@ -23,7 +23,7 @@ type WetFoodFormData = {
   wetWeightUnit: 'grams' | 'oz';
   dailyAmount: string;
   wetDailyAmountUnit: 'grams' | 'oz';
-  datePurchased: string;
+  dateStarted: string;
 };
 
 const router = Router();
@@ -97,7 +97,7 @@ router.post('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response,
       throw new BadRequestError('Request body is required');
     }
 
-    if (!dryFoodData.dailyAmount || !dryFoodData.datePurchased) {
+    if (!dryFoodData.dailyAmount || !dryFoodData.dateStarted) {
       throw new BadRequestError('Daily amount and purchase date are required');
     }
 
@@ -210,7 +210,7 @@ router.post('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response,
      throw new BadRequestError('Request body is required');
    }
 
-   if (!wetFoodData.dailyAmount || !wetFoodData.datePurchased) {
+   if (!wetFoodData.dailyAmount || !wetFoodData.dateStarted) {
      throw new BadRequestError('Daily amount and purchase date are required');
    }
 

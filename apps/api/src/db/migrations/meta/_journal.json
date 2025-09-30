@@ -8,6 +8,13 @@
       "when": 1757499940470,
       "tag": "0000_sleepy_the_phantom",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1759265083788,
+      "tag": "0001_first_tomorrow_man",
+      "breakpoints": true
     }
   ]
 }

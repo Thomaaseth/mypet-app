@@ -24,7 +24,7 @@ import { validateWetFoodData } from '@/lib/validations/food';
 //   wetWeightUnit: 'grams' | 'oz';
 //   dailyAmount: string;
 //   wetDailyAmountUnit: 'grams' | 'oz';
-//   datePurchased: string;
+//   dateStarted: string;
 // };
 
 interface WetFoodFormProps {
@@ -48,7 +48,7 @@ export function WetFoodForm({
     wetWeightUnit: initialData?.wetWeightUnit || 'grams',
     dailyAmount: initialData?.dailyAmount || '',
     wetDailyAmountUnit: initialData?.wetDailyAmountUnit || 'grams',
-    datePurchased: initialData?.datePurchased || new Date().toISOString().split('T')[0],
+    dateStarted: initialData?.dateStarted || new Date().toISOString().split('T')[0],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -225,17 +225,17 @@ export function WetFoodForm({
 
       {/* Date Purchased */}
       <div className="space-y-2">
-        <Label htmlFor="datePurchased">Date Purchased *</Label>
+        <Label htmlFor="dateStarted">Date Purchased *</Label>
         <Input
-          id="datePurchased"
+          id="dateStarted"
           type="date"
-          value={formData.datePurchased}
-          onChange={(e) => updateField('datePurchased', e.target.value)}
+          value={formData.dateStarted}
+          onChange={(e) => updateField('dateStarted', e.target.value)}
           max={new Date().toISOString().split('T')[0]}
           required
         />
-        {errors.datePurchased && (
-          <p className="text-sm text-red-600">{errors.datePurchased}</p>
+        {errors.dateStarted && (
+          <p className="text-sm text-red-600">{errors.dateStarted}</p>
         )}
       </div>
 
