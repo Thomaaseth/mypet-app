@@ -45,7 +45,7 @@ export const foodEntries = pgTable('food_entries', {
   
   // STATUS FIELDS
   isActive: boolean('is_active').default(true).notNull(),
-  dateFinished: date('date_finished'),  // ← NEW
+  dateFinished: date('date_finished'), 
 
   // TIMESTAMPS
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -105,6 +105,18 @@ export type DryFoodEntry = BaseFoodEntry & {
   weightPerUnit: null;
   wetWeightUnit: null;
   wetDailyAmountUnit: null;
+
+  // Calculated fields for active entries
+  remainingDays?: number;
+  remainingWeight?: number;
+  depletionDate?: Date;
+
+  // Calculated fields for finished entries
+  actualDaysElapsed?: number;
+  actualDailyConsumption?: number;
+  expectedDailyConsumption?: number;
+  variancePercentage?: number;
+  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
 };
 
 export type WetFoodEntry = BaseFoodEntry & {
@@ -117,6 +129,18 @@ export type WetFoodEntry = BaseFoodEntry & {
   bagWeight: null;
   bagWeightUnit: null;
   dryDailyAmountUnit: null;
+
+  // Calculated fields for active entries
+  remainingDays?: number;
+  remainingWeight?: number;
+  depletionDate?: Date;
+  
+  // Calculated fields for finished entries
+  actualDaysElapsed?: number;
+  actualDailyConsumption?: number;
+  expectedDailyConsumption?: number;
+  variancePercentage?: number;
+  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
 };
 
 // Utility types

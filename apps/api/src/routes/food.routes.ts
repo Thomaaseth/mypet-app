@@ -281,6 +281,51 @@ router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next
  }
 });
 
+// PUT /api/pets/:petId/food/:foodId/finish-date - Update finish date for finished entry
+router.put(
+  '/:petId/food/:foodId/finish-date',
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.authSession?.user.id;
+      if (!userId) {
+        throw new BadRequestError('User session not found');
+      }
+
+      const { petId, foodId } = req.params;
+      const { dateFinished } = req.body;
+
+      if (!petId || !foodId) {
+        throw new BadRequestError('Pet ID and Food ID are required');
+      }
+
+      if (!dateFinished) {
+        throw new BadRequestError('dateFinished is required');
+      }
+
+      // Parse and validate date
+      const newDate = new Date(dateFinished);
+      if (isNaN(newDate.getTime())) {
+        throw new BadRequestError('Invalid date format');
+      }
+
+      const updatedEntry = await FoodService.updateFinishDate(
+        petId,
+        foodId,
+        userId,
+        newDate
+      );
+
+      respondWithSuccess(
+        res,
+        { foodEntry: updatedEntry },
+        'Finish date updated successfully'
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // PATCH /api/pets/:petId/food/:foodId/finish - Mark food entry as finished
 router.patch('/:petId/food/:foodId/finish', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {

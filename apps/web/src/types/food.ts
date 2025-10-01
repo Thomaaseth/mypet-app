@@ -12,13 +12,28 @@ export type DryFoodEntry = {
   dailyAmount: string;
   dryDailyAmountUnit: 'grams' | 'cups';
   dateStarted: string;
+  dateFinished: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  // Calculated fields
-  remainingDays: number;
-  remainingWeight: number;
-  depletionDate: string;
+  
+  // Wet food fields (null for dry)
+  numberOfUnits: null;
+  weightPerUnit: null;
+  wetWeightUnit: null;
+  wetDailyAmountUnit: null;
+  
+  // Calculated fields for active entries
+  remainingDays?: number;
+  remainingWeight?: number;
+  depletionDate?: string;  // String from API
+  
+  // Calculated fields for finished entries
+  actualDaysElapsed?: number;
+  actualDailyConsumption?: number;
+  expectedDailyConsumption?: number;
+  variancePercentage?: number;
+  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
 };
 
 export type WetFoodEntry = {
@@ -33,13 +48,27 @@ export type WetFoodEntry = {
   dailyAmount: string;
   wetDailyAmountUnit: 'grams' | 'oz';
   dateStarted: string;
+  dateFinished: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  // Calculated fields
-  remainingDays: number;
-  remainingWeight: number;
-  depletionDate: string;
+  
+  // Dry food fields (null for wet)
+  bagWeight: null;
+  bagWeightUnit: null;
+  dryDailyAmountUnit: null;
+  
+  // Calculated fields for active entries
+  remainingDays?: number;
+  remainingWeight?: number;
+  depletionDate?: string;
+  
+  // Calculated fields for finished entries
+  actualDaysElapsed?: number;
+  actualDailyConsumption?: number;
+  expectedDailyConsumption?: number;
+  variancePercentage?: number;
+  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
 };
 
 export type DryFoodFormData = {

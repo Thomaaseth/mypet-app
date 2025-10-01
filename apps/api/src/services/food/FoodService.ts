@@ -32,6 +32,10 @@ export class FoodService {
     }
   }
 
+  private static toDateString(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
   // Export calculations methods
   static calculateDryFoodRemaining(entry: DryFoodEntry) {
     return FoodCalculations.calculateDryFoodRemaining(entry);
@@ -412,7 +416,7 @@ export class FoodService {
     petId: string, 
     userId: string, 
     foodType?: 'dry' | 'wet',
-    limit: number = 5
+    limit: number = 10
   ): Promise<(DryFoodEntry | WetFoodEntry)[]> {
     try {
       // Validate limit parameter
@@ -438,20 +442,28 @@ export class FoodService {
         .select()
         .from(foodEntries)
         .where(and(...whereConditions))
-        .orderBy(desc(foodEntries.updatedAt))
+        .orderBy(desc(foodEntries.dateFinished))
         .limit(limit);
   
-      return result as (DryFoodEntry | WetFoodEntry)[];
-    } catch (error) {
+      // Calculate actual consumption for each finished entry
+      return result.map(entry => ({
+        ...entry,
+        ...FoodCalculations.calculateActualConsumption(entry as DryFoodEntry | WetFoodEntry)
+      })) as (DryFoodEntry | WetFoodEntry)[];
+      } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
       console.error('Error fetching finished food entries:', error);
       throw new BadRequestError('Failed to fetch finished food entries');
-    }
+      }
   }
 
-  static async markFoodAsFinished(petId: string, foodId: string, userId: string): Promise<DryFoodEntry | WetFoodEntry> {
+  static async markFoodAsFinished(
+    petId: string, 
+    foodId: string, 
+    userId: string
+  ): Promise<DryFoodEntry | WetFoodEntry> {
     try {
       FoodValidations.validateUUID(foodId, 'food entry ID');
       await this.verifyPetOwnership(petId, userId);
@@ -460,6 +472,7 @@ export class FoodService {
         .update(foodEntries)
         .set({ 
           isActive: false,
+          dateFinished: this.toDateString(new Date()),
           updatedAt: new Date()
         })
         .where(and(
@@ -473,21 +486,95 @@ export class FoodService {
         throw new NotFoundError('Active food entry not found');
       }
   
-      // Return with calculations
-      let calculations;
-      if (updatedEntry.foodType === 'dry') {
-        calculations = FoodCalculations.calculateDryFoodRemaining(updatedEntry as DryFoodEntry);
-      } else {
-        calculations = FoodCalculations.calculateWetFoodRemaining(updatedEntry as WetFoodEntry);
-      }
-  
-      return { ...updatedEntry, ...calculations } as DryFoodEntry | WetFoodEntry;
+      // Return with actual consumption calculations
+      return {
+        ...updatedEntry,
+        ...FoodCalculations.calculateActualConsumption(updatedEntry as DryFoodEntry | WetFoodEntry)
+      } as DryFoodEntry | WetFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
       console.error('Error marking food as finished:', error);
       throw new BadRequestError('Failed to mark food as finished');
+    }
+  }
+
+  
+  //Update the finish date (ONLY) of a finished food entry
+  static async updateFinishDate(
+    petId: string,
+    foodId: string,
+    userId: string,
+    newDate: Date
+  ): Promise<DryFoodEntry | WetFoodEntry> {
+    try {
+      // Validations
+      FoodValidations.validateUUID(foodId, 'food entry ID');
+      
+      if (!(newDate instanceof Date) || isNaN(newDate.getTime())) {
+        throw new BadRequestError('Invalid date provided');
+      }
+      
+      await this.verifyPetOwnership(petId, userId);
+      
+      // Get the entry and verify it's finished
+      const [entry] = await db
+        .select()
+        .from(foodEntries)
+        .where(and(
+          eq(foodEntries.id, foodId),
+          eq(foodEntries.petId, petId)
+        ));
+      
+      if (!entry) {
+        throw new NotFoundError('Food entry not found');
+      }
+      
+      if (entry.isActive) {
+        throw new BadRequestError('Cannot update finish date of active entry');
+      }
+      
+      // Validate date range: must be between dateStarted and today
+      const startDate = new Date(entry.dateStarted);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+      
+      if (newDate < startDate) {
+        throw new BadRequestError(
+          `Finish date cannot be before start date (${startDate.toISOString().split('T')[0]})`
+        );
+      }
+      
+      if (newDate > today) {
+        throw new BadRequestError('Finish date cannot be in the future');
+      }
+      
+      // Update ONLY dateFinished
+      const [updatedEntry] = await db
+        .update(foodEntries)
+        .set({ 
+          dateFinished: this.toDateString(new Date()),
+          updatedAt: new Date()
+        })
+        .where(eq(foodEntries.id, foodId))
+        .returning();
+      
+      if (!updatedEntry) {
+        throw new NotFoundError('Food entry not found');
+      }
+      
+      // Return with recalculated values
+      return {
+        ...updatedEntry,
+        ...FoodCalculations.calculateActualConsumption(updatedEntry as DryFoodEntry | WetFoodEntry)
+      } as DryFoodEntry | WetFoodEntry;
+    } catch (error) {
+      if (error instanceof BadRequestError || error instanceof NotFoundError) {
+        throw error;
+      }
+      console.error('Error updating finish date:', error);
+      throw new BadRequestError('Failed to update finish date');
     }
   }
 }
