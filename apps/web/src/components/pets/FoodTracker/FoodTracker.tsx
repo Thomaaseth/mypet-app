@@ -8,6 +8,8 @@ import { DryFoodTracker } from './DryFoodTracker';
 import { WetFoodTracker } from './WetFoodTracker';
 import { FoodTrackerProvider, useFoodTrackerContext } from './FoodTrackerContext';
 import { formatDateForDisplay } from '@/lib/validations/food';
+import type { DryFoodEntry, WetFoodEntry, WetFoodFormData } from '@/types/food';
+
 
 interface FoodTrackerProps {
   petId: string;
@@ -17,6 +19,19 @@ const FOOD_TYPE_LABELS = {
   dry: 'Dry Food',
   wet: 'Wet Food'
 };
+
+// Type guard to ensure entries have calculated fields
+function hasCalculatedFields(entry: DryFoodEntry | WetFoodEntry): entry is (DryFoodEntry | WetFoodEntry) & {
+  remainingDays: number;
+  remainingWeight: number;
+  depletionDate: string;
+} {
+  return (
+    entry.remainingDays !== undefined &&
+    entry.remainingWeight !== undefined &&
+    entry.depletionDate !== undefined
+  );
+}
 
 // Internal component that uses the context
 function FoodTrackerContent() {
@@ -35,7 +50,7 @@ function FoodTrackerContent() {
         {/* Food Status Summary - Restored! */}
         {activeFoodEntries.length > 0 && !isLoading && (
           <div className="space-y-3 mb-6">
-            {activeFoodEntries.length === 1 ? (
+            {activeFoodEntries.length === 1 && hasCalculatedFields(activeFoodEntries[0]) ? (
               // Single food entry
               <div className={`p-4 rounded-lg border ${
                   activeFoodEntries[0].foodType === 'dry' 
@@ -60,7 +75,9 @@ function FoodTrackerContent() {
             ) : (
               // Multiple food entries - side by side
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {activeFoodEntries.sort((a) => a.foodType === 'dry' ? -1 : 1)
+              {activeFoodEntries
+                .filter(hasCalculatedFields)
+                .sort((a) => a.foodType === 'dry' ? -1 : 1)
                 .map((entry) => (
                   <div 
                     key={entry.id} 
@@ -68,16 +85,15 @@ function FoodTrackerContent() {
                       entry.foodType === 'dry' 
                         ? 'bg-amber-50 border-amber-200' 
                         : 'bg-blue-50 border-blue-200'
-                    }`}
-                  >
+                    }`}>
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground mb-1">
                         {FOOD_TYPE_LABELS[entry.foodType]} Supply
                       </p>
-                      <p className="text-xl font-bold">
+                      <p className="text-2xl font-bold">
                         {entry.remainingDays > 0 ? `${entry.remainingDays} days` : 'Running out'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {entry.remainingDays > 0 
                           ? `Runs out ${formatDateForDisplay(entry.depletionDate)}`
                           : 'Needs restocking'
@@ -86,10 +102,10 @@ function FoodTrackerContent() {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
+      )}
 
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'dry' | 'wet')}>
           <TabsList className="grid w-full grid-cols-2">

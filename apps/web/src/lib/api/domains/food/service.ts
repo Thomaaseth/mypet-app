@@ -74,6 +74,15 @@ export class FoodService {
       }
     }
 
+  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntriesApiResponse> {
+    try {
+      this.validator.validatePetId(petId);
+      return await this.repository.getFinishedDryFoodEntries(petId, limit);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // Wet food methods
   async getWetFoodEntries(petId: string): Promise<WetFoodEntriesApiResponse> {
     try {
@@ -114,6 +123,15 @@ export class FoodService {
       this.validator.validateFoodId(foodId);
       const validatedData = this.validator.validateUpdateWetFoodData(foodData);
       return await this.repository.updateWetFoodEntry(petId, foodId, validatedData);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntriesApiResponse> {
+    try {
+      this.validator.validatePetId(petId);
+      return await this.repository.getFinishedWetFoodEntries(petId, limit);
     } catch (error) {
       throw this.handleError(error);
     }

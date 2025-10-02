@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { dryFoodApi, foodApi, foodErrorHandler } from '@/lib/api/domains/food';
-import type { DryFoodEntry, DryFoodFormData, WetFoodEntry } from '@/types/food';
+import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { toastService } from '@/lib/toast';
 
 interface UseDryFoodTrackerOptions {
@@ -8,36 +8,62 @@ interface UseDryFoodTrackerOptions {
 }
 
 export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
-  const [dryFoodEntries, setDryFoodEntries] = useState<DryFoodEntry[]>([]);
+  // Separate state for active and finished entries
+  const [activeDryFoodEntries, setActiveDryFoodEntries] = useState<DryFoodEntry[]>([]);
+  const [finishedDryFoodEntries, setFinishedDryFoodEntries] = useState<DryFoodEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDryFoodEntries = useCallback(async () => {
+  // Fetch active entries
+  const fetchActiveDryFoodEntries = useCallback(async () => {
     if (!petId) return;
     
     try {
-      setIsLoading(true);
       setError(null);
-      
       const response = await dryFoodApi.getDryFoodEntries(petId);
-      setDryFoodEntries(response.foodEntries);
+      setActiveDryFoodEntries(response.foodEntries);
     } catch (err) {
       const foodError = foodErrorHandler(err);
       setError(foodError.message);
-      console.error('Failed to fetch dry food entries:', err);
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to fetch active dry food entries:', err);
     }
   }, [petId]);
 
+  // Fetch finished entries
+  const fetchFinishedDryFoodEntries = useCallback(async () => {
+    if (!petId) return;
+    
+    try {
+      setError(null);
+      const response = await dryFoodApi.getFinishedDryFoodEntries(petId);
+      setFinishedDryFoodEntries(response.foodEntries);
+    } catch (err) {
+      const foodError = foodErrorHandler(err);
+      setError(foodError.message);
+      console.error('Failed to fetch finished dry food entries:', err);
+    }
+  }, [petId]);
+
+  // Fetch both on mount
   useEffect(() => {
-    fetchDryFoodEntries();
-  }, [fetchDryFoodEntries]);
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchActiveDryFoodEntries(),
+        fetchFinishedDryFoodEntries()
+      ]);
+      setIsLoading(false);
+    };
+
+    fetchAllData();
+  }, [fetchActiveDryFoodEntries, fetchFinishedDryFoodEntries]);
 
   const createDryFoodEntry = useCallback(async (foodData: DryFoodFormData): Promise<DryFoodEntry | null> => {
     try {
       const newEntry = await dryFoodApi.createDryFoodEntry(petId, foodData);
-      setDryFoodEntries(prev => [newEntry, ...prev]);
+      
+      // Optimistically add to active entries
+      setActiveDryFoodEntries(prev => [newEntry, ...prev]);
 
       toastService.success('Dry food entry added successfully');
       return newEntry;
@@ -55,11 +81,14 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
   ): Promise<DryFoodEntry | null> => {
     try {
       const updatedEntry = await dryFoodApi.updateDryFoodEntry(petId, foodId, foodData);
-      setDryFoodEntries(prev => 
-        prev.map(entry => entry.id === foodId ? updatedEntry : entry)
+      
+      // Optimistically update in active entries
+      setActiveDryFoodEntries(prev => 
+        prev.map(entry => entry.id === foodId ? { ...updatedEntry } as DryFoodEntry : entry)
       );
+      
       toastService.success('Dry food entry updated successfully');
-      return updatedEntry;
+      return updatedEntry as DryFoodEntry;
     } catch (err) {
       const foodError = foodErrorHandler(err);
       toastService.error(foodError.message);
@@ -71,7 +100,11 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
   const deleteDryFoodEntry = useCallback(async (foodId: string): Promise<boolean> => {
     try {
       await foodApi.deleteFoodEntry(petId, foodId);
-      setDryFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      
+      // Remove from whichever state has it
+      setActiveDryFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      setFinishedDryFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      
       toastService.success('Dry food entry deleted successfully');
       return true;
     } catch (err) {
@@ -86,39 +119,35 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     try {
       const finishedEntry = await foodApi.markFoodAsFinished(petId, foodId);
       
-      // Update the local state to reflect the finished entry
-      setDryFoodEntries(prev => 
-        prev.map(entry => 
-          entry.id === foodId 
-            ? { ...finishedEntry } as DryFoodEntry
-            : entry
-        )
-      );
+      // Move from active to finished
+      setActiveDryFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      setFinishedDryFoodEntries(prev => [finishedEntry as DryFoodEntry, ...prev]);
       
-    // Enhanced toast with consumption info
-    if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
-      const dryEntry = finishedEntry as DryFoodEntry;
-      const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
-      const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
-      const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+      // Enhanced toast with consumption info
+      if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
+        const dryEntry = finishedEntry as DryFoodEntry;
+        const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
+        const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+        const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+        
+        const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
+          ? 'Overfeeding' 
+          : finishedEntry.feedingStatus === 'underfeeding' 
+          ? 'Underfeeding' 
+          : 'Normal feeding';
+        
+        toastService.success(
+          `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
+        );
+      } else {
+        toastService.success('Dry food marked as finished');
+      }
       
-      const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
-        ? 'Overfeeding' 
-        : finishedEntry.feedingStatus === 'underfeeding' 
-        ? 'Underfeeding' 
-        : 'Normal feeding';
-      
-      toastService.success(
-        `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
-      );
-    } else {
-      toastService.success('Food entry marked as finished');
-    }   
       return true;
     } catch (err) {
       const foodError = foodErrorHandler(err);
       toastService.error(foodError.message);
-      console.error('Failed to mark food entry as finished:', err);
+      console.error('Failed to mark dry food as finished:', err);
       return false;
     }
   }, [petId]);
@@ -127,12 +156,9 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     try {
       const updatedEntry = await foodApi.updateFinishDate(petId, foodId, dateFinished);
       
-      setDryFoodEntries(prev => 
-        prev.map(entry => 
-          entry.id === foodId 
-            ? { ...updatedEntry } as DryFoodEntry
-            : entry
-        )
+      // Update in finished entries
+      setFinishedDryFoodEntries(prev => 
+        prev.map(entry => entry.id === foodId ? { ...updatedEntry } as DryFoodEntry : entry)
       );
       
       // Enhanced toast with consumption info
@@ -149,7 +175,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
           : 'Normal feeding';
         
         toastService.success(
-          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
+          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
         );
       } else {
         toastService.success('Finish date updated successfully');
@@ -164,16 +190,15 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     }
   }, [petId]);
 
-  // Filter food section active/low stock/history
-  const activeDryFoodEntries = dryFoodEntries.filter(entry => entry.isActive);
-  const lowStockDryFoodEntries = activeDryFoodEntries.filter(entry => entry.remainingDays !== undefined && entry.remainingDays <= 7 && entry.remainingDays > 0);
-  const finishedDryFoodEntries = dryFoodEntries.filter(entry => !entry.isActive);
+  // Calculate low stock from active entries
+  const lowStockDryFoodEntries = activeDryFoodEntries.filter(
+    entry => entry.remainingDays !== undefined && entry.remainingDays <= 7 && entry.remainingDays > 0
+  );
 
   return {
-    dryFoodEntries: dryFoodEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     activeDryFoodEntries,
-    lowStockDryFoodEntries,
     finishedDryFoodEntries,
+    lowStockDryFoodEntries,
     isLoading,
     error,
     createDryFoodEntry,
@@ -181,6 +206,11 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     deleteDryFoodEntry,
     markDryFoodAsFinished,
     updateFinishDate,
-    refetchDryFoodEntries: fetchDryFoodEntries,
+    refetchDryFoodEntries: async () => {
+      await Promise.all([
+        fetchActiveDryFoodEntries(),
+        fetchFinishedDryFoodEntries()
+      ]);
+    },
   };
 }

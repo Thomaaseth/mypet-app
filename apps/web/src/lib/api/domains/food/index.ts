@@ -8,6 +8,7 @@ const foodService = new FoodService(foodRepository, foodValidator);
 // API exports
 export const dryFoodApi = {
   getDryFoodEntries: (petId: string) => foodService.getDryFoodEntries(petId),
+  getFinishedDryFoodEntries: (petId: string, limit?: number) => foodService.getFinishedDryFoodEntries(petId, limit),
   createDryFoodEntry: (petId: string, foodData: DryFoodFormData) => 
     foodService.createDryFoodEntry(petId, foodData),
   updateDryFoodEntry: (petId: string, foodId: string, foodData: Partial<DryFoodFormData>) => 
@@ -16,6 +17,7 @@ export const dryFoodApi = {
 
 export const wetFoodApi = {
   getWetFoodEntries: (petId: string) => foodService.getWetFoodEntries(petId),
+  getFinishedWetFoodEntries: (petId: string, limit?: number) => foodService.getFinishedWetFoodEntries(petId, limit),
   createWetFoodEntry: (petId: string, foodData: WetFoodFormData) => 
     foodService.createWetFoodEntry(petId, foodData),
   updateWetFoodEntry: (petId: string, foodId: string, foodData: Partial<WetFoodFormData>) => 

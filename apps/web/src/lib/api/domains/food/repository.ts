@@ -38,6 +38,13 @@ export class FoodRepository {
     return result.foodEntry;
   }
 
+  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntriesApiResponse> {
+    return await get<DryFoodEntriesApiResponse>(
+      `/api/pets/${petId}/food/finished`,
+      { foodType: 'dry', limit }
+    );
+  }
+
   // Wet food methods
   async getWetFoodEntries(petId: string): Promise<WetFoodEntriesApiResponse> {
     return await get<WetFoodEntriesApiResponse>(
@@ -64,6 +71,13 @@ export class FoodRepository {
       foodData
     );
     return result.foodEntry;
+  }
+
+  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntriesApiResponse> {
+    return await get<WetFoodEntriesApiResponse>(
+      `/api/pets/${petId}/food/finished`,
+      { foodType: 'wet', limit }
+    );
   }
 
   // Combined methods

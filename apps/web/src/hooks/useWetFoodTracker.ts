@@ -7,38 +7,63 @@ interface UseWetFoodTrackerOptions {
   petId: string;
 }
 
-
 export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
-  const [wetFoodEntries, setWetFoodEntries] = useState<WetFoodEntry[]>([]);
+  // Separate state for active and finished entries
+  const [activeWetFoodEntries, setActiveWetFoodEntries] = useState<WetFoodEntry[]>([]);
+  const [finishedWetFoodEntries, setFinishedWetFoodEntries] = useState<WetFoodEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchWetFoodEntries = useCallback(async () => {
+  // Fetch active entries
+  const fetchActiveWetFoodEntries = useCallback(async () => {
     if (!petId) return;
     
     try {
-      setIsLoading(true);
       setError(null);
-      
       const response = await wetFoodApi.getWetFoodEntries(petId);
-      setWetFoodEntries(response.foodEntries);
+      setActiveWetFoodEntries(response.foodEntries);
     } catch (err) {
       const foodError = foodErrorHandler(err);
       setError(foodError.message);
-      console.error('Failed to fetch wet food entries:', err);
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to fetch active wet food entries:', err);
     }
   }, [petId]);
 
-  useEffect(() => {
-    fetchWetFoodEntries();
-  }, [fetchWetFoodEntries]);
+  // Fetch finished entries
+  const fetchFinishedWetFoodEntries = useCallback(async () => {
+    if (!petId) return;
+    
+    try {
+      setError(null);
+      const response = await wetFoodApi.getFinishedWetFoodEntries(petId);
+      setFinishedWetFoodEntries(response.foodEntries);
+    } catch (err) {
+      const foodError = foodErrorHandler(err);
+      setError(foodError.message);
+      console.error('Failed to fetch finished wet food entries:', err);
+    }
+  }, [petId]);
 
-const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promise<WetFoodEntry | null> => {
+  // Fetch both on mount
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchActiveWetFoodEntries(),
+        fetchFinishedWetFoodEntries()
+      ]);
+      setIsLoading(false);
+    };
+
+    fetchAllData();
+  }, [fetchActiveWetFoodEntries, fetchFinishedWetFoodEntries]);
+
+  const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promise<WetFoodEntry | null> => {
     try {
       const newEntry = await wetFoodApi.createWetFoodEntry(petId, foodData);
-      setWetFoodEntries(prev => [newEntry, ...prev]);
+      
+      // Optimistically add to active entries
+      setActiveWetFoodEntries(prev => [newEntry, ...prev]);
 
       toastService.success('Wet food entry added successfully');
       return newEntry;
@@ -56,11 +81,14 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
   ): Promise<WetFoodEntry | null> => {
     try {
       const updatedEntry = await wetFoodApi.updateWetFoodEntry(petId, foodId, foodData);
-      setWetFoodEntries(prev => 
-        prev.map(entry => entry.id === foodId ? updatedEntry : entry)
+      
+      // Optimistically update in active entries
+      setActiveWetFoodEntries(prev => 
+        prev.map(entry => entry.id === foodId ? { ...updatedEntry } as WetFoodEntry : entry)
       );
+      
       toastService.success('Wet food entry updated successfully');
-      return updatedEntry;
+      return updatedEntry as WetFoodEntry;
     } catch (err) {
       const foodError = foodErrorHandler(err);
       toastService.error(foodError.message);
@@ -72,7 +100,11 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
   const deleteWetFoodEntry = useCallback(async (foodId: string): Promise<boolean> => {
     try {
       await foodApi.deleteFoodEntry(petId, foodId);
-      setWetFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      
+      // Remove from whichever state has it
+      setActiveWetFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      setFinishedWetFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      
       toastService.success('Wet food entry deleted successfully');
       return true;
     } catch (err) {
@@ -83,43 +115,39 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     }
   }, [petId]);
 
- const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolean> => {
+  const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolean> => {
     try {
       const finishedEntry = await foodApi.markFoodAsFinished(petId, foodId);
       
-      // Update the local state to reflect the finished entry
-      setWetFoodEntries(prev => 
-        prev.map(entry => 
-          entry.id === foodId 
-            ? { ...finishedEntry } as WetFoodEntry
-            : entry
-        )
-      );
+      // Move from active to finished
+      setActiveWetFoodEntries(prev => prev.filter(entry => entry.id !== foodId));
+      setFinishedWetFoodEntries(prev => [finishedEntry as WetFoodEntry, ...prev]);
       
-    // Enhanced toast with consumption info
-    if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
-      const wetEntry = finishedEntry as WetFoodEntry;
-      const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit) * (wetEntry.wetWeightUnit === 'oz' ? 28.3495 : 1);
-      const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
-      const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+      // Enhanced toast with consumption info
+      if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
+        const wetEntry = finishedEntry as WetFoodEntry;
+        const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit) * (wetEntry.wetWeightUnit === 'oz' ? 28.3495 : 1);
+        const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.wetDailyAmountUnit === 'oz' ? 28.3495 : 1);
+        const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+        
+        const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
+          ? 'Overfeeding' 
+          : finishedEntry.feedingStatus === 'underfeeding' 
+          ? 'Underfeeding' 
+          : 'Normal feeding';
+        
+        toastService.success(
+          `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
+        );
+      } else {
+        toastService.success('Wet food marked as finished');
+      }
       
-      const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
-        ? 'Overfeeding' 
-        : finishedEntry.feedingStatus === 'underfeeding' 
-        ? 'Underfeeding' 
-        : 'Normal feeding';
-      
-      toastService.success(
-        `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
-      );
-    } else {
-      toastService.success('Food entry marked as finished');
-    }   
       return true;
     } catch (err) {
       const foodError = foodErrorHandler(err);
       toastService.error(foodError.message);
-      console.error('Failed to mark food entry as finished:', err);
+      console.error('Failed to mark wet food as finished:', err);
       return false;
     }
   }, [petId]);
@@ -128,19 +156,16 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     try {
       const updatedEntry = await foodApi.updateFinishDate(petId, foodId, dateFinished);
       
-      setWetFoodEntries(prev => 
-        prev.map(entry => 
-          entry.id === foodId 
-            ? { ...updatedEntry } as WetFoodEntry
-            : entry
-        )
+      // Update in finished entries
+      setFinishedWetFoodEntries(prev => 
+        prev.map(entry => entry.id === foodId ? { ...updatedEntry } as WetFoodEntry : entry)
       );
       
       // Enhanced toast with consumption info
       if (updatedEntry.actualDaysElapsed && updatedEntry.feedingStatus) {
         const wetEntry = updatedEntry as WetFoodEntry;
         const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit) * (wetEntry.wetWeightUnit === 'oz' ? 28.3495 : 1);
-        const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+        const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.wetDailyAmountUnit === 'oz' ? 28.3495 : 1);
         const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
         
         const statusLabel = updatedEntry.feedingStatus === 'overfeeding' 
@@ -150,7 +175,7 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
           : 'Normal feeding';
         
         toastService.success(
-          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
+          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
         );
       } else {
         toastService.success('Finish date updated successfully');
@@ -165,15 +190,15 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     }
   }, [petId]);
 
-  const activeWetFoodEntries = wetFoodEntries.filter(entry => entry.isActive);
-  const lowStockWetFoodEntries = activeWetFoodEntries.filter(entry => entry.remainingDays !== undefined && entry.remainingDays <= 7 && entry.remainingDays > 0);
-  const finishedWetFoodEntries = wetFoodEntries.filter(entry => !entry.isActive);
+  // Calculate low stock from active entries
+  const lowStockWetFoodEntries = activeWetFoodEntries.filter(
+    entry => entry.remainingDays !== undefined && entry.remainingDays <= 7 && entry.remainingDays > 0
+  );
 
   return {
-    wetFoodEntries: wetFoodEntries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     activeWetFoodEntries,
-    lowStockWetFoodEntries,
     finishedWetFoodEntries,
+    lowStockWetFoodEntries,
     isLoading,
     error,
     createWetFoodEntry,
@@ -181,6 +206,11 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     deleteWetFoodEntry,
     markWetFoodAsFinished,
     updateFinishDate,
-    refetchWetFoodEntries: fetchWetFoodEntries,
+    refetchWetFoodEntries: async () => {
+      await Promise.all([
+        fetchActiveWetFoodEntries(),
+        fetchFinishedWetFoodEntries()
+      ]);
+    },
   };
 }

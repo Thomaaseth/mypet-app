@@ -257,6 +257,41 @@ router.put('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Re
  }
 });
 
+// GET /api/pets/:petId/food/finished - Get finished food entries with optional type filter
+router.get('/:petId/food/finished', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const petId = req.params.petId;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
+    }
+
+    // Strict food type validation
+    const foodType = req.query.foodType as string;
+    if (!foodType || !['dry', 'wet'].includes(foodType)) {
+      throw new BadRequestError('foodType query parameter is required and must be either "dry" or "wet"');
+    }
+
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+    const finishedEntries = await FoodService.getFinishedFoodEntries(
+      petId, 
+      userId, 
+      foodType as 'dry' | 'wet', 
+      limit
+    );
+    
+    const total = finishedEntries.length;
+    respondWithSuccess(res, { foodEntries: finishedEntries, total }, `Retrieved ${total} finished ${foodType} food entries`);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // COMBINED ROUTES
 // GET /api/pets/:petId/food - Get all food entries (both dry and wet)
 router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -281,9 +316,10 @@ router.get('/:petId/food', async (req: AuthenticatedRequest, res: Response, next
  }
 });
 
+
+
 // PUT /api/pets/:petId/food/:foodId/finish-date - Update finish date for finished entry
-router.put(
-  '/:petId/food/:foodId/finish-date',
+router.put('/:petId/food/:foodId/finish-date',
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const userId = req.authSession?.user.id;

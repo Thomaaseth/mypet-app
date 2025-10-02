@@ -96,6 +96,7 @@ export class FoodService {
         .where(and(
           eq(foodEntries.petId, petId),
           eq(foodEntries.foodType, 'dry'),
+          eq(foodEntries.isActive, true)
         ))
         .orderBy(desc(foodEntries.createdAt));
   
@@ -247,6 +248,7 @@ export class FoodService {
         .where(and(
           eq(foodEntries.petId, petId),
           eq(foodEntries.foodType, 'wet'),
+          eq(foodEntries.isActive, true)
         ))
         .orderBy(desc(foodEntries.createdAt));
   
@@ -554,7 +556,7 @@ export class FoodService {
       const [updatedEntry] = await db
         .update(foodEntries)
         .set({ 
-          dateFinished: this.toDateString(new Date()),
+          dateFinished: this.toDateString(newDate),
           updatedAt: new Date()
         })
         .where(eq(foodEntries.id, foodId))
