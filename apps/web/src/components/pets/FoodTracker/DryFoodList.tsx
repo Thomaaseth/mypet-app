@@ -27,12 +27,28 @@ import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
 
+
+// Type guard to ensure active entries have required calculated fields
+function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
+  remainingDays: number;
+  remainingWeight: number;
+  depletionDate: string;
+} {
+  return (
+    entry.isActive &&
+    entry.remainingDays !== undefined &&
+    entry.remainingWeight !== undefined &&
+    entry.depletionDate !== undefined
+  );
+}
+
 interface DryFoodListProps {
   entries: DryFoodEntry[];
   finishedEntries: DryFoodEntry[];
   onUpdate: (foodId: string, data: Partial<DryFoodFormData>) => Promise<DryFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   onMarkAsFinished: (foodId: string) => Promise<boolean>;
+  onUpdateFinishDate: (foodId: string, dateFinished: string) => Promise<DryFoodEntry | null>;
   isLoading?: boolean;
 }
 
@@ -42,6 +58,7 @@ export function DryFoodList({
   onUpdate, 
   onDelete, 
   onMarkAsFinished, 
+  onUpdateFinishDate,
   isLoading = false 
 }: DryFoodListProps) {
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | null>(null);
@@ -72,8 +89,11 @@ export function DryFoodList({
     const success = await onMarkAsFinished(foodId);
     setMarkingAsFinished(null);
   }
-
-  const getStatusSection = (entry: DryFoodEntry) => {
+  const getStatusSection = (entry: DryFoodEntry & { 
+    remainingDays: number; 
+    remainingWeight: number; 
+    depletionDate: string;
+  }) => {
     const isCalculatedFinished = entry.remainingDays <= 0;
     const isMarking = markingAsFinished === entry.id;
     
@@ -107,17 +127,17 @@ export function DryFoodList({
     }
   };
 
-  const activeEntries = entries.filter(entry => entry.isActive);
-  if (activeEntries.length === 0 && finishedEntries.length === 0) {
+  const validActiveEntries = entries.filter(isValidActiveEntry);
+  if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
     return null;
   }
 
   return (
     <>
       {/* Active Entries Section */}
-      {activeEntries.length > 0 && (
+      {validActiveEntries.length > 0 && (
         <div className="grid gap-4">
-          {activeEntries.map((entry) => (
+          {validActiveEntries.map((entry) => (
             <Card key={entry.id} className="relative">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
@@ -219,6 +239,7 @@ export function DryFoodList({
         <FoodHistorySection 
           entries={finishedEntries}
           foodType="dry"
+          onEditFinishDate={onUpdateFinishDate}
         />
       )}
 

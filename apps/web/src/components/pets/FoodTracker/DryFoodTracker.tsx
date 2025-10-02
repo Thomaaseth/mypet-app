@@ -18,6 +18,7 @@ export function DryFoodTracker() {
     updateDryFoodEntry,
     deleteDryFoodEntry,
     markDryFoodAsFinished,
+    updateDryFinishDate,
   } = useFoodTrackerContext();
 
   return (
@@ -33,6 +34,7 @@ export function DryFoodTracker() {
         updateFoodEntry: updateDryFoodEntry,
         deleteFoodEntry: deleteDryFoodEntry,
         markFoodAsFinished: markDryFoodAsFinished,
+        updateFinishDate: updateDryFinishDate,
       }}
       FormComponent={DryFoodForm}
       ListComponent={DryFoodList}

@@ -83,31 +83,90 @@ const createWetFoodEntry = useCallback(async (foodData: WetFoodFormData): Promis
     }
   }, [petId]);
 
-const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolean> => {
-  try {
-    const finishedEntry = await foodApi.markFoodAsFinished(petId, foodId);
-    
-    // Update the local state to reflect the finished entry
-    setWetFoodEntries(prev => 
-      prev.map(entry => 
-        entry.id === foodId 
-          ? { ...finishedEntry } as WetFoodEntry
-          : entry
-      )
-    );
-    
-    toastService.success('Food entry marked as finished');
-    return true;
-  } catch (err) {
-    const foodError = foodErrorHandler(err);
-    toastService.error(foodError.message);
-    console.error('Failed to mark food entry as finished:', err);
-    return false;
-  }
-}, [petId]);
+ const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolean> => {
+    try {
+      const finishedEntry = await foodApi.markFoodAsFinished(petId, foodId);
+      
+      // Update the local state to reflect the finished entry
+      setWetFoodEntries(prev => 
+        prev.map(entry => 
+          entry.id === foodId 
+            ? { ...finishedEntry } as WetFoodEntry
+            : entry
+        )
+      );
+      
+    // Enhanced toast with consumption info
+    if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
+      const wetEntry = finishedEntry as WetFoodEntry;
+      const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit) * (wetEntry.wetWeightUnit === 'oz' ? 28.3495 : 1);
+      const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+      const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+      
+      const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
+        ? 'Overfeeding' 
+        : finishedEntry.feedingStatus === 'underfeeding' 
+        ? 'Underfeeding' 
+        : 'Normal feeding';
+      
+      toastService.success(
+        `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
+      );
+    } else {
+      toastService.success('Food entry marked as finished');
+    }   
+      return true;
+    } catch (err) {
+      const foodError = foodErrorHandler(err);
+      toastService.error(foodError.message);
+      console.error('Failed to mark food entry as finished:', err);
+      return false;
+    }
+  }, [petId]);
+
+  const updateFinishDate = useCallback(async (foodId: string, dateFinished: string): Promise<WetFoodEntry | null> => {
+    try {
+      const updatedEntry = await foodApi.updateFinishDate(petId, foodId, dateFinished);
+      
+      setWetFoodEntries(prev => 
+        prev.map(entry => 
+          entry.id === foodId 
+            ? { ...updatedEntry } as WetFoodEntry
+            : entry
+        )
+      );
+      
+      // Enhanced toast with consumption info
+      if (updatedEntry.actualDaysElapsed && updatedEntry.feedingStatus) {
+        const wetEntry = updatedEntry as WetFoodEntry;
+        const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit) * (wetEntry.wetWeightUnit === 'oz' ? 28.3495 : 1);
+        const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+        const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+        
+        const statusLabel = updatedEntry.feedingStatus === 'overfeeding' 
+          ? 'Overfeeding' 
+          : updatedEntry.feedingStatus === 'underfeeding' 
+          ? 'Underfeeding' 
+          : 'Normal feeding';
+        
+        toastService.success(
+          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
+        );
+      } else {
+        toastService.success('Finish date updated successfully');
+      }
+      
+      return updatedEntry as WetFoodEntry;
+    } catch (err) {
+      const foodError = foodErrorHandler(err);
+      toastService.error(foodError.message);
+      console.error('Failed to update finish date:', err);
+      return null;
+    }
+  }, [petId]);
 
   const activeWetFoodEntries = wetFoodEntries.filter(entry => entry.isActive);
-  const lowStockWetFoodEntries = activeWetFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);
+  const lowStockWetFoodEntries = activeWetFoodEntries.filter(entry => entry.remainingDays !== undefined && entry.remainingDays <= 7 && entry.remainingDays > 0);
   const finishedWetFoodEntries = wetFoodEntries.filter(entry => !entry.isActive);
 
   return {
@@ -121,6 +180,7 @@ const markWetFoodAsFinished = useCallback(async (foodId: string): Promise<boolea
     updateWetFoodEntry,
     deleteWetFoodEntry,
     markWetFoodAsFinished,
+    updateFinishDate,
     refetchWetFoodEntries: fetchWetFoodEntries,
   };
 }

@@ -27,12 +27,27 @@ import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
 
+// Type guard to ensure active entries have required calculated fields
+function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
+  remainingDays: number;
+  remainingWeight: number;
+  depletionDate: string;
+} {
+  return (
+    entry.isActive &&
+    entry.remainingDays !== undefined &&
+    entry.remainingWeight !== undefined &&
+    entry.depletionDate !== undefined
+  );
+}
+
 interface WetFoodListProps {
   entries: WetFoodEntry[];
   finishedEntries: WetFoodEntry[];
   onUpdate: (foodId: string, data: Partial<WetFoodFormData>) => Promise<WetFoodEntry | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   onMarkAsFinished: (foodId: string) => Promise<boolean>;
+  onUpdateFinishDate: (foodId: string, dateFinished: string) => Promise<WetFoodEntry | null>;
   isLoading?: boolean;
 }
 export function WetFoodList({ 
@@ -41,6 +56,7 @@ export function WetFoodList({
   onUpdate, 
   onDelete, 
   onMarkAsFinished,
+  onUpdateFinishDate,
   isLoading = false 
 }: WetFoodListProps) {
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
@@ -72,7 +88,11 @@ export function WetFoodList({
   setMarkingAsFinished(null);
 };
 
-const getStatusSection = (entry: WetFoodEntry) => {
+const getStatusSection = (entry: WetFoodEntry & { 
+  remainingDays: number; 
+  remainingWeight: number; 
+  depletionDate: string;
+}) => {
   const isCalculatedFinished = entry.remainingDays <= 0;
   const isMarking = markingAsFinished === entry.id;
   
@@ -109,24 +129,28 @@ const getStatusSection = (entry: WetFoodEntry) => {
    return entry.numberOfUnits * parseFloat(entry.weightPerUnit);
  };
 
- const getProgressPercentage = (entry: WetFoodEntry) => {
+ const getProgressPercentage = (entry: WetFoodEntry & { 
+  remainingDays: number; 
+  remainingWeight: number; 
+  depletionDate: string;
+  }) => {
    const totalWeight = calculateTotalWeight(entry);
    if (totalWeight === 0) return 0;
    return Math.max(0, Math.min(100, (entry.remainingWeight / totalWeight) * 100));
  };
 
-const activeEntries = entries.filter(entry => entry.isActive);
+ const validActiveEntries = entries.filter(isValidActiveEntry);
 
-if (activeEntries.length === 0 && finishedEntries.length === 0) {
+if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
   return null;
 }
 
  return (
    <>
      {/* Active Entries Section */}
-     {activeEntries.length > 0 && (
+     {validActiveEntries.length > 0 && (
        <div className="grid gap-4">
-         {activeEntries.map((entry) => {
+         {validActiveEntries.map((entry) => {
            const totalWeight = calculateTotalWeight(entry);
            const progressPercentage = getProgressPercentage(entry);
            
@@ -239,6 +263,7 @@ if (activeEntries.length === 0 && finishedEntries.length === 0) {
        <FoodHistorySection 
          entries={finishedEntries}
          foodType="wet"
+         onEditFinishDate={onUpdateFinishDate}
        />
      )}
 

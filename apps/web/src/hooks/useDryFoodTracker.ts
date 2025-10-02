@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { dryFoodApi, foodApi, foodErrorHandler } from '@/lib/api/domains/food';
-import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
+import type { DryFoodEntry, DryFoodFormData, WetFoodEntry } from '@/types/food';
 import { toastService } from '@/lib/toast';
 
 interface UseDryFoodTrackerOptions {
@@ -95,7 +95,25 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
         )
       );
       
+    // Enhanced toast with consumption info
+    if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
+      const dryEntry = finishedEntry as DryFoodEntry;
+      const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
+      const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+      const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+      
+      const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
+        ? 'Overfeeding' 
+        : finishedEntry.feedingStatus === 'underfeeding' 
+        ? 'Underfeeding' 
+        : 'Normal feeding';
+      
+      toastService.success(
+        `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
+      );
+    } else {
       toastService.success('Food entry marked as finished');
+    }   
       return true;
     } catch (err) {
       const foodError = foodErrorHandler(err);
@@ -105,8 +123,50 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     }
   }, [petId]);
 
+  const updateFinishDate = useCallback(async (foodId: string, dateFinished: string): Promise<DryFoodEntry | null> => {
+    try {
+      const updatedEntry = await foodApi.updateFinishDate(petId, foodId, dateFinished);
+      
+      setDryFoodEntries(prev => 
+        prev.map(entry => 
+          entry.id === foodId 
+            ? { ...updatedEntry } as DryFoodEntry
+            : entry
+        )
+      );
+      
+      // Enhanced toast with consumption info
+      if (updatedEntry.actualDaysElapsed && updatedEntry.feedingStatus) {
+        const dryEntry = updatedEntry as DryFoodEntry;
+        const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
+        const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+        const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
+        
+        const statusLabel = updatedEntry.feedingStatus === 'overfeeding' 
+          ? 'Overfeeding' 
+          : updatedEntry.feedingStatus === 'underfeeding' 
+          ? 'Underfeeding' 
+          : 'Normal feeding';
+        
+        toastService.success(
+          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days) Status: ${statusLabel}`
+        );
+      } else {
+        toastService.success('Finish date updated successfully');
+      }
+      
+      return updatedEntry as DryFoodEntry;
+    } catch (err) {
+      const foodError = foodErrorHandler(err);
+      toastService.error(foodError.message);
+      console.error('Failed to update finish date:', err);
+      return null;
+    }
+  }, [petId]);
+
+  // Filter food section active/low stock/history
   const activeDryFoodEntries = dryFoodEntries.filter(entry => entry.isActive);
-  const lowStockDryFoodEntries = activeDryFoodEntries.filter(entry => entry.remainingDays <= 7 && entry.remainingDays > 0);
+  const lowStockDryFoodEntries = activeDryFoodEntries.filter(entry => entry.remainingDays !== undefined && entry.remainingDays <= 7 && entry.remainingDays > 0);
   const finishedDryFoodEntries = dryFoodEntries.filter(entry => !entry.isActive);
 
   return {
@@ -120,6 +180,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
     updateDryFoodEntry,
     deleteDryFoodEntry,
     markDryFoodAsFinished,
+    updateFinishDate,
     refetchDryFoodEntries: fetchDryFoodEntries,
   };
 }

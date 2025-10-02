@@ -18,6 +18,7 @@ export function WetFoodTracker() {
     updateWetFoodEntry,
     deleteWetFoodEntry,
     markWetFoodAsFinished,
+    updateWetFinishDate,
   } = useFoodTrackerContext();
 
   return (
@@ -33,6 +34,7 @@ export function WetFoodTracker() {
         updateFoodEntry: updateWetFoodEntry,
         deleteFoodEntry: deleteWetFoodEntry,
         markFoodAsFinished: markWetFoodAsFinished,
+        updateFinishDate: updateWetFinishDate,
       }}
       FormComponent={WetFoodForm}
       ListComponent={WetFoodList}

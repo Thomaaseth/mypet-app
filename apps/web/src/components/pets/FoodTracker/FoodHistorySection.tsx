@@ -4,18 +4,22 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp, History, RotateCcw } from 'lucide-react';
+import { ChevronDown, ChevronUp, History, RotateCcw, Calendar } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
+import { getFeedingStatusColor, getFeedingStatusIcon, getFeedingStatusLabel } from '@/lib/utils/food-formatting';
+import { EditFinishDateDialog } from './EditFinishDateDialog';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
   foodType: 'dry' | 'wet';
   onReorder?: (entry: DryFoodEntry | WetFoodEntry) => void;
+  onEditFinishDate: (foodId: string, dateFinished: string) => Promise<DryFoodEntry | WetFoodEntry | null>;
 }
 
-export function FoodHistorySection({ entries, foodType, onReorder }: FoodHistorySectionProps) {
+export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishDate }: FoodHistorySectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
 
   if (entries.length === 0) return null;
 
@@ -50,6 +54,14 @@ export function FoodHistorySection({ entries, foodType, onReorder }: FoodHistory
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-xs">Finished</Badge>
+                    {entry.feedingStatus && entry.actualDaysElapsed && (
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${getFeedingStatusColor(entry.feedingStatus)}`}
+                      >
+                        {getFeedingStatusIcon(entry.feedingStatus)} {getFeedingStatusLabel(entry.feedingStatus)} - {entry.actualDaysElapsed} days
+                      </Badge>
+                    )}
                     <h4 className="font-medium text-sm">
                       {entry.brandName && entry.productName 
                         ? `${entry.brandName} - ${entry.productName}`
@@ -62,25 +74,49 @@ export function FoodHistorySection({ entries, foodType, onReorder }: FoodHistory
                     ) : (
                       <span>📦 {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}</span>
                     )}
-                    <span>🗓️ Finished on {formatDateForDisplay(entry.depletionDate)}</span>
+                    <span>🗓️ Started {formatDateForDisplay(entry.dateStarted)}</span>
+                    {entry.dateFinished && (
+                      <span>✅ Finished {formatDateForDisplay(entry.dateFinished)}</span>
+                    )}
                   </div>
                 </div>
                 
-                {onReorder && (
+                <div className="flex gap-2 ml-4">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onReorder(entry)}
-                    className="ml-4"
+                    onClick={() => setEditingEntry(entry)}
+                    className="h-8"
                   >
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    Reorder
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Edit Date
                   </Button>
-                )}
+                  
+                  {onReorder && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onReorder(entry)}
+                      className="h-8"
+                    >
+                      <RotateCcw className="h-3 w-3 mr-1" />
+                      Reorder
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </CardContent>
+      )}
+
+      {editingEntry && (
+        <EditFinishDateDialog
+          entry={editingEntry}
+          isOpen={!!editingEntry}
+          onClose={() => setEditingEntry(null)}
+          onUpdate={onEditFinishDate}
+        />
       )}
     </Card>
   );

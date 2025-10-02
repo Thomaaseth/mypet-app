@@ -16,6 +16,7 @@ interface FoodTrackerContextValue {
   updateDryFoodEntry: (foodId: string, data: Partial<DryFoodFormData>) => Promise<DryFoodEntry | null>;
   deleteDryFoodEntry: (foodId: string) => Promise<boolean>;
   markDryFoodAsFinished: (foodId: string) => Promise<boolean>;
+  updateDryFinishDate: (foodId: string, dateFinished: string) => Promise<DryFoodEntry | null>;
 
   // Wet food data and actions
   activeWetFoodEntries: WetFoodEntry[];
@@ -27,6 +28,7 @@ interface FoodTrackerContextValue {
   updateWetFoodEntry: (foodId: string, data: Partial<WetFoodFormData>) => Promise<WetFoodEntry | null>;
   deleteWetFoodEntry: (foodId: string) => Promise<boolean>;
   markWetFoodAsFinished: (foodId: string) => Promise<boolean>;
+  updateWetFinishDate: (foodId: string, dateFinished: string) => Promise<WetFoodEntry | null>;
 
   // Combined data for summary
   activeFoodEntries: (DryFoodEntry | WetFoodEntry)[];
@@ -52,6 +54,7 @@ export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProp
     updateDryFoodEntry,
     deleteDryFoodEntry,
     markDryFoodAsFinished,
+    updateFinishDate: updateDryFinishDate,
   } = useDryFoodTracker({ petId });
 
   const {
@@ -64,6 +67,7 @@ export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProp
     updateWetFoodEntry,
     deleteWetFoodEntry,
     markWetFoodAsFinished,
+    updateFinishDate: updateWetFinishDate,
   } = useWetFoodTracker({ petId });
 
   // Combined data for summary
@@ -81,7 +85,8 @@ export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProp
     updateDryFoodEntry,
     deleteDryFoodEntry,
     markDryFoodAsFinished,
-
+    updateDryFinishDate,
+    
     // Wet food
     activeWetFoodEntries,
     finishedWetFoodEntries,
@@ -92,7 +97,8 @@ export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProp
     updateWetFoodEntry,
     deleteWetFoodEntry,
     markWetFoodAsFinished,
-
+    updateWetFinishDate,
+   
     // Combined
     activeFoodEntries,
     isLoading,

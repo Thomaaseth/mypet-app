@@ -29,6 +29,7 @@ interface GenericFoodHookReturn<TEntry, TFormData> {
   updateFoodEntry: (foodId: string, data: Partial<TFormData>) => Promise<TEntry | null>;
   deleteFoodEntry: (foodId: string) => Promise<boolean>;
   markFoodAsFinished: (foodId: string) => Promise<boolean>;
+  updateFinishDate: (foodId: string, dateFinished: string) => Promise<TEntry | null>;
 }
 
 // Generic props interface
@@ -49,6 +50,7 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
     onUpdate: (foodId: string, data: Partial<TFormData>) => Promise<TEntry | null>;
     onDelete: (foodId: string) => Promise<boolean>;
     onMarkAsFinished: (foodId: string) => Promise<boolean>;
+    onUpdateFinishDate: (foodId: string, dateFinished: string) => Promise<TEntry | null>;  // ADD THIS
     isLoading?: boolean;
   }>;
   
@@ -87,6 +89,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
     updateFoodEntry,
     deleteFoodEntry,
     markFoodAsFinished,
+    updateFinishDate,
   } = hookResult;
 
   const handleCreateEntry = async (data: TFormData) => {
@@ -303,8 +306,9 @@ export function GenericFoodTracker<TEntry, TFormData>({
         finishedEntries={finishedFoodEntries}
         onUpdate={handleUpdateEntry}
         onDelete={handleDeleteEntry}
-        isLoading={isActionLoading}
+        onUpdateFinishDate={updateFinishDate}
         onMarkAsFinished={handleMarkAsFinished}
+        isLoading={isActionLoading}
       />
     </div>
   );
