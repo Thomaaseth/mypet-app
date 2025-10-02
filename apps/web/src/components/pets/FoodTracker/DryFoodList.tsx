@@ -126,6 +126,16 @@ export function DryFoodList({
       return <Badge variant="default">Active</Badge>;
     }
   };
+  
+  const getProgressPercentage = (entry: DryFoodEntry & { 
+    remainingDays: number; 
+    remainingWeight: number; 
+    depletionDate: string;
+  }) => {
+    const totalWeight = parseFloat(entry.bagWeight);
+    if (totalWeight === 0) return 0;
+    return Math.max(0, Math.min(100, (entry.remainingWeight / totalWeight) * 100));
+  };
 
   const validActiveEntries = entries.filter(isValidActiveEntry);
   if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
@@ -137,103 +147,105 @@ export function DryFoodList({
       {/* Active Entries Section */}
       {validActiveEntries.length > 0 && (
         <div className="grid gap-4">
-          {validActiveEntries.map((entry) => (
-            <Card key={entry.id} className="relative">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">
-                      {entry.brandName && entry.productName 
-                        ? `${entry.brandName} - ${entry.productName}`
-                        : entry.brandName || entry.productName || 'Dry Food'}
-                    </CardTitle>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Weight className="h-4 w-4" />
-                        {entry.bagWeight} {entry.bagWeightUnit}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Utensils className="h-4 w-4" />
-                        {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDateForDisplay(entry.dateStarted)}
-                      </span>
+          {validActiveEntries.map((entry) => {
+            const progressPercentage = getProgressPercentage(entry);
+  
+            return (
+              <Card key={entry.id} className="relative">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg">
+                        {entry.brandName && entry.productName 
+                          ? `${entry.brandName} - ${entry.productName}`
+                          : entry.brandName || entry.productName || 'Dry Food'}
+                      </CardTitle>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Weight className="h-4 w-4" />
+                          {entry.bagWeight} {entry.bagWeightUnit}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Utensils className="h-4 w-4" />
+                          {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {formatDateForDisplay(entry.dateStarted)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusSection(entry)}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingEntry(entry)}
+                        disabled={isLoading}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingEntry(entry)}
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {getStatusSection(entry)}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingEntry(entry)}
-                      disabled={isLoading}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setDeletingEntry(entry)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                    <div>
+                      <p className="font-medium text-muted-foreground">Remaining</p>
+                      <p className="text-lg font-semibold">
+                        {entry.remainingWeight.toFixed(1)} {entry.bagWeightUnit}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-muted-foreground">Days Left</p>
+                      <p className="text-lg font-semibold">
+                        {entry.remainingDays > 0 ? entry.remainingDays : 0}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-muted-foreground">Depletion Date</p>
+                      <p className="text-lg font-semibold">
+                        {formatDateForDisplay(entry.depletionDate)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                  
+                  {/* Progress Bar */}
                   <div>
-                    <p className="font-medium text-muted-foreground">Remaining</p>
-                    <p className="text-lg font-semibold">
-                      {entry.remainingWeight.toFixed(1)} {entry.bagWeightUnit}
-                    </p>
+                    <div className="flex justify-between items-center mb-2">
+                      <p className="font-medium text-muted-foreground text-sm">Progress</p>
+                      <p className="text-sm text-muted-foreground">
+                        {progressPercentage.toFixed(1)}% remaining
+                      </p>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          progressPercentage > 50 
+                            ? 'bg-green-600' 
+                            : progressPercentage > 25 
+                            ? 'bg-yellow-600' 
+                            : 'bg-red-600'
+                        }`}
+                        style={{ width: `${progressPercentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-muted-foreground">Days Left</p>
-                    <p className="text-lg font-semibold">
-                      {entry.remainingDays > 0 ? entry.remainingDays : 0}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-medium text-muted-foreground">Depletion Date</p>
-                    <p className="text-lg font-semibold">
-                      {formatDateForDisplay(entry.depletionDate)}
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Progress Bar */}
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="font-medium text-muted-foreground text-sm">Progress</p>
-                    <p className="text-sm text-muted-foreground">
-                      {Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)).toFixed(1)}% remaining
-                    </p>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 50 
-                          ? 'bg-green-600' 
-                          : Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100)) > 25 
-                          ? 'bg-yellow-600' 
-                          : 'bg-red-600'
-                      }`}
-                      style={{ 
-                        width: `${Math.max(0, Math.min(100, (entry.remainingWeight / parseFloat(entry.bagWeight)) * 100))}%` 
-                      }}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
-
+  
       {/* History Section - Always show if there are finished entries */}
       {finishedEntries.length > 0 && (
         <FoodHistorySection 
@@ -242,7 +254,7 @@ export function DryFoodList({
           onEditFinishDate={onUpdateFinishDate}
         />
       )}
-
+  
       {/* Edit Dialog */}
       <Dialog open={!!editingEntry} onOpenChange={() => setEditingEntry(null)}>
         <DialogContent className="sm:max-w-[500px]">
@@ -270,7 +282,7 @@ export function DryFoodList({
           )}
         </DialogContent>
       </Dialog>
-
+  
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
         <AlertDialogContent>
@@ -290,4 +302,4 @@ export function DryFoodList({
       </AlertDialog>
     </>
   );
-}
+};
