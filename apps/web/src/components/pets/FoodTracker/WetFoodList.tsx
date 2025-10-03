@@ -62,7 +62,6 @@ export function WetFoodList({
 }: WetFoodListProps) {
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
- const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
  const [markingFinishedEntry, setMarkingFinishedEntry] = useState<WetFoodEntry | null>(null);
 
  const handleUpdate = async (data: WetFoodFormData) => { // Receive WetFoodFormData (strings)
@@ -84,49 +83,23 @@ export function WetFoodList({
    }
  };
 
- const handleMarkAsFinished = async (foodId: string) => {
-  setMarkingAsFinished(foodId);
-  const success = await onMarkAsFinished(foodId);
-  setMarkingAsFinished(null);
-};
+  const getStatusSection = (entry: WetFoodEntry & { 
+    remainingDays: number; 
+    remainingWeight: number; 
+    depletionDate: string;
+  }) => {
+    const isCalculatedFinished = entry.remainingDays <= 0;
+    
+    if (isCalculatedFinished) {
+      return <Badge variant="destructive">Finished</Badge>;
+    } else if (entry.remainingDays <= 7) {
+      return <Badge variant="secondary">Low Stock</Badge>;
+    } else {
+      return <Badge variant="default">Active</Badge>;
+    }
+  };
 
-const getStatusSection = (entry: WetFoodEntry & { 
-  remainingDays: number; 
-  remainingWeight: number; 
-  depletionDate: string;
-}) => {
-  const isCalculatedFinished = entry.remainingDays <= 0;
-  const isMarking = markingAsFinished === entry.id;
-  
-  if (isCalculatedFinished && entry.isActive) {
-    // Show "Mark as finished" button for calculated finished but still active entries
-    return (
-      <div className="flex items-center gap-2">
-        <Badge variant="destructive">Ready to Finish</Badge>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleMarkAsFinished(entry.id)}
-          disabled={isLoading || isMarking}
-          className="text-xs px-2 py-1 h-7"
-        >
-          {isMarking ? (
-            <>
-              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              Marking...
-            </>
-          ) : (
-            'Mark as Finished'
-          )}
-        </Button>
-      </div>
-    );
-  } else if (entry.remainingDays <= 7 && entry.remainingDays > 0) {
-    return <Badge variant="secondary">Low Stock</Badge>;
-  } else {
-    return <Badge variant="default">Active</Badge>;
-  }
-};
+
  const calculateTotalWeight = (entry: WetFoodEntry) => {
    return entry.numberOfUnits * parseFloat(entry.weightPerUnit);
  };
@@ -184,6 +157,14 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                    <div className="flex items-center gap-2 ml-4">
                      {getStatusSection(entry)}
                      <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMarkingFinishedEntry(entry)}
+                      className="text-xs px-2 py-1 h-7"
+                    >
+                      ✅ Mark Finished
+                    </Button>
+                     <Button
                        variant="outline"
                        size="sm"
                        onClick={() => setEditingEntry(entry)}
@@ -201,14 +182,6 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                      >
                        <Trash2 className="h-4 w-4" />
                      </Button>
-                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setMarkingFinishedEntry(entry)}
-                      className="text-xs px-2 py-1 h-7"
-                    >
-                      ✅ Mark Finished
-                    </Button>
                    </div>
                  </div>
                </CardHeader>
