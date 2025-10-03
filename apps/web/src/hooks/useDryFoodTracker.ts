@@ -46,6 +46,8 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
 
   // Fetch both on mount
   useEffect(() => {
+    console.log('🔴 DRY HOOK MOUNT - Fetching dry food for pet:', petId);
+
     const fetchAllData = async () => {
       setIsLoading(true);
       await Promise.all([

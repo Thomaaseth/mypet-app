@@ -2,7 +2,7 @@ import { BadRequestError } from '@/middleware/errors';
 import type { DryFoodEntry, WetFoodEntry } from '../../db/schema/food';
 
 // Tolerance threshold for feeding status (±15%)
-const FEEDING_TOLERANCE_PERCENTAGE = 15;
+const FEEDING_TOLERANCE_PERCENTAGE = 5;
 
 // Unit conversion constants
 const MS_PER_DAY = 1000 * 60 * 60 * 24;

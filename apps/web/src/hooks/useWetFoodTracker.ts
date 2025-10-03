@@ -46,6 +46,8 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
 
   // Fetch both on mount
   useEffect(() => {
+    console.log('🔵 WET HOOK MOUNT - Fetching wet food for pet:', petId);
+
     const fetchAllData = async () => {
       setIsLoading(true);
       await Promise.all([

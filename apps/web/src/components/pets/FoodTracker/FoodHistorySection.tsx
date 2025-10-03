@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp, History, RotateCcw, Calendar } from 'lucide-react';
+import { ChevronDown, ChevronUp, History, RotateCcw, Pencil } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
-import { getFeedingStatusColor, getFeedingStatusIcon, getFeedingStatusLabel } from '@/lib/utils/food-formatting';
+import { getFeedingStatusColor, formatFeedingStatusMessage } from '@/lib/utils/food-formatting';
 import { EditFinishDateDialog } from './EditFinishDateDialog';
 
 interface FoodHistorySectionProps {
@@ -59,7 +59,7 @@ export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishD
                         variant="outline" 
                         className={`text-xs ${getFeedingStatusColor(entry.feedingStatus)}`}
                       >
-                        {getFeedingStatusIcon(entry.feedingStatus)} {getFeedingStatusLabel(entry.feedingStatus)} - {entry.actualDaysElapsed} days
+                        {formatFeedingStatusMessage(entry)}
                       </Badge>
                     )}
                     <h4 className="font-medium text-sm">
@@ -70,9 +70,15 @@ export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishD
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     {foodType === 'dry' ? (
-                      <span>📦 {(entry as DryFoodEntry).bagWeight} {(entry as DryFoodEntry).bagWeightUnit}</span>
+                      <>
+                        <span>📦 {(entry as DryFoodEntry).bagWeight} {(entry as DryFoodEntry).bagWeightUnit}</span>
+                        <span>🥣 {(entry as DryFoodEntry).dailyAmount} {(entry as DryFoodEntry).dryDailyAmountUnit}/day</span>
+                      </>
                     ) : (
-                      <span>📦 {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}</span>
+                      <>
+                        <span>📦 {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}</span>
+                        <span>🥣 {(entry as WetFoodEntry).dailyAmount} {(entry as WetFoodEntry).wetDailyAmountUnit}/day</span>
+                      </>
                     )}
                     <span>🗓️ Started {formatDateForDisplay(entry.dateStarted)}</span>
                     {entry.dateFinished && (
@@ -86,10 +92,10 @@ export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishD
                     variant="outline"
                     size="sm"
                     onClick={() => setEditingEntry(entry)}
-                    className="h-8"
+                    className="h-8 w-8 p-0"
+                    title="Edit finish date"
                   >
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Edit Date
+                    <Pencil className="h-3 w-3" />
                   </Button>
                   
                   {onReorder && (
