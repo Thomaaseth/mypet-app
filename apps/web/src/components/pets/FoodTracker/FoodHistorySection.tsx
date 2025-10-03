@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronDown, ChevronUp, History, RotateCcw, Pencil } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
-import { getFeedingStatusColor, formatFeedingStatusMessage } from '@/lib/utils/food-formatting';
+import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDays } from '@/lib/utils/food-formatting';
 import { EditFinishDateDialog } from './EditFinishDateDialog';
 
 interface FoodHistorySectionProps {
@@ -15,6 +15,7 @@ interface FoodHistorySectionProps {
   foodType: 'dry' | 'wet';
   onReorder?: (entry: DryFoodEntry | WetFoodEntry) => void;
   onEditFinishDate: (foodId: string, dateFinished: string) => Promise<DryFoodEntry | WetFoodEntry | null>;
+  onDelete: (foodId: string) => Promise<boolean>
 }
 
 export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishDate }: FoodHistorySectionProps) {
@@ -54,6 +55,11 @@ export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishD
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-xs">Finished</Badge>
+                    <h4 className="font-medium text-sm">
+                      {entry.brandName && entry.productName 
+                        ? `${entry.brandName} - ${entry.productName}`
+                        : entry.brandName || entry.productName || `${foodType === 'dry' ? 'Dry' : 'Wet'} Food`}
+                    </h4>
                     {entry.feedingStatus && entry.actualDaysElapsed && (
                       <Badge 
                         variant="outline" 
@@ -62,11 +68,6 @@ export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishD
                         {formatFeedingStatusMessage(entry)}
                       </Badge>
                     )}
-                    <h4 className="font-medium text-sm">
-                      {entry.brandName && entry.productName 
-                        ? `${entry.brandName} - ${entry.productName}`
-                        : entry.brandName || entry.productName || `${foodType === 'dry' ? 'Dry' : 'Wet'} Food`}
-                    </h4>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     {foodType === 'dry' ? (
@@ -80,6 +81,7 @@ export function FoodHistorySection({ entries, foodType, onReorder, onEditFinishD
                         <span>🥣 {(entry as WetFoodEntry).dailyAmount} {(entry as WetFoodEntry).wetDailyAmountUnit}/day</span>
                       </>
                     )}
+                    <span>⏱️ Expected {calculateExpectedDays(entry)} days</span>
                     <span>🗓️ Started {formatDateForDisplay(entry.dateStarted)}</span>
                     {entry.dateFinished && (
                       <span>✅ Finished {formatDateForDisplay(entry.dateFinished)}</span>

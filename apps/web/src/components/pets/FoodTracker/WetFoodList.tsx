@@ -26,6 +26,7 @@ import { WetFoodForm } from './WetFoodForm';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
+import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
@@ -62,6 +63,7 @@ export function WetFoodList({
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
  const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
+ const [markingFinishedEntry, setMarkingFinishedEntry] = useState<WetFoodEntry | null>(null);
 
  const handleUpdate = async (data: WetFoodFormData) => { // Receive WetFoodFormData (strings)
   if (!editingEntry) return null;
@@ -139,7 +141,7 @@ const getStatusSection = (entry: WetFoodEntry & {
    return Math.max(0, Math.min(100, (entry.remainingWeight / totalWeight) * 100));
  };
 
- const validActiveEntries = entries.filter(isValidActiveEntry);
+const validActiveEntries = entries.filter(isValidActiveEntry);
 
 if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
   return null;
@@ -199,6 +201,14 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                      >
                        <Trash2 className="h-4 w-4" />
                      </Button>
+                     <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMarkingFinishedEntry(entry)}
+                      className="text-xs px-2 py-1 h-7"
+                    >
+                      ✅ Mark Finished
+                    </Button>
                    </div>
                  </div>
                </CardHeader>
@@ -264,6 +274,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
          entries={finishedEntries}
          foodType="wet"
          onEditFinishDate={onUpdateFinishDate}
+         onDelete={onDelete}
        />
      )}
 
@@ -295,6 +306,16 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
          )}
        </DialogContent>
      </Dialog>
+
+     {markingFinishedEntry && (
+      <MarkAsFinishedDialog
+        entry={markingFinishedEntry}
+        isOpen={!!markingFinishedEntry}
+        onClose={() => setMarkingFinishedEntry(null)}
+        onConfirm={onMarkAsFinished}
+        isLoading={isLoading}
+      />
+    )}
 
      {/* Delete Confirmation */}
      <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>

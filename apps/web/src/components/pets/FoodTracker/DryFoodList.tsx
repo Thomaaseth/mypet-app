@@ -26,6 +26,7 @@ import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
+import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 
 
 // Type guard to ensure active entries have required calculated fields
@@ -64,6 +65,7 @@ export function DryFoodList({
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
   const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
+  const [markingFinishedEntry, setMarkingFinishedEntry] = useState<DryFoodEntry | null>(null);
 
   const handleUpdate = async (data: DryFoodFormData) => {
     if (!editingEntry) return null;
@@ -193,6 +195,14 @@ export function DryFoodList({
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setMarkingFinishedEntry(entry)}
+                        className="text-xs px-2 py-1 h-7"
+                      >
+                        ✅ Mark As Finished
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -252,6 +262,7 @@ export function DryFoodList({
           entries={finishedEntries}
           foodType="dry"
           onEditFinishDate={onUpdateFinishDate}
+          onDelete={onDelete}
         />
       )}
   
@@ -282,7 +293,17 @@ export function DryFoodList({
           )}
         </DialogContent>
       </Dialog>
-  
+
+      {markingFinishedEntry && (
+        <MarkAsFinishedDialog
+          entry={markingFinishedEntry}
+          isOpen={!!markingFinishedEntry}
+          onClose={() => setMarkingFinishedEntry(null)}
+          onConfirm={onMarkAsFinished}
+          isLoading={isLoading}
+        />
+      )}
+
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
         <AlertDialogContent>
