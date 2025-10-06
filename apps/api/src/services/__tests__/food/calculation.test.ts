@@ -116,6 +116,54 @@ describe('Business Logic Calculations', () => {
       expect(result.remainingDays).toBe(2);
       expect(result.remainingWeight).toBeCloseTo(12, 1);
     });
+    
+    it('should handle wet food with grams weight and oz daily amount', async () => {
+      const purchaseDate = new Date();
+      purchaseDate.setDate(purchaseDate.getDate() - 1); // 1 day ago
+  
+      const wetFoodEntry = makeWetFoodEntry({
+        numberOfUnits: 10,
+        weightPerUnit: '100.00',
+        wetWeightUnit: 'grams',
+        dailyAmount: '10.00',
+        wetDailyAmountUnit: 'oz',
+        dateStarted: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
+  
+      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+  
+      // 10 units × 100g = 1000g total
+      // 10oz daily = 283.495g daily (10 × 28.3495)
+      // Day 1: 283.495g consumed, 716.505g remaining
+      // 716.505g / 283.495g per day = 2.52... -> 2 days remaining
+      expect(result.remainingDays).toBe(2);
+      expect(result.remainingWeight).toBeCloseTo(716.505, 1); // remaining in grams
+    });
+
+    it('should handle wet food with oz weight and grams daily amount', async () => {
+      const purchaseDate = new Date();
+      purchaseDate.setDate(purchaseDate.getDate() - 1); // 1 day ago
+  
+      const wetFoodEntry = makeWetFoodEntry({
+        numberOfUnits: 10,
+        weightPerUnit: '1.00',
+        wetWeightUnit: 'oz',
+        dailyAmount: '50.00',
+        wetDailyAmountUnit: 'grams',
+        dateStarted: purchaseDate.toISOString().split('T')[0],
+        isActive: true,
+      });
+  
+      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+  
+      // 10 units × 1oz = 10oz = 283.495g total (10 × 28.3495)
+      // 50g daily
+      // Day 1: 50g consumed, 233.495g remaining
+      // 233.495g / 50g per day = 4.66... -> 4 days remaining
+      expect(result.remainingDays).toBe(4);
+      expect(result.remainingWeight).toBeCloseTo(8.24, 2); // 233.495g = 8.24oz
+    });
   });
 
   describe('markFoodAsFinished', () => {
@@ -224,5 +272,28 @@ describe('Business Logic Calculations', () => {
       expect(result.remainingDays).toBe(0);
       expect(result.depletionDate.toDateString()).toBe(expectedDepletionDate.toDateString());
     });
+  });
+
+  it('should convert kg bag weight with cups daily amount', async () => {
+    const purchaseDate = new Date();
+    purchaseDate.setDate(purchaseDate.getDate() - 1);
+
+    const dryFoodEntry = makeDryFoodEntry({
+      bagWeight: '2.00',
+      bagWeightUnit: 'kg',
+      dailyAmount: '0.5',
+      dryDailyAmountUnit: 'cups',
+      dateStarted: purchaseDate.toISOString().split('T')[0],
+      isActive: true,
+    });
+
+    const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+
+    // 2kg = 2000g total
+    // 0.5 cups = 60g daily (0.5 × 120g)
+    // Day 1: 60g consumed, 1940g remaining
+    // 1940g / 60g per day = 32.33... -> 32 days remaining
+    expect(result.remainingDays).toBe(32);
+    expect(result.remainingWeight).toBeCloseTo(1.94, 2); // 1940g = 1.94kg
   });
 });
