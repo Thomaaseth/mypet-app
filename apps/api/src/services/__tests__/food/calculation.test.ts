@@ -154,6 +154,9 @@ describe('Business Logic Calculations', () => {
       const { primary, testPet } = await setupUserAndPet();
   
       const dryFoodData = makeDryFoodData({
+        // 5kg = 5000g total
+        // Day 1: 100g consumed, 4900g remaining
+        // 4900g / 100g per day = 49 days remaining
         bagWeight: '5.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
@@ -167,7 +170,7 @@ describe('Business Logic Calculations', () => {
       // Calculate remaining food
       const calculations = FoodService.calculateDryFoodRemaining(created);
       expect(calculations.remainingDays).toBeGreaterThan(0);
-      expect(calculations.remainingWeight).toBeCloseTo(5.0, 1);
+      expect(calculations.remainingWeight).toBeCloseTo(4.9, 1);
   
       // Verify the original entry is still active (calculations don't modify the entry)
       const fetched = await FoodService.getDryFoodEntryById(testPet.id, created.id, primary.id);
