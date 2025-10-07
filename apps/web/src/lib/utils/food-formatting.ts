@@ -95,3 +95,19 @@ export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): 
     return `${icon} ${statusLabel}`;
   }
 }
+
+/**
+ * Format weight with smart decimal precision
+ * - < 0.1: 3 decimals (ex 0.009 kg)
+ * - < 1: 2 decimals (ex 0.45 kg)
+ * - >= 1: 1 decimal (ex 2.5 kg)
+ */
+export function formatRemainingWeight(weight: number): string {
+  if (weight < 0.1) {
+    return weight.toFixed(3).replace(/\.?0+$/, '');
+  } else if (weight < 1) {
+    return weight.toFixed(2).replace(/\.?0+$/, '');
+  } else {
+    return weight.toFixed(1).replace(/\.?0+$/, '');
+  }
+}

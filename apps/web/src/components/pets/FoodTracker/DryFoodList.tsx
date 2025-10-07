@@ -27,6 +27,7 @@ import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
 import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
+import { formatRemainingWeight } from '@/lib/utils/food-formatting';
 
 
 // Type guard to ensure active entries have required calculated fields
@@ -227,7 +228,7 @@ export function DryFoodList({
                     <div>
                       <p className="font-medium text-muted-foreground">Remaining</p>
                       <p className="text-lg font-semibold">
-                        {entry.remainingWeight.toFixed(1)} {entry.bagWeightUnit}
+                        {formatRemainingWeight(entry.remainingWeight)} {entry.bagWeightUnit}
                       </p>
                     </div>
                     <div>

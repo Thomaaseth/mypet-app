@@ -36,7 +36,12 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
     try {
       setError(null);
       const response = await wetFoodApi.getFinishedWetFoodEntries(petId);
-      setFinishedWetFoodEntries(response.foodEntries);
+      // Sort by dateFinished DESC (most recent first)
+      const sortedEntries = [...response.foodEntries].sort((a, b) => {
+        if (!a.dateFinished || !b.dateFinished) return 0;
+        return new Date(b.dateFinished).getTime() - new Date(a.dateFinished).getTime();
+      });
+      setFinishedWetFoodEntries(sortedEntries);
     } catch (err) {
       const foodError = foodErrorHandler(err);
       setError(foodError.message);
@@ -46,8 +51,6 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
 
   // Fetch both on mount
   useEffect(() => {
-    console.log('🔵 WET HOOK MOUNT - Fetching wet food for pet:', petId);
-
     const fetchAllData = async () => {
       setIsLoading(true);
       await Promise.all([
@@ -159,10 +162,17 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
     try {
       const updatedEntry = await foodApi.updateFinishDate(petId, foodId, dateFinished);
       
-      // Update in finished entries
-      setFinishedWetFoodEntries(prev => 
-        prev.map(entry => entry.id === foodId ? { ...updatedEntry } as WetFoodEntry : entry)
-      );
+      // Update in finished entries and maintain sort order
+      setFinishedWetFoodEntries(prev => {
+        const updated = prev.map(entry => 
+          entry.id === foodId ? { ...updatedEntry } as WetFoodEntry : entry
+        );
+        // Re-sort by dateFinished DESC after update
+        return updated.sort((a, b) => {
+          if (!a.dateFinished || !b.dateFinished) return 0;
+          return new Date(b.dateFinished).getTime() - new Date(a.dateFinished).getTime();
+        });
+      });
       
       // Enhanced toast with consumption info
       if (updatedEntry.actualDaysElapsed && updatedEntry.feedingStatus) {

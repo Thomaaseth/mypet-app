@@ -4,7 +4,20 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronUp, History, RotateCcw, Pencil, Trash2 } from 'lucide-react';
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  History, 
+  RotateCcw, 
+  Pencil, 
+  Trash2,
+  Package,
+  Utensils,
+  Clock,
+  Hourglass,
+  Calendar,
+  CheckCircle
+} from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDays } from '@/lib/utils/food-formatting';
@@ -92,25 +105,52 @@ export function FoodHistorySection({
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       {foodType === 'dry' ? (
                         <>
-                          <span>📦 {(entry as DryFoodEntry).bagWeight} {(entry as DryFoodEntry).bagWeightUnit}</span>
-                          <span>🥣 {(entry as DryFoodEntry).dailyAmount} {(entry as DryFoodEntry).dryDailyAmountUnit}/day</span>
+                          <span className="flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            {(entry as DryFoodEntry).bagWeight} {(entry as DryFoodEntry).bagWeightUnit}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Utensils className="h-3 w-3" />
+                            {(entry as DryFoodEntry).dailyAmount} {(entry as DryFoodEntry).dryDailyAmountUnit}/day
+                          </span>
                         </>
                       ) : (
                         <>
-                          <span>📦 {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}</span>
-                          <span>🥣 {(entry as WetFoodEntry).dailyAmount} {(entry as WetFoodEntry).wetDailyAmountUnit}/day</span>
+                          <span className="flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Utensils className="h-3 w-3" />
+                            {(entry as WetFoodEntry).dailyAmount} {(entry as WetFoodEntry).wetDailyAmountUnit}/day
+                          </span>
                         </>
                       )}
-                      <span>⏱️ Expected {calculateExpectedDays(entry)} days</span>
-                      <span>🗓️ Started {formatDateForDisplay(entry.dateStarted)}</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        Expected {calculateExpectedDays(entry)} days
+                      </span>
+                      {entry.actualDaysElapsed && (
+                        <span className="flex items-center gap-1">
+                          <Hourglass className="h-3 w-3" />
+                          Actual {entry.actualDaysElapsed} days
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        Started {formatDateForDisplay(entry.dateStarted)}
+                      </span>
                       {entry.dateFinished && (
-                        <span>✅ Finished {formatDateForDisplay(entry.dateFinished)}</span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle className="h-3 w-3" />
+                          Finished {formatDateForDisplay(entry.dateFinished)}
+                        </span>
                       )}
                     </div>
                   </div>
                   
                   <div className="flex gap-2 ml-4">
-                    {/* Edit finish date button - matches active card style */}
+                    {/* Edit finish date button */}
                     <Button
                       variant="outline"
                       size="sm"
@@ -122,7 +162,7 @@ export function FoodHistorySection({
                       <Pencil className="h-4 w-4" />
                     </Button>
                     
-                    {/* Delete button - matches active card style */}
+                    {/* Delete button */}
                     <Button
                       variant="outline"
                       size="sm"
