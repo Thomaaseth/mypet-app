@@ -1,4 +1,3 @@
-// Create new file: apps/api/src/services/__tests__/food/feeding-status.test.ts
 import { describe, it, expect } from 'vitest';
 import { FoodService, FoodCalculations } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
