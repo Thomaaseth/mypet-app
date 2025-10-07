@@ -116,32 +116,30 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
       expect(finished.feedingStatus).toBe('overfeeding');
     });
 
-    it('should detect slight overfeeding at boundary (exactly 6% variance)', async () => {
+    it('should detect overfeeding at boundary (~7.5% variance => overfeeding)', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
-      // Expected: 2kg / 100g/day = 20 days
-      // Actual: Finished in ~18.87 days to get exactly 6% variance
-      // 2000g / 18.87 days = 106g/day
-      // Variance: (106 - 100) / 100 = +6% > 5% = OVERFEEDING
+      // 10750g / 200g/day = 53.75 days expected
+      // Finish in 50 days: 10750g / 50 days = 215g/day
+      // Variance: (215 - 200) / 200 = +7.5% = OVERFEEDING
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 19); // Rounded to 19 days
-
+      startDate.setDate(startDate.getDate() - 50);
+    
       const dryFoodData = makeDryFoodData({
-        bagWeight: '2.0',
+        bagWeight: '10.75',
         bagWeightUnit: 'kg',
-        dailyAmount: '100',
+        dailyAmount: '200',
         dryDailyAmountUnit: 'grams',
         dateStarted: startDate.toISOString().split('T')[0],
       });
-
+    
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
       const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
-
-      expect(finished.actualDaysElapsed).toBe(19);
-      expect(finished.variancePercentage).toBeGreaterThan(5);
+    
+      expect(finished.actualDaysElapsed).toBe(50);
+      expect(finished.variancePercentage).toBeCloseTo(7.5, 1);
       expect(finished.feedingStatus).toBe('overfeeding');
     });
-  });
+});
 
   describe('Underfeeding Detection', () => {
     it('should detect underfeeding when food lasts too long (< -5% variance)', async () => {
@@ -204,12 +202,11 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
 
       // Expected: 2kg / 100g/day = 20 days
       // Actual: Finished in 19 days (consumed 105.26g/day)
-      // Variance: (105.26 - 100) / 100 = +5.26% but we'll use 19 days = +5.26%
-      // Wait, let me recalculate: 2000g / 19 days = 105.26g/day
+      // 2000g / 19 days = 105.26g/day
       // Variance = (105.26 - 100) / 100 = +5.26%
-      // This should still be normal if within 5%, let's use 20 days for exact normal
+      // This should still be normal if within 5% with BUFFER
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 20);
+      startDate.setDate(startDate.getDate() - 19);
 
       const dryFoodData = makeDryFoodData({
         bagWeight: '2.0',
@@ -222,8 +219,7 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
       const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
 
-      expect(finished.variancePercentage).toBeLessThanOrEqual(5);
-      expect(finished.variancePercentage).toBeGreaterThanOrEqual(-5);
+      expect(finished.variancePercentage).toBeCloseTo(5.26, 1);
       expect(finished.feedingStatus).toBe('normal');
     });
 
@@ -301,14 +297,14 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
 
       expect(finished.expectedDailyConsumption).toBe(120);
       expect(finished.actualDailyConsumption).toBeCloseTo(113.4, 1);
-      expect(finished.feedingStatus).toBe('underfeeding');
+      expect(finished.feedingStatus).toBe('slightly-under');
     });
 
     it('should correctly calculate consumption with mixed wet food units', async () => {
       const { primary, testPet } = await setupUserAndPet();
 
       // 10 cans × 85g = 850g, 3oz/day = 85.05g/day, expected 10 days
-      // Finished in 10 days = perfect match
+      // Finished in 10 days = normal
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 10);
 
@@ -372,6 +368,113 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
       expect(() => {
         FoodCalculations.calculateActualConsumption(created);
       }).toThrow('Cannot calculate consumption');
+    });
+  });
+
+  describe('Warning Statuses (5.5% - 7.5% Range)', () => {
+    it('should detect slightly-over when between 5.5% and 7%', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+      // Better: 3kg / 100g = 30 days expected
+      // Finish in 28 days = 107.14g/day
+      // Variance = (107.14 - 100) / 100 = +7.14% = SLIGHTLY-OVER
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 28);
+  
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '3.0',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100',
+        dryDailyAmountUnit: 'grams',
+        dateStarted: startDate.toISOString().split('T')[0],
+      });
+  
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
+  
+      expect(finished.actualDaysElapsed).toBe(28);
+      expect(finished.actualDailyConsumption).toBeCloseTo(107.14, 1);
+      expect(finished.variancePercentage).toBeGreaterThan(5.5);
+      expect(finished.variancePercentage).toBeLessThan(7.5);
+      expect(finished.feedingStatus).toBe('slightly-over');
+    });
+  
+    it('should detect slightly-under when between -7.5% and -5.5%', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+  
+      // Expected: 3kg / 100g/day = 30 days
+      // Actual: Finished in 32 days (consumed 93.75g/day)
+      // Variance: (93.75 - 100) / 100 = -6.25% = SLIGHTLY-UNDER
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 32);
+  
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '3.0',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100',
+        dryDailyAmountUnit: 'grams',
+        dateStarted: startDate.toISOString().split('T')[0],
+      });
+  
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
+  
+      expect(finished.actualDaysElapsed).toBe(32);
+      expect(finished.actualDailyConsumption).toBeCloseTo(93.75, 1);
+      expect(finished.variancePercentage).toBeGreaterThan(-7.5);
+      expect(finished.variancePercentage).toBeLessThan(-5.5);
+      expect(finished.feedingStatus).toBe('slightly-under');
+    });
+  
+    it('should detect overfeeding when above 7.5% threshold', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+  
+      // Expected: 2kg / 100g/day = 20 days
+      // Actual: Finished in 18 days (consumed 111.11g/day)
+      // Variance: (111.11 - 100) / 100 = +11.11% = OVERFEEDING
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 18);
+  
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '2.0',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100',
+        dryDailyAmountUnit: 'grams',
+        dateStarted: startDate.toISOString().split('T')[0],
+      });
+  
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
+  
+      expect(finished.actualDaysElapsed).toBe(18);
+      expect(finished.actualDailyConsumption).toBeCloseTo(111.11, 1);
+      expect(finished.variancePercentage).toBeGreaterThan(7.5);
+      expect(finished.feedingStatus).toBe('overfeeding');
+    });
+  
+    it('should detect underfeeding when below -7.5% threshold', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+  
+      // Expected: 2kg / 100g/day = 20 days
+      // Actual: Finished in 22 days (consumed 90.91g/day)
+      // Variance: (90.91 - 100) / 100 = -9.09% = UNDERFEEDING
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 22);
+  
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '2.0',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100',
+        dryDailyAmountUnit: 'grams',
+        dateStarted: startDate.toISOString().split('T')[0],
+      });
+  
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
+  
+      expect(finished.actualDaysElapsed).toBe(22);
+      expect(finished.actualDailyConsumption).toBeCloseTo(90.91, 1);
+      expect(finished.variancePercentage).toBeLessThan(-7.5);
+      expect(finished.feedingStatus).toBe('underfeeding');
     });
   });
 });

@@ -1,6 +1,6 @@
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 
-type FeedingStatus = 'overfeeding' | 'normal' | 'underfeeding';
+type FeedingStatus = 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 
 export function formatVariancePercentage(variance: number): string {
   const sign = variance > 0 ? '+' : '';
@@ -11,7 +11,11 @@ export function getFeedingStatusColor(status: FeedingStatus): string {
   switch (status) {
     case 'overfeeding':
       return 'bg-red-100 text-red-800 border-red-200';
+    case 'slightly-over':
+      return 'bg-orange-100 text-orange-800 border-orange-200';
     case 'underfeeding':
+      return 'bg-red-100 text-red-800 border-red-200';
+    case 'slightly-under':
       return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     case 'normal':
       return 'bg-green-100 text-green-800 border-green-200';
@@ -22,8 +26,12 @@ export function getFeedingStatusLabel(status: FeedingStatus): string {
   switch (status) {
     case 'overfeeding':
       return 'Overfeeding';
+    case 'slightly-over':
+      return 'Slightly Overfeeding';
     case 'underfeeding':
       return 'Underfeeding';
+    case 'slightly-under':
+      return 'Slightly Underfeeding';
     case 'normal':
       return 'Normal';
   }
@@ -33,7 +41,11 @@ export function getFeedingStatusIcon(status: FeedingStatus): string {
   switch (status) {
     case 'overfeeding':
       return '🔴';
+    case 'slightly-over':
+      return '🟠';
     case 'underfeeding':
+      return '🔴';
+    case 'slightly-under':
       return '🟡';
     case 'normal':
       return '🟢';
@@ -75,9 +87,9 @@ export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): 
   const statusLabel = getFeedingStatusLabel(entry.feedingStatus);
   const icon = getFeedingStatusIcon(entry.feedingStatus);
 
-  if (entry.feedingStatus === 'overfeeding') {
+  if (entry.feedingStatus === 'overfeeding' || entry.feedingStatus === 'slightly-over') {
     return `${icon} ${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
-  } else if (entry.feedingStatus === 'underfeeding') {
+  } else if (entry.feedingStatus === 'underfeeding' || entry.feedingStatus === 'slightly-under') {
     return `${icon} ${statusLabel} by ${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
   } else {
     return `${icon} ${statusLabel}`;

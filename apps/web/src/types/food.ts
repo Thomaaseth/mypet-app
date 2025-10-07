@@ -33,7 +33,7 @@ export type DryFoodEntry = {
   actualDailyConsumption?: number;
   expectedDailyConsumption?: number;
   variancePercentage?: number;
-  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
+  feedingStatus?: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 };
 
 export type WetFoodEntry = {
@@ -68,7 +68,7 @@ export type WetFoodEntry = {
   actualDailyConsumption?: number;
   expectedDailyConsumption?: number;
   variancePercentage?: number;
-  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
+  feedingStatus?: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 };
 
 export type DryFoodFormData = {

@@ -116,7 +116,7 @@ export type DryFoodEntry = BaseFoodEntry & {
   actualDailyConsumption?: number;
   expectedDailyConsumption?: number;
   variancePercentage?: number;
-  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
+  feedingStatus?: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 };
 
 export type WetFoodEntry = BaseFoodEntry & {
@@ -140,7 +140,7 @@ export type WetFoodEntry = BaseFoodEntry & {
   actualDailyConsumption?: number;
   expectedDailyConsumption?: number;
   variancePercentage?: number;
-  feedingStatus?: 'overfeeding' | 'normal' | 'underfeeding';
+  feedingStatus?: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 };
 
 // Utility types

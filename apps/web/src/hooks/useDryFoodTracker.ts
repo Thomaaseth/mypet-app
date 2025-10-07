@@ -132,11 +132,12 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
         const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
         const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
         
-        const statusLabel = finishedEntry.feedingStatus === 'overfeeding' 
-          ? 'Overfeeding' 
-          : finishedEntry.feedingStatus === 'underfeeding' 
-          ? 'Underfeeding' 
-          : 'Normal feeding';
+        const statusLabel = 
+          finishedEntry.feedingStatus === 'overfeeding' ? 'Overfeeding' :
+          finishedEntry.feedingStatus === 'slightly-over' ? 'Slightly Over' :
+          finishedEntry.feedingStatus === 'underfeeding' ? 'Underfeeding' :
+          finishedEntry.feedingStatus === 'slightly-under' ? 'Slightly Under' :
+          'Normal feeding';
         
         toastService.success(
           `✅ Finished! Consumed in ${finishedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
@@ -170,11 +171,12 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
         const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
         const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
         
-        const statusLabel = updatedEntry.feedingStatus === 'overfeeding' 
-          ? 'Overfeeding' 
-          : updatedEntry.feedingStatus === 'underfeeding' 
-          ? 'Underfeeding' 
-          : 'Normal feeding';
+        const statusLabel = 
+          updatedEntry.feedingStatus === 'overfeeding' ? 'Overfeeding' :
+          updatedEntry.feedingStatus === 'slightly-over' ? 'Slightly Over' :
+          updatedEntry.feedingStatus === 'underfeeding' ? 'Underfeeding' :
+          updatedEntry.feedingStatus === 'slightly-under' ? 'Slightly Under' :
+          'Normal feeding';
         
         toastService.success(
           `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`

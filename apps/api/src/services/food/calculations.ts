@@ -1,8 +1,10 @@
 import { BadRequestError } from '@/middleware/errors';
 import type { DryFoodEntry, WetFoodEntry } from '../../db/schema/food';
 
-// Tolerance threshold for feeding status (±15%)
+// Tolerance threshold for feeding status (±5%)
 const FEEDING_TOLERANCE_PERCENTAGE = 5;
+const TOLERANCE_BUFFER = 0.5;
+const WARNING_THRESHOLD = 7;
 
 // Unit conversion constants
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -138,7 +140,7 @@ export class FoodCalculations {
     actualDailyConsumption: number;
     expectedDailyConsumption: number;
     variancePercentage: number;
-    feedingStatus: 'overfeeding' | 'normal' | 'underfeeding';
+    feedingStatus: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
   } {
     
     // Strict validation - dateFinished must exist for finished entries
@@ -199,13 +201,17 @@ export class FoodCalculations {
     const variancePercentage = 
       ((actualDailyConsumption - expectedDailyInGrams) / expectedDailyInGrams) * 100;
     
-    // Determine feeding status based on ±15% tolerance
-    let feedingStatus: 'overfeeding' | 'normal' | 'underfeeding';
+    // Determine feeding status based on ±5% tolerance
+    let feedingStatus: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
     
-    if (variancePercentage > FEEDING_TOLERANCE_PERCENTAGE) {
+    if (variancePercentage >= WARNING_THRESHOLD + TOLERANCE_BUFFER) {  // > 7.5%
       feedingStatus = 'overfeeding';
-    } else if (variancePercentage < -FEEDING_TOLERANCE_PERCENTAGE) {
+    } else if (variancePercentage > FEEDING_TOLERANCE_PERCENTAGE + TOLERANCE_BUFFER) {  // > 5.5%
+      feedingStatus = 'slightly-over';
+    } else if (variancePercentage <= -(WARNING_THRESHOLD + TOLERANCE_BUFFER)) {  // < -7.5%
       feedingStatus = 'underfeeding';
+    } else if (variancePercentage < -(FEEDING_TOLERANCE_PERCENTAGE + TOLERANCE_BUFFER)) {  // < -5.5%
+      feedingStatus = 'slightly-under';
     } else {
       feedingStatus = 'normal';
     }
