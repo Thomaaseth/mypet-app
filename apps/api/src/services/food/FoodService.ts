@@ -54,6 +54,21 @@ export class FoodService {
       
       // Authorization check
       await this.verifyPetOwnership(petId, userId);
+
+      // Check if there's already an active dry food entry
+      const [existingActiveEntry] = await db
+        .select()
+        .from(foodEntries)
+        .where(and(
+          eq(foodEntries.petId, petId),
+          eq(foodEntries.foodType, 'dry'),
+          eq(foodEntries.isActive, true)
+        ))
+        .limit(1);
+
+    if (existingActiveEntry) {
+      throw new BadRequestError('You already have an active dry food entry. Please finish or delete the existing entry before adding a new one.');
+    }
       
       // Execute db transaction
       const [newEntry] = await db
@@ -206,6 +221,21 @@ export class FoodService {
       
       // uthorization check
       await this.verifyPetOwnership(petId, userId);
+
+      // Check if there's already an active wet food entry
+    const [existingActiveEntry] = await db
+      .select()
+      .from(foodEntries)
+      .where(and(
+        eq(foodEntries.petId, petId),
+        eq(foodEntries.foodType, 'wet'),
+        eq(foodEntries.isActive, true)
+      ))
+      .limit(1);
+
+    if (existingActiveEntry) {
+    throw new BadRequestError('You already have an active wet food entry. Please finish or delete the existing entry before adding a new one.');
+    }
       
       // Execute db transaction
       const [newEntry] = await db

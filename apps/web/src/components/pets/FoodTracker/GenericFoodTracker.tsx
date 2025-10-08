@@ -17,6 +17,7 @@ import { FoodEntriesSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
@@ -68,6 +69,8 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
   };
 }
 
+
+
 export function GenericFoodTracker<TEntry, TFormData>({
   foodType,
   hookResult,
@@ -91,6 +94,10 @@ export function GenericFoodTracker<TEntry, TFormData>({
     markFoodAsFinished,
     updateFinishDate,
   } = hookResult;
+
+  const hasActiveEntry = activeFoodEntries.length > 0;
+  const disableAddButton = hasActiveEntry;
+  const tooltipText = "You can only have one active entry per type of food at any time. Please edit/delete the existing active entry if you need to make changes.";
 
   const handleCreateEntry = async (data: TFormData) => {
     setIsCreating(true);
@@ -149,11 +156,11 @@ export function GenericFoodTracker<TEntry, TFormData>({
     );
   }
 
-  // Empty state logic - show enhanced CTA when no active entries
+  // Empty state logic - enhanced CTA when no active entries
   const hasActiveEntries = activeFoodEntries.length > 0;
   const hasFinishedEntries = finishedFoodEntries.length > 0;
   
-  // Show enhanced empty state when NO ACTIVE entries (even if there are finished ones)
+  // enhanced empty state when NO ACTIVE entries
   if (!hasActiveEntries && !hasFinishedEntries) {
     // Truly empty - no active AND no finished entries
     return (
@@ -184,19 +191,30 @@ export function GenericFoodTracker<TEntry, TFormData>({
               
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="min-w-[140px]">
-                    {isCreating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Adding...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        {labels.emptyButtonText}
-                      </>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button className="min-w-[140px]" disabled={disableAddButton}>
+                          {isCreating ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="h-4 w-4 mr-2" />
+                              {labels.emptyButtonText}
+                            </>
+                          )}
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    {disableAddButton && (
+                      <TooltipContent className="max-w-xs">
+                        <p>{tooltipText}</p>
+                      </TooltipContent>
                     )}
-                  </Button>
+                  </Tooltip>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
@@ -220,15 +238,27 @@ export function GenericFoodTracker<TEntry, TFormData>({
 
   // Normal state OR no active entries but HAS finished entries
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              {labels.addButton}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button disabled={disableAddButton}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    {labels.addButton}
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {disableAddButton && (
+                <TooltipContent className="max-w-xs">
+                  <p>{tooltipText}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
@@ -310,6 +340,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
         onMarkAsFinished={handleMarkAsFinished}
         isLoading={isActionLoading}
       />
-    </div>
+     </div>
+    </TooltipProvider>
   );
 }
