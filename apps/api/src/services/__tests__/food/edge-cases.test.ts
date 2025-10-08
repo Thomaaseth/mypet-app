@@ -279,18 +279,22 @@ describe('Edge Cases and Error Scenarios', () => {
   describe('Memory and Performance Edge Cases', () => {
     it('should handle multiple food entries efficiently', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
-      const createPromises = Array.from({ length: 10 }, (_, i) => {
+    
+      // Create entries sequentially, finishing each before creating the next
+      for (let i = 0; i < 10; i++) {
         const dryFoodData = makeDryFoodData({ brandName: `Brand ${i}` });
-        return FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
-      });
-
-      await Promise.all(createPromises);
-
+        const entry = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+        
+        // Mark as finished if not the last one (to allow next creation)
+        if (i < 9) {
+          await FoodService.markFoodAsFinished(testPet.id, entry.id, primary.id);
+        }
+      }
+    
       const startTime = Date.now();
       const allEntries = await FoodService.getAllFoodEntries(testPet.id, primary.id);
       const endTime = Date.now();
-
+    
       expect(allEntries).toHaveLength(10);
       expect(endTime - startTime).toBeLessThan(1000);
     });

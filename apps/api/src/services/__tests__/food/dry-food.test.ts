@@ -45,12 +45,17 @@ describe('Dry Food Operations', () => {
   });
 
   describe('getDryFoodEntries', () => {
-    it('should return all dry food entries for a pet', async () => {
+    it('should return active dry food entries for a pet', async () => {
       const { primary, testPet } = await setupUserAndPet();
-      await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({ brandName: 'Brand A' }));
-      await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({ brandName: 'Brand B' }));
+      
+      // Create first entry
+      const firstEntry = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({ brandName: 'Brand A' }));
+      
+      // Should return 1 active entry
       const result = await FoodService.getDryFoodEntries(testPet.id, primary.id);
-      expect(result.length).toBe(2);
+      expect(result.length).toBe(1);
+      expect(result[0].brandName).toBe('Brand A');
+      expect(result[0].isActive).toBe(true);
     });
   });
 
