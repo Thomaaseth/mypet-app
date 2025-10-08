@@ -8,6 +8,8 @@ interface UseWetFoodTrackerOptions {
 }
 
 export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
+  console.log('🔵 useWetFoodTracker HOOK CALLED with petId:', petId);
+
   // Separate state for active and finished entries
   const [activeWetFoodEntries, setActiveWetFoodEntries] = useState<WetFoodEntry[]>([]);
   const [finishedWetFoodEntries, setFinishedWetFoodEntries] = useState<WetFoodEntry[]>([]);
@@ -51,12 +53,23 @@ export function useWetFoodTracker({ petId }: UseWetFoodTrackerOptions) {
 
   // Fetch both on mount
   useEffect(() => {
+    console.log('🔵 WET useEffect TRIGGERED for petId:', petId);
+
+    // Reset state immediately when petId changes to prevent stale data
+    setActiveWetFoodEntries([]);
+    setFinishedWetFoodEntries([]);
+    setError(null);
+
     const fetchAllData = async () => {
+      console.log('🔵 WET FETCHING DATA for petId:', petId);
+
       setIsLoading(true);
       await Promise.all([
         fetchActiveWetFoodEntries(),
         fetchFinishedWetFoodEntries()
       ]);
+      console.log('🔵 WET FETCH COMPLETE for petId:', petId, 'Active entries:', activeWetFoodEntries.length);
+
       setIsLoading(false);
     };
 

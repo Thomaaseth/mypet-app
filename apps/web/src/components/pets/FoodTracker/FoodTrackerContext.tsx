@@ -43,6 +43,8 @@ interface FoodTrackerProviderProps {
 }
 
 export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProps) {
+  console.log('🟡 FoodTrackerProvider RENDER with petId:', petId);
+
   // Single instances of hooks at the provider level
   const {
     activeDryFoodEntries,

@@ -8,6 +8,8 @@ interface UseDryFoodTrackerOptions {
 }
 
 export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
+  console.log('🔴 useDryFoodTracker HOOK CALLED with petId:', petId);
+
   // Separate state for active and finished entries
   const [activeDryFoodEntries, setActiveDryFoodEntries] = useState<DryFoodEntry[]>([]);
   const [finishedDryFoodEntries, setFinishedDryFoodEntries] = useState<DryFoodEntry[]>([]);
@@ -51,12 +53,23 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
 
   // Fetch both on mount
   useEffect(() => {
+    console.log('🔴 DRY useEffect TRIGGERED for petId:', petId);
+
+    // Reset state immediately when petId changes to prevent stale data
+    setActiveDryFoodEntries([]);
+    setFinishedDryFoodEntries([]);
+    setError(null);
+
     const fetchAllData = async () => {
+      console.log('🔴 DRY FETCHING DATA for petId:', petId);
+
       setIsLoading(true);
       await Promise.all([
         fetchActiveDryFoodEntries(),
         fetchFinishedDryFoodEntries()
       ]);
+      console.log('🔴 DRY FETCH COMPLETE for petId:', petId, 'Active entries:', activeDryFoodEntries.length);
+
       setIsLoading(false);
     };
 

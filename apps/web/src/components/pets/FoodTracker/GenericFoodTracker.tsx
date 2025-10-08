@@ -98,6 +98,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const hasActiveEntry = activeFoodEntries.length > 0;
   const disableAddButton = hasActiveEntry;
   const tooltipText = "You can only have one active entry per type of food at any time. Please edit/delete the existing active entry if you need to make changes.";
+  console.log(`[${foodType}] GenericFoodTracker - Active entries:`, activeFoodEntries.length, 'Disabled:', disableAddButton);
 
   const handleCreateEntry = async (data: TFormData) => {
     setIsCreating(true);
@@ -140,126 +141,355 @@ export function GenericFoodTracker<TEntry, TFormData>({
     return result || false;
   };
 
-  // Initial loading state - show appropriate skeleton based on what we expect
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Header with Add Button */}
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-7 w-40" /> {/* Title */}
-          <Skeleton className="h-10 w-32" /> {/* Add Button */}
-        </div>
+//   // Initial loading state - show appropriate skeleton based on what we expect
+//   if (isLoading) {
+//     return (
+//       <div className="space-y-6">
+//         {/* Header with Add Button */}
+//         <div className="flex justify-between items-center">
+//           <Skeleton className="h-7 w-40" /> {/* Title */}
+//           <Skeleton className="h-10 w-32" /> {/* Add Button */}
+//         </div>
 
-        {/* Show skeleton for 1 entry (most common case) */}
-        <FoodEntriesSkeleton count={1} />
-      </div>
-    );
-  }
+//         {/* Show skeleton for 1 entry (most common case) */}
+//         <FoodEntriesSkeleton count={1} />
+//       </div>
+//     );
+//   }
 
-  // Empty state logic - enhanced CTA when no active entries
-  const hasActiveEntries = activeFoodEntries.length > 0;
-  const hasFinishedEntries = finishedFoodEntries.length > 0;
+//   // Empty state logic - enhanced CTA when no active entries
+//   const hasActiveEntries = activeFoodEntries.length > 0;
+//   const hasFinishedEntries = finishedFoodEntries.length > 0;
   
-  // enhanced empty state when NO ACTIVE entries
-  if (!hasActiveEntries && !hasFinishedEntries) {
-    // Truly empty - no active AND no finished entries
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
-        </div>
+//   // enhanced empty state when NO ACTIVE entries
+//   if (!hasActiveEntries && !hasFinishedEntries) {
+//     // Truly empty - no active AND no finished entries
+//     return (
+//       <div className="space-y-6">
+//         <div className="flex justify-between items-center">
+//           <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+//         </div>
 
-        {/* Error Display */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+//         {/* Error Display */}
+//         {error && (
+//           <Alert variant="destructive">
+//             <AlertCircle className="h-4 w-4" />
+//             <AlertDescription>{error}</AlertDescription>
+//           </Alert>
+//         )}
 
-        {/* Enhanced Empty State - Match food entry card size */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
-                <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
-              <p className="text-muted-foreground mb-4 text-sm">
-                {labels.emptyDescription}
-              </p>
+//         {/* Enhanced Empty State - Match food entry card size */}
+//         <Card>
+//           <CardContent className="p-6">
+//             <div className="text-center">
+//               <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+//                 <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+//               </div>
+//               <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
+//               <p className="text-muted-foreground mb-4 text-sm">
+//                 {labels.emptyDescription}
+//               </p>
               
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <Button className="min-w-[140px]" disabled={disableAddButton}>
-                          {isCreating ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Adding...
-                            </>
-                          ) : (
-                            <>
-                              <Plus className="h-4 w-4 mr-2" />
-                              {labels.emptyButtonText}
-                            </>
-                          )}
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    {disableAddButton && (
-                      <TooltipContent className="max-w-xs">
-                        <p>{tooltipText}</p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle>{labels.dialogTitle}</DialogTitle>
-                    <DialogDescription>
-                      {labels.dialogDescription}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <FormComponent
-                    onSubmit={handleCreateEntry}
-                    isLoading={isCreating}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+//               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+//                 <DialogTrigger asChild>
+//                 <Tooltip>
+//                     <TooltipTrigger asChild>
+//                       <span>
+//                         <Button className="min-w-[140px]" disabled={disableAddButton}>
+//                           {isCreating ? (
+//                             <>
+//                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+//                               Adding...
+//                             </>
+//                           ) : (
+//                             <>
+//                               <Plus className="h-4 w-4 mr-2" />
+//                               {labels.emptyButtonText}
+//                             </>
+//                           )}
+//                         </Button>
+//                       </span>
+//                     </TooltipTrigger>
+//                     {disableAddButton && (
+//                       <TooltipContent className="max-w-xs">
+//                         <p>{tooltipText}</p>
+//                       </TooltipContent>
+//                     )}
+//                   </Tooltip>
+//                 </DialogTrigger>
+//                 <DialogContent className="sm:max-w-[500px]">
+//                   <DialogHeader>
+//                     <DialogTitle>{labels.dialogTitle}</DialogTitle>
+//                     <DialogDescription>
+//                       {labels.dialogDescription}
+//                     </DialogDescription>
+//                   </DialogHeader>
+//                   <FormComponent
+//                     onSubmit={handleCreateEntry}
+//                     isLoading={isCreating}
+//                   />
+//                 </DialogContent>
+//               </Dialog>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
 
-  // Normal state OR no active entries but HAS finished entries
+//   // Normal state OR no active entries but HAS finished entries
+//   return (
+//     <TooltipProvider>
+//      <div className="space-y-6">
+//       <div className="flex justify-between items-center">
+//         <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+//         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+//           <DialogTrigger asChild>
+//             <Tooltip>
+//               <TooltipTrigger asChild>
+//                 <span>
+//                   <Button 
+//                   disabled={disableAddButton}
+//                   onClick={() => {
+//                     console.log(`[${foodType}] BUTTON CLICKED! Disabled:`, disableAddButton, 'Dialog will open:', !disableAddButton);
+//                   }}
+//                   >
+//                     <Plus className="h-4 w-4 mr-2" />
+//                     {labels.addButton}
+//                   </Button>
+//                 </span>
+//               </TooltipTrigger>
+//               {disableAddButton && (
+//                 <TooltipContent className="max-w-xs">
+//                   <p>{tooltipText}</p>
+//                 </TooltipContent>
+//               )}
+//             </Tooltip>
+//           </DialogTrigger>
+//           <DialogContent className="sm:max-w-[500px]">
+//             <DialogHeader>
+//               <DialogTitle>{labels.dialogTitle}</DialogTitle>
+//               <DialogDescription>
+//                 {labels.dialogDescription}
+//               </DialogDescription>
+//             </DialogHeader>
+//             <FormComponent
+//               onSubmit={handleCreateEntry}
+//               isLoading={isCreating}
+//             />
+//           </DialogContent>
+//         </Dialog>
+//       </div>
+
+//       {/* Error Display */}
+//       {error && (
+//         <Alert variant="destructive">
+//           <AlertCircle className="h-4 w-4" />
+//           <AlertDescription>{error}</AlertDescription>
+//         </Alert>
+//       )}
+
+//       {/* Show CTA card when no active entries but has finished entries */}
+//       {/* {!hasActiveEntries && hasFinishedEntries && (
+//         <Card>
+//           <CardContent className="p-6">
+//             <div className="text-center">
+//               <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+//                 <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+//               </div>
+//               <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
+//               <p className="text-muted-foreground mb-4 text-sm">
+//                 {labels.emptyDescription}
+//               </p>
+              
+//               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+//                 <DialogTrigger asChild>
+//                   <Button className="min-w-[140px]">
+//                     {isCreating ? (
+//                       <>
+//                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+//                         Adding...
+//                       </>
+//                     ) : (
+//                       <>
+//                         <Plus className="h-4 w-4 mr-2" />
+//                         {labels.emptyButtonText}
+//                       </>
+//                     )}
+//                   </Button>
+//                 </DialogTrigger>
+//                 <DialogContent className="sm:max-w-[500px]">
+//                   <DialogHeader>
+//                     <DialogTitle>{labels.dialogTitle}</DialogTitle>
+//                     <DialogDescription>
+//                       {labels.dialogDescription}
+//                     </DialogDescription>
+//                   </DialogHeader>
+//                   <FormComponent
+//                     onSubmit={handleCreateEntry}
+//                     isLoading={isCreating}
+//                   />
+//                 </DialogContent>
+//               </Dialog>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       )} */}
+
+//       {/* Food List - Always render (includes history when there are finished entries) */}
+//       <ListComponent
+//         entries={activeFoodEntries}
+//         finishedEntries={finishedFoodEntries}
+//         onUpdate={handleUpdateEntry}
+//         onDelete={handleDeleteEntry}
+//         onUpdateFinishDate={updateFinishDate}
+//         onMarkAsFinished={handleMarkAsFinished}
+//         isLoading={isActionLoading}
+//       />
+//      </div>
+//     </TooltipProvider>
+//   );
+// }
+
+// Initial loading state - show appropriate skeleton based on what we expect
+if (isLoading) {
   return (
-    <TooltipProvider>
-     <div className="space-y-6">
+    <div className="space-y-6">
+      {/* Header with Add Button */}
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-7 w-40" /> {/* Title */}
+        <Skeleton className="h-10 w-32" /> {/* Add Button */}
+      </div>
+
+      {/* Show skeleton for 1 entry (most common case) */}
+      <FoodEntriesSkeleton count={1} />
+    </div>
+  );
+}
+
+// Empty state logic - enhanced CTA when no active entries
+const hasActiveEntries = activeFoodEntries.length > 0;
+const hasFinishedEntries = finishedFoodEntries.length > 0;
+
+// enhanced empty state when NO ACTIVE entries (regardless of finished entries)
+if (!hasActiveEntries) {
+  // No active entries - show CTA
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Enhanced Empty State - Match food entry card size */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+              <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
+            <p className="text-muted-foreground mb-4 text-sm">
+              {labels.emptyDescription}
+            </p>
+            
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              {disableAddButton ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button className="min-w-[140px]" disabled={true}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {labels.emptyButtonText}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>{tooltipText}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <DialogTrigger asChild>
+                  <Button className="min-w-[140px]">
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        {labels.emptyButtonText}
+                      </>
+                    )}
+                  </Button>
+                </DialogTrigger>
+              )}
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>{labels.dialogTitle}</DialogTitle>
+                  <DialogDescription>
+                    {labels.dialogDescription}
+                  </DialogDescription>
+                </DialogHeader>
+                <FormComponent
+                  onSubmit={handleCreateEntry}
+                  isLoading={isCreating}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Show history if exists */}
+      {hasFinishedEntries && (
+        <ListComponent
+          entries={activeFoodEntries}
+          finishedEntries={finishedFoodEntries}
+          onUpdate={handleUpdateEntry}
+          onDelete={handleDeleteEntry}
+          onUpdateFinishDate={updateFinishDate}
+          onMarkAsFinished={handleMarkAsFinished}
+          isLoading={isActionLoading}
+        />
+      )}
+    </div>
+  );
+}
+
+// Normal state - HAS active entries
+return (
+  <TooltipProvider>
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
+          {disableAddButton ? (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span>
-                  <Button disabled={disableAddButton}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {labels.addButton}
-                  </Button>
-                </span>
+                <Button disabled={true}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {labels.addButton}
+                </Button>
               </TooltipTrigger>
-              {disableAddButton && (
-                <TooltipContent className="max-w-xs">
-                  <p>{tooltipText}</p>
-                </TooltipContent>
-              )}
+              <TooltipContent className="max-w-xs">
+                <p>{tooltipText}</p>
+              </TooltipContent>
             </Tooltip>
-          </DialogTrigger>
+          ) : (
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                {labels.addButton}
+              </Button>
+            </DialogTrigger>
+          )}
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>{labels.dialogTitle}</DialogTitle>
@@ -283,53 +513,6 @@ export function GenericFoodTracker<TEntry, TFormData>({
         </Alert>
       )}
 
-      {/* Show CTA card when no active entries but has finished entries */}
-      {!hasActiveEntries && hasFinishedEntries && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
-                <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
-              <p className="text-muted-foreground mb-4 text-sm">
-                {labels.emptyDescription}
-              </p>
-              
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="min-w-[140px]">
-                    {isCreating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Adding...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        {labels.emptyButtonText}
-                      </>
-                    )}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle>{labels.dialogTitle}</DialogTitle>
-                    <DialogDescription>
-                      {labels.dialogDescription}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <FormComponent
-                    onSubmit={handleCreateEntry}
-                    isLoading={isCreating}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Food List - Always render (includes history when there are finished entries) */}
       <ListComponent
         entries={activeFoodEntries}
@@ -340,7 +523,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
         onMarkAsFinished={handleMarkAsFinished}
         isLoading={isActionLoading}
       />
-     </div>
-    </TooltipProvider>
-  );
+    </div>
+  </TooltipProvider>
+);
 }
