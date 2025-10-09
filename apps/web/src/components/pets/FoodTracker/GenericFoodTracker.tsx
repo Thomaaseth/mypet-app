@@ -373,7 +373,7 @@ const hasFinishedEntries = finishedFoodEntries.length > 0;
 
 // enhanced empty state when NO ACTIVE entries (regardless of finished entries)
 if (!hasActiveEntries) {
-  // No active entries - show CTA
+  // No active entries - show CTA (button is always enabled here)
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -401,35 +401,21 @@ if (!hasActiveEntries) {
             </p>
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              {disableAddButton ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button className="min-w-[140px]" disabled={true}>
+              <DialogTrigger asChild>
+                <Button className="min-w-[140px]">
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
                       <Plus className="h-4 w-4 mr-2" />
                       {labels.emptyButtonText}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <p>{tooltipText}</p>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <DialogTrigger asChild>
-                  <Button className="min-w-[140px]">
-                    {isCreating ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Adding...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        {labels.emptyButtonText}
-                      </>
-                    )}
-                  </Button>
-                </DialogTrigger>
-              )}
+                    </>
+                  )}
+                </Button>
+              </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>{labels.dialogTitle}</DialogTitle>
@@ -463,67 +449,60 @@ if (!hasActiveEntries) {
   );
 }
 
-// Normal state - HAS active entries
+// Normal state - HAS active entries (button always disabled here)
 return (
-  <TooltipProvider>
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          {disableAddButton ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogTrigger asChild>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
                 <Button disabled={true}>
                   <Plus className="h-4 w-4 mr-2" />
                   {labels.addButton}
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p>{tooltipText}</p>
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                {labels.addButton}
-              </Button>
-            </DialogTrigger>
-          )}
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>{labels.dialogTitle}</DialogTitle>
-              <DialogDescription>
-                {labels.dialogDescription}
-              </DialogDescription>
-            </DialogHeader>
-            <FormComponent
-              onSubmit={handleCreateEntry}
-              isLoading={isCreating}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Food List - Always render (includes history when there are finished entries) */}
-      <ListComponent
-        entries={activeFoodEntries}
-        finishedEntries={finishedFoodEntries}
-        onUpdate={handleUpdateEntry}
-        onDelete={handleDeleteEntry}
-        onUpdateFinishDate={updateFinishDate}
-        onMarkAsFinished={handleMarkAsFinished}
-        isLoading={isActionLoading}
-      />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <p>{tooltipText}</p>
+            </TooltipContent>
+          </Tooltip>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{labels.dialogTitle}</DialogTitle>
+            <DialogDescription>
+              {labels.dialogDescription}
+            </DialogDescription>
+          </DialogHeader>
+          <FormComponent
+            onSubmit={handleCreateEntry}
+            isLoading={isCreating}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
-  </TooltipProvider>
+
+    {/* Error Display */}
+    {error && (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )}
+
+    {/* Food List - Always render (includes history when there are finished entries) */}
+    <ListComponent
+      entries={activeFoodEntries}
+      finishedEntries={finishedFoodEntries}
+      onUpdate={handleUpdateEntry}
+      onDelete={handleDeleteEntry}
+      onUpdateFinishDate={updateFinishDate}
+      onMarkAsFinished={handleMarkAsFinished}
+      isLoading={isActionLoading}
+    />
+  </div>
 );
 }

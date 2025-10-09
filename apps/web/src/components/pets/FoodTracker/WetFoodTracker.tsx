@@ -45,7 +45,7 @@ export function WetFoodTracker() {
         entriesTitle: 'Wet Food Entries',
         alertSingular: 'entry',
         alertPlural: 'entries',
-        emptyTitle: 'No wet food tracked yet',
+        emptyTitle: 'No active wet food tracked',
         emptyDescription: 'All current wet food has been finished. Add new wet food to continue tracking.',
         emptyButtonText: 'Add First Cans',
       }}

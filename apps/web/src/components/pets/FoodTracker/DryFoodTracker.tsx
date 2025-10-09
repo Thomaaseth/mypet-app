@@ -45,7 +45,7 @@ export function DryFoodTracker() {
         entriesTitle: 'Dry Food Entries',
         alertSingular: 'entry',
         alertPlural: 'entries',
-        emptyTitle: 'No dry food tracked yet',
+        emptyTitle: 'No active dry food tracked',
         emptyDescription: 'All current dry food has been finished. Add new dry food to continue tracking.',
         emptyButtonText: 'Add New Bag',
       }}
