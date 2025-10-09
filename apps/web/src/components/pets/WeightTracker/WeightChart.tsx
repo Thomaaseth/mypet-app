@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -11,14 +11,16 @@ import {
 } from '@/components/ui/chart';
 import type { WeightChartData } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
+import { Button } from '@/components/ui/button';
 
 interface WeightChartProps {
   data: WeightChartData[];
   weightUnit: WeightUnit;
   className?: string;
+  onAddEntry?: () => void;
 }
 
-export default function WeightChart({ data, weightUnit, className }: WeightChartProps) {
+export default function WeightChart({ data, weightUnit, className, onAddEntry }: WeightChartProps) {
   // If no data, show empty state
   if (data.length === 0) {
     return (
@@ -30,8 +32,20 @@ export default function WeightChart({ data, weightUnit, className }: WeightChart
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-32 text-muted-foreground">
-            <p>No weight data yet. Add your first entry to see the chart!</p>
+          <div className="flex flex-col items-center justify-center py-8 px-4">
+            <div className="rounded-full bg-muted p-3 mb-4">
+              <TrendingUp className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">No weight tracked yet</h3>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Add your first weight entry to start tracking your pet&apos;s weight progress.
+            </p>
+            {onAddEntry && (
+              <Button onClick={onAddEntry}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Entry
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

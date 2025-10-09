@@ -106,28 +106,13 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
             <Scale className="h-5 w-5" />
             <CardTitle>Weight Tracker</CardTitle>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Weight Entry
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Weight Entry</DialogTitle>
-                <DialogDescription>
-                  Record your pet&apos;s weight. All entries will use {weightUnit} as the unit.
-                </DialogDescription>
-              </DialogHeader>
-              <WeightForm
-                weightUnit={weightUnit}
-                onSubmit={handleCreateEntry}
-                onCancel={() => setIsAddDialogOpen(false)}
-                isLoading={isActionLoading}
-              />
-            </DialogContent>
-          </Dialog>
+          {/* Only show the "Add Weight Entry" button when there are existing entries */}
+          {weightEntries.length > 0 && (
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Weight Entry
+            </Button>
+          )}
         </div>
       </CardHeader>
       
@@ -135,7 +120,26 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
         <WeightChart 
           data={chartData} 
           weightUnit={weightUnit} 
+          onAddEntry={() => setIsAddDialogOpen(true)}
         />
+
+        {/* Add Weight Dialog - Controlled programmatically */}
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Weight Entry</DialogTitle>
+              <DialogDescription>
+                Record your pet&apos;s weight. All entries will use {weightUnit} as the unit.
+              </DialogDescription>
+            </DialogHeader>
+            <WeightForm
+              weightUnit={weightUnit}
+              onSubmit={handleCreateEntry}
+              onCancel={() => setIsAddDialogOpen(false)}
+              isLoading={isActionLoading}
+            />
+          </DialogContent>
+        </Dialog>
 
         {/* Weight History Card with Collapsible Content */}
         <Card>
