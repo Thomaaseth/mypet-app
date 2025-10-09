@@ -2,6 +2,7 @@ import { db } from '../db';
 import { pets } from '../db/schema/pets';
 import { eq, and, desc } from 'drizzle-orm';
 import type { Pet, NewPet, PetGender, WeightUnit } from '../db/schema/pets';
+import { weightEntries } from '../db/schema/weight-entries';
 import { 
   BadRequestError, 
   NotFoundError, 
@@ -227,11 +228,31 @@ export class PetsService {
         notes: petData.notes || null,
       };
 
-      // Execute transaction
+      // Execute db write
       const [newPet] = await db
         .insert(pets)
         .values(cleanedData)
         .returning();
+
+
+      // If weight is provided, create initial weight entry
+      if (newPet.weight && newPet.createdAt) {
+        try {       
+          // Format the date as YYYY-MM-DD using the pet's createdAt timestamp
+          const entryDate = new Date(newPet.createdAt).toISOString().split('T')[0];
+          
+          await db.insert(weightEntries).values({
+            petId: newPet.id,
+            weight: newPet.weight,
+            date: entryDate,
+          });
+          
+          console.log(`Initial weight entry created for pet ${newPet.id}`);
+        } catch (weightError) {
+          // if error, don't don't fail pet creation
+          console.error('Failed to create initial weight entry:', weightError);
+        }
+      }
 
       return newPet;
     } catch (error) {

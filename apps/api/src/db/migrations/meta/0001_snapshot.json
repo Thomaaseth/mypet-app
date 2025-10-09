@@ -1,6 +1,6 @@
 {
-  "id": "70191fde-6d24-44ba-af58-d94d67a19049",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "df5472a7-3440-4a89-b44a-48d05cfb08dd",
+  "prevId": "70191fde-6d24-44ba-af58-d94d67a19049",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -404,14 +404,14 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -551,12 +551,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "date_finished": {
-          "name": "date_finished",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
         "bag_weight": {
           "name": "bag_weight",
           "type": "numeric(8, 2)",
@@ -609,6 +603,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "date_finished": {
+          "name": "date_finished",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

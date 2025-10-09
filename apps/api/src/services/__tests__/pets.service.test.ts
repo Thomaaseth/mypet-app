@@ -321,6 +321,60 @@ describe('PetsService', () => {
       expect(result.microchipNumber).toBe('ABC123456789');
       expect(result.notes).toBe('Very friendly dog');
     });
+    
+    it('should create initial weight entry when pet is created with weight', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const newPetData: NewPet = {
+        name: 'Weighted Pet',
+        userId: primary.id,
+        animalType: 'cat',
+        weight: '5.50',
+        weightUnit: 'kg',
+      };
+  
+      const result = await PetsService.createPet(newPetData);
+  
+      // Verify pet was created
+      expect(result.weight).toBe('5.50');
+      expect(result.id).toBeDefined();
+  
+      // Verify weight entry was auto-created
+      const weightEntries = await db.select()
+        .from(schema.weightEntries)
+        .where(eq(schema.weightEntries.petId, result.id));
+  
+      expect(weightEntries).toHaveLength(1);
+      expect(weightEntries[0].weight).toBe('5.50');
+      expect(weightEntries[0].petId).toBe(result.id);
+      
+      // Verify the date matches the pet's creation date
+      const entryDate = weightEntries[0].date;
+      const petCreatedDate = new Date(result.createdAt).toISOString().split('T')[0];
+      expect(entryDate).toBe(petCreatedDate);
+    });
+  
+    it('should NOT create weight entry when pet is created without weight', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      const newPetData: NewPet = {
+        name: 'Weightless Pet',
+        userId: primary.id,
+        animalType: 'dog',
+        // No weight provided
+      };
+  
+      const result = await PetsService.createPet(newPetData);
+  
+      // Verify pet was created
+      expect(result.weight).toBeNull();
+      expect(result.id).toBeDefined();
+  
+      // Verify NO weight entry was created
+      const weightEntries = await db.select()
+        .from(schema.weightEntries)
+        .where(eq(schema.weightEntries.petId, result.id));
+  
+      expect(weightEntries).toHaveLength(0);
+    });
   });
 
   describe('updatePet', () => {

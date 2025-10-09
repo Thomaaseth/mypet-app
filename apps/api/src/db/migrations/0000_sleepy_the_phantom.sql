@@ -88,7 +88,7 @@ CREATE TABLE "food_entries" (
 	"brand_name" varchar(100),
 	"product_name" varchar(150),
 	"daily_amount" numeric(8, 2) NOT NULL,
-	"date_purchased" date NOT NULL,
+	"date_started" date NOT NULL,
 	"bag_weight" numeric(8, 2),
 	"bag_weight_unit" "dry_food_bag_unit",
 	"dry_daily_amount_unit" "dry_food_daily_unit",
