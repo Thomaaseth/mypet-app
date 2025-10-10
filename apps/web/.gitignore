@@ -38,3 +38,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# TanStack Router generated files
+src/routeTree.gen.ts
+
+# Vite
+dist
+.vinxi
+*.timestamp_*.js
+vite.config.*.timestamp_*.js
