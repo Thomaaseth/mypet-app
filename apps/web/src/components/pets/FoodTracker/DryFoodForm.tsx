@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
-import { DRY_FOOD_BAG_UNITS, DRY_FOOD_DAILY_UNITS } from '@/types/food';
+import { DRY_FOOD_BAG_UNITS } from '@/types/food';
 import { validateDryFoodData } from '@/lib/validations/food';
 
 interface DryFoodFormProps {
@@ -136,40 +136,20 @@ export function DryFoodForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="dailyAmount">Daily Amount *</Label>
-          <Input
-            id="dailyAmount"
-            type="number"
-            step="0.01"
-            value={formData.dailyAmount}
-            onChange={(e) => updateField('dailyAmount', e.target.value)}
-            placeholder="e.g., 120"
-            required
-          />
-          {errors.dailyAmount && (
-            <p className="text-sm text-red-600">{errors.dailyAmount}</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="dryDailyAmountUnit">Unit *</Label>
-          <Select
-            value={formData.dryDailyAmountUnit}
-            onValueChange={(value) => updateField('dryDailyAmountUnit', value as 'grams')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DRY_FOOD_DAILY_UNITS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="dailyAmount">Daily Amount (grams) *</Label>
+        <Input
+          id="dailyAmount"
+          type="number"
+          step="0.01"
+          value={formData.dailyAmount}
+          onChange={(e) => updateField('dailyAmount', e.target.value)}
+          placeholder="e.g., 120"
+          required
+        />
+        {errors.dailyAmount && (
+          <p className="text-sm text-red-600">{errors.dailyAmount}</p>
+        )}
       </div>
 
       <div className="space-y-2">
