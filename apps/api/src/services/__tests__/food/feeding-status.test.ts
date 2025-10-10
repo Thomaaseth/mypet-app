@@ -249,56 +249,6 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
   });
 
   describe('Unit Conversion in Consumption Calculations', () => {
-    it('should correctly calculate consumption with kg and cups', async () => {
-      const { primary, testPet } = await setupUserAndPet();
-
-      // 2kg = 2000g, 1 cup = 120g, expected 2000g / 120g = 16.67 days
-      // Finished in 17 days = 117.65g/day
-      // Variance = (117.65 - 120) / 120 = -1.96% = NORMAL
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 17);
-
-      const dryFoodData = makeDryFoodData({
-        bagWeight: '2.0',
-        bagWeightUnit: 'kg',
-        dailyAmount: '1.0',
-        dryDailyAmountUnit: 'cups',
-        dateStarted: startDate.toISOString().split('T')[0],
-      });
-
-      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
-      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
-
-      expect(finished.expectedDailyConsumption).toBe(120); // 1 cup = 120g
-      expect(finished.actualDailyConsumption).toBeCloseTo(117.65, 1);
-      expect(finished.feedingStatus).toBe('normal');
-    });
-
-    it('should correctly calculate consumption with pounds and cups', async () => {
-      const { primary, testPet } = await setupUserAndPet();
-
-      // 2 pounds = 907.18g, 1 cup = 120g, expected 907.18g / 120g = 7.56 days
-      // Finished in 8 days = 113.4g/day
-      // Variance = (113.4 - 120) / 120 = -5.5% = UNDERFEEDING
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 8);
-
-      const dryFoodData = makeDryFoodData({
-        bagWeight: '2.0',
-        bagWeightUnit: 'pounds',
-        dailyAmount: '1.0',
-        dryDailyAmountUnit: 'cups',
-        dateStarted: startDate.toISOString().split('T')[0],
-      });
-
-      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
-      const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
-
-      expect(finished.expectedDailyConsumption).toBe(120);
-      expect(finished.actualDailyConsumption).toBeCloseTo(113.4, 1);
-      expect(finished.feedingStatus).toBe('slightly-under');
-    });
-
     it('should correctly calculate consumption with mixed wet food units', async () => {
       const { primary, testPet } = await setupUserAndPet();
 

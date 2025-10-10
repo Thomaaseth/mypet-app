@@ -41,8 +41,8 @@ export class FoodValidations {
     }
 
     // Validate daily amount unit
-    if (data.dryDailyAmountUnit !== undefined && !['grams', 'cups'].includes(data.dryDailyAmountUnit)) {
-      throw new BadRequestError('Invalid daily amount unit for dry food. Must be grams or cups');
+    if (data.dryDailyAmountUnit !== undefined && data.dryDailyAmountUnit !== 'grams') {
+      throw new BadRequestError('Invalid daily amount unit for dry food. Must be grams');
     }
 
     // Validate numeric values
@@ -66,12 +66,9 @@ export class FoodValidations {
       if (isNaN(dailyAmount) || dailyAmount <= 0) {
         throw new BadRequestError('Daily amount must be a positive number');
       }
-      // Reasonable upper limits based on unit
-      if (data.dryDailyAmountUnit === 'grams' && dailyAmount > 2000) {
+      // Reasonable upper limit for grams
+      if (dailyAmount > 2000) {
         throw new BadRequestError('Daily amount seems unreasonably large (max 2000 grams)');
-      }
-      if (data.dryDailyAmountUnit === 'cups' && dailyAmount > 16) {
-        throw new BadRequestError('Daily amount seems unreasonably large (max 16 cups)');
       }
     }
 

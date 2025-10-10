@@ -15,6 +15,13 @@
       "when": 1760023311114,
       "tag": "0001_cynical_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760088269738,
+      "tag": "0002_careful_jackpot",
+      "breakpoints": true
     }
   ]
 }

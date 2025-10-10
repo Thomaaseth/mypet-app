@@ -18,7 +18,7 @@ import { pets } from './pets';
 // Simplified enums
 export const foodTypeEnum = pgEnum('food_type', ['dry', 'wet']);
 export const dryFoodBagUnitEnum = pgEnum('dry_food_bag_unit', ['kg', 'pounds']);
-export const dryFoodDailyUnitEnum = pgEnum('dry_food_daily_unit', ['grams', 'cups']);
+export const dryFoodDailyUnitEnum = pgEnum('dry_food_daily_unit', ['grams']);
 export const wetFoodUnitEnum = pgEnum('wet_food_unit', ['grams', 'oz']);
 
 export const foodEntries = pgTable('food_entries', {
@@ -99,7 +99,7 @@ export type DryFoodEntry = BaseFoodEntry & {
   foodType: 'dry';
   bagWeight: string;
   bagWeightUnit: 'kg' | 'pounds';
-  dryDailyAmountUnit: 'grams' | 'cups';
+  dryDailyAmountUnit: 'grams';
   // Wet fields are null
   numberOfUnits: null;
   weightPerUnit: null;

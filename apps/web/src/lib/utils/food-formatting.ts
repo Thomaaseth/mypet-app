@@ -67,7 +67,7 @@ export function calculateExpectedDays(entry: DryFoodEntry | WetFoodEntry): numbe
   if (entry.foodType === 'dry') {
     const dryEntry = entry as DryFoodEntry;
     const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
-    const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+    const dailyAmountGrams = parseFloat(dryEntry.dailyAmount);
     return Math.ceil(totalWeightGrams / dailyAmountGrams);
   } else {
     const wetEntry = entry as WetFoodEntry;

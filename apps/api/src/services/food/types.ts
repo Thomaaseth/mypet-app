@@ -4,7 +4,7 @@ export type DryFoodFormData = {
     bagWeight: string;
     bagWeightUnit: 'kg' | 'pounds';
     dailyAmount: string;
-    dryDailyAmountUnit: 'grams' | 'cups';
+    dryDailyAmountUnit: 'grams';
     dateStarted: string;
   };
   

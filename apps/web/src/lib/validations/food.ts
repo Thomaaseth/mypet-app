@@ -32,7 +32,7 @@ export const dryFoodSchema = z.object({
     required_error: 'Bag weight unit is required',
     invalid_type_error: 'Invalid bag weight unit for dry food'
   }),
-  dryDailyAmountUnit: z.enum(['grams', 'cups'], {
+  dryDailyAmountUnit: z.enum(['grams'], {
     required_error: 'Daily amount unit is required',
     invalid_type_error: 'Invalid daily amount unit for dry food'
   }),
@@ -50,26 +50,13 @@ export const dryFoodSchema = z.object({
   }
 
   // Convert daily amount to grams for comparison
-  let dailyAmountInGrams = dailyAmount;
-  if (data.dryDailyAmountUnit === 'cups') {
-    // Approximate: 1 cup dry food ≈ 120 grams (varies by density)
-    dailyAmountInGrams = dailyAmount * 120;
-  }
+  const dailyAmountInGrams = dailyAmount;
 
   // Check if daily amount exceeds total bag weight
   if (dailyAmountInGrams >= bagWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Daily amount should be less than total bag weight',
-      path: ['dailyAmount']
-    });
-  }
-
-  // Cup decimal validation for dry food
-  if (data.dryDailyAmountUnit === 'cups' && data.dailyAmount.includes('/')) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Please use decimals instead of fractions (e.g., 0.25 instead of 1/4)',
       path: ['dailyAmount']
     });
   }
@@ -140,7 +127,7 @@ export const updateDryFoodSchema = z.object({
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  dryDailyAmountUnit: z.enum(['grams', 'cups']).optional(),
+  dryDailyAmountUnit: z.enum(['grams']).optional(),
   dateStarted: z.string().refine(val => {
     if (!val) return true;
     const date = new Date(val);

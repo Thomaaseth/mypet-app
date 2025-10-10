@@ -11,7 +11,6 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const GRAMS_PER_KG = 1000;
 const GRAMS_PER_LB = 453.592;
 const GRAMS_PER_OZ = 28.3495;
-const GRAMS_PER_CUP = 120; // Approximate for dry dog/cat food
 
 export class FoodCalculations {
   static calculateDryFoodRemaining(entry: DryFoodEntry): { 
@@ -35,11 +34,7 @@ export class FoodCalculations {
       bagWeightInGrams *= GRAMS_PER_LB;
     }
     
-    // Convert daily amount to grams for calculation
-    let dailyAmountInGrams = parseFloat(entry.dailyAmount);
-    if (entry.dryDailyAmountUnit === 'cups') {
-      dailyAmountInGrams *= GRAMS_PER_CUP;
-    }
+    const dailyAmountInGrams = parseFloat(entry.dailyAmount);
     
     const foodConsumedInGrams = Math.max(0, daysElapsed * dailyAmountInGrams);
     const remainingWeightInGrams = Math.max(0, bagWeightInGrams - foodConsumedInGrams);
@@ -185,12 +180,8 @@ export class FoodCalculations {
     // Get expected daily consumption and convert to grams
     let expectedDailyInGrams = parseFloat(entry.dailyAmount);
     
-    if (entry.foodType === 'dry') {
-      const dryEntry = entry as DryFoodEntry;
-      if (dryEntry.dryDailyAmountUnit === 'cups') {
-        expectedDailyInGrams *= GRAMS_PER_CUP;
-      }
-    } else {
+    // Only wet food needs conversion from oz to grams
+    if (entry.foodType === 'wet') {
       const wetEntry = entry as WetFoodEntry;
       if (wetEntry.wetDailyAmountUnit === 'oz') {
         expectedDailyInGrams *= GRAMS_PER_OZ;

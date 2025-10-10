@@ -10,7 +10,7 @@ export type DryFoodEntry = {
   bagWeight: string;
   bagWeightUnit: 'kg' | 'pounds';
   dailyAmount: string;
-  dryDailyAmountUnit: 'grams' | 'cups';
+  dryDailyAmountUnit: 'grams';
   dateStarted: string;
   dateFinished: string | null;
   isActive: boolean;
@@ -77,7 +77,7 @@ export type DryFoodFormData = {
   bagWeight: string;
   bagWeightUnit: 'kg' | 'pounds';
   dailyAmount: string;
-  dryDailyAmountUnit: 'grams' | 'cups';
+  dryDailyAmountUnit: 'grams';
   dateStarted: string;
 };
 
@@ -110,5 +110,5 @@ export type AllFoodEntriesApiResponse = {
 
 // Unit labels
 export const DRY_FOOD_BAG_UNITS = ['kg', 'pounds'] as const;
-export const DRY_FOOD_DAILY_UNITS = ['grams', 'cups'] as const;
+export const DRY_FOOD_DAILY_UNITS = ['grams'] as const;
 export const WET_FOOD_UNITS = ['grams', 'oz'] as const;

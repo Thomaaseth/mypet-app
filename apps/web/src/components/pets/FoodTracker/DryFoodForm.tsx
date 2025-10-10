@@ -156,7 +156,7 @@ export function DryFoodForm({
           <Label htmlFor="dryDailyAmountUnit">Unit *</Label>
           <Select
             value={formData.dryDailyAmountUnit}
-            onValueChange={(value) => updateField('dryDailyAmountUnit', value as 'grams' | 'cups')}
+            onValueChange={(value) => updateField('dryDailyAmountUnit', value as 'grams')}
           >
             <SelectTrigger>
               <SelectValue />

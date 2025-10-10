@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Calendar, Weight, Utensils, Loader2 } from 'lucide-react';
+import { Edit, Trash2, Calendar, Weight, Utensils } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
@@ -86,49 +86,6 @@ export function DryFoodList({
       setDeletingEntry(null);
     }
   };
-
-  // const handleMarkAsFinished = async(foodId: string) => {
-  //   setMarkingAsFinished(foodId);
-  //   const success = await onMarkAsFinished(foodId);
-  //   setMarkingAsFinished(null);
-  // }
-  // const getStatusSection = (entry: DryFoodEntry & { 
-  //   remainingDays: number; 
-  //   remainingWeight: number; 
-  //   depletionDate: string;
-  // }) => {
-  //   const isCalculatedFinished = entry.remainingDays <= 0;
-  //   const isMarking = markingAsFinished === entry.id;
-    
-  //   if (isCalculatedFinished && entry.isActive) {
-  //     // Show "Mark as finished" button for calculated finished but still active entries
-  //     return (
-  //       <div className="flex items-center gap-2">
-  //         <Badge variant="destructive">Ready to Finish</Badge>
-  //         <Button
-  //           variant="outline"
-  //           size="sm"
-  //           onClick={() => handleMarkAsFinished(entry.id)}
-  //           disabled={isLoading || isMarking}
-  //           className="text-xs px-2 py-1 h-7"
-  //         >
-  //           {isMarking ? (
-  //             <>
-  //               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-  //               Marking...
-  //             </>
-  //           ) : (
-  //             'Mark as Finished'
-  //           )}
-  //         </Button>
-  //       </div>
-  //     );
-  //   } else if (entry.remainingDays <= 7 && entry.remainingDays > 0) {
-  //     return <Badge variant="secondary">Low Stock</Badge>;
-  //   } else {
-  //     return <Badge variant="default">Active</Badge>;
-  //   }
-  // };
   
   const getStatusSection = (entry: DryFoodEntry & { 
     remainingDays: number; 

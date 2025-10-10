@@ -29,27 +29,6 @@ describe('Business Logic Calculations', () => {
       expect(result.remainingWeight).toBeCloseTo(1.5, 2);
     });
 
-    it('should handle unit conversions correctly for dry food', async () => {
-      const purchaseDate = new Date();
-      purchaseDate.setDate(purchaseDate.getDate() - 2);
-
-      const dryFoodEntry = makeDryFoodEntry({
-        bagWeight: '4.41', // pounds to grams conversion case
-        bagWeightUnit: 'pounds',
-        dailyAmount: '1.00', // cups -> grams mapping inside service
-        dryDailyAmountUnit: 'cups',
-        dateStarted: purchaseDate.toISOString().split('T')[0],
-        isActive: true,
-      });
-
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
-
-      // 2000g - (2 days × 120g) = 1760g remaining
-      // 1760g / 120g per day = 14.67 -> 14 days
-      expect(result.remainingDays).toBe(14);
-      expect(result.remainingWeight).toBeCloseTo(3.88, 1);
-    });
-
     it('should return 0 remaining days for finished dry food', async () => {
       const purchaseDate = new Date();
       purchaseDate.setDate(purchaseDate.getDate() - 30); // 30 days ago
@@ -272,28 +251,5 @@ describe('Business Logic Calculations', () => {
       expect(result.remainingDays).toBe(0);
       expect(result.depletionDate.toDateString()).toBe(expectedDepletionDate.toDateString());
     });
-  });
-
-  it('should convert kg bag weight with cups daily amount', async () => {
-    const purchaseDate = new Date();
-    purchaseDate.setDate(purchaseDate.getDate() - 1);
-
-    const dryFoodEntry = makeDryFoodEntry({
-      bagWeight: '2.00',
-      bagWeightUnit: 'kg',
-      dailyAmount: '0.5',
-      dryDailyAmountUnit: 'cups',
-      dateStarted: purchaseDate.toISOString().split('T')[0],
-      isActive: true,
-    });
-
-    const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
-
-    // 2kg = 2000g total
-    // 0.5 cups = 60g daily (0.5 × 120g)
-    // Day 1: 60g consumed, 1940g remaining
-    // 1940g / 60g per day = 32.33... -> 32 days remaining
-    expect(result.remainingDays).toBe(32);
-    expect(result.remainingWeight).toBeCloseTo(1.94, 2); // 1940g = 1.94kg
   });
 });

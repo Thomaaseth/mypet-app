@@ -145,7 +145,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
       if (finishedEntry.actualDaysElapsed && finishedEntry.feedingStatus) {
         const dryEntry = finishedEntry as DryFoodEntry;
         const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
-        const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+        const dailyAmountGrams = parseFloat(dryEntry.dailyAmount);
         const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
         
         const statusLabel = 
@@ -191,7 +191,7 @@ export function useDryFoodTracker({ petId }: UseDryFoodTrackerOptions) {
       if (updatedEntry.actualDaysElapsed && updatedEntry.feedingStatus) {
         const dryEntry = updatedEntry as DryFoodEntry;
         const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
-        const dailyAmountGrams = parseFloat(dryEntry.dailyAmount) * (dryEntry.dryDailyAmountUnit === 'cups' ? 120 : 1);
+        const dailyAmountGrams = parseFloat(dryEntry.dailyAmount);
         const expectedDays = Math.ceil(totalWeightGrams / dailyAmountGrams);
         
         const statusLabel = 
