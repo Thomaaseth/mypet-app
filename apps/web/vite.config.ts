@@ -4,7 +4,6 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-// Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -19,12 +18,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@/shared': path.resolve(__dirname, '../../packages/shared/src'),
     },
   },
   server: {
     port: 3000,
   },
-  css: {
-    postcss: './postcss.config.vite.mjs' // use vite specific - remove when migration over
-  }
 })
