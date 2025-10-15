@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@tanstack/react-router';
 import { authClient } from '@/lib/auth-client';
 import { authErrorHandler } from '@/lib/errors/handlers';
 import { User } from '@/types/auth';
@@ -69,7 +69,7 @@ export function useUserSession(options: UseUserSessionOptions = {}): UseUserSess
         });
 
         if (redirectOnError) {
-          router.push(redirectTo);
+          router.navigate({ to: redirectTo});
         }
       }
     } catch (error) {
@@ -83,7 +83,7 @@ export function useUserSession(options: UseUserSessionOptions = {}): UseUserSess
       });
 
       if (redirectOnError) {
-        router.push(redirectTo);
+        router.navigate({ to: redirectTo });
       }
     }
   }, [router, redirectOnError, redirectTo]);

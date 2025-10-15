@@ -3,13 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "dev:tanstack": "vite",
-    "build": "next build",
-    "build:tanstack": "vite build",
-    "start": "next start",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
-    "lint": "next lint"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

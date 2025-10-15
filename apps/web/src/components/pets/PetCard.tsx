@@ -1,5 +1,3 @@
-'use client';
-
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +9,8 @@ import {
   Weight,
   MapPin,
   Heart,
-  HeartOff 
+  HeartOff,
+  Eye 
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -30,8 +29,6 @@ interface PetCardProps {
   onDelete: (pet: Pet) => void;
   onView?: (pet: Pet) => void;
 }
-
-import Image from 'next/image';
 
 export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
   const [imageError, setImageError] = useState(false);
@@ -98,14 +95,11 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Pet Image */}
         <div className="w-full">
           {pet.imageUrl && !imageError ? (
-            <Image
+            <img
               src={pet.imageUrl}
               alt={`Photo of ${pet.name}`}
-              width={300}
-              height={128}
               className="w-full h-32 object-cover rounded-md"
               onError={() => setImageError(true)}
             />
@@ -197,6 +191,3 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
     </Card>
   );
 }
-
-// Missing Eye import
-import { Eye } from 'lucide-react';
