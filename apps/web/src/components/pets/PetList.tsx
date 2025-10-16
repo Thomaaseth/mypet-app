@@ -43,7 +43,9 @@ export default function PetList() {
   const [deletingPet, setDeletingPet] = useState<Pet | null>(null);
   const [activeTab, setActiveTab] = useState<string>('');
 
-  // Set active tab to first pet when pets load
+// NEEDS TO CHANGE LOGIC TO REORG PET TABS, FOR NOW: 
+
+// Set active tab to first pet when pets load
 //   useState(() => {
 //     if (pets.length > 0 && !activeTab) {
 //       setActiveTab(pets[0].id);
