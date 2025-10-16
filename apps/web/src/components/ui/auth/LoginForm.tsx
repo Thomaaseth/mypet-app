@@ -1,12 +1,10 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '../../../lib/auth-client';
 import { useErrorState } from '../../../hooks/useErrorsState';
 import { authErrorHandler } from '../../../lib/errors/handlers';
-import { useRouter } from 'next/navigation';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +22,8 @@ const signInSchema = z.object({
 type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const search = useSearch({ from: '/login' });
   const { refreshSession } = useSessionContext();
   const { isLoading, error, clearError, executeAction } = useErrorState({
     showErrorToast: true,
@@ -45,7 +44,6 @@ export default function SignInForm() {
         const { error } = await authClient.signIn.email({
           email: data.email,
           password: data.password,
-          // callbackURL: '/', // Removed to handle manual redirect 
         });
 
         if (error) {
@@ -60,8 +58,8 @@ export default function SignInForm() {
     if (result) {
       toastService.auth.signInSuccess();
       await refreshSession();
-      router.push('/');
-      router.refresh();
+      // Use the redirect param from _authenticated, or default to home
+      navigate({ to: search.redirect || '/' });
     }
   };
 

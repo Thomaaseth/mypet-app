@@ -1,7 +1,4 @@
-'use client';
-
-import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { Link, useNavigate, useLocation } from '@tanstack/react-router';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
@@ -10,8 +7,8 @@ import { authErrorHandler } from '@/lib/errors/handlers';
 import { useSessionContext } from '@/contexts/SessionContext';
 
 export const Navbar = () => {
-  const router = useRouter();
-  const pathname = usePathname();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   // Use session context
   const { user, isLoading, clearSession } = useSessionContext();
@@ -39,8 +36,7 @@ export const Navbar = () => {
 
     if (result) {
       console.log('✅ Navbar: Redirecting to home page');
-      router.push('/');
-      router.refresh(); // Refresh to update any server-side state
+      navigate({ to: '/' });
     }
   };
 
@@ -60,9 +56,9 @@ export const Navbar = () => {
   // Check if current path is active
   const isActivePath = (href: string): boolean => {
     if (href === '/') {
-      return pathname === '/';
+      return location.pathname === '/';
     }
-    return pathname.startsWith(href);
+    return location.pathname.startsWith(href);
   };
 
   if (isLoading) {
@@ -71,7 +67,7 @@ export const Navbar = () => {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2">
+              <Link to="/" search={{}} className="flex items-center space-x-2">
                 <span className="text-xl font-bold">Pettr</span>
               </Link>
             </div>
@@ -91,7 +87,7 @@ export const Navbar = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link to="/" search={{}} className="flex items-center space-x-2">
               <span className="text-xl font-bold">Pettr</span>
             </Link>
           </div>
@@ -108,7 +104,7 @@ export const Navbar = () => {
                     size="sm"
                     asChild
                   >
-                    <Link href={item.href}>{item.label}</Link>
+                    <Link to={item.href} search={{}}>{item.label}</Link>
                   </Button>
                 ))}
                 
@@ -140,7 +136,7 @@ export const Navbar = () => {
                     size="sm"
                     asChild
                   >
-                    <Link href={item.href}>{item.label}</Link>
+                    <Link to={item.href} search={{}}>{item.label}</Link>
                   </Button>
                 ))}
                 
@@ -151,14 +147,14 @@ export const Navbar = () => {
                     size="sm" 
                     asChild
                   >
-                    <Link href="/login">Login</Link>
-                  </Button>
+                    <Link to="/login" search={{}}>Login</Link>
+                    </Button>
                   <Button 
                     variant={isActivePath('/signup') ? "default" : "ghost"} 
                     size="sm" 
                     asChild
                   >
-                    <Link href="/signup">Sign Up</Link>
+                    <Link to="/signup" search={{}}>Sign Up</Link>
                   </Button>
                 </div>
               </>
