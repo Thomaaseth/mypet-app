@@ -25,7 +25,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
   const navigate = useNavigate();
-  const search = useSearch({ from: '/login' });
+  const search = useSearch({ from: '/signup' });
   const { refreshSession } = useSessionContext();
   const { isLoading, error, clearError, executeAction } = useErrorState();
 

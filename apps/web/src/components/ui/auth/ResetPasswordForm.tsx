@@ -1,12 +1,10 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '@/lib/auth-client';
 import { useErrorState } from '@/hooks/useErrorsState';
 import { authErrorHandler } from '@/lib/errors/handlers';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,7 +23,7 @@ interface ResetPasswordFormProps {
 }
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
-    const router = useRouter();
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { isLoading, error, executeAction } = useErrorState();
@@ -57,7 +55,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   
       if (result) {
         toastService.auth.passwordResetSuccess();
-        router.push('/login');
+        navigate({ to: '/login' });
       }
     };
 

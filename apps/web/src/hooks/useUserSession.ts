@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { authClient } from '@/lib/auth-client';
 import { authErrorHandler } from '@/lib/errors/handlers';
 import { User } from '@/types/auth';
@@ -24,7 +24,7 @@ interface UseUserSessionOptions {
 
 export function useUserSession(options: UseUserSessionOptions = {}): UseUserSessionReturn {
   const { redirectOnError = false, redirectTo = '/login' } = options;
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Consolidated session state 
   const [state, setState] = useState<UserSessionState>({
@@ -69,8 +69,7 @@ export function useUserSession(options: UseUserSessionOptions = {}): UseUserSess
         });
 
         if (redirectOnError) {
-          router.navigate({ to: redirectTo});
-        }
+          navigate({ to: redirectTo });        }
       }
     } catch (error) {
       console.error('Failed to load user session:', error);
@@ -83,10 +82,10 @@ export function useUserSession(options: UseUserSessionOptions = {}): UseUserSess
       });
 
       if (redirectOnError) {
-        router.navigate({ to: redirectTo });
+        navigate({ to: redirectTo });
       }
     }
-  }, [router, redirectOnError, redirectTo]);
+  }, [navigate, redirectOnError, redirectTo]);
 
   // Public refresh function - calls the internal loadSession
   const refreshSession = useCallback(async () => {

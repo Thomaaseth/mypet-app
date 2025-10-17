@@ -1,5 +1,3 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@tanstack/react-router';
 
 const forgotPasswordSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -78,7 +76,7 @@ export default function ForgotPasswordForm() {
                       >
                         Try Again
                       </Button>
-                      <Link href="/login" className="flex-1">
+                      <Link to="/login" className="flex-1">
                         <Button className="w-full">
                           Back to Login
                         </Button>
@@ -141,7 +139,7 @@ export default function ForgotPasswordForm() {
   
             <div className="mt-4 text-center">
               <Link 
-                href="/login" 
+                to="/login" 
                 className="text-sm text-muted-foreground hover:text-primary inline-flex items-center"
               >
                 <ArrowLeft className="mr-1 h-3 w-3" />
