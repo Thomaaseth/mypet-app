@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { SessionProvider } from '@/contexts/SessionContext'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/sonner'
+import '../globals.css'
 
 export const Route = createRootRoute({
   component: RootComponent,
