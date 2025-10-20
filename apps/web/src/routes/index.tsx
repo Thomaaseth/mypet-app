@@ -12,7 +12,7 @@ function HomePage() {
         <p className="text-muted-foreground">
           Home Page
         </p>
-        <div className="flex gap-4 justify-center">
+        {/* <div className="flex gap-4 justify-center">
           <a 
             href="/login" 
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
@@ -25,7 +25,7 @@ function HomePage() {
           >
             Sign Up
           </a>
-        </div>
+        </div> */}
       </div>
     </div>
   )

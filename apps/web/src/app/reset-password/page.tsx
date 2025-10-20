@@ -2,7 +2,7 @@
 
 // import { Loader2 } from 'lucide-react';
 // import ResetPasswordForm from '@/components/ui/auth/ResetPasswordForm';
-// import { useTokenValidation } from '@/hooks/useTokenValidation'; // New hook!
+// import { useTokenValidation } from '@/hooks/useTokenValidation';
 
 // export default function ResetPasswordPage() {
 //   // Single hook manages all token validation logic

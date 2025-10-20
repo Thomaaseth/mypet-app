@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { authClient } from '../../../lib/auth-client';
 import { useErrorState } from '../../../hooks/useErrorsState';
 import { authErrorHandler } from '../../../lib/errors/handlers';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate, useSearch, Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -128,12 +128,12 @@ export default function SignInForm() {
 
         {/* Forgot Password Link */}
         <div className="text-center">
-          <a
-            href="/forgot-password"
+          <Link
+            to="/forgot-password"
             className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
           >
             Forgot your password?
-          </a>
+          </Link>
         </div>
       </form>
 
@@ -141,12 +141,12 @@ export default function SignInForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
             {"Don't have an account?"}{' '}
-          <a
-            href="/signup"
+          <Link
+            to="/signup"
             className="font-medium text-primary underline underline-offset-4 hover:no-underline"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

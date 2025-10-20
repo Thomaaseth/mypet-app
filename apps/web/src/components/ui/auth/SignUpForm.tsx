@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '../../../lib/auth-client';
 import { useErrorState } from '../../../hooks/useErrorsState';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate, useSearch, Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -162,12 +162,12 @@ export default function SignUpForm() {
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
           Already have an account?{' '}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="font-medium text-primary underline underline-offset-4 hover:no-underline"
           >
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>
