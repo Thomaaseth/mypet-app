@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,8 +21,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Heart, Loader2 } from 'lucide-react';
-import { usePets } from '@/hooks/usePets';
-import { useErrorState } from '@/hooks/useErrorsState';
+import { usePets, useCreatePet, useUpdatePet, useDeletePet } from '@/queries/pets';
 import PetCard from './PetCard';
 import PetForm from './PetForm';
 import type { Pet, PetFormData } from '@/types/pet';
@@ -34,8 +31,15 @@ import { WeightTracker } from './WeightTracker';
 import { FoodTracker } from './FoodTracker';
 
 export default function PetList() {
-  const { pets, isLoading, error, createPet, updatePet, deletePet } = usePets();
-  const { isLoading: isActionLoading, executeAction } = useErrorState();
+  const { data: pets, isPending, error } = usePets();
+  const createPetMutation = useCreatePet();
+  const updatePetMutation = useUpdatePet();
+  const deletePetMutation = useDeletePet();
+
+  // Computed loading state for any mutation in progress
+  const isActionLoading = createPetMutation.isPending || 
+                          updatePetMutation.isPending || 
+                          deletePetMutation.isPending;
   
   // UI State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -52,86 +56,68 @@ export default function PetList() {
 //     }
 //   });
     useEffect(() => {
-    if (pets.length > 0 && !activeTab) {
+    if (pets && pets.length > 0 && !activeTab) {
         setActiveTab(pets[0].id); // Auto-select first pet (latest added => desc order)
     }
     }, [pets, activeTab]);
 
   // Handle create pet
-  const handleCreatePet = async (data: PetFormData): Promise<Pet | null> => {
-    const result = await executeAction(
-      async () => {
-        const newPet = await createPet(data);
-        if (newPet) {
-          setIsCreateDialogOpen(false);
-          setActiveTab(newPet.id); // Switch to the new pet's tab
-        }
-        return newPet;
-      },
-      petErrorHandler
-    );
-    
-    return result;
+  const handleCreatePet = async (petData: PetFormData): Promise<Pet | null> => {
+    try {
+      const result = await createPetMutation.mutateAsync(petData);
+      setIsCreateDialogOpen(false);
+      return result;
+    } catch (error) {
+      // Error already handled in mutation
+      return null;
+    }
   };
 
-  // Handle edit pet
-  const handleEditPet = async (data: PetFormData): Promise<Pet | null> => {
+  // Handle update pet
+  const handleUpdatePet = async (petData: PetFormData): Promise<Pet | null> => {
     if (!editingPet) return null;
     
-    const result = await executeAction(
-      async () => {
-        const updatedPet = await updatePet(editingPet.id, data);
-        if (updatedPet) {
-          setEditingPet(null);
-        }
-        return updatedPet;
-      },
-      petErrorHandler
-    );
-    
-    return result;
+    try {
+      const result = await updatePetMutation.mutateAsync({
+        petId: editingPet.id,
+        petData
+      });
+      setEditingPet(null);
+      return result;
+    } catch (error) {
+      // Error already handled in mutation
+      return null;
+    }
   };
 
   // Handle delete pet
   const handleDeletePet = async () => {
     if (!deletingPet) return;
     
-    const result = await executeAction(
-      async () => {
-        const success = await deletePet(deletingPet.id);
-        if (success) {
-          setDeletingPet(null);
-          // If we deleted the active tab, switch to first remaining pet
-          if (activeTab === deletingPet.id && pets.length > 1) {
-            const remainingPets = pets.filter(p => p.id !== deletingPet.id);
-            if (remainingPets.length > 0) {
-              setActiveTab(remainingPets[0].id);
-            }
-          }
-        }
-        return success;
-      },
-      petErrorHandler
-    );
-    
-    return result;
+    try {
+      await deletePetMutation.mutateAsync(deletingPet.id);
+      setDeletingPet(null);
+    } catch (error) {
+      // Error already handled in mutation
+    }
   };
 
 
 
-  if (isLoading) {
+  if (isPending) {
     return <PetListSkeleton />;
   }
 
   // Error state
   if (error) {
+    const appError = petErrorHandler(error);
     return (
       <div className="container mx-auto py-8 px-4">
         <Card>
           <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
             <div className="text-center space-y-2">
               <h3 className="text-lg font-semibold">Unable to load pets</h3>
-              <p className="text-muted-foreground">{error}</p>
+              <p className="text-muted-foreground">{appError.message}</p>
               <Button onClick={() => window.location.reload()}>
                 Try Again
               </Button>
@@ -143,7 +129,7 @@ export default function PetList() {
   }
 
   // Empty state
-  if (pets.length === 0) {
+  if (!pets || pets.length === 0) {
     return (
       <div className="container mx-auto py-8 px-4">
         <Card>
@@ -195,7 +181,7 @@ export default function PetList() {
           <div>
             <h1 className="text-3xl font-bold">My Pets</h1>
             <p className="text-muted-foreground">
-              Manage your {pets.length} pet{pets.length !== 1 ? 's' : ''}
+              Manage your {pets?.length} pet{pets.length !== 1 ? 's' : ''}
             </p>
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -224,7 +210,7 @@ export default function PetList() {
         {/* Pet Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex justify-center w-full">
-            {pets.map((pet) => (
+            {pets?.map((pet) => (
               <TabsTrigger 
                 key={pet.id} 
                 value={pet.id}
@@ -237,7 +223,7 @@ export default function PetList() {
           </TabsList>
 
           {/* Pet Tab Content */}
-          {pets.map((pet) => (
+          {pets?.map((pet) => (
             <TabsContent key={pet.id} value={pet.id} className="mt-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -320,7 +306,7 @@ export default function PetList() {
             {editingPet && (
               <PetForm
                 pet={editingPet}
-                onSubmit={handleEditPet}
+                onSubmit={handleUpdatePet}
                 onCancel={() => setEditingPet(null)}
                 isLoading={isActionLoading}
               />
@@ -346,7 +332,9 @@ export default function PetList() {
                 disabled={isActionLoading}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {isActionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {(createPetMutation.isPending || updatePetMutation.isPending || deletePetMutation.isPending) && 
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                }
                 Delete Pet
               </AlertDialogAction>
             </AlertDialogFooter>
