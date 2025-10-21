@@ -1,7 +1,5 @@
-'use client';
-
 import { createContext, useContext, ReactNode } from 'react';
-import { useUserSession } from '@/hooks/useUserSession';
+import { useSession, useUpdateUserCache, useRefreshSession } from '@/queries/session';
 import type { User } from '@/types/auth';
 import type { AppError } from '@/lib/errors';
 
@@ -21,11 +19,27 @@ interface SessionProviderProps {
 }
 
 export function SessionProvider({ children }: SessionProviderProps) {
-  // Single instance of useUserSession at the root level
-  const session = useUserSession();
+  // Use TanStack Query for session
+  const { data: user, isPending, error } = useSession();
+  const { updateUser, clearUser } = useUpdateUserCache();
+  const { refreshSession } = useRefreshSession();
+
+  // Transform error to AppError format
+  const appError: AppError | null = error 
+    ? { message: error.message, code: 'SESSION_ERROR' }
+    : null;
+
+  const value: SessionContextValue = {
+    user: user ?? null,
+    isLoading: isPending,
+    error: appError,
+    refreshSession,
+    updateUser,
+    clearSession: clearUser,
+  };
 
   return (
-    <SessionContext.Provider value={session}>
+    <SessionContext.Provider value={value}>
       {children}
     </SessionContext.Provider>
   );

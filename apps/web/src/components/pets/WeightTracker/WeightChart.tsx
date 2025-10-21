@@ -1,5 +1,3 @@
-'use client';
-
 import { TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

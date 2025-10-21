@@ -2,41 +2,24 @@ import { Link, useNavigate, useLocation } from '@tanstack/react-router';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { LogOut, Loader2 } from 'lucide-react';
-import { useErrorState } from '@/hooks/useErrorsState';
-import { authErrorHandler } from '@/lib/errors/handlers';
 import { useSessionContext } from '@/contexts/SessionContext';
+import { useLogout } from '@/queries/session';
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
   // Use session context
-  const { user, isLoading, clearSession } = useSessionContext();
-  
-  const { isLoading: isLoggingOut, executeAction } = useErrorState();
+  const { user, isLoading } = useSessionContext();
 
-  // Use clearSession from hook
+  const logoutMutation = useLogout();
+
   const handleLogout = async () => {
-    console.log('🔄 Navbar: Starting logout process...');
-
-    const result = await executeAction(
-      async () => {
-        const { error } = await authClient.signOut({});
-
-        if (error) {
-          throw error;
-        }
-
-        console.log('✅ Navbar: Logout successful, clearing user state');
-        clearSession(); // Use hook method
-        return { success: true };
-      },
-      authErrorHandler
-    );
-
-    if (result) {
-      console.log('✅ Navbar: Redirecting to home page');
+    try {
+      await logoutMutation.mutateAsync();
       navigate({ to: '/' });
+    } catch (error) {
+      // Error already logged in mutation
     }
   };
 
@@ -114,15 +97,15 @@ export const Navbar = () => {
                     variant="outline" 
                     size="sm" 
                     onClick={handleLogout}
-                    disabled={isLoggingOut}
+                    disabled={logoutMutation.isPending}
                     className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all duration-200 hover:scale-105"
                   >
-                    {isLoggingOut ? (
+                    {logoutMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                       <LogOut className="mr-2 h-4 w-4" />
                     )}
-                    {isLoggingOut ? 'Signing out...' : 'Logout'}
+                    Logout
                   </Button>
                 </div>
               </>

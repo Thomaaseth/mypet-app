@@ -1,5 +1,3 @@
-'use client';
-
 import { z } from 'zod'
 import { usePetForm } from '@/hooks/usePetForm';
 import { Button } from '@/components/ui/button';
