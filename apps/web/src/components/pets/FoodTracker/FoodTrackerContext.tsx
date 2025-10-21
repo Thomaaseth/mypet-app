@@ -1,8 +1,20 @@
-'use client';
-
 import { createContext, useContext, ReactNode } from 'react';
-import { useDryFoodTracker } from '@/hooks/useDryFoodTracker';
-import { useWetFoodTracker } from '@/hooks/useWetFoodTracker';
+import {
+  useActiveDryFood,
+  useFinishedDryFood,
+  useCreateDryFood,
+  useUpdateDryFood,
+  useDeleteDryFood,
+  useMarkDryFoodFinished,
+  useUpdateDryFoodFinishDate,
+  useActiveWetFood,
+  useFinishedWetFood,
+  useCreateWetFood,
+  useUpdateWetFood,
+  useDeleteWetFood,
+  useMarkWetFoodFinished,
+  useUpdateWetFoodFinishDate,
+} from '@/queries/food';
 import type { DryFoodEntry, WetFoodEntry, DryFoodFormData, WetFoodFormData } from '@/types/food';
 
 interface FoodTrackerContextValue {
@@ -45,37 +57,163 @@ interface FoodTrackerProviderProps {
 export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProps) {
   console.log('🟡 FoodTrackerProvider RENDER with petId:', petId);
 
-  // Single instances of hooks at the provider level
-  const {
-    activeDryFoodEntries,
-    finishedDryFoodEntries,
-    lowStockDryFoodEntries,
-    isLoading: isDryLoading,
-    error: dryError,
-    createDryFoodEntry,
-    updateDryFoodEntry,
-    deleteDryFoodEntry,
-    markDryFoodAsFinished,
-    updateFinishDate: updateDryFinishDate,
-  } = useDryFoodTracker({ petId });
+  // ============================================
+  // DRY FOOD QUERIES & MUTATIONS
+  // ============================================
+  const activeDryQuery = useActiveDryFood(petId);
+  const finishedDryQuery = useFinishedDryFood(petId);
+  
+  const createDryMutation = useCreateDryFood(petId);
+  const updateDryMutation = useUpdateDryFood(petId);
+  const deleteDryMutation = useDeleteDryFood(petId);
+  const markDryFinishedMutation = useMarkDryFoodFinished(petId);
+  const updateDryFinishDateMutation = useUpdateDryFoodFinishDate(petId);
 
-  const {
-    activeWetFoodEntries,
-    finishedWetFoodEntries,
-    lowStockWetFoodEntries,
-    isLoading: isWetLoading,
-    error: wetError,
-    createWetFoodEntry,
-    updateWetFoodEntry,
-    deleteWetFoodEntry,
-    markWetFoodAsFinished,
-    updateFinishDate: updateWetFinishDate,
-  } = useWetFoodTracker({ petId });
+  // ============================================
+  // WET FOOD QUERIES & MUTATIONS
+  // ============================================
+  const activeWetQuery = useActiveWetFood(petId);
+  const finishedWetQuery = useFinishedWetFood(petId);
+  
+  const createWetMutation = useCreateWetFood(petId);
+  const updateWetMutation = useUpdateWetFood(petId);
+  const deleteWetMutation = useDeleteWetFood(petId);
+  const markWetFinishedMutation = useMarkWetFoodFinished(petId);
+  const updateWetFinishDateMutation = useUpdateWetFoodFinishDate(petId);
 
-  // Combined data for summary
-  const activeFoodEntries = [...activeDryFoodEntries, ...activeWetFoodEntries];
+  // ============================================
+  // EXTRACT DATA FROM QUERIES
+  // ============================================
+  const activeDryFoodEntries = activeDryQuery.data?.entries ?? [];
+  const lowStockDryFoodEntries = activeDryQuery.data?.lowStock ?? [];
+  const finishedDryFoodEntries = finishedDryQuery.data ?? [];
+
+  const activeWetFoodEntries = activeWetQuery.data?.entries ?? [];
+  const lowStockWetFoodEntries = activeWetQuery.data?.lowStock ?? [];
+  const finishedWetFoodEntries = finishedWetQuery.data ?? [];
+
+  // ============================================
+  // LOADING & ERROR STATES
+  // ============================================
+  const isDryLoading = activeDryQuery.isPending || finishedDryQuery.isPending;
+  const isWetLoading = activeWetQuery.isPending || finishedWetQuery.isPending;
   const isLoading = isDryLoading || isWetLoading;
 
+  const dryError = activeDryQuery.error?.message ?? finishedDryQuery.error?.message ?? null;
+  const wetError = activeWetQuery.error?.message ?? finishedWetQuery.error?.message ?? null;
+
+  // ============================================
+  // MUTATION HANDLERS (wrap mutations to match expected interface)
+  // ============================================
+  
+  // Dry food handlers
+  const createDryFoodEntry = async (data: DryFoodFormData): Promise<DryFoodEntry | null> => {
+    try {
+      return await createDryMutation.mutateAsync(data);
+    } catch {
+      return null;
+    }
+  };
+
+  const updateDryFoodEntry = async (
+    foodId: string, 
+    data: Partial<DryFoodFormData>
+  ): Promise<DryFoodEntry | null> => {
+    try {
+      return await updateDryMutation.mutateAsync({ foodId, foodData: data });
+    } catch {
+      return null;
+    }
+  };
+
+  const deleteDryFoodEntry = async (foodId: string): Promise<boolean> => {
+    try {
+      await deleteDryMutation.mutateAsync(foodId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const markDryFoodAsFinished = async (foodId: string): Promise<boolean> => {
+    try {
+      await markDryFinishedMutation.mutateAsync(foodId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const updateDryFinishDate = async (
+    foodId: string, 
+    dateFinished: string
+  ): Promise<DryFoodEntry | null> => {
+    try {
+      const result = await updateDryFinishDateMutation.mutateAsync({ foodId, dateFinished });
+      return result as DryFoodEntry;
+    } catch {
+      return null;
+    }
+  };
+
+  // Wet food handlers
+  const createWetFoodEntry = async (data: WetFoodFormData): Promise<WetFoodEntry | null> => {
+    try {
+      return await createWetMutation.mutateAsync(data);
+    } catch {
+      return null;
+    }
+  };
+
+  const updateWetFoodEntry = async (
+    foodId: string, 
+    data: Partial<WetFoodFormData>
+  ): Promise<WetFoodEntry | null> => {
+    try {
+      return await updateWetMutation.mutateAsync({ foodId, foodData: data });
+    } catch {
+      return null;
+    }
+  };
+
+  const deleteWetFoodEntry = async (foodId: string): Promise<boolean> => {
+    try {
+      await deleteWetMutation.mutateAsync(foodId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const markWetFoodAsFinished = async (foodId: string): Promise<boolean> => {
+    try {
+      await markWetFinishedMutation.mutateAsync(foodId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const updateWetFinishDate = async (
+    foodId: string, 
+    dateFinished: string
+  ): Promise<WetFoodEntry | null> => {
+    try {
+      const result = await updateWetFinishDateMutation.mutateAsync({ foodId, dateFinished });
+      return result as WetFoodEntry;
+    } catch {
+      return null;
+    }
+  };
+
+  // ============================================
+  // COMBINED DATA
+  // ============================================
+  const activeFoodEntries = [...activeDryFoodEntries, ...activeWetFoodEntries];
+
+  // ============================================
+  // CONTEXT VALUE
+  // ============================================
   const value: FoodTrackerContextValue = {
     // Dry food
     activeDryFoodEntries,

@@ -223,9 +223,9 @@ export function WetFoodForm({
         </div>
       </div>
 
-      {/* Date Purchased */}
+      {/* Date Started */}
       <div className="space-y-2">
-        <Label htmlFor="dateStarted">Date Purchased *</Label>
+        <Label htmlFor="dateStarted">Date Started *</Label>
         <Input
           id="dateStarted"
           type="date"
