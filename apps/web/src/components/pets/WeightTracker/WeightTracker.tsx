@@ -18,15 +18,19 @@ import {
 } from '@/components/ui/collapsible';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, Scale, AlertCircle, ChevronDown, ChevronRight, Calendar } from 'lucide-react';
-import { useWeightTracker } from '@/hooks/useWeightTracker';
-import { useErrorState } from '@/hooks/useErrorsState';
 import WeightForm from './WeightForm';
 import WeightChart from './WeightChart';
 import WeightList from './WeightList';
 import { WeightTrackerSkeleton } from '@/components/ui/skeletons/WeightSkeleton';
 import { weightErrorHandler } from '@/lib/api/domains/weights';
-import type { WeightFormData } from '@/types/weights';
+import type { WeightFormData, WeightEntry } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
+import { 
+  useWeightEntries, 
+  useCreateWeightEntry, 
+  useUpdateWeightEntry, 
+  useDeleteWeightEntry 
+} from '@/queries/weights';
 
 interface WeightTrackerProps {
   petId: string;
@@ -34,52 +38,71 @@ interface WeightTrackerProps {
 }
 
 export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps) {
-  const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  
+  // Queries
+  const { 
+    data, 
+    isPending, 
+    error 
+  } = useWeightEntries({ petId, weightUnit });
+  
+  // Mutations
+  const createWeightMutation = useCreateWeightEntry(petId, weightUnit);
+  const updateWeightMutation = useUpdateWeightEntry(petId, weightUnit);
+  const deleteWeightMutation = useDeleteWeightEntry(petId);
 
-  const {
-    weightEntries,
-    chartData,
-    // latestWeight,
-    isLoading,
-    error,
-    createWeightEntry,
-    updateWeightEntry,
-    deleteWeightEntry,
-  } = useWeightTracker({ petId, weightUnit });
+  // Computed loading state
+  const isActionLoading = createWeightMutation.isPending || 
+                          updateWeightMutation.isPending || 
+                          deleteWeightMutation.isPending;
 
-  const handleCreateEntry = async (data: WeightFormData) => {
-    return executeAction(async () => {
-      const result = await createWeightEntry(data);
-      if (result) {
-        setIsAddDialogOpen(false);
-      }
+  // Extract data (with defaults for undefined)
+  const weightEntries = data?.weightEntries ?? [];
+  const chartData = data?.chartData ?? [];
+  const latestWeight = data?.latestWeight ?? null;
+
+  // Handlers
+  const handleCreateEntry = async (weightData: WeightFormData): Promise<WeightEntry | null> => {
+    try {
+      const result = await createWeightMutation.mutateAsync(weightData);
+      setIsAddDialogOpen(false);
       return result;
-    }, weightErrorHandler);
+    } catch (error) {
+      return null;
+    }
   };
 
-  const handleUpdateEntry = async (weightId: string, data: Partial<WeightFormData>) => {
-    return executeAction(async () => {
-      return await updateWeightEntry(weightId, data);
-    }, weightErrorHandler);
+  const handleUpdateEntry = async (
+    weightId: string, 
+    weightData: Partial<WeightFormData>
+  ): Promise<WeightEntry | null> => {
+    try {
+      const result = await updateWeightMutation.mutateAsync({ weightId, weightData });
+      return result;
+    } catch (error) {
+      return null;
+    }
   };
 
   const handleDeleteEntry = async (weightId: string): Promise<boolean> => {
-    const result = await executeAction(async () => {
-      return await deleteWeightEntry(weightId);
-    }, weightErrorHandler);
-    
-    return result !== null;
+    try {
+      await deleteWeightMutation.mutateAsync(weightId);
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   // Loading state
-  if (isLoading) {
+  if (isPending) {
     return <WeightTrackerSkeleton />;
   }
 
   // Error state
   if (error) {
+    const appError = weightErrorHandler(error);
     return (
       <Card>
         <CardHeader>
@@ -91,7 +114,7 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
         <CardContent>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{appError.message}</AlertDescription>
           </Alert>
         </CardContent>
       </Card>
