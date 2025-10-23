@@ -187,7 +187,7 @@ const petsHandlers = [
   }),
 
   // GET /api/pets/count - Get pet count
-  http.get(`${API_BASE_URL}/api/pets/count`, () => {
+  http.get(`${API_BASE_URL}/api/pets/stats/count`, () => {
     return HttpResponse.json({
       success: true,
       data: { count: mockPets.length },

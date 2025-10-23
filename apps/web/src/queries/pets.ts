@@ -27,7 +27,7 @@ export function usePet(petId: string) {
     return useQuery({
         queryKey: petKeys.detail(petId),
         queryFn: () => petApi.getPetById(petId),
-        enabled: !!petId, // only run if petId exists
+        enabled: petId.length > 0, // only run if petId exists
     })
   }
 
@@ -118,12 +118,15 @@ export function useDeletePet() {
         // Return context with previous data for rollback
         return { previousPets }
       },
-      onSuccess: (_data, petId) => {
+      onSuccess: (_data, petId, context) => {
         // Get pet name from cache (for toast)
-        const pets = queryClient.getQueryData<Pet[]>(petKeys.all)
-        const petName = pets?.find(p => p.id === petId)?.name || 'Pet'
+        const deletedPet = context?.previousPets?.find(p => p.id === petId);
+        const petName = deletedPet?.name || 'Pet';
         
         toastService.success('Pet deleted', `${petName} has been removed from your pets.`)
+
+        // Only invalidate on success
+        queryClient.invalidateQueries({ queryKey: petKeys.all })
       },
       onError: (error, _petId, context) => {
         // Rollback on error
@@ -133,10 +136,6 @@ export function useDeletePet() {
         
         const appError = petErrorHandler(error)
         toastService.error('Failed to delete pet', appError.message)
-      },
-      onSettled: () => {
-        // Always refetch after error or success
-        queryClient.invalidateQueries({ queryKey: petKeys.all })
       },
     })
   }
