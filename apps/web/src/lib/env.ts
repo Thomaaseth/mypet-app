@@ -9,14 +9,16 @@ const envSchema = z.object({
 })
 
 // Parse and validate environment variables
-const env = envSchema.parse({
-  MODE: import.meta.env.MODE,
-  DEV: import.meta.env.DEV,
-  PROD: import.meta.env.PROD,
+// Provide defaults for test environment
+const rawEnv = {
+  MODE: import.meta.env.MODE || 'test',
+  DEV: import.meta.env.DEV ?? false,
+  PROD: import.meta.env.PROD ?? false,
   VITE_API_URL: import.meta.env.VITE_API_URL,
   VITE_WEB_URL: import.meta.env.VITE_WEB_URL,
-})
+}
 
+const env = envSchema.parse(rawEnv)
 // Default values
 const API_URL = env.VITE_API_URL || 'http://localhost:3001'
 const WEB_URL = env.VITE_WEB_URL || 'http://localhost:3000'
