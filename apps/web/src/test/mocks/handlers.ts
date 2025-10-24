@@ -72,6 +72,12 @@ export const mockWeightEntries: WeightEntry[] = [
   },
 ];
 
+let petsList = [...mockPets];
+
+export function resetMockPets() {
+  petsList = [...mockPets];
+}
+
 /**
  * REQUEST HANDLERS
  * Organized by domain (pets, weights, food)
@@ -85,17 +91,17 @@ const petsHandlers = [
     return HttpResponse.json({
       success: true,
       data: {
-        pets: mockPets,
-        total: mockPets.length,
+        pets: petsList,
+        total: petsList.length,
       },
-      message: `Retrieved ${mockPets.length} pet(s)`,
+      message: `Retrieved ${petsList.length} pet(s)`,
     });
   }),
 
   // GET /api/pets/:id - Get pet by ID
   http.get(`${API_BASE_URL}/api/pets/:id`, ({ params }) => {
     const { id } = params;
-    const pet = mockPets.find((p) => p.id === id);
+    const pet = petsList.find((p) => p.id === id);
 
     if (!pet) {
       return HttpResponse.json(
@@ -125,6 +131,8 @@ const petsHandlers = [
       updatedAt: new Date().toISOString(),
       ...(body as Partial<Pet>),
     } as Pet;
+    
+    petsList.push(newPet);
 
     return HttpResponse.json(
       {
@@ -140,9 +148,9 @@ const petsHandlers = [
   http.put(`${API_BASE_URL}/api/pets/:id`, async ({ params, request }) => {
     const { id } = params;
     const body = await request.json();
-    const pet = mockPets.find((p) => p.id === id);
+    const petIndex = petsList.findIndex((p) => p.id === id);
 
-    if (!pet) {
+    if (petIndex === -1) {
       return HttpResponse.json(
         {
           success: false,
@@ -153,10 +161,13 @@ const petsHandlers = [
     }
 
     const updatedPet = {
-      ...pet,
+      ...petsList[petIndex],
       ...(body as Partial<Pet>),
       updatedAt: new Date().toISOString(),
     };
+
+    // Update in mutable list
+    petsList[petIndex] = updatedPet;
 
     return HttpResponse.json({
       success: true,
@@ -168,9 +179,9 @@ const petsHandlers = [
   // DELETE /api/pets/:id - Delete pet
   http.delete(`${API_BASE_URL}/api/pets/:id`, ({ params }) => {
     const { id } = params;
-    const pet = mockPets.find((p) => p.id === id);
+    const petIndex = petsList.findIndex((p) => p.id === id);
 
-    if (!pet) {
+    if (petIndex === -1) {
       return HttpResponse.json(
         {
           success: false,
@@ -179,6 +190,9 @@ const petsHandlers = [
         { status: 404 }
       );
     }
+
+    // Remove from mutable list
+    petsList.splice(petIndex, 1);
 
     return HttpResponse.json({
       success: true,
@@ -190,7 +204,7 @@ const petsHandlers = [
   http.get(`${API_BASE_URL}/api/pets/stats/count`, () => {
     return HttpResponse.json({
       success: true,
-      data: { count: mockPets.length },
+      data: { count: petsList.length },
     });
   }),
 ];
