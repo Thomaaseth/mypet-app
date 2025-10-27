@@ -150,6 +150,27 @@ describe('Weight Queries', () => {
       expect(firstPoint?.weight).toBe(4.50);
     });
 
+    it('should ensure chart data length matches weight entries length', async () => {
+      const { result } = renderHookWithQuery(() => 
+        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+      );
+    
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+    
+      const { weightEntries, chartData } = result.current.data!;
+      
+      // This tests the business logic that EVERY entry becomes a chart point
+      expect(chartData.length).toBe(weightEntries.length);
+      
+      // Optional: verify 1-to-1 mapping
+      weightEntries.forEach((entry, index) => {
+        expect(chartData[index].originalDate).toBe(entry.date);
+        expect(chartData[index].weight).toBe(parseFloat(entry.weight));
+      });
+    });
+
     it('should extract latest weight correctly', async () => {
       const { result } = renderHookWithQuery(() => 
         useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
@@ -784,7 +805,7 @@ describe('Weight Queries', () => {
   // ============================================
 
   describe('Edge Cases', () => {
-    it('should handle same-day entries (sorted by creation if dates equal)', async () => {
+    it('should handle same-day entries gracefully (defensive - backend prevents this)', async () => {
       server.use(
         http.get(`${API_BASE_URL}/pets/:petId/weights`, () => {
           return HttpResponse.json({
