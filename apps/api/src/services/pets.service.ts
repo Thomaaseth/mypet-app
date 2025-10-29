@@ -1,8 +1,8 @@
 import { db } from '../db';
 import { pets } from '../db/schema/pets';
 import { eq, and, desc } from 'drizzle-orm';
-import type { Pet, NewPet, PetGender, WeightUnit } from '../db/schema/pets';
-import { weightEntries } from '../db/schema/weight-entries';
+import type { Pet, NewPet, PetGender } from '../db/schema/pets';
+import { weightEntries, WeightUnit } from '../db/schema/weight-entries';
 import { 
   BadRequestError, 
   NotFoundError, 
@@ -45,14 +45,6 @@ export class PetsService {
       }
     }
 
-    // Weight unit validation
-    if (petData.weightUnit !== undefined && petData.weightUnit !== null) {
-      const validWeightUnits: WeightUnit[] = ['kg', 'lbs'];
-      if (!validWeightUnits.includes(petData.weightUnit)) {
-        throw new BadRequestError('Weight unit must be kg or lbs');
-      }
-    }
-
     // Birth date validation
     if (petData.birthDate !== undefined && petData.birthDate !== null && petData.birthDate !== '') {
       const birthDate = new Date(petData.birthDate);
@@ -75,14 +67,6 @@ export class PetsService {
       }
     }
 
-    // Weight validation
-    if (petData.weight !== undefined && petData.weight !== null && petData.weight !== '') {
-      const weightValue = parseFloat(petData.weight.toString());
-      if (isNaN(weightValue) || weightValue <= 0) {
-        throw new BadRequestError('Weight must be a positive number');
-      }
-    }
-
     // String field length validations
     if (petData.species && petData.species.length > 50) {
       throw new BadRequestError('Species must be 50 characters or less');
@@ -101,6 +85,20 @@ export class PetsService {
     //     throw new BadRequestError('Microchip number must be 8-20 alphanumeric characters');
     //   }
     // }
+  }
+
+  private static validateWeightFields(weight: string, weightUnit: WeightUnit, animalType: string): void {
+    const weightValue = parseFloat(weight);
+    if (isNaN(weightValue) || weightValue <= 0) {
+      throw new BadRequestError('Weight must be a positive number');
+    }
+    
+    const validWeightUnits: WeightUnit[] = ['kg', 'lbs'];
+    if (!validWeightUnits.includes(weightUnit)) {
+      throw new BadRequestError('Weight unit must be kg or lbs');
+    }
+    
+    this.validateWeightLimits(weightValue, animalType, weightUnit);
   }
 
   // Weight validation with business logic
@@ -207,25 +205,33 @@ export class PetsService {
   }
 
   // Create a new pet 
-  static async createPet(petData: NewPet): Promise<Pet> {
+  static async createPet(petData: NewPet & { weight?: string; weightUnit?: WeightUnit }): Promise<Pet> {
     try {
+
+      // Extract and separate weight fields from pet data
+      const { weight, weightUnit } = petData;
+
       // Input validation
       this.validatePetInputs(petData, false);
       
-      // Business logic validation (weight limits)
-      if (petData.weight) {
-        const weightValue = parseFloat(petData.weight);
-        this.validateWeightLimits(weightValue, petData.animalType, petData.weightUnit || 'kg');
+      // Validate weight separately if provided
+      if (weight) {
+        this.validateWeightFields(weight, weightUnit || 'kg', petData.animalType);
       }
 
       // Clean and prepare data
       const cleanedData: NewPet = {
-        ...petData,
+        name: petData.name,
+        userId: petData.userId,
+        animalType: petData.animalType,
         species: petData.species || null,
+        gender: petData.gender,
         birthDate: petData.birthDate || null,
-        weight: petData.weight || null,
+        isNeutered: petData.isNeutered,
         microchipNumber: petData.microchipNumber || null,
+        imageUrl: petData.imageUrl,
         notes: petData.notes || null,
+        isActive: petData.isActive,
       };
 
       // Execute db write
@@ -236,20 +242,19 @@ export class PetsService {
 
 
       // If weight is provided, create initial weight entry
-      if (newPet.weight && newPet.createdAt) {
+      if (weight && weightUnit && newPet.createdAt) {
         try {       
-          // Format the date as YYYY-MM-DD using the pet's createdAt timestamp
           const entryDate = new Date(newPet.createdAt).toISOString().split('T')[0];
           
           await db.insert(weightEntries).values({
             petId: newPet.id,
-            weight: newPet.weight,
+            weight: weight,
+            weightUnit: weightUnit,
             date: entryDate,
           });
           
           console.log(`Initial weight entry created for pet ${newPet.id}`);
         } catch (weightError) {
-          // if error, don't don't fail pet creation
           console.error('Failed to create initial weight entry:', weightError);
         }
       }
@@ -286,23 +291,11 @@ export class PetsService {
       // Authorization check
       const existingPet = await this.getPetById(petId, userId);
 
-      // Business logic validation (weight limits)
-      if (updateData.weight !== undefined && updateData.weight !== null && updateData.weight !== '') {
-        const weightValue = parseFloat(updateData.weight.toString());
-        
-        // Use the animal type from update or existing pet
-        const animalType = updateData.animalType || existingPet.animalType;
-        const weightUnit = updateData.weightUnit || existingPet.weightUnit || 'kg';
-        
-        this.validateWeightLimits(weightValue, animalType, weightUnit);
-      }
-
       // Clean the update data
       const cleanedData: Partial<NewPet> = {
         ...updateData,
         species: updateData.species === '' ? null : updateData.species,
         birthDate: updateData.birthDate === '' ? null : updateData.birthDate,
-        weight: updateData.weight === '' ? null : updateData.weight,
         microchipNumber: updateData.microchipNumber === '' ? null : updateData.microchipNumber,
         notes: updateData.notes === '' ? null : updateData.notes,
       };

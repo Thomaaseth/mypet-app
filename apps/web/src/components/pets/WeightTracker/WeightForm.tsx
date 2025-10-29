@@ -5,6 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface WeightFormProps {
   weightUnit: WeightUnit;
@@ -27,6 +34,8 @@ export default function WeightForm({
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
     resetToEmpty,
   } = useWeightForm({ weightUnit, weightEntry });
 
@@ -56,13 +65,15 @@ export default function WeightForm({
 
       {/* Weight */}
       <div className="space-y-2">
-        <Label htmlFor="weight">Weight ({weightUnit}) *</Label>
+        {/* <Label htmlFor="weight">Weight ({weightUnit}) *</Label> */}
+        <Label htmlFor="weight">Weight *</Label>
         <Input
           id="weight"
           type="number"
           step="0.0001"
           min="0"
-          placeholder={`Enter weight in ${weightUnit}`}
+          // placeholder={`Enter weight in ${weightUnit}`}
+          placeholder="Enter weight"
           {...register('weight')}
           aria-invalid={!!errors.weight}
         />
@@ -72,6 +83,26 @@ export default function WeightForm({
         <p className="text-xs text-muted-foreground">
           Maximum: {weightUnit === 'kg' ? '200kg' : '440lbs'}
         </p>
+      </div>
+
+      {/* Weight Unit */}
+      <div className="space-y-2">
+        <Label htmlFor="weightUnit">Unit *</Label>
+        <Select 
+          value={watch('weightUnit')} 
+          onValueChange={(value: 'kg' | 'lbs') => setValue('weightUnit', value)}
+        >
+          <SelectTrigger id="weightUnit">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="kg">kg</SelectItem>
+            <SelectItem value="lbs">lbs</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.weightUnit && (
+          <p className="text-sm text-destructive">{errors.weightUnit.message}</p>
+        )}
       </div>
 
       {/* Date */}

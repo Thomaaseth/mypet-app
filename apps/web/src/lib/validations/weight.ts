@@ -10,7 +10,9 @@ export const weightEntryFormSchema = z.object({
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
     }, 'Weight must be a positive number'),
-  
+  weightUnit: z.enum(['kg', 'lbs'], {
+    errorMap: () => ({ message: 'Please select a valid weight unit' })
+  }),
   date: z
     .string()
     .min(1, 'Date is required')

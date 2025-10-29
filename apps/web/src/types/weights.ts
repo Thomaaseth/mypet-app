@@ -4,6 +4,7 @@ export interface WeightEntry {
   id: string;
   petId: string;
   weight: string; // Decimal as string (consistent with Pet weight field)
+  weightUnit: WeightUnit;
   date: string; // ISO date string (YYYY-MM-DD format)
   createdAt: string;
   updatedAt: string;
@@ -12,6 +13,7 @@ export interface WeightEntry {
 // Form data types for weight entries
 export interface WeightFormData {
   weight: string; // String for form input
+  weightUnit: WeightUnit;
   date: string; // HTML date input format: YYYY-MM-DD
 }
 

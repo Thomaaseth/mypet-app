@@ -61,12 +61,12 @@ export function useWeightEntries({ petId, weightUnit }: UseWeightEntriesOptions)
 
 // MUTATIONS (WRITE operations)
 // CREATE
-export function useCreateWeightEntry(petId: string, weightUnit: WeightUnit) {
+export function useCreateWeightEntry(petId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (weightData: WeightFormData) => 
-      weightApi.createWeightEntry(petId, weightData, weightUnit),
+      weightApi.createWeightEntry(petId, weightData),
     onSuccess: () => {
       // Invalidate weight entries for this pet
       queryClient.invalidateQueries({ queryKey: weightKeys.byPet(petId) })
@@ -81,14 +81,14 @@ export function useCreateWeightEntry(petId: string, weightUnit: WeightUnit) {
 }
 
 // UPDATE
-export function useUpdateWeightEntry(petId: string, weightUnit: WeightUnit) {
+export function useUpdateWeightEntry(petId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: ({ weightId, weightData }: { 
       weightId: string; 
       weightData: Partial<WeightFormData> 
-    }) => weightApi.updateWeightEntry(petId, weightId, weightData, weightUnit),
+    }) => weightApi.updateWeightEntry(petId, weightId, weightData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: weightKeys.byPet(petId) })
       

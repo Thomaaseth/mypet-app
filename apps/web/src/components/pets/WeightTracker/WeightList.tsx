@@ -91,7 +91,7 @@ export default function WeightList({
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>
-            <TableHead>Weight ({weightUnit})</TableHead>
+            <TableHead>Weight</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -102,7 +102,7 @@ export default function WeightList({
                 {formatDateForDisplay(entry.date)}
               </TableCell>
               <TableCell>
-                {entry.weight} {weightUnit}
+                {entry.weight} {entry.weightUnit}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">

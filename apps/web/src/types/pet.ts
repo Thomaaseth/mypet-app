@@ -9,8 +9,6 @@ export interface Pet {
   species: string | null; // Optional: user can enter any text like "Golden Retriever", "Persian Cat", etc.
   gender: PetGender;
   birthDate: string | null; // ISO date string
-  weight: string | null; // Decimal as string (the actual weight value)
-  weightUnit: WeightUnit; // Unit: kg or lbs
   isNeutered: boolean;
   microchipNumber: string | null;
   imageUrl: string | null;

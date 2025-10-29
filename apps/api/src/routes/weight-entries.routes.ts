@@ -72,7 +72,7 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
   try {
     const { petId } = req.params;
     const userId = req.authSession?.user.id;
-    const { weight, date } = req.body;
+    const { weight, date, weightUnit } = req.body;
 
     if (!userId) {
       throw new BadRequestError('User session not found');
@@ -82,14 +82,14 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
       throw new BadRequestError('Pet ID is required');
     }
 
-    if (!weight || !date) {
-      throw new BadRequestError('Weight and date are required');
+    if (!weight || !date || !weightUnit) {
+      throw new BadRequestError('Weight, unit and date are required');
     }
 
     const weightEntry = await WeightEntriesService.createWeightEntry(
       petId, 
       userId, 
-      { weight, date }
+      { weight, date, weightUnit }
     );
     
     res.status(201).json({

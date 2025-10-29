@@ -19,12 +19,14 @@ export function useWeightForm(options: UseWeightFormOptions) {
     if (weightEntry) {
       return {
         weight: weightEntry.weight,
+        weightUnit: weightEntry.weightUnit,
         date: weightEntry.date,
       };
     }
 
     return {
       weight: '',
+      weightUnit: weightUnit || 'kg',
       date: getTodayDateString(),
       ...defaultValues,
     };
@@ -38,6 +40,7 @@ export function useWeightForm(options: UseWeightFormOptions) {
   const resetWithWeightEntry = (newWeightEntry: WeightEntry) => {
     const formData: WeightFormData = {
       weight: newWeightEntry.weight,
+      weightUnit: newWeightEntry.weightUnit,
       date: newWeightEntry.date,
     };
     

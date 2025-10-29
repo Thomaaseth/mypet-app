@@ -40,11 +40,10 @@ export class WeightService {
   async createWeightEntry(
     petId: string, 
     weightData: WeightFormData, 
-    weightUnit: WeightUnit
   ): Promise<WeightEntry> {
     try {
       // Validate the data
-      this.validator.validateWeightEntry(weightData, weightUnit);
+      this.validator.validateWeightEntry(weightData, weightData.weightUnit);
       
       return await this.repository.createWeightEntry(petId, weightData);
     } catch (error) {
@@ -56,16 +55,16 @@ export class WeightService {
     petId: string,
     weightId: string,
     weightData: Partial<WeightFormData>,
-    weightUnit: WeightUnit
   ): Promise<WeightEntry> {
     try {
       // Only validate if weight or date is being updated
       if (weightData.weight || weightData.date) {
         const fullData: WeightFormData = {
           weight: weightData.weight || '0', // Will be validated anyway
+          weightUnit: weightData.weightUnit || 'kg', // Fallback if not provided
           date: weightData.date || new Date().toISOString().split('T')[0]
         };
-        this.validator.validateWeightEntry(fullData, weightUnit);
+        this.validator.validateWeightEntry(fullData, fullData.weightUnit);
       }
       
       return await this.repository.updateWeightEntry(petId, weightId, weightData);

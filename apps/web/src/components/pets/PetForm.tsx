@@ -209,7 +209,8 @@ export default function PetForm({
         </p>
       </div>
 
-      {/* Weight */}
+      {/* Weight - Only show in CREATE mode */}
+      {!isEditing && (
       <div className="space-y-2">
         <Label>Weight</Label>
         <div className="flex gap-2">
@@ -242,6 +243,16 @@ export default function PetForm({
           Optional: Current weight (max 200kg / 440lbs)
         </p>
       </div>
+      )}
+
+      {/* Message for EDIT mode */}
+      {isEditing && (
+        <div className="space-y-2 p-4 bg-muted/50 rounded-md border border-muted">
+          <p className="text-sm text-muted-foreground">
+            💡 <strong>Weight Tracking:</strong> Use the Weight Tracker to add or update your pet&apos;s weight history.
+          </p>
+        </div>
+      )}
 
       {/* Microchip Number */}
       <div className="space-y-2">

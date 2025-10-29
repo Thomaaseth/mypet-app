@@ -2,8 +2,7 @@ import { db } from '../db';
 import { weightEntries } from '../db/schema/weight-entries';
 import { pets } from '../db/schema/pets';
 import { eq, and, desc, asc } from 'drizzle-orm';
-import type { WeightEntry, NewWeightEntry, WeightEntryFormData } from '../db/schema/weight-entries';
-import type { WeightUnit } from '../db/schema/pets';
+import type { WeightEntry, NewWeightEntry, WeightEntryFormData, WeightUnit } from '../db/schema/weight-entries';
 import { 
   BadRequestError, 
   NotFoundError, 
@@ -136,10 +135,12 @@ export class WeightEntriesService {
         .from(weightEntries)
         .where(eq(weightEntries.petId, petId))
         .orderBy(asc(weightEntries.date)); // Order by date for chart display
+      
+      const weightUnit = entries.length > 0 ? entries[entries.length - 1].weightUnit : 'kg';
 
       return {
         weightEntries: entries,
-        weightUnit: pet.weightUnit || 'kg' // Fallback to kg if somehow null
+        weightUnit: weightUnit
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -198,6 +199,7 @@ export class WeightEntriesService {
       const newEntryData: NewWeightEntry = {
         petId,
         weight: entryData.weight,
+        weightUnit: entryData.weightUnit,
         date: entryData.date,
       };
 
@@ -239,7 +241,8 @@ export class WeightEntriesService {
       // Business logic validation for weight
       if (updateData.weight !== undefined) {
         const weightValue = parseFloat(updateData.weight.toString());
-        this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
+        // Use the weight unit from the existing entry
+        this.validateWeightLimits(weightValue, pet.animalType, existingEntry.weightUnit);
       }
 
       // Database operations (duplicate check)

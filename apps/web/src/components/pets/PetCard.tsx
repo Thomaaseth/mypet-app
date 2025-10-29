@@ -22,6 +22,7 @@ import {
 import type { Pet } from '@/types/pet';
 import { calculatePetAge, formatWeight } from '@/lib/validations/pet';
 import { useState } from 'react';
+import { useWeightEntries } from '@/queries/weights';
 
 interface PetCardProps {
   pet: Pet;
@@ -34,8 +35,15 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
   const [imageError, setImageError] = useState(false);
   
   const age = calculatePetAge(pet.birthDate);
-  const weight = formatWeight(pet.weight, pet.weightUnit);
-  
+
+  // Query latest weight from weight_entries
+  const { data: weightData } = useWeightEntries({ 
+    petId: pet.id, 
+    weightUnit: 'kg' // Default, actual unit comes from entries
+  });  
+
+  const latestWeight = weightData?.latestWeight;
+
   // Placeholder image when no image is available or error loading
   const placeholderImage = (
     <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center">
@@ -136,10 +144,15 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 <span>{age}</span>
               </div>
             )}
-            {pet.weight && (
+            {latestWeight ? (
               <div className="flex items-center gap-2">
                 <Weight className="h-4 w-4 text-muted-foreground" />
-                <span>{weight}</span>
+                <span>{latestWeight.weight} {latestWeight.weightUnit}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Weight className="h-4 w-4" />
+                <span className="text-sm">No weight tracked</span>
               </div>
             )}
           </div>

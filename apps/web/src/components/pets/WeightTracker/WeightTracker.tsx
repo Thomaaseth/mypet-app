@@ -32,10 +32,10 @@ import {
 
 interface WeightTrackerProps {
   petId: string;
-  weightUnit: WeightUnit;
+  // weightUnit: WeightUnit;
 }
 
-export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps) {
+export default function WeightTracker({ petId }: WeightTrackerProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   
@@ -44,11 +44,13 @@ export default function WeightTracker({ petId, weightUnit }: WeightTrackerProps)
     data, 
     isPending, 
     error 
-  } = useWeightEntries({ petId, weightUnit });
+  } = useWeightEntries({ petId, weightUnit: 'kg' });
   
+  const weightUnit = data?.latestWeight?.weightUnit || 'kg';
+
   // Mutations
-  const createWeightMutation = useCreateWeightEntry(petId, weightUnit);
-  const updateWeightMutation = useUpdateWeightEntry(petId, weightUnit);
+  const createWeightMutation = useCreateWeightEntry(petId);
+  const updateWeightMutation = useUpdateWeightEntry(petId);
   const deleteWeightMutation = useDeleteWeightEntry(petId);
 
   // Computed loading state

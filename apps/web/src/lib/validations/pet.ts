@@ -111,26 +111,33 @@ export const createPetSchema = basePetFormSchema.extend({
 });
 
 // Schema for updating a pet (more flexible)
-export const updatePetSchema = basePetFormSchema.partial().extend({
-  id: z.string().uuid('Invalid pet ID'),
-}).refine((data) => {
-  if (!data.weight) return true; // Optional field
+// export const updatePetSchema = basePetFormSchema.partial().extend({
+//   id: z.string().uuid('Invalid pet ID'),
+// }).refine((data) => {
+//   if (!data.weight) return true; // Optional field
   
-  const weight = parseFloat(data.weight);
-  if (isNaN(weight) || weight <= 0) return false;
+//   const weight = parseFloat(data.weight);
+//   if (isNaN(weight) || weight <= 0) return false;
   
-  // Unit-specific validation
-  if (data.weightUnit === 'kg') {
-    return weight <= 200; // Max 200kg (440 lbs)
-  } else if (data.weightUnit === 'lbs') {
-    return weight <= 440; // Max 440 lbs (200kg)
-  }
+//   // Unit-specific validation
+//   if (data.weightUnit === 'kg') {
+//     return weight <= 200; // Max 200kg (440 lbs)
+//   } else if (data.weightUnit === 'lbs') {
+//     return weight <= 440; // Max 440 lbs (200kg)
+//   }
   
-  return true;
-}, {
-  message: 'Weight exceeds maximum allowed (200kg / 440lbs)',
-  path: ['weight']
-});
+//   return true;
+// }, {
+//   message: 'Weight exceeds maximum allowed (200kg / 440lbs)',
+//   path: ['weight']
+// });
+
+export const updatePetSchema = basePetFormSchema
+  .omit({ weight: true, weightUnit: true })
+  .partial()
+  .extend({
+    id: z.string().uuid('Invalid pet ID'),
+  });
 
 // Export types
 export type PetFormData = z.infer<typeof petFormSchema>;
