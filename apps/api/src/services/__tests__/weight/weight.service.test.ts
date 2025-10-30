@@ -5,7 +5,7 @@ import * as schema from '../../../db';
 import { BadRequestError, NotFoundError } from '../../../middleware/errors';
 import { WeightEntriesService } from '../../weight-entries.service';
 import { db } from '../../../db';
-import { setupUserAndPet, setupPetWithWeightUnit, setupMultiplePetsWithDifferentUnits } from './helpers/setup';
+import { setupUserAndPet } from './helpers/setup';
 import { makeWeightEntryData, makeMultipleWeightEntries, makeInvalidWeightData } from './helpers/factories';
 import type { WeightEntry, NewWeightEntry, WeightEntryFormData } from '../../../db/schema/weight-entries';
 
@@ -63,6 +63,7 @@ describe('WeightEntriesService', () => {
   
         expect(result.id).toBe(entry.id);
         expect(result.weight).toBe('5.50');
+        expect(result.weightUnit).toBe('kg');
         expect(result.date).toBe('2024-01-15');
         expect(result.petId).toBe(testPet.id);
       });
@@ -107,6 +108,7 @@ describe('WeightEntriesService', () => {
         );
   
         expect(result.weight).toBe('5.50');
+        expect(result.weightUnit).toBe('kg');
         expect(result.date).toBe('2024-01-15');
         expect(result.petId).toBe(testPet.id);
         expect(result.id).toBeDefined();
@@ -432,21 +434,25 @@ describe('WeightEntriesService', () => {
       });
   
       it('should handle different weight units correctly', async () => {
-        const { primary,kgPet, lbsPet } = await setupMultiplePetsWithDifferentUnits();
+        const { primary, testPet } = await setupUserAndPet();
   
-        await WeightEntriesService.createWeightEntry(kgPet.id, primary.id, makeWeightEntryData({
+        await WeightEntriesService.createWeightEntry(testPet.id, primary.id, makeWeightEntryData({
           weight: '5.50',
+          weightUnit: 'kg',
+          date: '2024-01-15',
         }));
   
-        await WeightEntriesService.createWeightEntry(lbsPet.id, primary.id, makeWeightEntryData({
+        await WeightEntriesService.createWeightEntry(testPet.id, primary.id, makeWeightEntryData({
           weight: '12.25',
+          weightUnit: 'lbs',
+          date: '2024-01-16',
         }));
   
-        const kgResult = await WeightEntriesService.getWeightEntries(kgPet.id, primary.id);
-        const lbsResult = await WeightEntriesService.getWeightEntries(lbsPet.id, primary.id);
+        const result = await WeightEntriesService.getWeightEntries(testPet.id, primary.id);
   
-        expect(kgResult.weightUnit).toBe('kg');
-        expect(lbsResult.weightUnit).toBe('lbs');
+        expect(result.weightUnit).toBe('lbs');
+        expect(result.weightEntries[0].weightUnit).toBe('kg');
+        expect(result.weightEntries[1].weightUnit).toBe('lbs');
       });
     });
   
@@ -503,7 +509,7 @@ describe('WeightEntriesService', () => {
       });
   
       it('should validate weight limits correctly for lbs pets', async () => {
-        const { primary, testPet: lbsPet } = await setupPetWithWeightUnit('lbs');
+        const { primary, testPet: lbsPet } = await setupUserAndPet();
         
         // Update pet to be a cat for this test
         await db.update(schema.pets)
@@ -515,7 +521,7 @@ describe('WeightEntriesService', () => {
           WeightEntriesService.createWeightEntry(
             lbsPet.id, 
             primary.id, 
-            makeWeightEntryData({ weight: '35' })
+            makeWeightEntryData({ weight: '35', weightUnit: 'lbs' })
           )
         ).rejects.toThrow('Weight 35lbs is outside realistic range for cat');
       });

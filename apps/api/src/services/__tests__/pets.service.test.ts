@@ -199,7 +199,6 @@ describe('PetsService', () => {
         animalType: 'cat',
         species: 'Persian',
         gender: 'female',
-        weightUnit: 'kg',
       };
 
       const result = await PetsService.createPet(newPetData);
@@ -233,7 +232,6 @@ describe('PetsService', () => {
       expect(result.animalType).toBe('dog');
       expect(result.species).toBeNull();
       expect(result.gender).toBe('unknown');
-      expect(result.weightUnit).toBe('kg');
     });
 
     it('should throw BadRequestError when name is missing', async () => {
@@ -304,8 +302,6 @@ describe('PetsService', () => {
         species: 'Golden Retriever',
         gender: 'male',
         birthDate: '2020-01-15',
-        weight: '25.5',
-        weightUnit: 'kg',
         isNeutered: true,
         microchipNumber: 'ABC123456789',
         notes: 'Very friendly dog',
@@ -316,7 +312,6 @@ describe('PetsService', () => {
       expect(result.species).toBe('Golden Retriever');
       expect(result.gender).toBe('male');
       expect(result.birthDate).toBe('2020-01-15');
-      expect(result.weight).toBe('25.50');
       expect(result.isNeutered).toBe(true);
       expect(result.microchipNumber).toBe('ABC123456789');
       expect(result.notes).toBe('Very friendly dog');
@@ -324,7 +319,7 @@ describe('PetsService', () => {
     
     it('should create initial weight entry when pet is created with weight', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
-      const newPetData: NewPet = {
+      const newPetData: NewPet & { weight?: string; weightUnit?: 'kg' | 'lbs' } = {
         name: 'Weighted Pet',
         userId: primary.id,
         animalType: 'cat',
@@ -335,7 +330,6 @@ describe('PetsService', () => {
       const result = await PetsService.createPet(newPetData);
   
       // Verify pet was created
-      expect(result.weight).toBe('5.50');
       expect(result.id).toBeDefined();
   
       // Verify weight entry was auto-created
@@ -345,6 +339,7 @@ describe('PetsService', () => {
   
       expect(weightEntries).toHaveLength(1);
       expect(weightEntries[0].weight).toBe('5.50');
+      expect(weightEntries[0].weightUnit).toBe('kg');
       expect(weightEntries[0].petId).toBe(result.id);
       
       // Verify the date matches the pet's creation date
@@ -365,7 +360,6 @@ describe('PetsService', () => {
       const result = await PetsService.createPet(newPetData);
   
       // Verify pet was created
-      expect(result.weight).toBeNull();
       expect(result.id).toBeDefined();
   
       // Verify NO weight entry was created
@@ -390,14 +384,12 @@ describe('PetsService', () => {
       const updateData = {
         name: 'Updated Name',
         species: 'Maine Coon',
-        weight: '4.5',
       };
 
       const result = await PetsService.updatePet(pet.id, primary.id, updateData);
 
       expect(result.name).toBe('Updated Name');
       expect(result.species).toBe('Maine Coon');
-      expect(result.weight).toBe('4.50');
       expect(result.updatedAt).toBeDefined();
     });
 
@@ -669,7 +661,6 @@ describe('PetsService', () => {
       const updatePromises = [
         PetsService.updatePet(pet.id, primary.id, { name: 'Updated Name 1' }),
         PetsService.updatePet(pet.id, primary.id, { species: 'Persian' }),
-        PetsService.updatePet(pet.id, primary.id, { weight: '5.0' }),
       ];
 
       const results = await Promise.all(updatePromises);
@@ -706,14 +697,12 @@ describe('PetsService', () => {
         name: 'Type Test Pet',
         userId: primary.id,
         animalType: 'dog',
-        weight: '25.75',
         isNeutered: true,
         birthDate: '2020-12-25',
       };
 
       const result = await PetsService.createPet(newPetData);
 
-      expect(result.weight).toBe('25.75');
       expect(result.isNeutered).toBe(true);
       expect(result.birthDate).toBe('2020-12-25');
       expect(result.createdAt).toBeInstanceOf(Date);

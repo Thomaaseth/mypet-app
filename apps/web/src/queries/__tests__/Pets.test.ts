@@ -230,31 +230,6 @@ describe('Pets Queries', () => {
       });
     });
 
-    it('should handle weight with comma (transform to dot)', async () => {
-      const { result } = renderHookWithQuery(() => useCreatePet());
-
-      const petData: PetFormData = {
-        name: 'Test Pet',
-        animalType: 'cat',
-        species: '',
-        gender: 'unknown',
-        birthDate: '',
-        weight: '4,5',
-        weightUnit: 'kg',
-        isNeutered: false,
-        microchipNumber: '',
-        notes: '',
-      };
-
-      let createdPet: Pet | undefined;
-      await waitFor(async () => {
-        createdPet = await result.current.mutateAsync(petData);
-      });
-
-      // Weight should be transformed to dot notation
-      expect(createdPet?.weight).toBe('4.5');
-    });
-
     it('should handle validation errors', async () => {
       server.use(
         http.post(`${API_BASE_URL}/pets`, () => {
@@ -353,11 +328,9 @@ describe('Pets Queries', () => {
       // List should reflect the update
       const updatedPetInList = petsListResult.current.data?.find(p => p.id === petId);
       expect(updatedPetInList?.name).toBe('Fluffy Updated');
-      expect(updatedPetInList?.weight).toBe('5.0');
       
       // Detail should reflect the update
       expect(petDetailResult.current.data?.name).toBe('Fluffy Updated');
-      expect(petDetailResult.current.data?.weight).toBe('5.0');
     });
   });
 

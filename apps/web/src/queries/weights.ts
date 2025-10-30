@@ -20,12 +20,11 @@ export const weightKeys = {
 // QUERIES (READ operations)
 interface UseWeightEntriesOptions {
   petId: string;
-  weightUnit: WeightUnit;
 }
 
 
  // Fetch all weight entries for a pet, returns sorted entries and chart data
-export function useWeightEntries({ petId, weightUnit }: UseWeightEntriesOptions) {
+export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
   return useQuery({
     queryKey: weightKeys.byPet(petId),
     queryFn: async () => {

@@ -6,6 +6,7 @@ export function makeWeightEntryData(
 ): WeightEntryFormData {
   return {
     weight: '5.50',
+    weightUnit: 'kg' as const,
     date: '2024-01-15',
     ...overrides,
   };
@@ -16,6 +17,7 @@ export function makeWeightEntry(overrides: Partial<any> = {}) {
     id: randomUUID(),
     petId: randomUUID(),
     weight: '5.50',
+    weightUnit: 'kg',
     date: '2024-01-15',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -28,9 +30,10 @@ export function makeInvalidWeightData(
 ): Record<string, unknown> {
   return {
     weight: '5.50',
+    weightUnit: 'kg',
     date: '2024-01-15',
     ...overrides,
-  };
+  };  
 }
 
 export function makeMultipleWeightEntries(
@@ -41,6 +44,7 @@ export function makeMultipleWeightEntries(
   return Array.from({ length: count }, (_, index) => ({
     petId,
     weight: `${5.50 + (index * 0.25)}`, // 5.50, 5.75, 6.00, etc.
+    weightUnit: 'kg' as const,
     date: `2024-01-${15 + index}`, // Sequential dates
     ...baseOverrides,
   }));

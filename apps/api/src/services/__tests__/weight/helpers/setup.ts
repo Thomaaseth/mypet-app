@@ -8,37 +8,37 @@ export async function setupUserAndPet() {
   return { primary, secondary, testPet };
 }
 
-export async function setupPetWithWeightUnit(weightUnit: 'kg' | 'lbs' = 'kg') {
-  const { primary } = await DatabaseTestUtils.createTestUsers();
+// export async function setupPetWithWeightUnit(weightUnit: 'kg' | 'lbs' = 'kg') {
+//   const { primary } = await DatabaseTestUtils.createTestUsers();
   
-  const [testPet] = await db.insert(schema.pets).values({
-    userId: primary.id,
-    name: `Test Pet (${weightUnit})`,
-    animalType: 'cat',
-    weightUnit,
-  }).returning();
+//   const [testPet] = await db.insert(schema.pets).values({
+//     userId: primary.id,
+//     name: `Test Pet (${weightUnit})`,
+//     animalType: 'cat',
+//     weightUnit,
+//   }).returning();
 
-  return { primary, testPet };
-}
+//   return { primary, testPet };
+// }
 
-export async function setupMultiplePetsWithDifferentUnits() {
-  const { primary } = await DatabaseTestUtils.createTestUsers();
+// export async function setupMultiplePetsWithDifferentUnits() {
+//   const { primary } = await DatabaseTestUtils.createTestUsers();
   
-  const [kgPet] = await db.insert(schema.pets).values({
-    userId: primary.id,
-    name: 'KG Pet',
-    animalType: 'cat',
-    weightUnit: 'kg',
-    isActive: true,
-  }).returning();
+//   const [kgPet] = await db.insert(schema.pets).values({
+//     userId: primary.id,
+//     name: 'KG Pet',
+//     animalType: 'cat',
+//     weightUnit: 'kg',
+//     isActive: true,
+//   }).returning();
 
-  const [lbsPet] = await db.insert(schema.pets).values({
-    userId: primary.id,
-    name: 'LBS Pet',
-    animalType: 'dog',
-    weightUnit: 'lbs',
-    isActive: true,
-  }).returning();
+//   const [lbsPet] = await db.insert(schema.pets).values({
+//     userId: primary.id,
+//     name: 'LBS Pet',
+//     animalType: 'dog',
+//     weightUnit: 'lbs',
+//     isActive: true,
+//   }).returning();
 
-  return { primary, kgPet, lbsPet };
-}
+//   return { primary, kgPet, lbsPet };
+// }

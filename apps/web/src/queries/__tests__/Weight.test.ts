@@ -47,7 +47,7 @@ describe('Weight Queries', () => {
   describe('useWeightEntries', () => {
     it('should fetch and transform weight entries correctly', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       // Initial loading state
@@ -78,6 +78,7 @@ describe('Weight Queries', () => {
                   id: 'weight-3',
                   petId: TEST_PET_ID,
                   weight: '4.80',
+                  weightUnit: 'kg',
                   date: '2024-03-15',
                   createdAt: '2024-03-15T00:00:00.000Z',
                   updatedAt: '2024-03-15T00:00:00.000Z',
@@ -86,6 +87,7 @@ describe('Weight Queries', () => {
                   id: 'weight-1',
                   petId: TEST_PET_ID,
                   weight: '4.50',
+                  weightUnit: 'kg',
                   date: '2024-01-15',
                   createdAt: '2024-01-15T00:00:00.000Z',
                   updatedAt: '2024-01-15T00:00:00.000Z',
@@ -94,6 +96,7 @@ describe('Weight Queries', () => {
                   id: 'weight-2',
                   petId: TEST_PET_ID,
                   weight: '4.60',
+                  weightUnit: 'kg',
                   date: '2024-02-15',
                   createdAt: '2024-02-15T00:00:00.000Z',
                   updatedAt: '2024-02-15T00:00:00.000Z',
@@ -108,7 +111,7 @@ describe('Weight Queries', () => {
 
       // Use a fresh QueryClient to avoid cached data
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -126,7 +129,7 @@ describe('Weight Queries', () => {
 
     it('should generate chart data with formatted dates and numeric weights', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -152,7 +155,7 @@ describe('Weight Queries', () => {
 
     it('should ensure chart data length matches weight entries length', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
     
       await waitFor(() => {
@@ -173,7 +176,7 @@ describe('Weight Queries', () => {
 
     it('should extract latest weight correctly', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -204,7 +207,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -230,7 +233,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -242,7 +245,7 @@ describe('Weight Queries', () => {
 
     it('should not fetch when petId is empty (enabled: false)', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: '', weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: '' })
       );
 
       // Should stay in idle state
@@ -262,12 +265,12 @@ describe('Weight Queries', () => {
                   id: 'weight-1',
                   petId: TEST_PET_ID,
                   weight: '4.50',
+                  weightUnit: 'kg',
                   date: '2024-01-15',
                   createdAt: '2024-01-15T00:00:00.000Z',
                   updatedAt: '2024-01-15T00:00:00.000Z',
                 },
               ],
-              weightUnit: 'kg',
             },
             message: 'Retrieved 1 weight entry',
           });
@@ -275,7 +278,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -297,7 +300,7 @@ describe('Weight Queries', () => {
     it('should create weight entry and invalidate cache', async () => {
       // STEP 1: Fetch weights first (so query exists in cache)
       const { result: weightsQueryResult, queryClient } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
       
       await waitFor(() => {
@@ -309,13 +312,14 @@ describe('Weight Queries', () => {
       
       // STEP 2: Create mutation with SAME queryClient
       const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT),
+        () => useCreateWeightEntry(TEST_PET_ID),
         { queryClient }
       );
 
       // STEP 3: Execute mutation
       const newWeightData: WeightFormData = {
         weight: '4.70',
+        weightUnit: 'kg',
         date: '2024-03-15',
       };
 
@@ -350,11 +354,12 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useCreateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT)
+        useCreateWeightEntry(TEST_PET_ID)
       );
 
       const invalidData: WeightFormData = {
         weight: '',
+        weightUnit: 'kg',
         date: '2024-03-15',
       };
 
@@ -381,11 +386,12 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useCreateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT)
+        useCreateWeightEntry(TEST_PET_ID)
       );
 
       const duplicateData: WeightFormData = {
         weight: '4.50',
+        weightUnit: 'kg',
         date: '2024-01-15', // Same date as existing entry
       };
 
@@ -408,11 +414,12 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useCreateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT)
+        useCreateWeightEntry(TEST_PET_ID)
       );
 
       const weightData: WeightFormData = {
         weight: '4.70',
+        weightUnit: 'kg',
         date: '2024-03-15',
       };
 
@@ -428,7 +435,7 @@ describe('Weight Queries', () => {
       
       // STEP 1: Fetch weights first
       const { result: weightsQueryResult, queryClient } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
       
       await waitFor(() => {
@@ -442,7 +449,7 @@ describe('Weight Queries', () => {
       
       // STEP 2: Create mutation with SAME queryClient
       const { result: mutationResult } = renderHookWithQuery(
-        () => useUpdateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT),
+        () => useUpdateWeightEntry(TEST_PET_ID),
         { queryClient }
       );
 
@@ -471,7 +478,7 @@ describe('Weight Queries', () => {
 
     it('should handle partial updates (weight only)', async () => {
       const { result } = renderHookWithQuery(() => 
-        useUpdateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT)
+        useUpdateWeightEntry(TEST_PET_ID)
       );
 
       // Update only weight (date stays the same)
@@ -503,7 +510,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useUpdateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT)
+        useUpdateWeightEntry(TEST_PET_ID)
       );
 
       await expect(
@@ -528,7 +535,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useUpdateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT)
+        useUpdateWeightEntry(TEST_PET_ID)
       );
 
       const invalidUpdate: Partial<WeightFormData> = {
@@ -608,7 +615,7 @@ describe('Weight Queries', () => {
     it('should always refetch after operation (success or error)', async () => {
       // Create an active observer by rendering the query hook
       const { result: weightsQueryResult, queryClient } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
       
       // Wait for initial fetch
@@ -684,6 +691,7 @@ describe('Weight Queries', () => {
                   id: 'weight-4',
                   petId: TEST_PET_ID,
                   weight: '4.90',
+                  weightUnit: 'kg',
                   date: '2024-12-01',
                   createdAt: '2024-12-01T00:00:00.000Z',
                   updatedAt: '2024-12-01T00:00:00.000Z',
@@ -692,6 +700,7 @@ describe('Weight Queries', () => {
                   id: 'weight-1',
                   petId: TEST_PET_ID,
                   weight: '4.50',
+                  weightUnit: 'kg',
                   date: '2024-01-15',
                   createdAt: '2024-01-15T00:00:00.000Z',
                   updatedAt: '2024-01-15T00:00:00.000Z',
@@ -700,6 +709,7 @@ describe('Weight Queries', () => {
                   id: 'weight-3',
                   petId: TEST_PET_ID,
                   weight: '4.80',
+                  weightUnit: 'kg',
                   date: '2024-06-20',
                   createdAt: '2024-06-20T00:00:00.000Z',
                   updatedAt: '2024-06-20T00:00:00.000Z',
@@ -713,7 +723,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -730,7 +740,7 @@ describe('Weight Queries', () => {
 
     it('should preserve original date format in chart data', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -749,7 +759,7 @@ describe('Weight Queries', () => {
 
     it('should convert weight strings to numbers for chart', async () => {
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -775,6 +785,7 @@ describe('Weight Queries', () => {
                   id: 'weight-1',
                   petId: TEST_PET_ID,
                   weight: '4.567', // Multiple decimals
+                  weightUnit: 'kg',
                   date: '2024-01-15',
                   createdAt: '2024-01-15T00:00:00.000Z',
                   updatedAt: '2024-01-15T00:00:00.000Z',
@@ -788,7 +799,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -816,6 +827,7 @@ describe('Weight Queries', () => {
                   id: 'weight-2',
                   petId: TEST_PET_ID,
                   weight: '4.60',
+                  weightUnit: 'kg',
                   date: '2024-01-15',
                   createdAt: '2024-01-15T10:00:00.000Z',
                   updatedAt: '2024-01-15T10:00:00.000Z',
@@ -824,12 +836,12 @@ describe('Weight Queries', () => {
                   id: 'weight-1',
                   petId: TEST_PET_ID,
                   weight: '4.50',
+                  weightUnit: 'kg',
                   date: '2024-01-15',
                   createdAt: '2024-01-15T09:00:00.000Z',
                   updatedAt: '2024-01-15T09:00:00.000Z',
                 },
               ],
-              weightUnit: 'kg',
             },
             message: 'Retrieved 2 weight entries',
           });
@@ -837,7 +849,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -865,7 +877,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -887,7 +899,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       await waitFor(() => {
@@ -915,7 +927,7 @@ describe('Weight Queries', () => {
 
     it('should invalidate correct cache keys on create', async () => {
       const { result: weightsQueryResult, queryClient } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
       
       await waitFor(() => {
@@ -923,12 +935,13 @@ describe('Weight Queries', () => {
       });
       
       const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT),
+        () => useCreateWeightEntry(TEST_PET_ID),
         { queryClient }
       );
 
       const newWeightData: WeightFormData = {
         weight: '4.70',
+        weightUnit: 'kg',
         date: '2024-03-15',
       };
 
@@ -943,19 +956,20 @@ describe('Weight Queries', () => {
       const otherPetId = 'pet-2';
       
       const { queryClient } = renderHookWithQuery(() => 
-        useWeightEntries({ petId: TEST_PET_ID, weightUnit: TEST_WEIGHT_UNIT })
+        useWeightEntries({ petId: TEST_PET_ID })
       );
 
       // Set cache for different pet
       queryClient.setQueryData(weightKeys.byPet(otherPetId), []);
 
       const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateWeightEntry(TEST_PET_ID, TEST_WEIGHT_UNIT),
+        () => useCreateWeightEntry(TEST_PET_ID),
         { queryClient }
       );
 
       const newWeightData: WeightFormData = {
         weight: '4.70',
+        weightUnit: 'kg',
         date: '2024-03-15',
       };
 

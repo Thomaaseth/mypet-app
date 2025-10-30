@@ -60,7 +60,7 @@ export class WeightEntriesService {
   // business rules validation helper
   private static validateBusinessRules(entryData: WeightEntryFormData, pet: any): void {
     const weightValue = parseFloat(entryData.weight.toString());
-    this.validateWeightLimits(weightValue, pet.animalType, pet.weightUnit || 'kg');
+    this.validateWeightLimits(weightValue, pet.animalType, entryData.weightUnit);
   }
 
   // Validate weight based on animal type and unit
