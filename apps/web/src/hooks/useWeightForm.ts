@@ -5,15 +5,16 @@ import type { WeightEntry } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
 
 interface UseWeightFormOptions {
+  animalType: 'cat' | 'dog';
   weightUnit: WeightUnit;
   weightEntry?: WeightEntry;
   defaultValues?: Partial<WeightFormData>;
 }
 
 export function useWeightForm(options: UseWeightFormOptions) {
-  const { weightUnit, weightEntry, defaultValues } = options;
+  const { animalType,weightUnit, weightEntry, defaultValues } = options;
 
-  const schema = createWeightEntrySchema(weightUnit);
+  const schema = createWeightEntrySchema(weightUnit, animalType);
 
   const getInitialValues = (): WeightFormData => {
     if (weightEntry) {

@@ -30,7 +30,7 @@ import type { WeightUnit } from '@/types/pet';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 const TEST_PET_ID = 'pet-1';
-const TEST_WEIGHT_UNIT: WeightUnit = 'kg';
+const TEST_ANIMAL_TYPE: 'cat' | 'dog' = 'cat';
 
 describe('Weight Queries', () => {
   
@@ -312,7 +312,7 @@ describe('Weight Queries', () => {
       
       // STEP 2: Create mutation with SAME queryClient
       const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateWeightEntry(TEST_PET_ID),
+        () => useCreateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE),
         { queryClient }
       );
 
@@ -354,7 +354,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useCreateWeightEntry(TEST_PET_ID)
+        useCreateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE)
       );
 
       const invalidData: WeightFormData = {
@@ -386,7 +386,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useCreateWeightEntry(TEST_PET_ID)
+        useCreateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE)
       );
 
       const duplicateData: WeightFormData = {
@@ -414,7 +414,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useCreateWeightEntry(TEST_PET_ID)
+        useCreateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE)
       );
 
       const weightData: WeightFormData = {
@@ -449,7 +449,7 @@ describe('Weight Queries', () => {
       
       // STEP 2: Create mutation with SAME queryClient
       const { result: mutationResult } = renderHookWithQuery(
-        () => useUpdateWeightEntry(TEST_PET_ID),
+        () => useUpdateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE),
         { queryClient }
       );
 
@@ -478,7 +478,7 @@ describe('Weight Queries', () => {
 
     it('should handle partial updates (weight only)', async () => {
       const { result } = renderHookWithQuery(() => 
-        useUpdateWeightEntry(TEST_PET_ID)
+        useUpdateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE)
       );
 
       // Update only weight (date stays the same)
@@ -510,7 +510,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useUpdateWeightEntry(TEST_PET_ID)
+        useUpdateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE)
       );
 
       await expect(
@@ -535,7 +535,7 @@ describe('Weight Queries', () => {
       );
 
       const { result } = renderHookWithQuery(() => 
-        useUpdateWeightEntry(TEST_PET_ID)
+        useUpdateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE)
       );
 
       const invalidUpdate: Partial<WeightFormData> = {
@@ -935,7 +935,7 @@ describe('Weight Queries', () => {
       });
       
       const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateWeightEntry(TEST_PET_ID),
+        () => useCreateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE),
         { queryClient }
       );
 
@@ -963,7 +963,7 @@ describe('Weight Queries', () => {
       queryClient.setQueryData(weightKeys.byPet(otherPetId), []);
 
       const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateWeightEntry(TEST_PET_ID),
+        () => useCreateWeightEntry(TEST_PET_ID, TEST_ANIMAL_TYPE),
         { queryClient }
       );
 

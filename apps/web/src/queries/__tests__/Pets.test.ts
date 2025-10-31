@@ -187,7 +187,7 @@ describe('Pets Queries', () => {
       // STEP 2: Create mutation with SAME queryClient
       const { result: mutationResult } = renderHookWithQuery(
         () => useCreatePet(),
-        { queryClient } // ← Reuse same queryClient!
+        { queryClient }
       );
   
       const newPetData: PetFormData = {

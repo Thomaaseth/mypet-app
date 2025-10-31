@@ -32,25 +32,25 @@ import {
 
 interface WeightTrackerProps {
   petId: string;
-  // weightUnit: WeightUnit;
+  animalType: 'cat' | 'dog';
 }
 
-export default function WeightTracker({ petId }: WeightTrackerProps) {
+export default function WeightTracker({ petId, animalType }: WeightTrackerProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   
   // Queries
-  const { 
+  const {  
     data, 
     isPending, 
     error 
-  } = useWeightEntries({ petId, weightUnit: 'kg' });
+  } = useWeightEntries({ petId });
   
   const weightUnit = data?.latestWeight?.weightUnit || 'kg';
 
   // Mutations
-  const createWeightMutation = useCreateWeightEntry(petId);
-  const updateWeightMutation = useUpdateWeightEntry(petId);
+  const createWeightMutation = useCreateWeightEntry(petId, animalType);
+  const updateWeightMutation = useUpdateWeightEntry(petId, animalType);
   const deleteWeightMutation = useDeleteWeightEntry(petId);
 
   // Computed loading state
@@ -156,6 +156,7 @@ export default function WeightTracker({ petId }: WeightTrackerProps) {
               </DialogDescription>
             </DialogHeader>
             <WeightForm
+              animalType={animalType} 
               weightUnit={weightUnit}
               onSubmit={handleCreateEntry}
               onCancel={() => setIsAddDialogOpen(false)}
@@ -195,6 +196,7 @@ export default function WeightTracker({ petId }: WeightTrackerProps) {
                   </div>
                 ) : (
                   <WeightList
+                    animalType={animalType}
                     weightEntries={weightEntries}
                     weightUnit={weightUnit}
                     onUpdateEntry={handleUpdateEntry}

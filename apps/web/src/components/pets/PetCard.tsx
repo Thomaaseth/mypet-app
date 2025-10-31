@@ -39,7 +39,6 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
   // Query latest weight from weight_entries
   const { data: weightData } = useWeightEntries({ 
     petId: pet.id, 
-    weightUnit: 'kg' // Default, actual unit comes from entries
   });  
 
   const latestWeight = weightData?.latestWeight;

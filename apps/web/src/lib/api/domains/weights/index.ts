@@ -11,10 +11,10 @@ const weightService = new WeightService(weightRepository, weightValidator);
 export const weightApi = {
   getWeightEntries: (petId: string) => weightService.getWeightEntries(petId),
   getWeightEntryById: (petId: string, weightId: string) => weightService.getWeightEntryById(petId, weightId),
-  createWeightEntry: (petId: string, weightData: WeightFormData, weightUnit: WeightUnit) => 
-    weightService.createWeightEntry(petId, weightData, weightUnit),
-  updateWeightEntry: (petId: string, weightId: string, weightData: Partial<WeightFormData>, weightUnit: WeightUnit) => 
-    weightService.updateWeightEntry(petId, weightId, weightData, weightUnit),
+  createWeightEntry: (petId: string, weightData: WeightFormData, animalType: 'cat' | 'dog') => 
+    weightService.createWeightEntry(petId, weightData, animalType),
+  updateWeightEntry: (petId: string, weightId: string, weightData: Partial<WeightFormData>, animalType: 'cat' | 'dog') => 
+    weightService.updateWeightEntry(petId, weightId, weightData, animalType),
   deleteWeightEntry: (petId: string, weightId: string) => weightService.deleteWeightEntry(petId, weightId),
 };
 

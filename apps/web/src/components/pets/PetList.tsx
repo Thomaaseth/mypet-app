@@ -251,12 +251,12 @@ export default function PetList() {
                             <span className="text-muted-foreground">Gender:</span>
                             <span className="capitalize">{pet.gender}</span>
                             </div>
-                            {pet.weight && (
+                            {/* {pet.weight && (
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Weight:</span>
                                 <span>{pet.weight} {pet.weightUnit}</span>
                             </div>
-                            )}
+                            )} */}
                             <div className="flex justify-between">
                             <span className="text-muted-foreground">Spayed/Neutered:</span>
                             <span>{pet.isNeutered ? 'Yes' : 'No'}</span>
@@ -270,7 +270,7 @@ export default function PetList() {
                 {/* Weight Tracker Section - Full Width */}
                 <WeightTracker 
                     petId={pet.id} 
-                    weightUnit={pet.weightUnit} 
+                    animalType={pet.animalType} 
                 />
 
                 {/* Food Tracker Section - Full Width */}

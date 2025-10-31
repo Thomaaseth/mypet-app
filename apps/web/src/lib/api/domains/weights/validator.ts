@@ -2,8 +2,8 @@ import { validateWeightEntry, type WeightFormData } from '@/lib/validations/weig
 import type { WeightUnit } from '@/types/pet';
 
 export class WeightValidator {
-  validateWeightEntry(data: WeightFormData, weightUnit: WeightUnit) {
-    const result = validateWeightEntry(data, weightUnit);
+  validateWeightEntry(data: WeightFormData, weightUnit: WeightUnit, animalType: 'cat' | 'dog') {
+    const result = validateWeightEntry(data, weightUnit, animalType);
     
     if (!result.success) {
       const firstError = result.error.errors[0];

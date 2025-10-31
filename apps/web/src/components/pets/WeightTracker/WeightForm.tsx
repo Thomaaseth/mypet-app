@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 
 interface WeightFormProps {
+  animalType: 'cat' | 'dog';
   weightUnit: WeightUnit;
   weightEntry?: WeightEntry; // If provided, we're editing
   onSubmit: (data: WeightFormData) => Promise<WeightEntry | null>;
@@ -23,6 +24,7 @@ interface WeightFormProps {
 }
 
 export default function WeightForm({ 
+  animalType,
   weightUnit,
   weightEntry, 
   onSubmit, 
@@ -37,7 +39,9 @@ export default function WeightForm({
     watch,
     setValue,
     resetToEmpty,
-  } = useWeightForm({ weightUnit, weightEntry });
+  } = useWeightForm({ animalType, weightUnit, weightEntry });
+
+  const currentWeightUnit = watch('weightUnit');
 
   const isEditing = !!weightEntry;
 
@@ -80,9 +84,12 @@ export default function WeightForm({
         {errors.weight && (
           <p className="text-sm text-destructive">{errors.weight.message}</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Maximum: {weightUnit === 'kg' ? '200kg' : '440lbs'}
-        </p>
+          <p className="text-xs text-muted-foreground">
+            Maximum: {currentWeightUnit === 'kg' 
+              ? (animalType === 'cat' ? '15kg' : '90kg')
+              : (animalType === 'cat' ? '33lbs' : '198lbs')
+            }
+          </p>
       </div>
 
       {/* Weight Unit */}

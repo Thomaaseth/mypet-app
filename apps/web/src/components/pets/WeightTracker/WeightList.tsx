@@ -32,6 +32,7 @@ import type { WeightEntry, WeightFormData } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
 
 interface WeightListProps {
+  animalType: 'cat' | 'dog';
   weightEntries: WeightEntry[];
   weightUnit: WeightUnit;
   onUpdateEntry: (weightId: string, data: Partial<WeightFormData>) => Promise<WeightEntry | null>;
@@ -40,6 +41,7 @@ interface WeightListProps {
 }
 
 export default function WeightList({ 
+  animalType,
   weightEntries, 
   weightUnit, 
   onUpdateEntry, 
@@ -140,6 +142,7 @@ export default function WeightList({
           </DialogHeader>
           {editingEntry && (
             <WeightForm
+              animalType={animalType}
               weightUnit={weightUnit}
               weightEntry={editingEntry}
               onSubmit={handleEditSubmit}
