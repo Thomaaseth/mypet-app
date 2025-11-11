@@ -1,5 +1,5 @@
 import { TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react';
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer, ReferenceArea } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartConfig,
@@ -14,11 +14,21 @@ import { Button } from '@/components/ui/button';
 interface WeightChartProps {
   data: WeightChartData[];
   weightUnit: WeightUnit;
+  targetWeightMin?: number;
+  targetWeightMax?: number;
   className?: string;
   onAddEntry?: () => void;
 }
 
-export default function WeightChart({ data, weightUnit, className, onAddEntry }: WeightChartProps) {
+export default function WeightChart({ 
+  data, 
+  weightUnit,
+  targetWeightMin,
+  targetWeightMax, 
+  className, 
+  onAddEntry
+ }: WeightChartProps) {
+
   // If no data, show empty state
   if (data.length === 0) {
     return (
@@ -144,6 +154,7 @@ export default function WeightChart({ data, weightUnit, className, onAddEntry }:
                 domain={['dataMin - 0.5', 'dataMax + 0.5']}
                 tickFormatter={(value) => `${value}`}
               />
+              
               <ChartTooltip
                 cursor={false}
                 content={
@@ -159,6 +170,18 @@ export default function WeightChart({ data, weightUnit, className, onAddEntry }:
                   />
                 }
               />
+               {/* Target Range Shaded Zone */}
+               {targetWeightMin && targetWeightMax && (
+                <ReferenceArea
+                  y1={targetWeightMin}
+                  y2={targetWeightMax}
+                  fill="hsl(var(--chart-1))"
+                  fillOpacity={0.15}
+                  stroke="hsl(var(--chart-1))"
+                  strokeDasharray="3 3"
+                  strokeWidth={1}
+                />
+              )}
               <Line
                 dataKey="weight"
                 type="natural"
@@ -179,8 +202,6 @@ export default function WeightChart({ data, weightUnit, className, onAddEntry }:
           </ChartContainer>
           </div>
           </div>
-
-
 
           {/* Chart Stats */}
           {data.length > 1 && (
