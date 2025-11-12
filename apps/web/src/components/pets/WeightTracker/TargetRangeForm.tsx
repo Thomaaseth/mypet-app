@@ -12,10 +12,16 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
   } from '@/components/ui/alert-dialog';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+  } from "@/components/ui/accordion";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronRight } from 'lucide-react';
 import type { WeightUnit } from '@/types/pet';
 import type { WeightTargetFormData } from '@/types/weight-targets';
 
@@ -181,6 +187,35 @@ export default function TargetRangeForm({
             Unit is determined by your weight entries
           </p>
         </div>
+
+        {/* Educational Accordion */}
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="why-set-range" className="border-0">
+            <AccordionTrigger className="text-sm text-muted-foreground hover:text-foreground py-2 hover:no-underline">
+              Why set a target range?
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="bg-muted/50 rounded-md p-4 space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  A healthy weight range helps you monitor if your pet is underweight, 
+                  overweight, or right on track. Your veterinarian can provide the best 
+                  guidance based on:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
+                  <li>Breed and body type</li>
+                  <li>Age and activity level</li>
+                  <li>Overall health condition</li>
+                </ul>
+                <div className="bg-background border border-border rounded-md p-3">
+                  <p className="text-sm font-medium">
+                    💡 At your next vet visit, simply ask: &quot;What&apos;s a healthy weight 
+                    range for my pet?&quot; Then add it to the app.
+                  </p>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {/* Form Actions */}
         <div className="flex items-center justify-between pt-4">

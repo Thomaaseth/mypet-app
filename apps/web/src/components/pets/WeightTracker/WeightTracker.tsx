@@ -341,8 +341,8 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               </ul>
               <div className="bg-muted p-3 rounded-md">
                 <p className="text-sm font-semibold">
-                  At your next vet visit, simply ask: &quot;What&apos;s a healthy weight 
-                  range for my pet?&quot; Then add it to the app.
+                  💡 At your next visit, simply ask your vet &quot;What&apos;s a healthy weight 
+                  range for your pet.&quot; Then add it to the app.
                 </p>
               </div>
               <div className="flex justify-end gap-2">
