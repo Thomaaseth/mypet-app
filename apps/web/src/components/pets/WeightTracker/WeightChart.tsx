@@ -167,20 +167,40 @@ export default function WeightChart({
               />
               
               <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    labelFormatter={(value, payload) => {
-                      // Show full date in tooltip
-                      const fullDate = payload?.[0]?.payload?.date;
-                      return fullDate || value;
-                    }}
-                    formatter={(value) => [
-                      `${value} ${weightUnit}`,
-                    ]}
-                  />
-                }
-              />
+                  cursor={false}
+                  content={(props) => {
+                    if (!props.active || !props.payload?.[0]) return null;
+                    
+                    const data = props.payload[0].payload;
+                    const weight = data.weight;
+                    
+                    return (
+                      <div className="bg-background border border-border rounded-lg shadow-lg p-3 space-y-1.5">
+                        {/* Date */}
+                        <p className="text-sm font-medium text-foreground">{data.date}</p>
+                        
+                        {/* Weight */}
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-chart-2" />
+                          <span className="text-sm">
+                            <span className="text-muted-foreground">Weight: </span>
+                            <span className="font-semibold">{weight} {weightUnit}</span>
+                          </span>
+                        </div>
+                        
+                        {/* Target Range (if exists) */}
+                        {targetWeightMin && targetWeightMax && (
+                          <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                            <div className="w-3 h-2 bg-success/20 border border-success border-dashed rounded-sm" />
+                            <span className="text-xs text-muted-foreground">
+                              Target: {targetWeightMin}-{targetWeightMax} {weightUnit}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
                {/* Target Range Shaded Zone */}
                {targetWeightMin && targetWeightMax && (
                 <ReferenceArea
