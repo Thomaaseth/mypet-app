@@ -151,7 +151,16 @@ export default function WeightChart({
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                domain={[
+                  (dataMin: number) => {
+                    const minValue = targetWeightMin ? Math.min(dataMin, targetWeightMin) : dataMin;
+                    return minValue - 0.5;
+                  },
+                  (dataMax: number) => {
+                    const maxValue = targetWeightMax ? Math.max(dataMax, targetWeightMax) : dataMax;
+                    return maxValue + 0.5;
+                  }
+                ]}                
                 tickFormatter={(value) => `${value}`}
               />
               
