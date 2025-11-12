@@ -1,5 +1,5 @@
 import { TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react';
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer, ReferenceArea } from 'recharts';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer, ReferenceArea, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartConfig,
@@ -28,6 +28,8 @@ export default function WeightChart({
   className, 
   onAddEntry
  }: WeightChartProps) {
+
+
 
   // If no data, show empty state
   if (data.length === 0) {
@@ -90,7 +92,7 @@ export default function WeightChart({
       label: `${weightUnit}`,
       color: 'var(--chart-2)',
     },
-  } satisfies ChartConfig;
+  } satisfies ChartConfig; 
 
   return (
     <Card className={className}>
@@ -184,11 +186,12 @@ export default function WeightChart({
                 <ReferenceArea
                   y1={targetWeightMin}
                   y2={targetWeightMax}
-                  fill="hsl(var(--chart-1))"
+                  fill="hsl(var(--success))"
                   fillOpacity={0.15}
-                  stroke="hsl(var(--chart-1))"
-                  strokeDasharray="3 3"
+                  stroke="hsl(var(--success))"
+                  strokeOpacity={0.4}
                   strokeWidth={1}
+                  strokeDasharray="3 3"
                 />
               )}
               <Line

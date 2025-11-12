@@ -62,8 +62,27 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   
   const { data: weightTarget } = useWeightTarget(petId);
 
+  // Extract data (with defaults for undefined)
+  const weightEntries = data?.weightEntries ?? [];
+  const chartData = data?.chartData ?? [];
+  const latestWeight = data?.latestWeight ?? null;
+
   const weightUnit = data?.latestWeight?.weightUnit || 'kg';
   const hasTargetRange = Boolean(weightTarget?.minWeight && weightTarget?.maxWeight);
+
+  const getWeightStatus = () => {
+    if (!hasTargetRange || !weightTarget || !latestWeight) return null;
+    
+    const weight = parseFloat(latestWeight.weight);
+    const min = parseFloat(weightTarget.minWeight);
+    const max = parseFloat(weightTarget.maxWeight);
+    
+    if (weight < min) return 'below';
+    if (weight > max) return 'above';
+    return 'within';
+  };
+  
+  const status = getWeightStatus();
 
   // Mutations
   const createWeightMutation = useCreateWeightEntry(petId, animalType);
@@ -77,10 +96,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                           updateWeightMutation.isPending || 
                           deleteWeightMutation.isPending;
 
-  // Extract data (with defaults for undefined)
-  const weightEntries = data?.weightEntries ?? [];
-  const chartData = data?.chartData ?? [];
-  const latestWeight = data?.latestWeight ?? null;
+
 
   // Handlers
   const handleCreateEntry = async (weightData: WeightFormData): Promise<WeightEntry | null> => {
@@ -223,21 +239,37 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           onAddEntry={() => setIsAddDialogOpen(true)}
         />
 
-         {/* Target Range Display Badge (when exists) */}
-         {hasTargetRange && weightTarget && (
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Target className="h-3.5 w-3.5" />
-            <span>
-              Target: {weightTarget.minWeight}-{weightTarget.maxWeight} {weightUnit}
-            </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-auto px-2 py-0 text-xs"
-              onClick={() => setIsTargetRangeDialogOpen(true)}
-            >
-              Edit
-            </Button>
+        {/* Target Range Display Badge (when exists) */}
+        {hasTargetRange && weightTarget && (
+          <div className="flex items-center justify-center">
+            <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border ${
+              status === 'within' 
+                ? 'bg-success/10 border-success/20' 
+                : 'bg-warning/10 border-warning/20'
+            }`}>
+              <Target className={`h-4 w-4 ${
+                status === 'within' ? 'text-success' : 'text-warning'
+              }`} />
+              <div className="flex items-center gap-1.5 text-sm">
+                <span className="text-muted-foreground">Target:</span>
+                <span className="font-semibold">
+                  {weightTarget.minWeight}-{weightTarget.maxWeight} {weightUnit}
+                </span>
+                {status && status !== 'within' && (
+                  <span className="text-xs text-warning">
+                    ({status === 'below' ? '↓ Below' : '↑ Above'})
+                  </span>
+                )}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-auto px-2 py-1 text-xs hover:bg-success/20"
+                onClick={() => setIsTargetRangeDialogOpen(true)}
+              >
+                Edit
+              </Button>
+            </div>
           </div>
         )}
 
