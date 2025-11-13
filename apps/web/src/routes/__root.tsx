@@ -4,6 +4,7 @@ import { SessionProvider } from '@/contexts/SessionContext'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/sonner'
 import '../globals.css'
+import { NetworkStatusBanner } from '@/components/NetworkStatusBanner'
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -12,6 +13,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <SessionProvider>
+     <NetworkStatusBanner />
       <Navbar />
         <main className="min-h-screen">
          <Outlet />
