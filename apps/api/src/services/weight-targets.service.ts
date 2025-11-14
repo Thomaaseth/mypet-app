@@ -54,7 +54,7 @@ export class WeightTargetsService {
   }
 
   // Business rules validation - ensure target is realistic for pet type
-  private static validateBusinessRules(targetData: WeightTargetFormData, pet: any): void {
+  private static validateBusinessRules(targetData: WeightTargetFormData, pet: { animalType: string }): void {
     const minWeight = parseFloat(targetData.minWeight.toString());
     const maxWeight = parseFloat(targetData.maxWeight.toString());
     

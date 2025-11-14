@@ -26,7 +26,6 @@ import type { WeightUnit } from '@/types/pet';
 import type { WeightTargetFormData } from '@/types/weight-targets';
 
 interface TargetRangeFormProps {
-  petId: string;
   petName: string;
   weightUnit: WeightUnit;
   currentMin?: number;
