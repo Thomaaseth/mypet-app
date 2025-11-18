@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from './schema';
 import { config } from '../config';
+import { dbLogger } from '../lib/logger';
 
 const client = postgres(config.db.url, {
   max: 1, // Supabase pooler recommendation
@@ -19,8 +20,8 @@ const client = postgres(config.db.url, {
 
 // Test connection on startup
 client`SELECT 1`
-  .then(() => console.log('[DB] ✅ Database connection established'))
-  .catch((error) => console.error('[DB] ❌ Failed to connect:', error.message));
+  .then(() => dbLogger.info('Database connection established'))
+  .catch((error) => dbLogger.error({ err: error }, 'Failed to connect to database'));
 
 export const db = drizzle(client, { schema });
 

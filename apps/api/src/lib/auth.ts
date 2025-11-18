@@ -5,8 +5,9 @@ import { db } from "../db"
 import { config } from "../config";
 import { createAuthMiddleware, APIError } from "better-auth/api"
 import { emailService } from "./email/email.service";
+import { authLogger } from './logger';
 
-console.log("Creating Better-auth instance...");
+authLogger.info('Creating Better-auth instance...');
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -44,7 +45,7 @@ export const auth = betterAuth({
             token: string 
         }) => {
             // Send reset password email using Resend
-            console.log(`Sending reset password email to ${user.email}`);
+            authLogger.info({ email: user.email }, 'Sending reset password email');
             
             const result = await emailService.sendPasswordResetEmail(
                 { 
@@ -55,11 +56,11 @@ export const auth = betterAuth({
             );
                         
             if (!result.success) {
-                console.error('Failed to send reset password email:', result.error);
+                authLogger.error({ error: result.error, email: user.email }, 'Failed to send reset password email');
                 throw new Error('Failed to send reset password email');
             }
             
-            console.log('Reset password email sent successfully');
+            authLogger.info({ email: user.email }, 'Reset password email sent successfully');
         },
         resetPasswordTokenExpiresIn: 3600, // 1 hour
     },
@@ -76,7 +77,7 @@ export const auth = betterAuth({
             // urlObj.searchParams.set('callbackURL', config.app.url);
             const modifiedUrl = urlObj.toString();
 
-            console.log(`Sending verification email to ${user.email}`);
+            authLogger.info({ email: user.email }, 'Sending email verification');
             
             const result = await emailService.sendVerificationEmail(
                 { 
@@ -87,11 +88,11 @@ export const auth = betterAuth({
             );
             
             if (!result.success) {
-                console.error('Failed to send verification email:', result.error);
+                authLogger.error({ error: result.error, email: user.email }, 'Failed to send email verification');
                 throw new Error('Failed to send verification email');
             }
             
-            console.log('Verification email sent successfully');
+            authLogger.info({ email: user.email }, 'Email verification sent successfully');
         },
         sendOnSignUp: true, // Automatically send verification email on signup
         autoSignInAfterVerification: true, // Auto sign in after email verification
@@ -106,7 +107,7 @@ export const auth = betterAuth({
                 token: string;
             }) => {
                 // Send change email verification using Resend
-                console.log(`Sending email change verification to ${newEmail}`);
+                authLogger.info({ newEmail: newEmail }, 'Sending email change verification');
                 const urlObj = new URL(url);
                 urlObj.searchParams.set('callbackURL', config.env.webUrl);
                 const modifiedUrl = urlObj.toString();
@@ -121,11 +122,11 @@ export const auth = betterAuth({
                 );
                 
                 if (!result.success) {
-                    console.error('Failed to send email change verification:', result.error);
+                    authLogger.error({ error: result.error, newEmail: newEmail }, 'Failed to send email change verification');
                     throw new Error('Failed to send email change verification');
                 }
                 
-                console.log('Email change verification sent successfully');
+                authLogger.info({ newEmail: newEmail }, 'Email change verification sent successfully');
             },
         },
     },
@@ -175,5 +176,5 @@ export const auth = betterAuth({
     },
 })
 
-console.log("Better-auth initialized successfully");
-console.log("🔧 Available endpoints:", Object.keys(auth));
+authLogger.info('Better-auth initialized successfully');
+authLogger.debug({ endpoints: Object.keys(auth) }, 'Available Better-auth endpoints');

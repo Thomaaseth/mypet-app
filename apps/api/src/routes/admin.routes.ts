@@ -6,6 +6,7 @@ import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth
 import { respondWithSuccess, respondWithError } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
 import { getCronConfig } from '../config/cron.config';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -51,7 +52,7 @@ router.post('/cron/trigger', async (req: AuthenticatedRequest, res: Response, ne
       throw new BadRequestError('Manual cron trigger is disabled');
     }
 
-    console.log('🔧 Manual cron job trigger requested by user:', req.authSession?.user.id);
+    logger.info({ userId: req.authSession?.user.id }, 'Manual cron job trigger requested');
     
     const result = await CronService.runDailyFoodStatusUpdate();
     

@@ -6,14 +6,23 @@ import {
     UserForbiddenError,
     UserNotAuthenticatedError,
 } from './errors';
+import { httpLogger } from '../lib/logger';
 
 export function middlewareLogResponse(req: Request, res: Response, next: NextFunction) {
     res.on('finish', () => {
         const statusCode = res.statusCode;
 
-        if (statusCode >= 300) {
-            console.log(`[NON-OK] ${req.method} ${req.url} - Status: ${statusCode}`);
-        }
+        try {
+            if (statusCode >= 300 && statusCode !== 304) {
+              httpLogger.info({
+                method: req.method,
+                url: req.url,
+                statusCode,
+              }, 'Non-OK response');
+            }
+          } catch (logError) {
+            process.stderr.write(`[LOGGING ERROR] ${logError}\n`);
+          }
     });
     next();
 }
@@ -46,7 +55,7 @@ export function errorMiddleware(err: Error, _: Request, res: Response, __: NextF
     }
 
     if (statusCode >= 500) {
-        console.log(err.message);
+        httpLogger.error({ err }, 'Server error');
     }
 
     respondWithError(res, statusCode, message);

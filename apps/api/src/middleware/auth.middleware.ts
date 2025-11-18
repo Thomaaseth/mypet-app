@@ -5,6 +5,7 @@ import { respondWithError } from '../lib/json';
 import { APIError } from 'better-auth/api';
 import { session } from '@/db';
 import { _statusCode } from 'better-auth/*';
+import { authLogger } from '../lib/logger';
 
 
 export interface AuthenticatedRequest extends Request {
@@ -64,7 +65,8 @@ export async function globalAuthHandler(req: Request, res: Response, next: NextF
         next();
     } catch (error: unknown) {
     
-    console.error('Global auth middleware error', error);
+    authLogger.error({ err: error }, 'Global auth middleware error');
+
     if (error instanceof APIError) {
         respondWithError(res, error.statusCode || 401, error.message);
         return;
