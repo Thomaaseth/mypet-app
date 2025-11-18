@@ -32,6 +32,8 @@ export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
       return response.weightEntries
     },
     enabled: !!petId, // Only run if petId exists
+    staleTime: 30 * 60 * 1000, // 30 mins
+    refetchOnWindowFocus: true,
     select: (data) => {
       // Sort entries (oldest to newest for chart)
       const sortedEntries = [...data].sort((a, b) => 

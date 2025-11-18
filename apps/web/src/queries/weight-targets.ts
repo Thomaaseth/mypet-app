@@ -16,6 +16,7 @@ export function useWeightTarget(petId: string) {
     queryFn: () => weightTargetApi.getWeightTarget(petId),
     enabled: !!petId,
     staleTime: Infinity, // WILL NEED TO TEST CACHE INVALIDATION / REFETCH
+    refetchOnWindowFocus: true,
   });
 }
 

@@ -18,7 +18,7 @@ export function middlewareLogResponse(req: Request, res: Response, next: NextFun
             
             const logData = {
                 method: req.method,
-                url: req.url,
+                url: req.originalUrl,
                 statusCode,
                 duration: `${duration}ms`,
             };
