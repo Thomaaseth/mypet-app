@@ -9,20 +9,34 @@ import {
 import { httpLogger } from '../lib/logger';
 
 export function middlewareLogResponse(req: Request, res: Response, next: NextFunction) {
-    res.on('finish', () => {
-        const statusCode = res.statusCode;
+    const startTime = Date.now();
 
+    res.on('finish', () => {
         try {
-            if (statusCode >= 300 && statusCode !== 304) {
-              httpLogger.info({
+            const statusCode = res.statusCode;
+            const duration = Date.now() - startTime;
+            
+            const logData = {
                 method: req.method,
                 url: req.url,
                 statusCode,
-              }, 'Non-OK response');
+                duration: `${duration}ms`,
+            };
+            
+            // Always log errors
+            if (statusCode >= 500) {
+                httpLogger.error(logData, 'Server error');
+            } else if (statusCode >= 400) {
+                httpLogger.warn(logData, 'Client error');
+            } else if (statusCode >= 300 && statusCode !== 304) {
+                httpLogger.info(logData, 'Redirect');
+            } else if (statusCode !== 304) {
+                // Log successful requests at DEBUG level (only visible with LOG_LEVEL=debug)
+                httpLogger.debug(logData, 'Request completed');
             }
-          } catch (logError) {
+        } catch (logError) {
             process.stderr.write(`[LOGGING ERROR] ${logError}\n`);
-          }
+        }
     });
     next();
 }
