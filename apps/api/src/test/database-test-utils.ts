@@ -17,6 +17,7 @@ export class DatabaseTestUtils {
       // Clean in dependency order (children first, parents last)
       await db.delete(schema.foodEntries);
       await db.delete(schema.weightEntries);
+      await db.delete(schema.weightTargets);
       await db.delete(schema.pets);
       await db.delete(schema.user);
     } catch (error) {
@@ -84,7 +85,6 @@ export class DatabaseTestUtils {
       name: `Test Pet ${index + 1}`,
       animalType: index % 2 === 0 ? ('cat' as const) : ('dog' as const),
       species: index % 2 === 0 ? 'Persian' : 'Golden Retriever',
-      weightUnit: 'kg' as const,
       isActive: true,
     }));
 
@@ -96,7 +96,8 @@ export class DatabaseTestUtils {
    */
   static async createTestWeightEntries(
     petId: string,
-    count: number = 2
+    count: number = 2,
+    weightUnit: 'kg' | 'lbs' = 'kg'
   ): Promise<Array<typeof schema.weightEntries.$inferSelect>> {
     const baseDate = new Date('2024-01-15');
     const entriesData = Array.from({ length: count }, (_, index) => {
@@ -105,7 +106,8 @@ export class DatabaseTestUtils {
       
       return {
         petId,
-        weight: (5.0 + index * 0.25).toFixed(2), // 5.00, 5.25, 5.50...
+        weight: (5.0 + index * 0.25).toFixed(2), // 5.00, 5.25, 5.50...,
+        weightUnit,
         date: date.toISOString().split('T')[0], // YYYY-MM-DD format
       };
     });
