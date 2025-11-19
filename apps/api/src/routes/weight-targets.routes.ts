@@ -1,8 +1,9 @@
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { WeightTargetsService } from '../services/weight-targets.service';
 import { globalAuthHandler } from '../middleware/auth.middleware';
 import { BadRequestError } from '../middleware/errors';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
+import { respondWithSuccess } from '../lib/json';
 
 const router = Router({ mergeParams: true }); // mergeParams to access petId from parent route
 
@@ -10,7 +11,7 @@ const router = Router({ mergeParams: true }); // mergeParams to access petId fro
 router.use(globalAuthHandler);
 
 // GET /api/pets/:petId/weight-target - Get weight target for a pet
-router.get('/', async (req: AuthenticatedRequest, res) => {
+router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { petId } = req.params;
     const userId = req.authSession?.user.id;
@@ -25,20 +26,15 @@ router.get('/', async (req: AuthenticatedRequest, res) => {
 
     const target = await WeightTargetsService.getWeightTarget(petId, userId);
     
-    res.json({
-      success: true,
-      data: {
-        weightTarget: target
-      }
-    });
+    respondWithSuccess(res, { weightTarget: target }, 'Weight target retrieved successfully');
+
   } catch (error) {
-    console.error('GET /weight-target error:', error);
-    throw error;
+    next(error);
   }
 });
 
-// PUT /api/pets/:petId/weight-target - Create or update weight target (upsert)
-router.put('/', async (req: AuthenticatedRequest, res) => {
+// PUT /api/pets/:petId/weight-target - Create or update weight target
+router.put('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { petId } = req.params;
     const userId = req.authSession?.user.id;
@@ -62,21 +58,15 @@ router.put('/', async (req: AuthenticatedRequest, res) => {
       { minWeight, maxWeight, weightUnit }
     );
     
-    res.json({
-      success: true,
-      data: {
-        weightTarget
-      },
-      message: 'Weight target saved successfully'
-    });
+    respondWithSuccess(res, { weightTarget }, 'Weight target saved successfully');
+
   } catch (error) {
-    console.error('PUT /weight-target error:', error);
-    throw error;
+    next(error);
   }
 });
 
 // DELETE /api/pets/:petId/weight-target - Delete weight target
-router.delete('/', async (req: AuthenticatedRequest, res) => {
+router.delete('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { petId } = req.params;
     const userId = req.authSession?.user.id;
@@ -91,13 +81,10 @@ router.delete('/', async (req: AuthenticatedRequest, res) => {
 
     await WeightTargetsService.deleteWeightTarget(petId, userId);
     
-    res.json({
-      success: true,
-      message: 'Weight target deleted successfully'
-    });
+    respondWithSuccess(res, null, 'Weight target deleted successfully');
+
   } catch (error) {
-    console.error('DELETE /weight-target error:', error);
-    throw error;
+    next(error);
   }
 });
 

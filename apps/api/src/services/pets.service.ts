@@ -8,6 +8,7 @@ import {
   NotFoundError, 
   UserForbiddenError 
 } from '../middleware/errors';
+import { dbLogger } from '@/lib/logger';
 
 export class PetsService {
   // input validation helpers
@@ -166,7 +167,7 @@ export class PetsService {
       if (error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error fetching user pets:', error);
+      dbLogger.error({ err: error }, 'Error fetching user pets');
       throw new BadRequestError('Failed to fetch pets');
     }
   }
@@ -199,7 +200,7 @@ export class PetsService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error fetching pet by ID:', error);
+      dbLogger.error({ err: error }, 'Error fetching pet by ID');
       throw new BadRequestError('Failed to fetch pet');
     }
   }
@@ -253,9 +254,9 @@ export class PetsService {
             date: entryDate,
           });
           
-          console.log(`Initial weight entry created for pet ${newPet.id}`);
+          dbLogger.info({ petId: newPet.id }, 'Initial weight entry created');
         } catch (weightError) {
-          console.error('Failed to create initial weight entry:', weightError);
+          dbLogger.error({ err: weightError }, 'Failed to create initial weight entry');
         }
       }
 
@@ -264,7 +265,7 @@ export class PetsService {
       if (error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error creating pet:', error);
+      dbLogger.error({ err: error }, 'Error creating pet');
       throw new BadRequestError('Failed to create pet');
     }
   }
@@ -322,7 +323,7 @@ export class PetsService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error updating pet:', error);
+      dbLogger.error({ err: error }, 'Error updating pet');
       throw new BadRequestError('Failed to update pet');
     }
   }
@@ -353,7 +354,7 @@ export class PetsService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error deleting pet:', error);
+      dbLogger.error({ err: error }, 'Error deleting pet');
       throw new BadRequestError('Failed to delete pet');
     }
   }
@@ -375,7 +376,7 @@ export class PetsService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error hard deleting pet:', error);
+      dbLogger.error({ err: error }, 'Error hard deleting pet');
       throw new BadRequestError('Failed to permanently delete pet');
     }
   }
@@ -398,7 +399,7 @@ export class PetsService {
 
       return result.length;
     } catch (error) {
-      console.error('Error getting pet count:', error);
+      dbLogger.error({ err: error }, 'Error getting pet count');
       return 0;
     }
   }

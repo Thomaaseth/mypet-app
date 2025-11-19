@@ -15,6 +15,8 @@ import {
 import { FoodValidations } from './validations';
 import { FoodCalculations } from './calculations';
 import type { DryFoodFormData, WetFoodFormData } from './types';
+import { dbLogger } from '../../lib/logger';
+
 
 export class FoodService {
   private static async verifyPetOwnership(petId: string, userId: string): Promise<void> {
@@ -96,7 +98,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error creating dry food entry:', error);
+      dbLogger.error({ err: error }, 'Error creating dry food entry');
       throw new BadRequestError('Failed to create dry food entry');
     }
   }
@@ -124,7 +126,7 @@ export class FoodService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error fetching dry food entries:', error);
+      dbLogger.error({ err: error }, 'Error fetching dry food entries');
       throw new BadRequestError('Failed to fetch dry food entries');
     }
   }
@@ -178,7 +180,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error updating dry food entry:', error);
+      dbLogger.error({ err: error }, 'Error updating dry food entry');
       throw new BadRequestError('Failed to update dry food entry');
     }
   }
@@ -207,7 +209,7 @@ export class FoodService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error fetching dry food entry:', error);
+      dbLogger.error({ err: error }, 'Error fetching dry food entry');
       throw new BadRequestError('Failed to fetch dry food entry');
     }
   }
@@ -263,7 +265,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error creating wet food entry:', error);
+      dbLogger.error({ err: error }, 'Error creating wet food entry');
       throw new BadRequestError('Failed to create wet food entry');
     }
   }
@@ -291,7 +293,7 @@ export class FoodService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error fetching wet food entries:', error);
+      dbLogger.error({ err: error }, 'Error fetching wet food entries');
       throw new BadRequestError('Failed to fetch wet food entries');
     }
   }
@@ -345,7 +347,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error updating wet food entry:', error);
+      dbLogger.error({ err: error }, 'Error updating wet food entry');
       throw new BadRequestError('Failed to update wet food entry');
     }
   }
@@ -375,7 +377,7 @@ export class FoodService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error fetching wet food entry:', error);
+      dbLogger.error({ err: error }, 'Error fetching wet food entry');
       throw new BadRequestError('Failed to fetch wet food entry');
     }
   }
@@ -404,7 +406,7 @@ export class FoodService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error fetching all food entries:', error);
+      dbLogger.error({ err: error }, 'Error fetching all food entries');
       throw new BadRequestError('Failed to fetch food entries');
     }
   }
@@ -439,7 +441,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error deleting food entry:', error);
+      dbLogger.error({ err: error }, 'Error deleting food entry');
       throw new BadRequestError('Failed to delete food entry');
     }
   }
@@ -486,7 +488,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error fetching finished food entries:', error);
+      dbLogger.error({ err: error }, 'Error fetching finished food entries');
       throw new BadRequestError('Failed to fetch finished food entries');
       }
   }
@@ -527,7 +529,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error marking food as finished:', error);
+      dbLogger.error({ err: error }, 'Error marking food as finished');
       throw new BadRequestError('Failed to mark food as finished');
     }
   }
@@ -605,7 +607,7 @@ export class FoodService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error updating finish date:', error);
+      dbLogger.error({ err: error }, 'Error updating finish date');
       throw new BadRequestError('Failed to update finish date');
     }
   }

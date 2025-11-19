@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { config } from '../../config';
+import { authLogger } from '../../lib/logger';
 
 const resend = new Resend(config.email.resendApiKey);
 
@@ -32,14 +33,14 @@ export async function sendEmail({ to, subject, html }: EmailOptions): Promise<Em
         });
 
         if (error) {
-            console.error('Resend error:', error);
-            return { success: false, error: error.message}
+          authLogger.error({ err: error }, 'Resend email error');
+          return { success: false, error: error.message}
         }
-        console.log('Email send successfully:', data);
+        authLogger.info({ emailId: data?.id, to }, 'Email sent successfully');
         return { success: true };
     } catch (error) {
-        console.error('Email service error:', error);
-        return {
+      authLogger.error({ err: error }, 'Email service error');
+      return {
             success: false,
             error: error instanceof Error ? error.message : 'Failed to send email'
         };

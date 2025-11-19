@@ -9,6 +9,7 @@ import {
   UserForbiddenError 
 } from '../middleware/errors';
 import { PetsService } from './pets.service';
+import { dbLogger } from '../lib/logger';
 
 export class WeightEntriesService {
   // Verify pet ownership (helper method)
@@ -146,7 +147,7 @@ export class WeightEntriesService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error fetching weight entries:', error);
+      dbLogger.error({ err: error }, 'Error fetching weight entries');
       throw new BadRequestError('Failed to fetch weight entries');
     }
   }
@@ -175,7 +176,7 @@ export class WeightEntriesService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error fetching weight entry by ID:', error);
+      dbLogger.error({ err: error }, 'Error fetching weight entry by ID');
       throw new BadRequestError('Failed to fetch weight entry');
     }
   }
@@ -213,7 +214,7 @@ export class WeightEntriesService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error creating weight entry:', error);
+      dbLogger.error({ err: error }, 'Error creating weight entry');
       throw new BadRequestError('Failed to create weight entry');
     }
   }
@@ -272,7 +273,7 @@ export class WeightEntriesService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error updating weight entry:', error);
+      dbLogger.error({ err: error }, 'Error updating weight entry');
       throw new BadRequestError('Failed to update weight entry');
     }
   }
@@ -299,7 +300,7 @@ export class WeightEntriesService {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
         throw error;
       }
-      console.error('Error deleting weight entry:', error);
+      dbLogger.error({ err: error }, 'Error deleting weight entry');
       throw new BadRequestError('Failed to delete weight entry');
     }
   }

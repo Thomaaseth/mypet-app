@@ -8,6 +8,7 @@ import {
   NotFoundError,
 } from '../middleware/errors';
 import { PetsService } from './pets.service';
+import { dbLogger } from '../lib/logger';
 
 export class WeightTargetsService {
   // Verify pet ownership (reuse pattern from WeightEntriesService)
@@ -99,7 +100,7 @@ export class WeightTargetsService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error fetching weight target:', error);
+      dbLogger.error({ err: error }, 'Error fetching weight target');
       throw new BadRequestError('Failed to fetch weight target');
     }
   }
@@ -155,7 +156,7 @@ export class WeightTargetsService {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error upserting weight target:', error);
+      dbLogger.error({ err: error }, 'Error upserting weight target');
       throw new BadRequestError('Failed to save weight target');
     }
   }
@@ -182,7 +183,7 @@ export class WeightTargetsService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      console.error('Error deleting weight target:', error);
+      dbLogger.error({ err: error }, 'Error deleting weight target');
       throw new BadRequestError('Failed to delete weight target');
     }
   }
