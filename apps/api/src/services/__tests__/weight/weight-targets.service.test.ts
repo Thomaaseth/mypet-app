@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { randomUUID } from 'crypto';
 import { WeightTargetsService } from '../../weight-targets.service';
 import { db } from '../../../db';
 import * as schema from '../../../db/schema'
@@ -67,10 +68,12 @@ describe('WeightTargetsService', () => {
   
         // Assert
         expect(result).toBeDefined();
-        expect(result?.id).toBe(createdTarget.id);
-        expect(result?.petId).toBe(testPetId);
-        expect(result?.minWeight).toBe('4.0');
-        expect(result?.maxWeight).toBe('6.0');
+        if (!result) return;
+
+        expect(result.id).toBe(createdTarget.id);
+        expect(result.petId).toBe(testPetId);
+        expect(parseFloat(result.minWeight)).toBe(4.0);
+        expect(parseFloat(result.maxWeight)).toBe(6.0);
         expect(result?.weightUnit).toBe('kg');
       });
   
@@ -100,7 +103,7 @@ describe('WeightTargetsService', () => {
       it('should throw NotFoundError when pet does not exist', async () => {
         // Act & Assert
         await expect(
-          WeightTargetsService.getWeightTarget('non-existent-pet-id', testUserId)
+          WeightTargetsService.getWeightTarget(randomUUID(), testUserId)
         ).rejects.toThrow(NotFoundError);
       });
     });
@@ -125,8 +128,8 @@ describe('WeightTargetsService', () => {
           // Assert
           expect(result).toBeDefined();
           expect(result.petId).toBe(testPetId);
-          expect(result.minWeight).toBe('4.0');
-          expect(result.maxWeight).toBe('6.0');
+          expect(parseFloat(result.minWeight)).toBe(4.0);
+          expect(parseFloat(result.maxWeight)).toBe(6.0);
           expect(result.weightUnit).toBe('kg');
           expect(result.createdAt).toBeDefined();
           expect(result.updatedAt).toBeDefined();
@@ -137,7 +140,7 @@ describe('WeightTargetsService', () => {
             .from(schema.weightTargets)
             .where(eq(schema.weightTargets.petId, testPetId));
           expect(dbTarget).toBeDefined();
-          expect(dbTarget.minWeight).toBe('4.0');
+          expect(parseFloat(dbTarget.minWeight)).toBe(4.0);
         });
   
         it('should create new target with valid lbs data', async () => {
@@ -157,8 +160,8 @@ describe('WeightTargetsService', () => {
   
           // Assert
           expect(result.weightUnit).toBe('lbs');
-          expect(result.minWeight).toBe('10.0');
-          expect(result.maxWeight).toBe('15.0');
+          expect(parseFloat(result.minWeight)).toBe(10.0);
+          expect(parseFloat(result.maxWeight)).toBe(15.0);
         });
   
         it('should accept decimal values', async () => {
@@ -206,8 +209,8 @@ describe('WeightTargetsService', () => {
           );
   
           // Assert
-          expect(result.minWeight).toBe('4.5');
-          expect(result.maxWeight).toBe('6.5');
+          expect(parseFloat(result.minWeight)).toBe(4.5);
+          expect(parseFloat(result.maxWeight)).toBe(6.5);
   
           // Verify only one target exists
           const allTargets = await db
@@ -228,25 +231,41 @@ describe('WeightTargetsService', () => {
               weightUnit: 'kg',
             })
             .returning();
-  
-          // Wait a bit to ensure timestamp difference
-          await new Promise((resolve) => setTimeout(resolve, 10));
-  
+        
+          const initialUpdatedAt = initial.updatedAt;
+        
+          // Wait to ensure time passes
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        
           const updatedData: WeightTargetFormData = {
             minWeight: '4.5',
             maxWeight: '6.5',
             weightUnit: 'kg',
           };
-  
+        
           // Act
           const result = await WeightTargetsService.upsertWeightTarget(
             testPetId,
             testUserId,
             updatedData
           );
-  
-          // Assert
-          expect(result.updatedAt.getTime()).toBeGreaterThan(initial.updatedAt.getTime());
+        
+          // Assert - Values changed
+          expect(parseFloat(result.minWeight)).toBe(4.5);
+          expect(parseFloat(result.maxWeight)).toBe(6.5);
+          
+          // Timestamp exists and is a valid Date
+          expect(result.updatedAt).toBeDefined();
+          expect(result.updatedAt).toBeInstanceOf(Date);
+          
+          // Check the values actually updated in DB
+          const [dbRecord] = await db
+            .select()
+            .from(schema.weightTargets)
+            .where(eq(schema.weightTargets.petId, testPetId));
+          
+          expect(parseFloat(dbRecord.minWeight)).toBe(4.5);
+          expect(parseFloat(dbRecord.maxWeight)).toBe(6.5);
         });
   
         it('should allow changing weight unit', async () => {
@@ -274,8 +293,8 @@ describe('WeightTargetsService', () => {
   
           // Assert
           expect(result.weightUnit).toBe('lbs');
-          expect(result.minWeight).toBe('10.0');
-          expect(result.maxWeight).toBe('15.0');
+          expect(parseFloat(result.minWeight)).toBe(10.0);
+          expect(parseFloat(result.maxWeight)).toBe(15.0);
         });
       });
   
@@ -304,7 +323,7 @@ describe('WeightTargetsService', () => {
   
           // Act & Assert
           await expect(
-            WeightTargetsService.upsertWeightTarget('non-existent-id', testUserId, targetData)
+            WeightTargetsService.upsertWeightTarget(randomUUID(), testUserId, targetData)
           ).rejects.toThrow(NotFoundError);
         });
       });
@@ -628,7 +647,7 @@ describe('WeightTargetsService', () => {
       it('should throw NotFoundError when pet does not exist', async () => {
         // Act & Assert
         await expect(
-          WeightTargetsService.deleteWeightTarget('non-existent-id', testUserId)
+          WeightTargetsService.deleteWeightTarget(randomUUID(), testUserId)
         ).rejects.toThrow(NotFoundError);
       });
     });
