@@ -4,6 +4,7 @@ import type { Pet } from '@/types/pet';
 import type { WeightEntry } from '@/types/weights';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { getApiUrl } from '@/lib/env';
+import type { WeightTarget } from '@/types/weight-targets';
 
 
 // Get API base URL from environment
@@ -23,8 +24,6 @@ export const mockPets: Pet[] = [
     species: 'Persian',
     gender: 'female',
     birthDate: '2020-01-15',
-    weight: '4.50',
-    weightUnit: 'kg',
     isNeutered: true,
     microchipNumber: '123456789',
     imageUrl: null,
@@ -41,8 +40,6 @@ export const mockPets: Pet[] = [
     species: 'Golden Retriever',
     gender: 'male',
     birthDate: '2019-06-20',
-    weight: '30.00',
-    weightUnit: 'kg',
     isNeutered: false,
     microchipNumber: null,
     imageUrl: null,
@@ -58,6 +55,7 @@ export const mockWeightEntries: WeightEntry[] = [
     id: 'weight-1',
     petId: 'pet-1',
     weight: '4.50',
+    weightUnit: 'kg',
     date: '2024-01-15',
     createdAt: '2024-01-15T00:00:00.000Z',
     updatedAt: '2024-01-15T00:00:00.000Z',
@@ -66,16 +64,32 @@ export const mockWeightEntries: WeightEntry[] = [
     id: 'weight-2',
     petId: 'pet-1',
     weight: '4.60',
+    weightUnit: 'kg',
     date: '2024-02-15',
     createdAt: '2024-02-15T00:00:00.000Z',
     updatedAt: '2024-02-15T00:00:00.000Z',
   },
 ];
 
+export const mockWeightTarget: WeightTarget = {
+  id: 'target-1',
+  petId: 'pet-1',
+  minWeight: '4.0',
+  maxWeight: '5.0',
+  weightUnit: 'kg',
+  createdAt: '2024-01-01T00:00:00.000Z',
+  updatedAt: '2024-01-01T00:00:00.000Z',
+};
+
 let petsList = [...mockPets];
+let currentWeightTarget: WeightTarget | null = { ...mockWeightTarget };
 
 export function resetMockPets() {
   petsList = [...mockPets];
+}
+
+export function resetMockWeightTarget() {
+  currentWeightTarget = { ...mockWeightTarget };
 }
 
 /**
@@ -300,10 +314,93 @@ const weightsHandlers = [
   }),
 ];
 
+// WEIGHT TARGET HANDLERS
+const weightTargetsHandlers = [
+  // GET /api/pets/:petId/weight-target - Get weight target for a pet
+  http.get(`${API_BASE_URL}/api/pets/:petId/weight-target`, ({ params }) => {
+    const { petId } = params;
+    
+    console.log('🔵 MSW: Intercepted GET /pets/:petId/weight-target', { petId });
+
+    // Return null if no target exists
+    if (!currentWeightTarget || currentWeightTarget.petId !== petId) {
+      return HttpResponse.json({
+        success: true,
+        data: {
+          weightTarget: null,
+        },
+        message: 'No weight target found for this pet',
+      });
+    }
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        weightTarget: currentWeightTarget,
+      },
+      message: 'Weight target retrieved successfully',
+    });
+  }),
+
+  // PUT /api/pets/:petId/weight-target - Upsert weight target
+  http.put(`${API_BASE_URL}/api/pets/:petId/weight-target`, async ({ params, request }) => {
+    const { petId } = params;
+    const body = await request.json();
+    
+    console.log('🔵 MSW: Intercepted PUT /pets/:petId/weight-target', { petId, body });
+
+    // Simulate creating or updating target
+    const upsertedTarget: WeightTarget = {
+      id: currentWeightTarget?.id || `target-${Date.now()}`,
+      petId: petId as string,
+      createdAt: currentWeightTarget?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...(body as Partial<WeightTarget>),
+    } as WeightTarget;
+
+    currentWeightTarget = upsertedTarget;
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        weightTarget: upsertedTarget,
+      },
+      message: 'Weight target saved successfully',
+    });
+  }),
+
+  // DELETE /api/pets/:petId/weight-target - Delete weight target
+  http.delete(`${API_BASE_URL}/api/pets/:petId/weight-target`, ({ params }) => {
+    const { petId } = params;
+    
+    console.log('🔵 MSW: Intercepted DELETE /pets/:petId/weight-target', { petId });
+
+    // Check if target exists
+    if (!currentWeightTarget || currentWeightTarget.petId !== petId) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Weight target not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    // Delete the target
+    currentWeightTarget = null;
+
+    return HttpResponse.json({
+      success: true,
+      message: 'Weight target deleted successfully',
+    });
+  }),
+];
+
 // EXPORT ALL HANDLERS
 export const handlers = [
   ...petsHandlers,
   ...weightsHandlers,
+  ...weightTargetsHandlers,
   // add next handlers
 ];
 

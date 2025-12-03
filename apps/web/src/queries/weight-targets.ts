@@ -32,7 +32,8 @@ export function useUpsertWeightTarget(petId: string) {
       queryClient.invalidateQueries({ queryKey: weightTargetKeys.byPet(petId) });
       
       // Also invalidate weight entries (they may need to show the target on chart)
-      queryClient.invalidateQueries({ queryKey: ['weights', petId] });
+      // TEST WITHOUT IT
+      // queryClient.invalidateQueries({ queryKey: ['weights', petId] });
 
       toastService.success('Weight target saved successfully');
     },
