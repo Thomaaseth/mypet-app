@@ -91,6 +91,90 @@ export function resetMockPets() {
 export function resetMockWeightTarget() {
   currentWeightTarget = { ...mockWeightTarget };
 }
+export const mockActiveDryFood: DryFoodEntry[] = [
+  {
+    id: 'dry-1',
+    petId: 'pet-1',
+    foodType: 'dry',
+    brandName: 'Royal Canin',
+    productName: 'Persian Adult',
+    bagWeight: '2.0',
+    bagWeightUnit: 'kg',
+    dailyAmount: '100',
+    dryDailyAmountUnit: 'grams',
+    dateStarted: '2024-01-01',
+    dateFinished: null,
+    isActive: true,
+    remainingDays: 15,
+    remainingWeight: 1500,
+    depletionDate: '2024-01-16',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    numberOfUnits: null,
+    weightPerUnit: null,
+    wetWeightUnit: null,
+    wetDailyAmountUnit: null,
+  },
+  {
+    id: 'dry-2',
+    petId: 'pet-1',
+    foodType: 'dry',
+    brandName: 'Hills',
+    productName: 'Science Diet',
+    bagWeight: '3.0',
+    bagWeightUnit: 'kg',
+    dailyAmount: '120',
+    dryDailyAmountUnit: 'grams',
+    dateStarted: '2024-01-15',
+    dateFinished: null,
+    isActive: true,
+    remainingDays: 5, // Low stock
+    remainingWeight: 600,
+    depletionDate: '2024-01-20',
+    createdAt: '2024-01-15T00:00:00.000Z',
+    updatedAt: '2024-01-15T00:00:00.000Z',
+    numberOfUnits: null,
+    weightPerUnit: null,
+    wetWeightUnit: null,
+    wetDailyAmountUnit: null,
+  },
+];
+
+export const mockFinishedDryFood: DryFoodEntry[] = [
+  {
+    id: 'dry-finished-1',
+    petId: 'pet-1',
+    foodType: 'dry',
+    brandName: 'Purina',
+    productName: 'Pro Plan',
+    bagWeight: '2.5',
+    bagWeightUnit: 'kg',
+    dailyAmount: '123',
+    dryDailyAmountUnit: 'grams',
+    dateStarted: '2024-01-01',
+    dateFinished: '2024-01-23',
+    isActive: false,
+    actualDaysElapsed: 22,
+    actualDailyConsumption: 113.64,
+    expectedDailyConsumption: 110,
+    variancePercentage: 3.31,
+    feedingStatus: 'normal',
+    createdAt: '2023-12-01T00:00:00.000Z',
+    updatedAt: '2023-12-23T00:00:00.000Z',
+    numberOfUnits: null,
+    weightPerUnit: null,
+    wetWeightUnit: null,
+    wetDailyAmountUnit: null,
+  },
+];
+
+let activeDryFoodList = [...mockActiveDryFood];
+let finishedDryFoodList = [...mockFinishedDryFood];
+
+export function resetMockDryFood() {
+  activeDryFoodList = [...mockActiveDryFood];
+  finishedDryFoodList = [...mockFinishedDryFood];
+}
 
 /**
  * REQUEST HANDLERS
@@ -396,11 +480,276 @@ const weightTargetsHandlers = [
   }),
 ];
 
+// DRY FOOD HANDLERS
+const dryFoodHandlers = [
+  // GET /api/pets/:petId/food/dry - Get active dry food entries
+  http.get(`${API_BASE_URL}/api/pets/:petId/food/dry`, ({ params }) => {
+    const { petId } = params;
+    
+    console.log('🔵 MSW: Intercepted GET /pets/:petId/food/dry', { petId });
+
+    const entries = activeDryFoodList.filter(entry => entry.petId === petId);
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        foodEntries: entries,
+        total: entries.length,
+      },
+      message: `Retrieved ${entries.length} active dry food entries`,
+    });
+  }),
+
+  // GET /api/pets/:petId/food/finished - Get finished dry food entries (with foodType filter)
+  http.get(`${API_BASE_URL}/api/pets/:petId/food/finished`, ({ params, request }) => {
+    const { petId } = params;
+    const url = new URL(request.url);
+    const foodType = url.searchParams.get('foodType');
+    
+    console.log('🔵 MSW: Intercepted GET /pets/:petId/food/finished', { petId, foodType });
+
+    // Filter by foodType if specified
+    let entries = finishedDryFoodList.filter(entry => entry.petId === petId);
+    
+    if (foodType === 'dry') {
+      entries = entries.filter(entry => entry.foodType === 'dry');
+    }
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        foodEntries: entries,
+        total: entries.length,
+      },
+      message: `Retrieved ${entries.length} finished dry food entries`,
+    });
+  }),
+
+  // POST /api/pets/:petId/food/dry - Create dry food entry
+  http.post(`${API_BASE_URL}/api/pets/:petId/food/dry`, async ({ params, request }) => {
+    const { petId } = params;
+    const body = await request.json();
+    
+    console.log('🔵 MSW: Intercepted POST /pets/:petId/food/dry', { petId, body });
+
+    const newEntry: DryFoodEntry = {
+      id: `dry-${Date.now()}`,
+      petId: petId as string,
+      foodType: 'dry',
+      dateFinished: null,
+      isActive: true,
+      remainingDays: 20,
+      remainingWeight: 2000,
+      depletionDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      numberOfUnits: null,
+      weightPerUnit: null,
+      wetWeightUnit: null,
+      wetDailyAmountUnit: null,
+      ...(body as Partial<DryFoodEntry>),
+    } as DryFoodEntry;
+
+    activeDryFoodList.push(newEntry);
+
+    return HttpResponse.json(
+      {
+        success: true,
+        data: { foodEntry: newEntry },
+        message: 'Dry food entry created successfully',
+      },
+      { status: 201 }
+    );
+  }),
+
+  // PUT /api/pets/:petId/food/dry/:foodId - Update dry food entry
+  http.put(`${API_BASE_URL}/api/pets/:petId/food/dry/:foodId`, async ({ params, request }) => {
+    const { petId, foodId } = params;
+    const body = await request.json();
+    
+    console.log('🔵 MSW: Intercepted PUT /pets/:petId/food/dry/:foodId', { petId, foodId, body });
+
+    const entryIndex = activeDryFoodList.findIndex(
+      entry => entry.id === foodId && entry.petId === petId
+    );
+
+    if (entryIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Food entry not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    const updatedEntry = {
+      ...activeDryFoodList[entryIndex],
+      ...(body as Partial<DryFoodEntry>),
+      updatedAt: new Date().toISOString(),
+    };
+
+    activeDryFoodList[entryIndex] = updatedEntry;
+
+    return HttpResponse.json({
+      success: true,
+      data: { foodEntry: updatedEntry },
+      message: 'Dry food entry updated successfully',
+    });
+  }),
+
+  // DELETE /api/pets/:petId/food/:foodId - Delete dry food entry
+  http.delete(`${API_BASE_URL}/api/pets/:petId/food/:foodId`, ({ params }) => {
+    const { petId, foodId } = params;
+    
+    console.log('🔵 MSW: Intercepted DELETE /pets/:petId/food/:foodId', { petId, foodId });
+
+    const activeIndex = activeDryFoodList.findIndex(
+      entry => entry.id === foodId && entry.petId === petId
+    );
+    
+    const finishedIndex = finishedDryFoodList.findIndex(
+      entry => entry.id === foodId && entry.petId === petId
+    );
+
+    if (activeIndex === -1 && finishedIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Food entry not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    if (activeIndex !== -1) {
+      activeDryFoodList.splice(activeIndex, 1);
+    }
+    
+    if (finishedIndex !== -1) {
+      finishedDryFoodList.splice(finishedIndex, 1);
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: 'Food entry deleted successfully',
+    });
+  }),
+
+  // PATCH /api/pets/:petId/food/:foodId/finish - Mark food as finished
+  http.patch(`${API_BASE_URL}/api/pets/:petId/food/:foodId/finish`, async ({ params }) => {
+    const { petId, foodId } = params;
+    
+    console.log('🔵 MSW: Intercepted PATCH /pets/:petId/food/:foodId/finish', { petId, foodId });
+
+    const entryIndex = activeDryFoodList.findIndex(
+      entry => entry.id === foodId && entry.petId === petId
+    );
+
+    if (entryIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Food entry not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    const entry = activeDryFoodList[entryIndex];
+    const finishedEntry: DryFoodEntry = {
+      ...entry,
+      dateFinished: new Date().toISOString().split('T')[0],
+      isActive: false,
+      actualDaysElapsed: 20,
+      actualDailyConsumption: 100,
+      expectedDailyConsumption: parseFloat(entry.dailyAmount),
+      variancePercentage: 0,
+      feedingStatus: 'normal',
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Move from active to finished
+    activeDryFoodList.splice(entryIndex, 1);
+    finishedDryFoodList.unshift(finishedEntry);
+
+    return HttpResponse.json({
+      success: true,
+      data: { foodEntry: finishedEntry },
+      message: 'Food entry marked as finished',
+    });
+  }),
+
+  // PUT /api/pets/:petId/food/:foodId/finish-date - Update finish date
+  http.put(`${API_BASE_URL}/api/pets/:petId/food/:foodId/finish-date`, async ({ params, request }) => {
+    const { petId, foodId } = params;
+    const body = await request.json();
+    
+    console.log('🔵 MSW: Intercepted PUT /pets/:petId/food/:foodId/finish-date', { petId, foodId, body });
+
+    const entryIndex = finishedDryFoodList.findIndex(
+      entry => entry.id === foodId && entry.petId === petId
+    );
+
+    if (entryIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Finished food entry not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    const entry = finishedDryFoodList[entryIndex];
+    const newDateFinished = (body as { dateFinished: string }).dateFinished;
+    
+    // Calculate actualDaysElapsed dynamically
+    const startDate = new Date(entry.dateStarted);
+    const finishDate = new Date(newDateFinished);
+    const actualDaysElapsed = Math.ceil((finishDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Calculate consumption metrics
+    const bagWeightGrams = parseFloat(entry.bagWeight) * (entry.bagWeightUnit === 'kg' ? 1000 : 453.592);
+    const expectedDailyConsumption = parseFloat(entry.dailyAmount);
+    const actualDailyConsumption = bagWeightGrams / actualDaysElapsed;
+    const variancePercentage = ((actualDailyConsumption - expectedDailyConsumption) / expectedDailyConsumption) * 100;
+    
+    // Determine feeding status
+    let feedingStatus: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
+    if (variancePercentage > 10) feedingStatus = 'overfeeding';
+    else if (variancePercentage > 5) feedingStatus = 'slightly-over';
+    else if (variancePercentage < -10) feedingStatus = 'underfeeding';
+    else if (variancePercentage < -5) feedingStatus = 'slightly-under';
+    else feedingStatus = 'normal';
+
+    const updatedEntry = {
+      ...entry,
+      dateFinished: newDateFinished,
+      actualDaysElapsed,
+      actualDailyConsumption: Math.round(actualDailyConsumption * 100) / 100,
+      expectedDailyConsumption,
+      variancePercentage: Math.round(variancePercentage * 100) / 100,
+      feedingStatus,
+      updatedAt: new Date().toISOString(),
+    };
+
+    finishedDryFoodList[entryIndex] = updatedEntry;
+
+    return HttpResponse.json({
+      success: true,
+      data: { foodEntry: updatedEntry },
+      message: 'Finish date updated successfully',
+    });
+  }),
+];
+
 // EXPORT ALL HANDLERS
 export const handlers = [
   ...petsHandlers,
   ...weightsHandlers,
   ...weightTargetsHandlers,
+  ...dryFoodHandlers,
   // add next handlers
 ];
 
