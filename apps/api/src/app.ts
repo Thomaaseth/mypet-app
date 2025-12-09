@@ -9,6 +9,7 @@ import { config } from "./config";
 import petRoutes from '@/routes/pets.routes';
 import foodRoutes from '@/routes/food.routes';
 import adminRoutes from '@/routes/admin.routes';
+import vetRoutes from '@/routes/veterinarians.routes';
 
 export const app = express();
 
@@ -32,6 +33,9 @@ app.use('/api/pets', petRoutes)
 
 // FOOD ROUTES
 app.use('/api/pets', foodRoutes)
+
+// VET ROUTES
+app.use('/api/vets', vetRoutes)
 
 // APP HEALTH   
 app.get('/api/health', (req, res, next) => {

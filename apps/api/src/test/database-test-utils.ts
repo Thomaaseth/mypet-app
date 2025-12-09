@@ -15,9 +15,11 @@ export class DatabaseTestUtils {
   static async cleanDatabase(): Promise<void> {
     try {
       // Clean in dependency order (children first, parents last)
+      await db.delete(schema.petVeterinarians);
       await db.delete(schema.foodEntries);
       await db.delete(schema.weightEntries);
       await db.delete(schema.weightTargets);
+      await db.delete(schema.veterinarians);
       await db.delete(schema.pets);
       await db.delete(schema.user);
     } catch (error) {

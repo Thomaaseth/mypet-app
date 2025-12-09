@@ -4,5 +4,5 @@ export * from './weight-entries';
 export * from './relations';
 export * from './food';
 export * from './weight-targets';
-// export * from './vet'
-// export * from './appointment'
+export * from './veterinarians';
+export * from './pet-veterinarians';
