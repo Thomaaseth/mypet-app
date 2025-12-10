@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,9 @@ export default function VetCard({
   assignedPetCount = 0,
   isPrimaryForAnyPet = false,
 }: VetCardProps) {
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const fullAddress = [
     vet.addressLine1,
     vet.addressLine2,
@@ -71,7 +75,7 @@ export default function VetCard({
             )}
           </div>
           <CardAction>
-            <DropdownMenu>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
@@ -79,17 +83,27 @@ export default function VetCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(vet)}>
-                  <Edit2 className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
+                <DropdownMenuItem 
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setIsDropdownOpen(false);
+                      onEdit(vet);
+                    }}
+                  >
+                    <Edit2 className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDelete(vet)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setIsDropdownOpen(false);
+                      onDelete(vet);
+                    }}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

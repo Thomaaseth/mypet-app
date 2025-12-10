@@ -230,8 +230,8 @@ export default function VetForm({
         </p>
       </div>
 
-{/* Pet Assignment - Only show in CREATE mode and if user has pets */}
-{!isEditing && pets && pets.length > 0 && (
+      {/* Pet Assignment - Only show in CREATE mode and if user has pets */}
+      {!isEditing && pets && pets.length > 0 && (
         <div className="space-y-4 p-4 border rounded-md bg-muted/50">
           <div className="space-y-2">
             <Label className="text-base font-semibold">Assign to Pets (Optional)</Label>

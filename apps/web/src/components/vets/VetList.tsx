@@ -184,7 +184,7 @@ export default function VetList() {
                     onSubmit={handleCreateVet}
                     onCancel={() => setIsCreateDialogOpen(false)}
                     isLoading={isActionLoading}
-                  />
+                    />
                 </DialogContent>
               </Dialog>
             </div>
@@ -225,7 +225,7 @@ export default function VetList() {
                 onSubmit={handleCreateVet}
                 onCancel={() => setIsCreateDialogOpen(false)}
                 isLoading={isActionLoading}
-              />
+                />
             </DialogContent>
           </Dialog>
         </div>
@@ -243,7 +243,7 @@ export default function VetList() {
         </div>
 
         {/* Edit Dialog */}
-        <Dialog open={!!editingVet} onOpenChange={(open) => !open && setEditingVet(null)}>
+        <Dialog open={!!editingVet} onOpenChange={() => setEditingVet(null)}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Veterinarian</DialogTitle>
@@ -257,7 +257,7 @@ export default function VetList() {
                 onSubmit={handleUpdateVet}
                 onCancel={() => setEditingVet(null)}
                 isLoading={isActionLoading}
-              />
+                />
             )}
           </DialogContent>
         </Dialog>
@@ -265,8 +265,8 @@ export default function VetList() {
         {/* Delete Confirmation Dialog */}
         <AlertDialog
           open={!!deletingVet}
-          onOpenChange={(open) => !open && setDeletingVet(null)}
-        >
+          onOpenChange={() => setDeletingVet(null)}
+          >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>

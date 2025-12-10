@@ -33,7 +33,8 @@ interface PetCardProps {
 
 export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
   const [imageError, setImageError] = useState(false);
-  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   const age = calculatePetAge(pet.birthDate);
 
   // Query latest weight from weight_entries
