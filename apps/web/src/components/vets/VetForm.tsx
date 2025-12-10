@@ -1,18 +1,26 @@
 import { z } from 'zod'
+import { useState } from 'react';
 import { useVetForm } from '@/hooks/useVetForm';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { usePets } from '@/queries/pets';
+import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
 
+
 interface VetFormProps {
   vet?: Veterinarian;
-  onSubmit: (data: VeterinarianFormData) => Promise<Veterinarian | null>;
+  onSubmit: (
+    data: VeterinarianFormData,
+    petIds?: string[],
+    isPrimaryForPet?: boolean
+  ) => Promise<Veterinarian | null>;
   onCancel?: () => void;
   isLoading?: boolean;
   error?: string;
@@ -26,6 +34,12 @@ export default function VetForm({
   error,
 }: VetFormProps) {
   const isEditing = !!vet;
+
+  const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
+  const [isPrimaryVet, setIsPrimaryVet] = useState(false);
+
+  // Fetch pets for assignment
+  const { data: pets } = usePets();
 
   const {
     register,
@@ -48,7 +62,12 @@ export default function VetForm({
         notes: formData.notes ?? '',
       };
       
-      await onSubmit(transformedData);
+      // Pass pet assignment data to parent
+      await onSubmit(
+        transformedData,
+        selectedPetIds.length > 0 ? selectedPetIds : undefined,
+        isPrimaryVet
+      );
     } catch (err) {
       console.error('Form submission error:', err);
     }
@@ -211,6 +230,59 @@ export default function VetForm({
         </p>
       </div>
 
+{/* Pet Assignment - Only show in CREATE mode and if user has pets */}
+{!isEditing && pets && pets.length > 0 && (
+        <div className="space-y-4 p-4 border rounded-md bg-muted/50">
+          <div className="space-y-2">
+            <Label className="text-base font-semibold">Assign to Pets (Optional)</Label>
+            <p className="text-sm text-muted-foreground">
+              Select which pets use this veterinarian
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {pets.map((pet) => (
+              <div key={pet.id} className="flex items-center space-x-3">
+                <Checkbox
+                  id={`pet-${pet.id}`}
+                  checked={selectedPetIds.includes(pet.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedPetIds([...selectedPetIds, pet.id]);
+                    } else {
+                      setSelectedPetIds(selectedPetIds.filter((id) => id !== pet.id));
+                    }
+                  }}
+                />
+                <Label
+                  htmlFor={`pet-${pet.id}`}
+                  className="flex items-center gap-2 cursor-pointer font-normal"
+                >
+                  <span>{pet.name}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {pet.animalType}
+                  </Badge>
+                </Label>
+              </div>
+            ))}
+          </div>
+
+          {selectedPetIds.length > 0 && (
+            <div className="flex items-center space-x-3 pt-2 border-t">
+              <Checkbox
+                id="isPrimaryVet"
+                checked={isPrimaryVet}
+                onCheckedChange={(checked) => setIsPrimaryVet(!!checked)}
+              />
+              <Label htmlFor="isPrimaryVet" className="cursor-pointer font-normal">
+                Set as primary veterinarian for selected pets
+              </Label>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-4">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>

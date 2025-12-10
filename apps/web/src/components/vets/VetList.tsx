@@ -50,10 +50,16 @@ export default function VetList() {
 
   // Handle create vet
   const handleCreateVet = async (
-    vetData: VeterinarianFormData
+    vetData: VeterinarianFormData,
+    petIds?: string[],
+    isPrimaryForPet?: boolean,
   ): Promise<Veterinarian | null> => {
     try {
-      const result = await createVetMutation.mutateAsync({ vetData });
+      const result = await createVetMutation.mutateAsync({
+        vetData,
+        petIds,
+        isPrimaryForPet,
+      });
       setIsCreateDialogOpen(false);
       return result;
     } catch (error) {
