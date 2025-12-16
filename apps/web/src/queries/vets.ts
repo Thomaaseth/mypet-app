@@ -61,13 +61,11 @@ export function useCreateVeterinarian() {
     mutationFn: ({
       vetData,
       petIds,
-      isPrimaryForPet,
     }: {
       vetData: VeterinarianFormData;
       petIds?: string[];
-      isPrimaryForPet?: boolean;
     }) => {
-      return vetApi.createVeterinarian(vetData, { petIds, isPrimaryForPet });
+      return vetApi.createVeterinarian(vetData, { petIds });
     },
     onSuccess: (newVet) => {
       // Invalidate and refetch veterinarians list
@@ -149,13 +147,11 @@ export function useAssignVetToPets() {
     mutationFn: ({
       vetId,
       petIds,
-      isPrimaryForPet,
     }: {
       vetId: string;
       petIds: string[];
-      isPrimaryForPet?: boolean;
     }) => {
-      return vetApi.assignVetToPets(vetId, petIds, isPrimaryForPet);
+      return vetApi.assignVetToPets(vetId, petIds);
     },
     onSuccess: (_, { vetId }) => {
       // Invalidate vet details and pets list

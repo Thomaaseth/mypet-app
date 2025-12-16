@@ -93,22 +93,16 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
     const vetData: VeterinarianFormData = validation.data;
 
     // Extract pet assignment data if provided
-    const { petIds, isPrimaryForPet } = req.body as { petIds?: string[]; isPrimaryForPet?: boolean };
-
-    // Add userId to the vet data
-    const newVetData = {
-      ...vetData,
-      userId,
-      petIds: petIds || [],
-      isPrimaryForPet: isPrimaryForPet || false,
-    };
+    const { petIds } = req.body;
 
     const newVet = await VeterinariansService.createVeterinarian({
       ...vetData,
       userId,
-      petIds,
-      isPrimaryForPet,
-    });
+    },
+    petIds
+  );
+    
+
     respondWithCreated(res, { veterinarian: newVet }, 'Veterinarian created successfully');
   } catch (error) {
     next(error);
@@ -186,13 +180,13 @@ router.post('/:id/assign', async (req: AuthenticatedRequest, res: Response, next
       throw new BadRequestError('Veterinarian ID is required');
     }
 
-    const { petIds, isPrimaryForPet } = req.body;
+    const { petIds } = req.body;
 
     if (!petIds || !Array.isArray(petIds) || petIds.length === 0) {
       throw new BadRequestError('At least one pet ID is required');
     }
 
-    await VeterinariansService.assignVetToPets(vetId, userId, petIds, isPrimaryForPet || false);
+    await VeterinariansService.assignVetToPets(vetId, userId, petIds);
     respondWithSuccess(res, null, 'Veterinarian assigned to pets successfully');
   } catch (error) {
     next(error);

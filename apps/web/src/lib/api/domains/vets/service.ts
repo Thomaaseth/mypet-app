@@ -82,10 +82,9 @@ export class VetService {
   async assignVetToPets(
     vetId: string,
     petIds: string[],
-    isPrimaryForPet: boolean = false
   ): Promise<void> {
     try {
-      return await this.repository.assignVetToPets(vetId, petIds, isPrimaryForPet);
+      return await this.repository.assignVetToPets(vetId, petIds);
     } catch (error) {
       console.error('Error assigning vet to pets:', error);
       throw error;
@@ -101,7 +100,7 @@ export class VetService {
     }
   }
 
-  async getVetPets(vetId: string): Promise<Array<{ petId: string; isPrimaryForPet: boolean }>> {
+  async getVetPets(vetId: string): Promise<Array<{ petId: string }>> {
     try {
       return await this.repository.getVetPets(vetId);
     } catch (error) {

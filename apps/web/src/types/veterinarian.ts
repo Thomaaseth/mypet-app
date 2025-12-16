@@ -19,7 +19,6 @@ export interface Veterinarian {
   // Extended veterinarian with pet assignment info
   export interface VeterinarianWithPets extends Veterinarian {
     assignedPetIds: string[];
-    isPrimaryForPets: string[]; // Array of pet IDs where this is the primary vet
   }
   
   // Form data types
@@ -39,7 +38,6 @@ export interface Veterinarian {
   // Pet assignment types
   export interface PetAssignment {
     petId: string;
-    isPrimaryForPet: boolean;
   }
   
   // API response types
@@ -55,7 +53,6 @@ export interface Veterinarian {
   export interface VetPetsApiResponse {
     pets: Array<{
       petId: string;
-      isPrimaryForPet: boolean;
     }>;
   }
   

@@ -12,13 +12,13 @@ export const vetApi = {
   getVeterinarianById: (vetId: string) => vetService.getVeterinarianById(vetId),
   createVeterinarian: (
     vetData: VeterinarianFormData,
-    options?: { petIds?: string[]; isPrimaryForPet?: boolean }
+    options?: { petIds?: string[] }
   ) => vetService.createVeterinarian(vetData, options),
   updateVeterinarian: (vetId: string, vetData: Partial<VeterinarianFormData>) =>
     vetService.updateVeterinarian(vetId, vetData),
   deleteVeterinarian: (vetId: string) => vetService.deleteVeterinarian(vetId),
-  assignVetToPets: (vetId: string, petIds: string[], isPrimaryForPet?: boolean) =>
-    vetService.assignVetToPets(vetId, petIds, isPrimaryForPet),
+  assignVetToPets: (vetId: string, petIds: string[]) =>
+    vetService.assignVetToPets(vetId, petIds),
   unassignVetFromPets: (vetId: string, petIds: string[]) =>
     vetService.unassignVetFromPets(vetId, petIds),
   getVetPets: (vetId: string) => vetService.getVetPets(vetId),

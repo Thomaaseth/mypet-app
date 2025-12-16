@@ -133,7 +133,7 @@ export class VeterinariansService {
   }
 
   // Create a new veterinarian
-  static async createVeterinarian(vetData: NewVeterinarian & { petIds?: string[]; isPrimaryForPet?: boolean }): Promise<Veterinarian> {
+  static async createVeterinarian(vetData: NewVeterinarian, petIds?: string[]): Promise<Veterinarian> {
     try {
       // Input validation
       this.validateVeterinarianInputs(vetData, false);
@@ -161,8 +161,8 @@ export class VeterinariansService {
         .returning();
 
       // If petIds provided, assign vet to those pets
-      if (vetData.petIds && vetData.petIds.length > 0) {
-        await this.assignVetToPets(newVet.id, vetData.userId, vetData.petIds, vetData.isPrimaryForPet || false);
+      if (petIds && petIds.length > 0) {
+        await this.assignVetToPets(newVet.id, vetData.userId, petIds);
       }
 
       dbLogger.info({ vetId: newVet.id }, 'Veterinarian created successfully');
@@ -278,8 +278,7 @@ export class VeterinariansService {
   static async assignVetToPets(
     vetId: string, 
     userId: string, 
-    petIds: string[], 
-    isPrimaryForPet: boolean = false
+    petIds: string[]
   ): Promise<void> {
     try {
       // Validate vet exists and belongs to user
@@ -290,19 +289,10 @@ export class VeterinariansService {
         await PetsService.getPetById(petId, userId);
       }
 
-      // If setting as primary, remove primary flag from other vets for these pets
-      if (isPrimaryForPet) {
-        await db
-          .update(petVeterinarians)
-          .set({ isPrimaryForPet: false })
-          .where(inArray(petVeterinarians.petId, petIds));
-      }
-
       // Create assignments (using ON CONFLICT to handle duplicates)
       const assignmentsToInsert = petIds.map(petId => ({
         petId,
         veterinarianId: vetId,
-        isPrimaryForPet,
       }));
 
       // Delete existing assignments first to avoid conflicts
@@ -353,7 +343,7 @@ export class VeterinariansService {
   }
 
   // Get pets assigned to a veterinarian
-  static async getVetPets(vetId: string, userId: string): Promise<Array<{ petId: string; isPrimaryForPet: boolean }>> {
+  static async getVetPets(vetId: string, userId: string): Promise<Array<{ petId: string}>> {
     try {
       // Validate vet exists and belongs to user
       await this.getVeterinarianById(vetId, userId);
@@ -361,7 +351,6 @@ export class VeterinariansService {
       const assignments = await db
         .select({
           petId: petVeterinarians.petId,
-          isPrimaryForPet: petVeterinarians.isPrimaryForPet,
         })
         .from(petVeterinarians)
         .where(eq(petVeterinarians.veterinarianId, vetId));
@@ -377,7 +366,7 @@ export class VeterinariansService {
   }
 
   // Get veterinarians for a specific pet
-  static async getPetVeterinarians(petId: string, userId: string): Promise<Array<Veterinarian & { isPrimaryForPet: boolean }>> {
+  static async getPetVeterinarians(petId: string, userId: string): Promise<Array<Veterinarian>> {
     try {
       // Validate pet exists and belongs to user
       await PetsService.getPetById(petId, userId);
@@ -399,7 +388,6 @@ export class VeterinariansService {
           isActive: veterinarians.isActive,
           createdAt: veterinarians.createdAt,
           updatedAt: veterinarians.updatedAt,
-          isPrimaryForPet: petVeterinarians.isPrimaryForPet,
         })
         .from(veterinarians)
         .innerJoin(

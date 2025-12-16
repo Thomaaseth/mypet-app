@@ -15,7 +15,7 @@ export class VetRepository {
 
   async createVeterinarian(
     vetData: VeterinarianFormData,
-    options?: { petIds?: string[]; isPrimaryForPet?: boolean }
+    options?: { petIds?: string[] }
   ): Promise<Veterinarian> {
     const body = {
       ...vetData,
@@ -43,17 +43,16 @@ export class VetRepository {
   async assignVetToPets(
     vetId: string,
     petIds: string[],
-    isPrimaryForPet: boolean = false
   ): Promise<void> {
-    await post(`/api/vets/${vetId}/assign`, { petIds, isPrimaryForPet });
+    await post(`/api/vets/${vetId}/assign`, { petIds });
   }
 
   async unassignVetFromPets(vetId: string, petIds: string[]): Promise<void> {
     await post(`/api/vets/${vetId}/unassign`, { petIds });
   }
 
-  async getVetPets(vetId: string): Promise<Array<{ petId: string; isPrimaryForPet: boolean }>> {
-    const result = await get<{ pets: Array<{ petId: string; isPrimaryForPet: boolean }> }>(
+  async getVetPets(vetId: string): Promise<Array<{ petId: string }>> {
+    const result = await get<{ pets: Array<{ petId: string }> }>(
       `/api/vets/${vetId}/pets`
     );
     return result.pets;

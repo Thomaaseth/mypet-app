@@ -1,0 +1,1 @@
+ALTER TABLE "pet_veterinarians" DROP COLUMN "is_primary_for_pet";

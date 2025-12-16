@@ -52,13 +52,11 @@ export default function VetList() {
   const handleCreateVet = async (
     vetData: VeterinarianFormData,
     petIds?: string[],
-    isPrimaryForPet?: boolean,
   ): Promise<Veterinarian | null> => {
     try {
       const result = await createVetMutation.mutateAsync({
         vetData,
         petIds,
-        isPrimaryForPet,
       });
       setIsCreateDialogOpen(false);
       return result;
@@ -72,7 +70,6 @@ export default function VetList() {
   const handleUpdateVet = async (
     vetData: VeterinarianFormData,
     petIds?: string[],
-    isPrimaryForPet?: boolean
   ): Promise<Veterinarian | null> => {
     if (!editingVet) return null;
   

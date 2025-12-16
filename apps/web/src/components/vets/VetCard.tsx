@@ -29,7 +29,6 @@ interface VetCardProps {
   onEdit: (vet: Veterinarian) => void;
   onDelete: (vet: Veterinarian) => void;
   assignedPetCount?: number;
-  isPrimaryForAnyPet?: boolean;
 }
 
 export default function VetCard({
@@ -37,7 +36,6 @@ export default function VetCard({
   onEdit,
   onDelete,
   assignedPetCount = 0,
-  isPrimaryForAnyPet = false,
 }: VetCardProps) {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -69,9 +67,6 @@ export default function VetCard({
               <CardTitle className="text-lg">
                 {vet.clinicName || vet.vetName}
               </CardTitle>
-              {isPrimaryForAnyPet && (
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" aria-label="Primary vet" />
-              )}
             </div>
             {vet.clinicName && (
               <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -163,15 +158,11 @@ export default function VetCard({
           <div className="pt-2 border-t">
             <p className="text-xs font-medium text-muted-foreground mb-2">Assigned Pets:</p>
             <div className="flex flex-wrap gap-1">
-              {assignedPets.map((pet) => {
-                const isPrimary = assignedPetData?.find(a => a.petId === pet.id)?.isPrimaryForPet;
-                return (
-                  <Badge key={pet.id} variant={isPrimary ? "default" : "secondary"} className="text-xs">
+              {assignedPets.map((pet) => (
+                  <Badge key={pet.id} variant="default" className="text-xs">
                     {pet.name}
-                    {isPrimary && <Star className="h-3 w-3 ml-1 fill-current" />}
                   </Badge>
-                );
-              })}
+              ))}
             </div>
           </div>
         )}

@@ -93,7 +93,6 @@ export const validateUpdateVeterinarian = (data: unknown) => {
 // Pet assignment schema for "Apply to other pets" feature
 export const petAssignmentSchema = z.object({
   petIds: z.array(z.string().uuid('Invalid pet ID')).min(1, 'Select at least one pet'),
-  isPrimaryForPet: z.boolean().default(false),
 });
 
 export type PetAssignmentData = z.infer<typeof petAssignmentSchema>;

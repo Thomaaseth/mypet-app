@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { usePets } from '@/queries/pets';
 import { useVetPets } from '@/queries/vets';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, AlertCircle, Star } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
 
@@ -20,7 +20,6 @@ interface VetFormProps {
   onSubmit: (
     data: VeterinarianFormData,
     petIds?: string[],
-    isPrimaryForPet?: boolean
   ) => Promise<Veterinarian | null>;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -37,7 +36,6 @@ export default function VetForm({
   const isEditing = !!vet;
 
   const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
-  const [isPrimaryVet, setIsPrimaryVet] = useState(false);
 
   // Fetch pets for assignment
   const { data: pets } = usePets();
@@ -49,7 +47,6 @@ export default function VetForm({
   useEffect(() => {
     if (vet && currentAssignments) {
       setSelectedPetIds(currentAssignments.map(a => a.petId));
-      setIsPrimaryVet(currentAssignments.some(a => a.isPrimaryForPet));
     }
   }, [vet, currentAssignments]);
 
@@ -78,7 +75,6 @@ export default function VetForm({
       await onSubmit(
         transformedData,
         selectedPetIds.length > 0 ? selectedPetIds : undefined,
-        isPrimaryVet
       );
     } catch (err) {
       console.error('Form submission error:', err);
@@ -156,7 +152,7 @@ export default function VetForm({
         <Input
           id="website"
           type="url"
-          placeholder="https://www.happypaws.com"
+          placeholder="https://www.pettr.health"
           {...register('website')}
           aria-invalid={!!errors.website}
         />
@@ -253,58 +249,30 @@ export default function VetForm({
           </div>
 
           <div className="space-y-2">
-            {pets.map((pet) => {
-              const isSelected = selectedPetIds.includes(pet.id);
-              const isPrimary = isPrimaryVet && isSelected;
-              
-              return (
-                <div key={pet.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50">
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      id={`pet-${pet.id}`}
-                      checked={isSelected}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedPetIds([...selectedPetIds, pet.id]);
-                        } else {
-                          setSelectedPetIds(selectedPetIds.filter((id) => id !== pet.id));
-                          // If unchecking and this was primary, unset primary
-                          if (isPrimary) {
-                            setIsPrimaryVet(false);
-                          }
-                        }
-                      }}
-                    />
-                    <Label
-                      htmlFor={`pet-${pet.id}`}
-                      className="cursor-pointer font-normal"
-                    >
-                      {pet.name}
-                    </Label>
-                  </div>
-                  
-                  {isSelected && (
-                    <Button
-                      type="button"
-                      variant={isPrimary ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        if (isPrimary) {
-                          setIsPrimaryVet(false);
-                        } else {
-                          setIsPrimaryVet(true);
-                        }
-                      }}
-                    >
-                      <Star className={`h-3 w-3 mr-1 ${isPrimary ? 'fill-current' : ''}`} />
-                      {isPrimary ? 'Primary' : 'Set as Primary'}
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
+            {pets.map((pet) => (
+              <div key={pet.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
+                <Checkbox
+                  id={`pet-${pet.id}`}
+                  checked={selectedPetIds.includes(pet.id)}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedPetIds([...selectedPetIds, pet.id]);
+                    } else {
+                      setSelectedPetIds(selectedPetIds.filter((id) => id !== pet.id));
+                    }
+                  }}
+                />
+                <Label
+                  htmlFor={`pet-${pet.id}`}
+                  className="cursor-pointer font-normal flex-1"
+                >
+                  {pet.name}
+                </Label>
+              </div>
+            ))}
           </div>
 
+                  
           {selectedPetIds.length === 0 && (
             <p className="text-xs text-muted-foreground">
               You can assign this veterinarian to pets later.
