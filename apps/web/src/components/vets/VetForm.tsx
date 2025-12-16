@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { usePets } from '@/queries/pets';
 import { useVetPets } from '@/queries/vets';
-import { Badge } from '@/components/ui/badge';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
@@ -80,6 +79,7 @@ export default function VetForm({
       console.error('Form submission error:', err);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">

@@ -25,23 +25,29 @@ import {
   useCreateVeterinarian,
   useUpdateVeterinarian,
   useDeleteVeterinarian,
+  useAssignVetToPets,
+  useUnassignVetFromPets,
 } from '@/queries/vets';
 import VetCard from './VetCard';
 import VetForm from './VetForm';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
-import { vetErrorHandler } from '@/lib/api';
+import { vetErrorHandler, vetApi } from '@/lib/api';
 
 export default function VetList() {
   const { data: vets, isPending, error } = useVeterinarians();
   const createVetMutation = useCreateVeterinarian();
   const updateVetMutation = useUpdateVeterinarian();
   const deleteVetMutation = useDeleteVeterinarian();
+  const assignVetMutation = useAssignVetToPets();
+  const unassignVetMutation = useUnassignVetFromPets();
 
   // Computed loading state for any mutation in progress
   const isActionLoading =
     createVetMutation.isPending ||
     updateVetMutation.isPending ||
-    deleteVetMutation.isPending;
+    deleteVetMutation.isPending ||
+    assignVetMutation.isPending ||
+    unassignVetMutation.isPending;
 
   // UI State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -72,22 +78,44 @@ export default function VetList() {
     petIds?: string[],
   ): Promise<Veterinarian | null> => {
     if (!editingVet) return null;
-  
+
     try {
+      // Update vet basic info
       const result = await updateVetMutation.mutateAsync({
         vetId: editingVet.id,
         vetData,
       });
-      
-      // Handle pet assignments separately if provided
+
+      // Handle pet assignments if provided
       if (petIds !== undefined) {
-        // This would require additional mutations - for now we'll skip
-        // You can add this in phase 2 if needed
+        // Get current assignments
+        const currentAssignments = await vetApi.getVetPets(editingVet.id);
+        const currentPetIds = currentAssignments.map(a => a.petId);
+
+        // Determine which pets to assign and unassign
+        const petsToAssign = petIds.filter(id => !currentPetIds.includes(id));
+        const petsToUnassign = currentPetIds.filter(id => !petIds.includes(id));
+
+        // Use mutations for assign/unassign
+        if (petsToAssign.length > 0) {
+          await assignVetMutation.mutateAsync({
+            vetId: editingVet.id,
+            petIds: petsToAssign,
+          });
+        }
+
+        if (petsToUnassign.length > 0) {
+          await unassignVetMutation.mutateAsync({
+            vetId: editingVet.id,
+            petIds: petsToUnassign,
+          });
+        }
       }
-      
+
       setEditingVet(null);
       return result;
     } catch (error) {
+      // Error already handled in mutation
       return null;
     }
   };
@@ -189,7 +217,7 @@ export default function VetList() {
                     onSubmit={handleCreateVet}
                     onCancel={() => setIsCreateDialogOpen(false)}
                     isLoading={isActionLoading}
-                    />
+                  />
                 </DialogContent>
               </Dialog>
             </div>
@@ -230,7 +258,7 @@ export default function VetList() {
                 onSubmit={handleCreateVet}
                 onCancel={() => setIsCreateDialogOpen(false)}
                 isLoading={isActionLoading}
-                />
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -262,7 +290,7 @@ export default function VetList() {
                 onSubmit={handleUpdateVet}
                 onCancel={() => setEditingVet(null)}
                 isLoading={isActionLoading}
-                />
+              />
             )}
           </DialogContent>
         </Dialog>
@@ -271,7 +299,7 @@ export default function VetList() {
         <AlertDialog
           open={!!deletingVet}
           onOpenChange={() => setDeletingVet(null)}
-          >
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
