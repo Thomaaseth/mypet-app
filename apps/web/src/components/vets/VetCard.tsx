@@ -21,6 +21,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { Veterinarian } from '@/types/veterinarian';
+import { usePets } from '@/queries/pets';
+import { useVetPets } from '@/queries/vets';
 
 interface VetCardProps {
   vet: Veterinarian;
@@ -48,6 +50,15 @@ export default function VetCard({
   ]
     .filter(Boolean)
     .join(', ');
+
+  // Fetch assigned pets
+  const { data: allPets } = usePets();
+  const { data: assignedPetData } = useVetPets(vet.id);
+
+  // Calculate which pets are assigned
+  const assignedPets = allPets?.filter(pet => 
+    assignedPetData?.some(assignment => assignment.petId === pet.id)
+  ) || [];
 
   return (
     <Card className="group hover:shadow-md transition-shadow duration-200">
@@ -144,6 +155,24 @@ export default function VetCard({
                 ? `${vet.notes.substring(0, 100)}...`
                 : vet.notes}
             </p>
+          </div>
+        )}
+
+        {/* Assigned Pets */}
+        {assignedPets.length > 0 && (
+          <div className="pt-2 border-t">
+            <p className="text-xs font-medium text-muted-foreground mb-2">Assigned Pets:</p>
+            <div className="flex flex-wrap gap-1">
+              {assignedPets.map((pet) => {
+                const isPrimary = assignedPetData?.find(a => a.petId === pet.id)?.isPrimaryForPet;
+                return (
+                  <Badge key={pet.id} variant={isPrimary ? "default" : "secondary"} className="text-xs">
+                    {pet.name}
+                    {isPrimary && <Star className="h-3 w-3 ml-1 fill-current" />}
+                  </Badge>
+                );
+              })}
+            </div>
           </div>
         )}
 
