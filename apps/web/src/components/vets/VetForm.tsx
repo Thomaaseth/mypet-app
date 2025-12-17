@@ -151,8 +151,8 @@ export default function VetForm({
         <Label htmlFor="website">Website</Label>
         <Input
           id="website"
-          type="url"
-          placeholder="https://www.pettr.health"
+          type="text"
+          placeholder="www.pettr.health"
           {...register('website')}
           aria-invalid={!!errors.website}
         />
@@ -160,7 +160,7 @@ export default function VetForm({
           <p className="text-sm text-destructive">{errors.website.message}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          Must start with http:// or https://
+        Optional: e.g., www.pettr.xyz or example.com
         </p>
       </div>
 
@@ -234,7 +234,7 @@ export default function VetForm({
           <p className="text-sm text-destructive">{errors.notes.message}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          Optional: Office hours, specialties, or other notes (max 1000 characters)
+          Optional: Office hours, specialties, or other notes (max 100 characters)
         </p>
       </div>
 

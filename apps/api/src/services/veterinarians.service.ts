@@ -67,9 +67,15 @@ export class VeterinariansService {
     }
 
     if (data.website !== undefined && data.website !== null && data.website !== '') {
-      const urlRegex = /^https?:\/\/.+/;
-      if (typeof data.website !== 'string' || !urlRegex.test(data.website) || data.website.length > 255) {
-        throw new BadRequestError('Invalid website URL format or too long (max 255 characters)');
+      const websiteRegex = /^(https?:\/\/)?(www\.)?[\w\-]+(\.[\w\-]+)+/;
+      if (typeof data.website !== 'string' || data.website.length < 4 || data.website.length > 100 || !websiteRegex.test(data.website)) {
+        throw new BadRequestError('Please enter a valid website (e.g., www.example.com or example.com, max 100 characters)');
+      }
+    }
+
+    if (data.notes !== undefined && data.notes !== null && data.notes !== '') {
+      if (typeof data.notes !== 'string' || data.notes.length > 100) {
+        throw new BadRequestError('Notes must be less than 100 characters');
       }
     }
   }

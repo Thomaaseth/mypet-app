@@ -31,10 +31,14 @@ export const baseVeterinarianFormSchema = z.object({
     .optional()
     .or(z.literal('')),
   
-  website: z
+    website: z
     .string()
-    .url('Please enter a valid URL (must start with http:// or https://)')
-    .max(255, 'Website URL must be less than 255 characters')
+    .min(4, 'Website is too short') // At minimum: "w.co"
+    .max(100, 'Website URL must be less than 100 characters') // More reasonable
+    .regex(
+      /^(https?:\/\/)?(www\.)?[\w\-]+(\.[\w\-]+)+/,
+      'Please enter a valid website (e.g., www.example.com or example.com)'
+    )
     .optional()
     .or(z.literal('')),
   
@@ -63,7 +67,7 @@ export const baseVeterinarianFormSchema = z.object({
   
   notes: z
     .string()
-    .max(1000, 'Notes must be less than 1000 characters')
+    .max(100, 'Notes must be less than 100 characters')
     .optional()
     .or(z.literal('')),
 });

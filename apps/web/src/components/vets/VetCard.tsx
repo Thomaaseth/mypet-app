@@ -118,42 +118,55 @@ export default function VetCard({
       </CardHeader>
 
       <CardContent className="space-y-3">
-        <div className="space-y-2 text-sm">
-            <a href={`tel:${vet.phone}`} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{vet.phone}</span>
+        <div className="space-y-2 text-sm min-h-[120px]">
+            <a 
+              href={`tel:${vet.phone}`} 
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+            >
+              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <span>{vet.phone}</span>
             </a>
             {vet.email && (
-            <a href={`mailto:${vet.email}`} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="truncate">{vet.email}</span>
+            <a 
+              href={`mailto:${vet.email}`} 
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+            >
+              <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <span className="truncate">{vet.email}</span>
             </a>
             )}
 
             {vet.website && (
-            <a href={vet.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <span className="truncate">{vet.website}</span>
+            <a         
+              href={vet.website.startsWith('http') ? vet.website : `https://${vet.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+            >
+              <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <span className="truncate">{vet.website}</span>
             </a>
             )}
 
+          {/* Address */}
           <div className="flex items-start gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
             <span className="text-muted-foreground">{fullAddress}</span>
           </div>
         </div>
 
+        {/* Notes Preview - Fixed height section */}
         {vet.notes && (
-          <div className="text-sm text-muted-foreground pt-2 border-t">
-            <p className="line-clamp-2">
-              {vet.notes.length > 100
-                ? `${vet.notes.substring(0, 100)}...`
-                : vet.notes}
+          <div className="text-sm text-muted-foreground pt-2 border-t min-h-[60px]">
+            <p className="whitespace-pre-wrap break-words">
+              {vet.notes}
             </p>
           </div>
         )}
 
+
         {/* Assigned Pets */}
+        <div className="min-h-[60px]">
         {assignedPets.length > 0 && (
           <div className="pt-2 border-t">
             <p className="text-xs font-medium text-muted-foreground mb-2">Assigned Pets:</p>
@@ -166,7 +179,9 @@ export default function VetCard({
             </div>
           </div>
         )}
+        </div>
 
+        {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           <Button
             variant="outline"
