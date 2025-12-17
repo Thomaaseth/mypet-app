@@ -6,3 +6,4 @@ export * from './food';
 export * from './weight-targets';
 export * from './veterinarians';
 export * from './pet-veterinarians';
+export * from './appointments';

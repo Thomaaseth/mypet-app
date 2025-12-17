@@ -10,6 +10,7 @@ import petRoutes from '@/routes/pets.routes';
 import foodRoutes from '@/routes/food.routes';
 import adminRoutes from '@/routes/admin.routes';
 import vetRoutes from '@/routes/veterinarians.routes';
+import appointmentRoutes from '@/routes/appointments.routes';
 
 export const app = express();
 
@@ -36,6 +37,9 @@ app.use('/api/pets', foodRoutes)
 
 // VET ROUTES
 app.use('/api/vets', vetRoutes)
+
+// APPOINTMENT ROUTES
+app.use('/api/appointments', appointmentRoutes)
 
 // APP HEALTH   
 app.get('/api/health', (req, res, next) => {
