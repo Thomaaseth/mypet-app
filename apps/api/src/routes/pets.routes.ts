@@ -8,7 +8,7 @@ import {
   validateUpdatePet,
   type CreatePetData,
   type UpdatePetData
-} from '../../../web/src/lib/validations/pet'; // Import from frontend validations
+} from '../../../web/src/lib/validations/pet';
 import { 
   BadRequestError, 
   NotFoundError, 

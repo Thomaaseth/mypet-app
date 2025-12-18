@@ -39,8 +39,13 @@ export { petApi, petErrorHandler } from './domains/pets';
 export { weightApi, weightErrorHandler } from './domains/weights';
 export { foodApi, foodErrorHandler } from './domains/food';
 export { vetApi, vetErrorHandler } from './domains/vets';
+export { appointmentApi, appointmentErrorHandler } from './domains/appointments';
+
 
 export type { PetsApiResponse, PetError } from './domains/pets';
 export type { WeightEntriesApiResponse, WeightError } from './domains/weights';
 export type { FoodEntriesApiResponse, FoodError } from './domains/food';
 export type { VeterinariansApiResponse, VeterinarianError } from './domains/vets';
+export type { AppointmentsApiResponse, AppointmentError } from './domains/appointments';
+
+

@@ -31,6 +31,7 @@ import {
 import VetCard from './VetCard';
 import VetForm from './VetForm';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
+import { AppointmentTracker } from './appointments';
 import { vetErrorHandler, vetApi } from '@/lib/api';
 
 export default function VetList() {
@@ -274,6 +275,10 @@ export default function VetList() {
             />
           ))}
         </div>
+
+                
+        {/* Appointments Section - Full Width Below Vets */}   
+        <AppointmentTracker />
 
         {/* Edit Dialog */}
         <Dialog open={!!editingVet} onOpenChange={() => setEditingVet(null)}>
