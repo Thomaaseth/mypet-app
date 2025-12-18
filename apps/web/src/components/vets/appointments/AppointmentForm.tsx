@@ -18,7 +18,7 @@ import type { AppointmentWithRelations, AppointmentFormData, AppointmentType } f
 import { appointmentFormSchema, appointmentTypes, generateTimeOptions } from '@/lib/validations/appointments';
 import { usePets } from '@/queries/pets';
 import { useVeterinarians } from '@/queries/vets';
-import { useVetPets } from '@/queries/vets';
+import { usePetVets } from '@/queries/vets';
 import { useLastVetForPet } from '@/queries/appointments';
 
 interface AppointmentFormProps {
@@ -57,33 +57,22 @@ export default function AppointmentForm({
   const selectedVetId = watch('veterinarianId');
 
   // Fetch vets assigned to selected pet
-  const { data: assignedVetData } = useVetPets(selectedVetId || '');
+  const { data: availableVetsData } = usePetVets(selectedPetId || '');
 
-  // Fetch last vet used for selected pet
-  const { data: lastVetId } = useLastVetForPet(selectedPetId);
-
-  // Filter vets based on selected pet
-  const [availableVets, setAvailableVets] = useState<typeof vets>([]);
+  const { data: lastVetId, isLoading: isLoadingLastVet } = useLastVetForPet(selectedPetId || '', {
+    enabled: !!selectedPetId && !isEditing
+  });
 
   useEffect(() => {
-    if (!selectedPetId || !vets) {
-      setAvailableVets([]);
+    if (!selectedPetId || !availableVetsData) {
       return;
     }
 
-    // Get vets assigned to this pet
-    const vetIdsForPet = assignedVetData?.map(a => a.petId) || [];
-    const filteredVets = vets.filter(vet => 
-      assignedVetData?.some(assignment => assignment.petId === selectedPetId)
-    );
-
-    setAvailableVets(filteredVets);
-
     // Pre-fill vet if not editing and last vet exists
-    if (!isEditing && lastVetId && filteredVets.some(v => v.id === lastVetId)) {
+    if (!isEditing && lastVetId && availableVetsData.some(v => v.id === lastVetId)) {
       setValue('veterinarianId', lastVetId);
     }
-  }, [selectedPetId, vets, assignedVetData, lastVetId, isEditing, setValue]);
+  }, [selectedPetId, availableVetsData, lastVetId, isEditing, setValue]);
 
   const timeOptions = generateTimeOptions();
 
@@ -144,7 +133,7 @@ export default function AppointmentForm({
       {/* Veterinarian Selection */}
       <div className="space-y-2">
         <Label htmlFor="veterinarianId">Veterinarian *</Label>
-        {selectedPetId && availableVets && availableVets.length === 0 ? (
+        {selectedPetId && availableVetsData && availableVetsData.length === 0 ? (
           <div className="text-sm text-muted-foreground border rounded-md p-3 bg-muted/50">
             <p>No veterinarians assigned to this pet yet.</p>
             <p className="mt-1">Please assign a veterinarian to this pet first in the Vets section.</p>
@@ -159,7 +148,7 @@ export default function AppointmentForm({
               <SelectValue placeholder={selectedPetId ? "Select a veterinarian" : "Select a pet first"} />
             </SelectTrigger>
             <SelectContent>
-              {availableVets?.map((vet) => (
+              {availableVetsData?.map((vet) => (
                 <SelectItem key={vet.id} value={vet.id}>
                   {vet.clinicName || vet.vetName}
                 </SelectItem>
@@ -288,7 +277,7 @@ export default function AppointmentForm({
             Cancel
           </Button>
         )}
-        <Button type="submit" disabled={isLoading || (!!selectedPetId && (!availableVets || availableVets.length === 0))}
+        <Button type="submit" disabled={isLoading || (!!selectedPetId && (!availableVetsData || availableVetsData.length === 0))}
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading

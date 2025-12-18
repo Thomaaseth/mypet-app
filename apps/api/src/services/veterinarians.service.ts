@@ -371,6 +371,44 @@ export class VeterinariansService {
     }
   }
 
+  // Get vets assigned to a pet
+  static async getVetsForPet(petId: string, userId: string): Promise<Veterinarian[]> {
+    try {
+      // Get all vet-pet assignments for this pet
+      const assignments = await db
+        .select({
+          veterinarianId: petVeterinarians.veterinarianId,
+        })
+        .from(petVeterinarians)
+        .where(eq(petVeterinarians.petId, petId));
+
+      if (assignments.length === 0) {
+        return [];
+      }
+
+      const vetIds = assignments.map(a => a.veterinarianId);
+
+      // Get all vets that are assigned to this pet AND belong to this user
+      const vets = await db
+        .select()
+        .from(veterinarians)
+        .where(
+          and(
+            eq(veterinarians.userId, userId),
+            inArray(veterinarians.id, vetIds)
+          )
+        );
+
+      return vets;
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
+        throw error;
+      }
+      dbLogger.error({ err: error }, 'Error fetching vets for pet');
+      throw new BadRequestError('Failed to fetch vets for pet');
+    }
+  }
+
   // Get veterinarians for a specific pet
   static async getPetVeterinarians(petId: string, userId: string): Promise<Array<Veterinarian>> {
     try {

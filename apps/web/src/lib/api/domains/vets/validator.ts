@@ -72,13 +72,21 @@ export class VetValidator {
   private validateWebsite(website?: string): void {
     if (!website || website.trim() === '') return; // Optional
     
-    const urlRegex = /^https?:\/\/.+/;
-    if (!urlRegex.test(website)) {
-      throw new ValidationError('Website must start with http:// or https://', 'website');
+    const trimmed = website.trim();
+    
+    // accepts www., http://, https://, or plain domain
+    const websiteRegex = /^(https?:\/\/)?(www\.)?[\w\-]+(\.[\w\-]+)+/;
+    
+    if (trimmed.length < 4) {
+      throw new ValidationError('Website is too short', 'website');
     }
     
-    if (website.length > 255) {
-      throw new ValidationError('Website URL cannot exceed 255 characters', 'website');
+    if (trimmed.length > 100) {
+      throw new ValidationError('Website URL must be less than 100 characters', 'website');
+    }
+    
+    if (!websiteRegex.test(trimmed)) {
+      throw new ValidationError('Please enter a valid website (e.g., www.example.com or example.com)', 'website');
     }
   }
 

@@ -16,6 +16,7 @@ import {
 } from '../middleware/errors';
 import weightEntriesRoutes from './weight-entries.routes';
 import weightTargetsRoutes from './weight-targets.routes';
+import { VeterinariansService } from '@/services/veterinarians.service';
 
 const router = Router();
 
@@ -53,6 +54,31 @@ router.get('/stats/count', async (req: AuthenticatedRequest, res: Response, next
 
     const count = await PetsService.getUserPetCount(userId);
     respondWithSuccess(res, { count }, `You have ${count} pet(s)`);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/pets/:petId/vets - Get veterinarians assigned to a pet
+router.get('/:petId/vets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const petId = req.params.petId;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
+    }
+
+    // Verify pet ownership
+    await PetsService.getPetById(petId, userId);
+
+    // Get vets assigned to this pet
+    const vets = await VeterinariansService.getVetsForPet(petId, userId);
+    
+    respondWithSuccess(res, { veterinarians: vets, total: vets.length }, 'Retrieved veterinarians for pet');
   } catch (error) {
     next(error);
   }

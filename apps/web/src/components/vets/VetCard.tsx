@@ -117,16 +117,18 @@ export default function VetCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
-        <div className="space-y-2 text-sm min-h-[120px]">
-            <a 
-              href={`tel:${vet.phone}`} 
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-            >
-              <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span>{vet.phone}</span>
-            </a>
-            {vet.email && (
+      <CardContent className="flex flex-col">
+        {/* Contact Information - Fixed height */}
+        <div className="space-y-2 text-sm h-[120px]">
+          <a 
+            href={`tel:${vet.phone}`} 
+            className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
+          >
+            <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span>{vet.phone}</span>
+          </a>
+          
+          {vet.email && (
             <a 
               href={`mailto:${vet.email}`} 
               className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
@@ -134,9 +136,9 @@ export default function VetCard({
               <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <span className="truncate">{vet.email}</span>
             </a>
-            )}
+          )}
 
-            {vet.website && (
+          {vet.website && (
             <a         
               href={vet.website.startsWith('http') ? vet.website : `https://${vet.website}`}
               target="_blank"
@@ -146,43 +148,41 @@ export default function VetCard({
               <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <span className="truncate">{vet.website}</span>
             </a>
-            )}
+          )}
 
-          {/* Address */}
           <div className="flex items-start gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
             <span className="text-muted-foreground">{fullAddress}</span>
           </div>
         </div>
 
-        {/* Notes Preview - Fixed height section */}
-        {vet.notes && (
-          <div className="text-sm text-muted-foreground pt-2 border-t min-h-[60px]">
+        {/* Notes - Fixed height */}
+        <div className="text-sm text-muted-foreground pt-3 border-t h-[80px]">
+          {vet.notes && (
             <p className="whitespace-pre-wrap break-words">
               {vet.notes}
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
-
-        {/* Assigned Pets */}
-        <div className="min-h-[60px]">
-        {assignedPets.length > 0 && (
-          <div className="pt-2 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Assigned Pets:</p>
-            <div className="flex flex-wrap gap-1">
-              {assignedPets.map((pet) => (
+        {/* Assigned Pets - Fixed height */}
+        <div className="pt-3 border-t h-[120px]">
+          {assignedPets.length > 0 && (
+            <>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Assigned Pets:</p>
+              <div className="flex flex-wrap gap-1">
+                {assignedPets.map((pet) => (
                   <Badge key={pet.id} variant="default" className="text-xs">
                     {pet.name}
                   </Badge>
-              ))}
-            </div>
-          </div>
-        )}
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-3 border-t">
           <Button
             variant="outline"
             size="sm"

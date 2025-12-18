@@ -41,12 +41,12 @@ export function useAppointment(appointmentId: string) {
 }
 
 // Fetch last vet used for a pet (for smart pre-fill)
-export function useLastVetForPet(petId: string) {
+export function useLastVetForPet(petId: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: appointmentKeys.lastVet(petId),
     queryFn: () => appointmentApi.getLastVetForPet(petId),
-    enabled: Boolean(petId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - reasonable for pre-fill data
+    enabled: options?.enabled !== undefined ? options.enabled : Boolean(petId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

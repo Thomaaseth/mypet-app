@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { VeterinariansService } from '../services/veterinarians.service';
+import { PetsService } from '@/services/pets.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { 
@@ -35,21 +36,26 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
   }
 });
 
-// GET /api/vets/:id - Get a specific veterinarian
-router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+// GET /api/pets/:petId/vets - Get veterinarians assigned to a pet
+router.get('/:petId/vets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.authSession?.user.id;
     if (!userId) {
       throw new BadRequestError('User session not found');
     }
 
-    const vetId = req.params.id;
-    if (!vetId) {
-      throw new BadRequestError('Veterinarian ID is required');
+    const petId = req.params.petId;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
     }
 
-    const vet = await VeterinariansService.getVeterinarianById(vetId, userId);
-    respondWithSuccess(res, { veterinarian: vet }, 'Veterinarian retrieved successfully');
+    // Verify pet ownership
+    await PetsService.getPetById(petId, userId);
+
+    // Get vets assigned to this pet
+    const vets = await VeterinariansService.getVetsForPet(petId, userId);
+    
+    respondWithSuccess(res, { veterinarians: vets, total: vets.length }, 'Retrieved veterinarians for pet');
   } catch (error) {
     next(error);
   }
@@ -74,6 +80,28 @@ router.get('/:id/pets', async (req: AuthenticatedRequest, res: Response, next: N
     next(error);
   }
 });
+
+// GET /api/vets/:id - Get a specific veterinarian
+router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const vetId = req.params.id;
+    if (!vetId) {
+      throw new BadRequestError('Veterinarian ID is required');
+    }
+
+    const vet = await VeterinariansService.getVeterinarianById(vetId, userId);
+    respondWithSuccess(res, { veterinarian: vet }, 'Veterinarian retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 
 // POST /api/vets - Create a new veterinarian
 router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

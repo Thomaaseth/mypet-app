@@ -50,26 +50,7 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
   }
 });
 
-// GET /api/appointments/:id - Get a specific appointment
-router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.authSession?.user.id;
-    if (!userId) {
-      throw new BadRequestError('User session not found');
-    }
-
-    const appointmentId = req.params.id;
-    if (!appointmentId) {
-      throw new BadRequestError('Appointment ID is required');
-    }
-
-    const appointment = await AppointmentsService.getAppointmentById(appointmentId, userId);
-    respondWithSuccess(res, { appointment }, 'Appointment retrieved successfully');
-  } catch (error) {
-    next(error);
-  }
-});
-
+// MOVE THIS BEFORE /:id
 // GET /api/appointments/last-vet/:petId - Get last vet used for a pet
 router.get('/last-vet/:petId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -92,6 +73,26 @@ router.get('/last-vet/:petId', async (req: AuthenticatedRequest, res: Response, 
         ? 'Last vet retrieved successfully' 
         : 'No previous appointments found for this pet'
     );
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/appointments/:id - Get a specific appointment
+router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const appointmentId = req.params.id;
+    if (!appointmentId) {
+      throw new BadRequestError('Appointment ID is required');
+    }
+
+    const appointment = await AppointmentsService.getAppointmentById(appointmentId, userId);
+    respondWithSuccess(res, { appointment }, 'Appointment retrieved successfully');
   } catch (error) {
     next(error);
   }

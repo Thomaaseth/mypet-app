@@ -22,6 +22,7 @@ export const vetApi = {
   unassignVetFromPets: (vetId: string, petIds: string[]) =>
     vetService.unassignVetFromPets(vetId, petIds),
   getVetPets: (vetId: string) => vetService.getVetPets(vetId),
+  getPetVets: (petId: string) => vetService.getPetVets(petId),
 };
 
 // Export error handler using service

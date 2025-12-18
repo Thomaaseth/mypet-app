@@ -57,6 +57,13 @@ export class VetRepository {
     );
     return result.pets;
   }
+
+  async getPetVets(petId: string): Promise<Veterinarian[]> {
+    const result = await get<{ veterinarians: Veterinarian[]; total: number }>(
+      `/api/pets/${petId}/vets`
+    );
+    return result.veterinarians;
+  }
 }
 
 // Default repository instance

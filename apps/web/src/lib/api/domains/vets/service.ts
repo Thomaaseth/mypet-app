@@ -109,6 +109,15 @@ export class VetService {
     }
   }
 
+  async getPetVets(petId: string): Promise<Veterinarian[]> {
+    try {
+      return await this.repository.getPetVets(petId);
+    } catch (error) {
+      console.error('Error fetching pet vets:', error);
+      throw error;
+    }
+  }
+
   mapError(error: unknown): VeterinarianError {
     let message: string;
     let field: keyof VeterinarianFormData | undefined;

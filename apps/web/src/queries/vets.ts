@@ -8,6 +8,7 @@ export const vetKeys = {
   all: ['vets'] as const,
   detail: (id: string) => ['vets', id] as const,
   pets: (vetId: string) => ['vets', vetId, 'pets'] as const,
+  petVets: (petId: string) => ['pets', petId, 'vets'] as const,
 };
 
 // ============================================
@@ -40,6 +41,15 @@ export function useVetPets(vetId: string) {
     queryKey: vetKeys.pets(vetId),
     queryFn: () => vetApi.getVetPets(vetId),
     enabled: Boolean(vetId),
+  });
+}
+
+// Fetch veterinarians assigned to a pet
+export function usePetVets(petId: string) {
+  return useQuery({
+    queryKey: vetKeys.petVets(petId),
+    queryFn: () => vetApi.getPetVets(petId),
+    enabled: Boolean(petId),
   });
 }
 
