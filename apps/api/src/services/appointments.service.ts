@@ -266,8 +266,15 @@ export class AppointmentsService {
   // GET last vet used for a specific pet
   static async getLastVetForPet(petId: string, userId: string): Promise<string | null> {
     try {
+      console.log('DEBUG - petId:', petId);
+      console.log('DEBUG - userId:', userId);
+      console.log('DEBUG - userId type:', typeof userId);
       this.validateUUID(petId, 'pet ID');
-      this.validateUUID(userId, 'user ID');
+      // this.validateUUID(userId, 'user ID');
+      
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
 
       // Verify pet ownership
       await this.verifyPetOwnership(petId, userId);
@@ -299,7 +306,14 @@ export class AppointmentsService {
     userId: string
   ): Promise<Appointment> {
     try {
-      this.validateUUID(userId, 'user ID');
+      console.log('DEBUG CREATE - userId:', userId);
+      console.log('DEBUG CREATE - userId type:', typeof userId);
+      // this.validateUUID(userId, 'user ID');
+
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
+
       this.validateAppointmentInputs(appointmentData, false);
 
       // Verify pet ownership
