@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { Pet } from '@/types/pet';
-import { calculatePetAge, formatWeight } from '@/lib/validations/pet';
+import { calculatePetAge } from '@/lib/validations/pet';
 import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
 
@@ -33,7 +33,6 @@ interface PetCardProps {
 
 export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
   const [imageError, setImageError] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const age = calculatePetAge(pet.birthDate);
 
@@ -67,7 +66,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 )}
           </div>
           <CardAction>
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />

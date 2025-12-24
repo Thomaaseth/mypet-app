@@ -47,19 +47,12 @@ export default function PetList() {
   const [deletingPet, setDeletingPet] = useState<Pet | null>(null);
   const [activeTab, setActiveTab] = useState<string>('');
 
-// NEEDS TO CHANGE LOGIC TO REORG PET TABS, FOR NOW: 
-
-// Set active tab to first pet when pets load
-//   useState(() => {
-//     if (pets.length > 0 && !activeTab) {
-//       setActiveTab(pets[0].id);
-//     }
-//   });
-    useEffect(() => {
+  // Set active tab to first pet when pets load
+  useEffect(() => {
     if (pets && pets.length > 0 && !activeTab) {
-        setActiveTab(pets[0].id); // Auto-select first pet (latest added => desc order)
+      setActiveTab(pets[0].id); // Auto-select first pet (latest added => desc order)
     }
-    }, [pets, activeTab]);
+  }, [pets, activeTab]);
 
   // Handle create pet
   const handleCreatePet = async (petData: PetFormData): Promise<Pet | null> => {
@@ -92,17 +85,40 @@ export default function PetList() {
 
   // Handle delete pet
   const handleDeletePet = async () => {
-    if (!deletingPet) return;
+    if (!deletingPet || !pets) return;
     
     try {
-      await deletePetMutation.mutateAsync(deletingPet.id);
+      const deletedPetId = deletingPet.id;
+      
+      // Find the index of the pet being deleted
+      const deletedIndex = pets.findIndex(p => p.id === deletedPetId);
+      
+      // Determine which pet to navigate to after deletion
+      let nextPetId: string | null = null;
+      
+      if (pets.length > 1) {
+        // If there are other pets, navigate to the next one
+        if (deletedIndex < pets.length - 1) {
+          // Navigate to the next pet (same index after deletion)
+          nextPetId = pets[deletedIndex + 1].id;
+        } else {
+          // We're deleting the last pet, navigate to the previous one
+          nextPetId = pets[deletedIndex - 1].id;
+        }
+      }
+      
+      // Perform the deletion
+      await deletePetMutation.mutateAsync(deletedPetId);
+      
+      // Update active tab to the next pet (or empty if no pets left)
+      setActiveTab(nextPetId || '');
+      
+      // Close the dialog
       setDeletingPet(null);
     } catch (error) {
       // Error already handled in mutation
     }
   };
-
-
 
   if (isPending) {
     return <PetListSkeleton />;
@@ -227,75 +243,77 @@ export default function PetList() {
             <TabsContent key={pet.id} value={pet.id} className="mt-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
+                  <div>
                     <PetCard
-                        pet={pet}
-                        onEdit={() => setEditingPet(pet)}
-                        onDelete={() => setDeletingPet(pet)}
+                      pet={pet}
+                      onEdit={() => setEditingPet(pet)}
+                      onDelete={() => setDeletingPet(pet)}
                     />
-                    </div>
+                  </div>
 
-                    {/* Quick Stats */}
-                    <div>
+                  {/* Quick Stats */}
+                  <div>
                     <Card>
-                        <CardHeader>
+                      <CardHeader>
                         <CardTitle className="text-lg">Quick Stats</CardTitle>
-                        </CardHeader>
-                        <CardContent>
+                      </CardHeader>
+                      <CardContent>
                         <div className="space-y-3">
-                            <div className="flex justify-between">
+                          <div className="flex justify-between">
                             <span className="text-muted-foreground">Species:</span>
                             <span>{pet.species || 'Not specified'}</span>
-                            </div>
-                            <div className="flex justify-between">
+                          </div>
+                          <div className="flex justify-between">
                             <span className="text-muted-foreground">Gender:</span>
                             <span className="capitalize">{pet.gender}</span>
-                            </div>
-                            {/* {pet.weight && (
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Weight:</span>
-                                <span>{pet.weight} {pet.weightUnit}</span>
-                            </div>
-                            )} */}
-                            <div className="flex justify-between">
+                          </div>
+                          <div className="flex justify-between">
                             <span className="text-muted-foreground">Spayed/Neutered:</span>
                             <span>{pet.isNeutered ? 'Yes' : 'No'}</span>
-                            </div>
+                          </div>
                         </div>
-                        </CardContent>
+                      </CardContent>
                     </Card>
-                    </div>
+                  </div>
                 </div>
 
                 {/* Weight Tracker Section - Full Width */}
                 <WeightTracker 
-                    petId={pet.id} 
-                    animalType={pet.animalType} 
+                  petId={pet.id} 
+                  animalType={pet.animalType} 
                 />
 
                 {/* Food Tracker Section - Full Width */}
                 <FoodTracker 
-                    petId={pet.id}
+                  petId={pet.id}
                 />
 
                 {/* Coming Soon Card */}
                 <Card>
-                    <CardHeader>
+                  <CardHeader>
                     <CardTitle className="text-lg">Coming Soon</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  </CardHeader>
+                  <CardContent>
                     <p className="text-muted-foreground text-sm">
-                        Food management and vet records will be available here soon!
+                      Food management and vet records will be available here soon!
                     </p>
-                    </CardContent>
+                  </CardContent>
                 </Card>
-                </div>
+              </div>
             </TabsContent>
           ))}
         </Tabs>
 
         {/* Edit Pet Dialog */}
-        <Dialog open={!!editingPet} onOpenChange={() => setEditingPet(null)}>
+        <Dialog 
+          open={!!editingPet} 
+          onOpenChange={(open) => {
+            // Only allow closing if not currently loading
+            if (!open && !isActionLoading) {
+              setEditingPet(null);
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Pet</DialogTitle>
@@ -315,7 +333,15 @@ export default function PetList() {
         </Dialog>
 
         {/* Delete Pet Confirmation */}
-        <AlertDialog open={!!deletingPet} onOpenChange={() => setDeletingPet(null)}>
+        <AlertDialog 
+          open={!!deletingPet} 
+          onOpenChange={(open) => {
+            // Only allow closing if not currently loading
+            if (!open && !isActionLoading) {
+              setDeletingPet(null);
+            }
+          }}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Pet</AlertDialogTitle>
@@ -332,8 +358,8 @@ export default function PetList() {
                 disabled={isActionLoading}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {(createPetMutation.isPending || updatePetMutation.isPending || deletePetMutation.isPending) && 
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                {isActionLoading && 
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 }
                 Delete Pet
               </AlertDialogAction>
