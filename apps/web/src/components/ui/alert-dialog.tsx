@@ -1,142 +1,74 @@
 import * as React from "react"
-import { Dialog as HeadlessDialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
+
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-// Context to manage alert dialog state
-interface AlertDialogContextValue {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+function AlertDialog({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
+  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
 }
 
-const AlertDialogContext = React.createContext<AlertDialogContextValue | null>(null)
-
-function useAlertDialogContext() {
-  const context = React.useContext(AlertDialogContext)
-  if (!context) {
-    throw new Error("AlertDialog compound components must be used within AlertDialog")
-  }
-  return context
-}
-
-// Root AlertDialog component
-interface AlertDialogProps {
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  children: React.ReactNode
-}
-
-function AlertDialog({ open: controlledOpen, onOpenChange, children }: AlertDialogProps) {
-  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
-  const isControlled = controlledOpen !== undefined
-  const open = isControlled ? controlledOpen : uncontrolledOpen
-
-  const handleOpenChange = React.useCallback(
-    (newOpen: boolean) => {
-      if (onOpenChange) {
-        onOpenChange(newOpen)
-      }
-      if (!isControlled) {
-        setUncontrolledOpen(newOpen)
-      }
-    },
-    [isControlled, onOpenChange]
-  )
-
+function AlertDialogTrigger({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
   return (
-    <AlertDialogContext.Provider value={{ open, onOpenChange: handleOpenChange }}>
-      {children}
-    </AlertDialogContext.Provider>
+    <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
   )
 }
 
-// Trigger component
-interface AlertDialogTriggerProps extends React.ComponentPropsWithoutRef<"button"> {
-  asChild?: boolean
-}
-
-function AlertDialogTrigger({ asChild, children, onClick, ...props }: AlertDialogTriggerProps) {
-  const { onOpenChange } = useAlertDialogContext()
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onOpenChange(true)
-    onClick?.(e)
-  }
-
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children, {
-      ...props,
-      onClick: handleClick,
-    } as React.HTMLAttributes<HTMLElement>)
-  }
-
+function AlertDialogPortal({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
   return (
-    <button data-slot="alert-dialog-trigger" onClick={handleClick} {...props}>
-      {children}
-    </button>
+    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
   )
 }
 
-// Portal component (no-op)
-type AlertDialogPortalProps = {
-  children: React.ReactNode
-}
-
-function AlertDialogPortal({ children }: AlertDialogPortalProps) {
-  return <>{children}</>
-}
-
-// Overlay component (deprecated - kept for backwards compatibility)
-type AlertDialogOverlayProps = React.ComponentPropsWithoutRef<"div">
-
-function AlertDialogOverlay({ className, ...props }: AlertDialogOverlayProps) {
+function AlertDialogOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Overlay>) {
   return (
-    <div
+    <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
-      className={cn("fixed inset-0 z-50 bg-black/50", className)}
+      className={cn(
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        className
+      )}
       {...props}
     />
   )
 }
 
-// Content component - using modern Headless UI v2.1+ API
-type AlertDialogContentProps = React.ComponentPropsWithoutRef<"div">
-
-function AlertDialogContent({ className, children, ...props }: AlertDialogContentProps) {
-  const { open, onOpenChange } = useAlertDialogContext()
-
+function AlertDialogContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Content>) {
   return (
-    <HeadlessDialog open={open} onClose={() => onOpenChange(false)} className="relative z-50">
-      {/* Backdrop with transition */}
-      <DialogBackdrop
-        transition
-        className="fixed inset-0 bg-black/50 transition duration-200 ease-out data-[closed]:opacity-0"
+    <AlertDialogPortal>
+      <AlertDialogOverlay />
+      <AlertDialogPrimitive.Content
+        data-slot="alert-dialog-content"
+        className={cn(
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          className
+        )}
+          onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          document.body.style.pointerEvents = '';
+        }}
+        {...props}
       />
-
-      {/* Container */}
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        {/* Panel with transition */}
-        <DialogPanel
-          transition
-          data-slot="alert-dialog-content"
-          className={cn(
-            "bg-background relative grid w-full max-w-[calc(100%-2rem)] gap-4 rounded-lg border p-6 shadow-lg sm:max-w-lg",
-            "transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0",
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </DialogPanel>
-      </div>
-    </HeadlessDialog>
+    </AlertDialogPortal>
   )
 }
 
-// Header component
-type AlertDialogHeaderProps = React.ComponentPropsWithoutRef<"div">
-
-function AlertDialogHeader({ className, ...props }: AlertDialogHeaderProps) {
+function AlertDialogHeader({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-dialog-header"
@@ -146,26 +78,28 @@ function AlertDialogHeader({ className, ...props }: AlertDialogHeaderProps) {
   )
 }
 
-// Footer component
-type AlertDialogFooterProps = React.ComponentPropsWithoutRef<"div">
-
-function AlertDialogFooter({ className, ...props }: AlertDialogFooterProps) {
+function AlertDialogFooter({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="alert-dialog-footer"
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      className={cn(
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        className
+      )}
       {...props}
     />
   )
 }
 
-// Title component
-type AlertDialogTitleProps = React.ComponentPropsWithoutRef<"h2">
-
-function AlertDialogTitle({ className, ...props }: AlertDialogTitleProps) {
+function AlertDialogTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
   return (
-    <HeadlessDialog.Title
-      as="h2"
+    <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
       className={cn("text-lg font-semibold", className)}
       {...props}
@@ -173,13 +107,12 @@ function AlertDialogTitle({ className, ...props }: AlertDialogTitleProps) {
   )
 }
 
-// Description component
-type AlertDialogDescriptionProps = React.ComponentPropsWithoutRef<"p">
-
-function AlertDialogDescription({ className, ...props }: AlertDialogDescriptionProps) {
+function AlertDialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
   return (
-    <HeadlessDialog.Description
-      as="p"
+    <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
       className={cn("text-muted-foreground text-sm", className)}
       {...props}
@@ -187,58 +120,25 @@ function AlertDialogDescription({ className, ...props }: AlertDialogDescriptionP
   )
 }
 
-// Action component (button that confirms/proceeds)
-interface AlertDialogActionProps extends React.ComponentPropsWithoutRef<"button"> {
-  asChild?: boolean
-}
-
-function AlertDialogAction({ asChild, className, onClick, ...props }: AlertDialogActionProps) {
-  const { onOpenChange } = useAlertDialogContext()
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e)
-    // Only close if the onClick handler didn't prevent default
-    if (!e.defaultPrevented) {
-      onOpenChange(false)
-    }
-  }
-
-  if (asChild && React.isValidElement(props.children)) {
-    return React.cloneElement(props.children, {
-      className: cn(buttonVariants(), className),
-      onClick: handleClick,
-    } as React.HTMLAttributes<HTMLElement>)
-  }
-
+function AlertDialogAction({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
   return (
-    <button className={cn(buttonVariants(), className)} onClick={handleClick} {...props} />
+    <AlertDialogPrimitive.Action
+      className={cn(buttonVariants(), className)}
+      {...props}
+    />
   )
 }
 
-// Cancel component (button that cancels/dismisses)
-interface AlertDialogCancelProps extends React.ComponentPropsWithoutRef<"button"> {
-  asChild?: boolean
-}
-
-function AlertDialogCancel({ asChild, className, onClick, ...props }: AlertDialogCancelProps) {
-  const { onOpenChange } = useAlertDialogContext()
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e)
-    onOpenChange(false)
-  }
-
-  if (asChild && React.isValidElement(props.children)) {
-    return React.cloneElement(props.children, {
-      className: cn(buttonVariants({ variant: "outline" }), className),
-      onClick: handleClick,
-    } as React.HTMLAttributes<HTMLElement>)
-  }
-
+function AlertDialogCancel({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
   return (
-    <button
+    <AlertDialogPrimitive.Cancel
       className={cn(buttonVariants({ variant: "outline" }), className)}
-      onClick={handleClick}
       {...props}
     />
   )
