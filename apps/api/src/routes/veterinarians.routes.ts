@@ -37,29 +37,29 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
 });
 
 // GET /api/pets/:petId/vets - Get veterinarians assigned to a pet
-router.get('/:petId/vets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.authSession?.user.id;
-    if (!userId) {
-      throw new BadRequestError('User session not found');
-    }
+// router.get('/:petId/vets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+//   try {
+//     const userId = req.authSession?.user.id;
+//     if (!userId) {
+//       throw new BadRequestError('User session not found');
+//     }
 
-    const petId = req.params.petId;
-    if (!petId) {
-      throw new BadRequestError('Pet ID is required');
-    }
+//     const petId = req.params.petId;
+//     if (!petId) {
+//       throw new BadRequestError('Pet ID is required');
+//     }
 
-    // Verify pet ownership
-    await PetsService.getPetById(petId, userId);
+//     // Verify pet ownership
+//     await PetsService.getPetById(petId, userId);
 
-    // Get vets assigned to this pet
-    const vets = await VeterinariansService.getVetsForPet(petId, userId);
+//     // Get vets assigned to this pet
+//     const vets = await VeterinariansService.getVetsForPet(petId, userId);
     
-    respondWithSuccess(res, { veterinarians: vets, total: vets.length }, 'Retrieved veterinarians for pet');
-  } catch (error) {
-    next(error);
-  }
-});
+//     respondWithSuccess(res, { veterinarians: vets, total: vets.length }, 'Retrieved veterinarians for pet');
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // GET /api/vets/:id/pets - Get pets assigned to a veterinarian
 router.get('/:id/pets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

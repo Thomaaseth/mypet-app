@@ -22,7 +22,7 @@ export interface AppointmentFormData {
 }
 
 export class AppointmentsService {
-  // UUID validation helper
+  // UUID validation helper (for database-generated IDs only)
   private static validateUUID(id: string, fieldName: string): void {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!id || !uuidRegex.test(id)) {
@@ -187,7 +187,10 @@ export class AppointmentsService {
     filter: 'upcoming' | 'past' = 'upcoming'
   ): Promise<Appointment[]> {
     try {
-      this.validateUUID(userId, 'user ID');
+      // Validate userId exists and is string
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
 
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
@@ -235,8 +238,13 @@ export class AppointmentsService {
   // GET single appointment by ID
   static async getAppointmentById(appointmentId: string, userId: string): Promise<Appointment> {
     try {
+      // Validate userId exists and is string
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
+
+      // Validate database UUID
       this.validateUUID(appointmentId, 'appointment ID');
-      this.validateUUID(userId, 'user ID');
 
       const appointment = await db.query.appointments.findFirst({
         where: and(
@@ -266,15 +274,13 @@ export class AppointmentsService {
   // GET last vet used for a specific pet
   static async getLastVetForPet(petId: string, userId: string): Promise<string | null> {
     try {
-      console.log('DEBUG - petId:', petId);
-      console.log('DEBUG - userId:', userId);
-      console.log('DEBUG - userId type:', typeof userId);
-      this.validateUUID(petId, 'pet ID');
-      // this.validateUUID(userId, 'user ID');
-      
+      // Validate userId exists and is string
       if (!userId || typeof userId !== 'string') {
         throw new BadRequestError('Valid user ID is required');
       }
+
+      // Validate database UUID
+      this.validateUUID(petId, 'pet ID');
 
       // Verify pet ownership
       await this.verifyPetOwnership(petId, userId);
@@ -306,14 +312,12 @@ export class AppointmentsService {
     userId: string
   ): Promise<Appointment> {
     try {
-      console.log('DEBUG CREATE - userId:', userId);
-      console.log('DEBUG CREATE - userId type:', typeof userId);
-      // this.validateUUID(userId, 'user ID');
-
+      // Validate userId exists and is string
       if (!userId || typeof userId !== 'string') {
         throw new BadRequestError('Valid user ID is required');
       }
 
+      // Validate appointment inputs
       this.validateAppointmentInputs(appointmentData, false);
 
       // Verify pet ownership
@@ -372,8 +376,15 @@ export class AppointmentsService {
     userId: string
   ): Promise<Appointment> {
     try {
+      // Validate userId exists and is string
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
+
+      // Validate database UUID
       this.validateUUID(appointmentId, 'appointment ID');
-      this.validateUUID(userId, 'user ID');
+
+      // Validate update data
       this.validateAppointmentInputs(updateData, true);
 
       // Fetch existing appointment
@@ -464,8 +475,13 @@ export class AppointmentsService {
     userId: string
   ): Promise<Appointment> {
     try {
+      // Validate userId exists and is string
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
+
+      // Validate database UUID
       this.validateUUID(appointmentId, 'appointment ID');
-      this.validateUUID(userId, 'user ID');
 
       if (visitNotes.length > 1000) {
         throw new BadRequestError('Visit notes must be less than 1000 characters');
@@ -505,8 +521,13 @@ export class AppointmentsService {
   // DELETE appointment (hard delete)
   static async deleteAppointment(appointmentId: string, userId: string): Promise<void> {
     try {
+      // Validate userId exists and is string
+      if (!userId || typeof userId !== 'string') {
+        throw new BadRequestError('Valid user ID is required');
+      }
+
+      // Validate database UUID
       this.validateUUID(appointmentId, 'appointment ID');
-      this.validateUUID(userId, 'user ID');
 
       // Verify appointment exists and user owns it
       await this.getAppointmentById(appointmentId, userId);
