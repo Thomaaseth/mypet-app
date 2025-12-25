@@ -227,14 +227,15 @@ export default function AppointmentForm({
 
       {/* Reason for Visit */}
       <div className="space-y-2">
-        <Label htmlFor="reasonForVisit">Reason for Visit</Label>
+        <Label htmlFor="reasonForVisit">Reminders/Notes</Label>
         <Textarea
           id="reasonForVisit"
-          placeholder="Why is your pet seeing the vet?"
+          placeholder="Topics to discuss with the veterinarian"
           rows={3}
           {...register('reasonForVisit')}
           aria-invalid={!!errors.reasonForVisit}
           disabled={isPastAppointment || isLoading}
+          className="[word-break:break-word]"
         />
         {errors.reasonForVisit && (
           <p className="text-sm text-destructive">{errors.reasonForVisit.message}</p>
@@ -244,17 +245,18 @@ export default function AppointmentForm({
         </p>
       </div>
 
-      {/* Visit Notes - only for past appointments or when editing */}
-      {(isEditing || isPastAppointment) && (
+      {/* Visit Notes - only for past appointments */}
+      {(isPastAppointment) && (
         <div className="space-y-2">
-          <Label htmlFor="visitNotes">Visit Notes</Label>
+          <Label htmlFor="visitNotes">Visit Summary</Label>
           <Textarea
             id="visitNotes"
-            placeholder="Notes from the vet visit..."
+            placeholder="Notes and recommendations from the vet visit..."
             rows={4}
             {...register('visitNotes')}
             aria-invalid={!!errors.visitNotes}
             disabled={isLoading}
+            className="[word-break:break-word]"
           />
           {errors.visitNotes && (
             <p className="text-sm text-destructive">{errors.visitNotes.message}</p>

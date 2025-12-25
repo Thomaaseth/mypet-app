@@ -128,7 +128,7 @@ export default function AppointmentCard({
                       }}
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      Edit Notes
+                      Edit Visit summary 
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -184,7 +184,7 @@ export default function AppointmentCard({
         {/* Reason for Visit */}
         {appointment.reasonForVisit && (
           <div className="pt-2 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Reason:</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1">Reminders/Notes:</p>
             <p className="text-sm whitespace-pre-wrap break-words">
               {appointment.reasonForVisit}
             </p>
@@ -194,14 +194,14 @@ export default function AppointmentCard({
         {/* Visit Notes (for past appointments) */}
         {!isUpcoming && appointment.visitNotes && (
           <div className="pt-2 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Notes:</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1">Visit summary:</p>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
               {appointment.visitNotes}
             </p>
           </div>
         )}
 
-        {/* Action Buttons - Mobile friendly */}
+        {/* Action Buttons */}
         <div className="flex gap-2 pt-2">
           {isUpcoming ? (
             <>
@@ -224,7 +224,7 @@ export default function AppointmentCard({
                 onClick={() => onEditNotes(appointment)}
               >
                 <FileText className="h-4 w-4 mr-1" />
-                Edit Notes
+                Edit Visit Summary
               </Button>
             </>
           )}

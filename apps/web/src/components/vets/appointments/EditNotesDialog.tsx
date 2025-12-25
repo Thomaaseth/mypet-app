@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -29,8 +29,15 @@ export default function EditNotesDialog({
   onSubmit,
   onCancel,
 }: EditNotesDialogProps) {
-  const [visitNotes, setVisitNotes] = useState(appointment?.visitNotes || '');
+  const [visitNotes, setVisitNotes] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Update visitNotes when appointment changes
+  useEffect(() => {
+    if (appointment) {
+      setVisitNotes(appointment.visitNotes || '');
+    }
+  }, [appointment]);
 
   if (!appointment) return null;
 
@@ -89,7 +96,7 @@ export default function EditNotesDialog({
           {/* Reason for Visit (read-only) */}
           {appointment.reasonForVisit && (
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Reason for Visit (read-only)</Label>
+              <Label className="text-muted-foreground">Discussion Points (read-only)</Label>
               <div className="text-sm border rounded-md p-3 bg-muted/50 text-muted-foreground">
                 {appointment.reasonForVisit}
               </div>
@@ -98,15 +105,15 @@ export default function EditNotesDialog({
 
           {/* Visit Notes (editable) */}
           <div className="space-y-2">
-            <Label htmlFor="visitNotes">Visit Notes</Label>
+            <Label htmlFor="visitNotes">Visit Summary</Label>
             <Textarea
               id="visitNotes"
-              placeholder="Add notes from the vet visit..."
+              placeholder="Notes and recommendations from the vet visit..."
               rows={6}
               value={visitNotes}
               onChange={(e) => setVisitNotes(e.target.value)}
               disabled={isLoading}
-              className="resize-none"
+              className="resize-none [word-break:break-word]"
             />
             <p className="text-xs text-muted-foreground">
               {visitNotes.length}/1000 characters
