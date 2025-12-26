@@ -184,7 +184,7 @@ export default function AppointmentCard({
         {/* Reason for Visit */}
         {appointment.reasonForVisit && (
           <div className="pt-2 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Reminders/Notes:</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1">Discussion points:</p>
             <p className="text-sm whitespace-pre-wrap break-words">
               {appointment.reasonForVisit}
             </p>

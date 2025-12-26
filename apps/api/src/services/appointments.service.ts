@@ -137,14 +137,14 @@ export class AppointmentsService {
 
     // Notes length validation
     if (appointmentData.reasonForVisit !== undefined && appointmentData.reasonForVisit !== null) {
-      if (appointmentData.reasonForVisit.length > 500) {
-        throw new BadRequestError('Reason for visit must be less than 500 characters');
+      if (appointmentData.reasonForVisit.length > 100) {
+        throw new BadRequestError('Reason for visit must be less than 100 characters');
       }
     }
 
     if (appointmentData.visitNotes !== undefined && appointmentData.visitNotes !== null) {
-      if (appointmentData.visitNotes.length > 1000) {
-        throw new BadRequestError('Visit notes must be less than 1000 characters');
+      if (appointmentData.visitNotes.length > 200) {
+        throw new BadRequestError('Visit notes must be less than 200 characters');
       }
     }
   }

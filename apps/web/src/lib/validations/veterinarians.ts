@@ -13,7 +13,7 @@ export const baseVeterinarianFormSchema = z.object({
   
   clinicName: z
     .string()
-    .max(150, 'Clinic name must be less than 150 characters')
+    .max(100, 'Clinic name must be less than 100 characters')
     .regex(/^[a-zA-Z0-9\s\-'\.&]*$/, 'Clinic name can only contain letters, numbers, spaces, hyphens, apostrophes, periods, and ampersands')
     .optional()
     .or(z.literal('')),

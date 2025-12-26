@@ -56,14 +56,16 @@ export const appointmentFormSchema = z.object({
     required_error: 'Please select an appointment type',
     invalid_type_error: 'Invalid appointment type',
   }),
-  
+
+  // "Discussion points"
   reasonForVisit: z.string()
-    .max(500, 'Reason must be less than 500 characters')
+    .max(100, 'Reason must be less than 100 characters')
     .optional()
     .or(z.literal('')),
-  
+
+  // "Visit summary"
   visitNotes: z.string()
-    .max(1000, 'Notes must be less than 1000 characters')
+    .max(200, 'Notes must be less than 200 characters')
     .optional()
     .or(z.literal('')),
 });
@@ -90,7 +92,7 @@ export const updateAppointmentSchema = appointmentFormSchema.extend({
 // Schema for updating only visit notes (for past appointments)
 export const updateVisitNotesSchema = z.object({
   visitNotes: z.string()
-    .max(1000, 'Notes must be less than 1000 characters')
+    .max(200, 'Notes must be less than 200 characters')
     .optional()
     .or(z.literal('')),
 });

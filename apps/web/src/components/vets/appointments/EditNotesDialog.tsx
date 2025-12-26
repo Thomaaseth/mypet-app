@@ -49,8 +49,8 @@ export default function EditNotesDialog({
     setLocalError(null);
 
     // Client-side validation
-    if (visitNotes.length > 1000) {
-      setLocalError('Visit notes must be less than 1000 characters');
+    if (visitNotes.length > 200) {
+      setLocalError('Visit notes must be less than 200 characters');
       return;
     }
 
@@ -103,7 +103,7 @@ export default function EditNotesDialog({
             </div>
           )}
 
-          {/* Visit Notes (editable) */}
+          {/* Visit Notes "Visit summary" (editable) */}
           <div className="space-y-2">
             <Label htmlFor="visitNotes">Visit Summary</Label>
             <Textarea
@@ -114,9 +114,10 @@ export default function EditNotesDialog({
               onChange={(e) => setVisitNotes(e.target.value)}
               disabled={isLoading}
               className="resize-none [word-break:break-word]"
+              maxLength={200}
             />
             <p className="text-xs text-muted-foreground">
-              {visitNotes.length}/1000 characters
+              {visitNotes.length}/200 characters
             </p>
           </div>
 

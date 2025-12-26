@@ -14,7 +14,7 @@ import {
     userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }).notNull(),
     
     vetName: varchar('vet_name', { length: 100 }).notNull(),
-    clinicName: varchar('clinic_name', { length: 150 }),
+    clinicName: varchar('clinic_name', { length: 100 }),
     
     phone: varchar('phone', { length: 20 }).notNull(),
     email: varchar('email', { length: 100 }),

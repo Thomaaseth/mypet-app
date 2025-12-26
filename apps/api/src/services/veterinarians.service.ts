@@ -48,8 +48,8 @@ export class VeterinariansService {
     }
 
     if (data.clinicName !== undefined && data.clinicName !== null && data.clinicName !== '') {
-      if (typeof data.clinicName !== 'string' || data.clinicName.length > 150) {
-        throw new BadRequestError('Clinic name must be less than 150 characters');
+      if (typeof data.clinicName !== 'string' || data.clinicName.length > 100) {
+        throw new BadRequestError('Clinic name must be less than 100 characters');
       }
     }
 

@@ -225,27 +225,28 @@ export default function AppointmentForm({
         )}
       </div>
 
-      {/* Reason for Visit */}
+      {/* Reason for Visit "Discussion points" */}
       <div className="space-y-2">
-        <Label htmlFor="reasonForVisit">Reminders/Notes</Label>
+        <Label htmlFor="reasonForVisit">Discussion Points</Label>
         <Textarea
           id="reasonForVisit"
-          placeholder="Topics to discuss with the veterinarian"
+          placeholder="Topics to discuss with the veterinarian (e.g., change of diet, urinary issues)"
           rows={3}
           {...register('reasonForVisit')}
           aria-invalid={!!errors.reasonForVisit}
           disabled={isPastAppointment || isLoading}
           className="[word-break:break-word]"
+          maxLength={100}
         />
         {errors.reasonForVisit && (
           <p className="text-sm text-destructive">{errors.reasonForVisit.message}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          Optional: Max 500 characters
+          {(watch('reasonForVisit')?.length || 0)}/100 characters
         </p>
       </div>
 
-      {/* Visit Notes - only for past appointments */}
+      {/* Visit Notes "Visit summary" - only for past appointments */}
       {(isPastAppointment) && (
         <div className="space-y-2">
           <Label htmlFor="visitNotes">Visit Summary</Label>
@@ -257,12 +258,13 @@ export default function AppointmentForm({
             aria-invalid={!!errors.visitNotes}
             disabled={isLoading}
             className="[word-break:break-word]"
+            maxLength={200}
           />
           {errors.visitNotes && (
             <p className="text-sm text-destructive">{errors.visitNotes.message}</p>
           )}
           <p className="text-xs text-muted-foreground">
-            Optional: Max 1000 characters
+            {(watch('visitNotes')?.length || 0)}/200 characters
           </p>
         </div>
       )}

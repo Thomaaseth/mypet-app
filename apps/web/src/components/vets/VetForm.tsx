@@ -53,6 +53,7 @@ export default function VetForm({
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useVetForm({ vet });
 
   const onFormSubmit = async (formData: z.infer<typeof baseVeterinarianFormSchema>) => {
@@ -229,12 +230,14 @@ export default function VetForm({
           rows={3}
           {...register('notes')}
           aria-invalid={!!errors.notes}
+          className="[word-break:break-word]"
+          maxLength={100}
         />
         {errors.notes && (
           <p className="text-sm text-destructive">{errors.notes.message}</p>
         )}
         <p className="text-xs text-muted-foreground">
-          Optional: Office hours, specialties, or other notes (max 100 characters)
+          {(watch('notes')?.length || 0)}/100 characters
         </p>
       </div>
 
