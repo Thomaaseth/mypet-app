@@ -139,7 +139,7 @@ export default function VetForm({
         <Input
           id="email"
           type="email"
-          placeholder="contact@happypaws.com"
+          placeholder="contact@pettr.health"
           {...register('email')}
           aria-invalid={!!errors.email}
         />

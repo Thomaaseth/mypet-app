@@ -78,8 +78,9 @@ export function useCreateVeterinarian() {
       return vetApi.createVeterinarian(vetData, { petIds });
     },
     onSuccess: (newVet) => {
-      // Invalidate and refetch veterinarians list
+      // Invalidate and refetch veterinarians list and pets assignements
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pets'] });
 
       // Show success toast
       toastService.success(
@@ -112,6 +113,7 @@ export function useUpdateVeterinarian() {
       // Invalidate both list and detail caches
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
       queryClient.invalidateQueries({ queryKey: vetKeys.detail(updatedVet.id) });
+      queryClient.invalidateQueries({ queryKey: ['pets']});
 
       // Show success toast
       toastService.success(
@@ -168,6 +170,7 @@ export function useAssignVetToPets() {
       queryClient.invalidateQueries({ queryKey: vetKeys.detail(vetId) });
       queryClient.invalidateQueries({ queryKey: vetKeys.pets(vetId) });
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pets'] });
 
       // Show success toast
       toastService.success('Pets assigned', 'Veterinarian has been assigned to selected pets.');
@@ -192,6 +195,7 @@ export function useUnassignVetFromPets() {
       queryClient.invalidateQueries({ queryKey: vetKeys.detail(vetId) });
       queryClient.invalidateQueries({ queryKey: vetKeys.pets(vetId) });
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['pets'] });
 
       // Show success toast
       toastService.success(
