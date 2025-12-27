@@ -68,7 +68,7 @@ export default function AppointmentCard({
     .join(', ');
 
   return (
-    <Card className="group hover:shadow-md transition-shadow duration-200">
+    <Card className="group hover:shadow-md transition-shadow duration-200 flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
@@ -150,7 +150,7 @@ export default function AppointmentCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="flex flex-col gap-3 flex-1">
         {/* Date and Time */}
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
@@ -163,8 +163,8 @@ export default function AppointmentCard({
           </div>
         </div>
 
-        {/* Veterinarian Info */}
-        <div className="pt-2 border-t space-y-2">
+        {/* Veterinarian Info - Fixed height to accommodate clinic name + vet name + 2-line address */}
+        <div className="pt-2 border-t space-y-2 h-[100px]">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span>{appointment.veterinarian.clinicName || appointment.veterinarian.vetName}</span>
@@ -181,19 +181,17 @@ export default function AppointmentCard({
           </div>
         </div>
 
-        {/* Reason for Visit */}
-        {appointment.reasonForVisit && (
-          <div className="pt-2 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Discussion points:</p>
-            <p className="text-sm whitespace-pre-wrap break-words">
-              {appointment.reasonForVisit}
-            </p>
-          </div>
-        )}
+        {/* Discussion Points - Fixed height for ~100 characters */}
+        <div className="pt-2 border-t h-[120px]">
+          <p className="text-xs font-medium text-muted-foreground mb-1">Discussion points:</p>
+          <p className="text-sm whitespace-pre-wrap break-words">
+            {appointment.reasonForVisit}
+          </p>
+        </div>
 
-        {/* Visit Notes (for past appointments) */}
-        {!isUpcoming && appointment.visitNotes && (
-          <div className="pt-2 border-t">
+        {/* Visit Summary (for past appointments) - Fixed height for ~200 characters */}
+        {!isUpcoming && (
+          <div className="h-[200px]">
             <p className="text-xs font-medium text-muted-foreground mb-1">Visit summary:</p>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
               {appointment.visitNotes}
@@ -201,32 +199,28 @@ export default function AppointmentCard({
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        {/* Action Buttons - Always at bottom */}
+        <div className="flex gap-2 pt-2 mt-auto">
           {isUpcoming ? (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => onEdit(appointment)}
-              >
-                <Edit2 className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => onEdit(appointment)}
+            >
+              <Edit2 className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
           ) : (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => onEditNotes(appointment)}
-              >
-                <FileText className="h-4 w-4 mr-1" />
-                Edit Visit Summary
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => onEditNotes(appointment)}
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Edit Visit Summary
+            </Button>
           )}
         </div>
       </CardContent>
