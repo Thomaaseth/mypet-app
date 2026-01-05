@@ -180,7 +180,7 @@ export default function AppointmentTracker() {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="upcoming" className="space-y-4">
+        <Tabs defaultValue="upcoming" className="space-y-4" onValueChange={() => setExpandedDiscussionPointsCount(0)}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upcoming">
               Upcoming ({upcomingAppointments?.length || 0})
