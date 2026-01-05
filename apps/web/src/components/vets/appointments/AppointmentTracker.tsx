@@ -43,6 +43,8 @@ export default function AppointmentTracker() {
   const [editingNotesAppointment, setEditingNotesAppointment] = useState<AppointmentWithRelations | null>(null);
   const [deletingAppointment, setDeletingAppointment] = useState<AppointmentWithRelations | null>(null);
   const [expandedDiscussionPointsCount, setExpandedDiscussionPointsCount] = useState(0);
+  const [visibleUpcomingCount, setVisibleUpcomingCount] = useState(3);
+  const [visiblePastCount, setVisiblePastCount] = useState(3);
 
   const handleCreateAppointment = async (
     appointmentData: AppointmentFormData
@@ -180,7 +182,11 @@ export default function AppointmentTracker() {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="upcoming" className="space-y-4" onValueChange={() => setExpandedDiscussionPointsCount(0)}>
+        <Tabs defaultValue="upcoming" className="space-y-4" onValueChange={() => {
+          setExpandedDiscussionPointsCount(0);
+          setVisibleUpcomingCount(3);
+          setVisiblePastCount(3);
+          }}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upcoming">
               Upcoming ({upcomingAppointments?.length || 0})
@@ -200,18 +206,54 @@ export default function AppointmentTracker() {
                 No upcoming appointments
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {upcomingAppointments?.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    isUpcoming={true}
-                    onEdit={setEditingAppointment}
-                    onEditNotes={setEditingNotesAppointment}
-                    onDelete={setDeletingAppointment}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {upcomingAppointments?.slice(0, visibleUpcomingCount).map((appointment) => (
+                    <AppointmentCard
+                      key={appointment.id}
+                      appointment={appointment}
+                      isUpcoming={true}
+                      onEdit={setEditingAppointment}
+                      onEditNotes={setEditingNotesAppointment}
+                      onDelete={setDeletingAppointment}
+                    />
+                  ))}
+                </div>
+                {upcomingAppointments && upcomingAppointments.length > 3 && (
+                  <div className="flex justify-center gap-2 pt-4">
+                    {visibleUpcomingCount < upcomingAppointments.length && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setVisibleUpcomingCount(prev => Math.min(prev + 3, upcomingAppointments.length))}
+                      >
+                        Show More
+                      </Button>
+                    )}
+                    {visibleUpcomingCount > 3 && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setVisibleUpcomingCount(prev => {
+                            const remainder = (prev - 3) % 3;
+                            return Math.max(3, prev - (remainder === 0 ? 3 : remainder));
+                          })}
+                        >
+                          Show Less
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setVisibleUpcomingCount(3)}
+                        >
+                          Collapse All
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
@@ -225,21 +267,57 @@ export default function AppointmentTracker() {
                 No past appointments
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {pastAppointments?.map((appointment) => (
-                  <AppointmentCard
-                    key={appointment.id}
-                    appointment={appointment}
-                    isUpcoming={false}
-                    isAnyDiscussionPointsExpanded={expandedDiscussionPointsCount > 0}
-                    onDiscussionPointsExpand={() => setExpandedDiscussionPointsCount(prev => prev + 1)}
-                    onDiscussionPointsCollapse={() => setExpandedDiscussionPointsCount(prev => Math.max(0, prev - 1))}
-                    onEdit={setEditingAppointment}
-                    onEditNotes={setEditingNotesAppointment}
-                    onDelete={setDeletingAppointment}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pastAppointments?.slice(0, visiblePastCount).map((appointment) => (
+                    <AppointmentCard
+                      key={appointment.id}
+                      appointment={appointment}
+                      isUpcoming={false}
+                      isAnyDiscussionPointsExpanded={expandedDiscussionPointsCount > 0}
+                      onDiscussionPointsExpand={() => setExpandedDiscussionPointsCount(prev => prev + 1)}
+                      onDiscussionPointsCollapse={() => setExpandedDiscussionPointsCount(prev => Math.max(0, prev - 1))}
+                      onEdit={setEditingAppointment}
+                      onEditNotes={setEditingNotesAppointment}
+                      onDelete={setDeletingAppointment}
+                    />
+                  ))}
+                </div>
+                {pastAppointments && pastAppointments.length > 3 && (
+                  <div className="flex justify-center gap-2 pt-4">
+                    {visiblePastCount < pastAppointments.length && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setVisiblePastCount(prev => Math.min(prev + 3, pastAppointments.length))}
+                      >
+                        Show More
+                      </Button>
+                    )}
+                    {visiblePastCount > 3 && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setVisiblePastCount(prev => {
+                            const remainder = (prev - 3) % 3;
+                            return Math.max(3, prev - (remainder === 0 ? 3 : remainder));
+                          })}
+                        >
+                          Show Less
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setVisiblePastCount(3)}
+                        >
+                          Collapse All
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
         </Tabs>
