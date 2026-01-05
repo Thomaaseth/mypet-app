@@ -42,6 +42,7 @@ export default function AppointmentTracker() {
   const [editingAppointment, setEditingAppointment] = useState<AppointmentWithRelations | null>(null);
   const [editingNotesAppointment, setEditingNotesAppointment] = useState<AppointmentWithRelations | null>(null);
   const [deletingAppointment, setDeletingAppointment] = useState<AppointmentWithRelations | null>(null);
+  const [expandedDiscussionPointsCount, setExpandedDiscussionPointsCount] = useState(0);
 
   const handleCreateAppointment = async (
     appointmentData: AppointmentFormData
@@ -230,6 +231,9 @@ export default function AppointmentTracker() {
                     key={appointment.id}
                     appointment={appointment}
                     isUpcoming={false}
+                    isAnyDiscussionPointsExpanded={expandedDiscussionPointsCount > 0}
+                    onDiscussionPointsExpand={() => setExpandedDiscussionPointsCount(prev => prev + 1)}
+                    onDiscussionPointsCollapse={() => setExpandedDiscussionPointsCount(prev => Math.max(0, prev - 1))}
                     onEdit={setEditingAppointment}
                     onEditNotes={setEditingNotesAppointment}
                     onDelete={setDeletingAppointment}

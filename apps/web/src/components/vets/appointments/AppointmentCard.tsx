@@ -11,6 +11,8 @@ import {
   Stethoscope,
   FileText,
   Building2,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,12 +22,15 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { AppointmentWithRelations, AppointmentType } from '@/types/appointments';
-import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
+import { formatDateForDisplay, formatTimeForDisplay, isUpcomingAppointment } from '@/lib/validations/appointments';
 import { useState } from 'react';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
   isUpcoming: boolean;
+  isAnyDiscussionPointsExpanded?: boolean;
+  onDiscussionPointsExpand?: () => void;
+  onDiscussionPointsCollapse?: () => void
   onEdit: (appointment: AppointmentWithRelations) => void;
   onEditNotes: (appointment: AppointmentWithRelations) => void;
   onDelete: (appointment: AppointmentWithRelations) => void;
@@ -48,15 +53,38 @@ const getAppointmentTypeBadge = (type: AppointmentType) => {
 export default function AppointmentCard({
   appointment,
   isUpcoming,
+  isAnyDiscussionPointsExpanded = true,
+  onDiscussionPointsExpand,
+  onDiscussionPointsCollapse,
   onEdit,
   onEditNotes,
   onDelete,
 }: AppointmentCardProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMyContentExpanded, setIsMyContentExpanded] = useState(isUpcoming);
 
   const typeBadge = getAppointmentTypeBadge(appointment.appointmentType);
   const displayDate = formatDateForDisplay(appointment.appointmentDate);
   const displayTime = formatTimeForDisplay(appointment.appointmentTime);
+  
+  // Check if appointment time has passed
+  const hasAppointmentTimePassed = (() => {
+    const now = new Date();
+    const apptDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    return now > apptDateTime;
+  })();
+
+  const handleDiscussionPointsToggle = () => {
+    if (isMyContentExpanded) {
+      // Collapsing this card
+      setIsMyContentExpanded(false);
+      onDiscussionPointsCollapse?.();
+    } else {
+      // Expanding this card
+      setIsMyContentExpanded(true);
+      onDiscussionPointsExpand?.();
+    }
+  };
 
   const fullAddress = [
     appointment.veterinarian.addressLine1,
@@ -181,17 +209,34 @@ export default function AppointmentCard({
           </div>
         </div>
 
-        {/* Discussion Points - Fixed height for ~100 characters */}
-        <div className="pt-2 border-t h-[120px]">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Discussion points:</p>
-          <p className="text-sm whitespace-pre-wrap break-words">
-            {appointment.reasonForVisit}
-          </p>
+        {/* Discussion Points - Collapsible for past cards only */}
+        <div className={`pt-2 border-t ${isUpcoming || isAnyDiscussionPointsExpanded ? 'h-[120px]' : 'h-[28px]'}`}>
+          {!isUpcoming && onDiscussionPointsExpand ? (
+            <button
+              type="button"
+              onClick={handleDiscussionPointsToggle}
+              className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground mb-1 hover:text-foreground transition-colors"
+            >
+              <span>Discussion points:</span>
+              {isMyContentExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+            </button>
+          ) : (
+            <p className="text-xs font-medium text-muted-foreground mb-1">Discussion points:</p>
+          )}
+          {(isUpcoming || isMyContentExpanded) && (
+            <p className="text-sm whitespace-pre-wrap break-words">
+              {appointment.reasonForVisit}
+            </p>
+          )}
         </div>
 
-        {/* Visit Summary (for past appointments) - Fixed height for ~200 characters */}
-        {!isUpcoming && (
-          <div className="h-[200px]">
+        {/* Visit Summary - Fixed height for ~200 characters */}
+        {(!isUpcoming || hasAppointmentTimePassed) && (
+          <div className="h-[150px]">
             <p className="text-xs font-medium text-muted-foreground mb-1">Visit summary:</p>
             <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
               {appointment.visitNotes}
@@ -199,7 +244,7 @@ export default function AppointmentCard({
           </div>
         )}
 
-        {/* Action Buttons - Always at bottom */}
+        {/* Action Buttons */}
         <div className="flex gap-2 pt-2 mt-auto">
           {isUpcoming ? (
             <Button

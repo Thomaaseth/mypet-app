@@ -15,7 +15,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppointmentWithRelations, AppointmentFormData, AppointmentType } from '@/types/appointments';
-import { appointmentFormSchema, appointmentTypes, generateTimeOptions } from '@/lib/validations/appointments';
+import { appointmentFormSchema, appointmentTypes, generateTimeOptions, isUpcomingAppointment } from '@/lib/validations/appointments';
 import { usePets } from '@/queries/pets';
 import { useVeterinarians } from '@/queries/vets';
 import { usePetVets } from '@/queries/vets';
@@ -39,8 +39,16 @@ export default function AppointmentForm({
   error,
 }: AppointmentFormProps) {
   const isEditing = !!appointment;
-  const isPastAppointment = appointment && new Date(appointment.appointmentDate) < new Date();
+  const isPastAppointment = appointment ? !isUpcomingAppointment(appointment.appointmentDate) : false;
 
+  // Check if appointment time has passed (show Visit Summary field on same day)
+  const hasAppointmentTimePassed = (() => {
+    if (!appointment) return false;
+    const now = new Date();
+    const apptDateTime = new Date(`${appointment.appointmentDate}T${appointment.appointmentTime}`);
+    return now > apptDateTime;
+  })();
+  
   // Fetch pets and vets
   const { data: pets } = usePets();
   const { data: vets } = useVeterinarians();
@@ -246,8 +254,8 @@ export default function AppointmentForm({
         </p>
       </div>
 
-      {/* Visit Notes "Visit summary" - only for past appointments */}
-      {(isPastAppointment) && (
+      {/* Visit Notes "Visit summary" (for past and current appointment if hasAppointmentTimePassed) */}
+      {(isPastAppointment || hasAppointmentTimePassed) && (
         <div className="space-y-2">
           <Label htmlFor="visitNotes">Visit Summary</Label>
           <Textarea
