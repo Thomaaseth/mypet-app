@@ -33,9 +33,14 @@ yarn-error.log*
 
 # TanStack Router generated files
 src/routeTree.gen.ts
+.tanstack
+
 
 # Vite
 dist
-.vinxi
 *.timestamp_*.js
 vite.config.*.timestamp_*.js
+
+# Next.js (legacy - migrated to TanStack)
+.next
+next-env.d.ts
