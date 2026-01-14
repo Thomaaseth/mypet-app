@@ -5,6 +5,9 @@ import type { WeightEntry } from '@/types/weights';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { getApiUrl } from '@/lib/env';
 import type { WeightTarget } from '@/types/weight-targets';
+import type { Veterinarian } from '@/types/veterinarian';
+import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
+
 
 
 // Get API base URL from environment
@@ -91,6 +94,113 @@ export function resetMockPets() {
 export function resetMockWeightTarget() {
   currentWeightTarget = { ...mockWeightTarget };
 }
+
+
+
+// MOCK VETS
+export const mockVeterinarians: Veterinarian[] = [
+  {
+    id: 'vet-1',
+    userId: 'user-1',
+    vetName: 'Dr. Sarah Johnson',
+    clinicName: 'City Vet Clinic',
+    phone: '555-1234',
+    email: 'sjohnson@cityvet.com',
+    website: 'www.cityvet.com',
+    addressLine1: '123 Main Street',
+    addressLine2: 'Suite 100',
+    city: 'Boston',
+    zipCode: '02101',
+    notes: 'Emergency services available',
+    isActive: true,
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'vet-2',
+    userId: 'user-1',
+    vetName: 'Dr. Michael Chen',
+    clinicName: 'Pet Care Hospital',
+    phone: '555-5678',
+    email: 'mchen@petcare.com',
+    website: 'www.petcare.com',
+    addressLine1: '456 Oak Avenue',
+    addressLine2: null,
+    city: 'Cambridge',
+    zipCode: '02138',
+    notes: null,
+    isActive: true,
+    createdAt: '2024-01-15T00:00:00.000Z',
+    updatedAt: '2024-01-15T00:00:00.000Z',
+  },
+];
+
+let veterinariansList = [...mockVeterinarians];
+
+export function resetMockVeterinarians() {
+  veterinariansList = [...mockVeterinarians];
+}
+
+export const mockUpcomingAppointments: AppointmentWithRelations[] = [
+  {
+    id: 'appt-1',
+    petId: 'pet-1',
+    veterinarianId: 'vet-1',
+    appointmentDate: '2025-02-01',
+    appointmentTime: '10:00:00',
+    appointmentType: 'checkup',
+    reasonForVisit: 'Annual checkup',
+    visitNotes: null,
+    userId: 'user-1',
+    createdAt: '2025-01-15T00:00:00.000Z',
+    updatedAt: '2025-01-15T00:00:00.000Z',
+    pet: mockPets[0], // Reuse existing mockPets
+    veterinarian: mockVeterinarians[0], // Reuse existing mockVeterinarians
+  },
+  {
+    id: 'appt-2',
+    petId: 'pet-2',
+    veterinarianId: 'vet-2',
+    appointmentDate: '2025-02-05',
+    appointmentTime: '14:30:00',
+    appointmentType: 'vaccination',
+    reasonForVisit: 'Booster shots',
+    visitNotes: null,
+    userId: 'user-1',
+    createdAt: '2025-01-16T00:00:00.000Z',
+    updatedAt: '2025-01-16T00:00:00.000Z',
+    pet: mockPets[1], // Reuse existing mockPets
+    veterinarian: mockVeterinarians[1], // Reuse existing mockVeterinarians
+  },
+];
+
+export const mockPastAppointments: AppointmentWithRelations[] = [
+  {
+    id: 'appt-past-1',
+    petId: 'pet-1',
+    veterinarianId: 'vet-1',
+    appointmentDate: '2024-12-15',
+    appointmentTime: '11:00:00',
+    appointmentType: 'checkup',
+    reasonForVisit: 'Regular checkup',
+    visitNotes: 'Checkup went well',
+    userId: 'user-1',
+    createdAt: '2024-12-01T00:00:00.000Z',
+    updatedAt: '2024-12-15T00:00:00.000Z',
+    pet: mockPets[0], // Reuse existing mockPets
+    veterinarian: mockVeterinarians[0], // Reuse existing mockVeterinarians
+  },
+];
+
+
+let upcomingAppointmentsList = [...mockUpcomingAppointments];
+let pastAppointmentsList = [...mockPastAppointments];
+
+export function resetMockAppointments() {
+  upcomingAppointmentsList = [...mockUpcomingAppointments];
+  pastAppointmentsList = [...mockPastAppointments];
+}
+
 export const mockActiveDryFood: DryFoodEntry[] = [
   {
     id: 'dry-1',
@@ -1028,6 +1138,491 @@ const wetFoodHandlers = [
   // Note: These handler are already defined in dryFoodHandlers
 ];
 
+// VETS HANDLERS
+const veterinariansHandlers = [
+  // GET /api/vets - Get all veterinarians
+  http.get(`${API_BASE_URL}/api/vets`, () => {
+    console.log('🔵 MSW: Intercepted GET /vets');
+    return HttpResponse.json({
+      success: true,
+      data: {
+        veterinarians: veterinariansList,
+        total: veterinariansList.length,
+      },
+      message: `Retrieved ${veterinariansList.length} veterinarian(s)`,
+    });
+  }),
+
+  // GET /api/vets/:id - Get veterinarian by ID
+  http.get(`${API_BASE_URL}/api/vets/:id`, ({ params }) => {
+    const { id } = params;
+    console.log('🔵 MSW: Intercepted GET /vets/:id', { id });
+    
+    const vet = veterinariansList.find((v) => v.id === id);
+
+    if (!vet) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Veterinarian not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json({
+      success: true,
+      data: { veterinarian: vet },
+      message: 'Veterinarian retrieved successfully',
+    });
+  }),
+
+  // POST /api/vets - Create veterinarian
+  http.post(`${API_BASE_URL}/api/vets`, async ({ request }) => {
+    const body = await request.json();
+    console.log('🔵 MSW: Intercepted POST /vets', body);
+    
+    const newVet: Veterinarian = {
+      id: `vet-${Date.now()}`,
+      userId: 'user-1',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...(body as Partial<Veterinarian>),
+    } as Veterinarian;
+
+    veterinariansList.push(newVet);
+
+    return HttpResponse.json(
+      {
+        success: true,
+        data: { veterinarian: newVet },
+        message: 'Veterinarian created successfully',
+      },
+      { status: 201 }
+    );
+  }),
+
+  // PUT /api/vets/:id - Update veterinarian
+  http.put(`${API_BASE_URL}/api/vets/:id`, async ({ params, request }) => {
+    const { id } = params;
+    const body = await request.json();
+    console.log('🔵 MSW: Intercepted PUT /vets/:id', { id, body });
+    
+    const vetIndex = veterinariansList.findIndex((v) => v.id === id);
+
+    if (vetIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Veterinarian not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    const updatedVet = {
+      ...veterinariansList[vetIndex],
+      ...(body as Partial<Veterinarian>),
+      updatedAt: new Date().toISOString(),
+    };
+
+    veterinariansList[vetIndex] = updatedVet;
+
+    return HttpResponse.json({
+      success: true,
+      data: { veterinarian: updatedVet },
+      message: 'Veterinarian updated successfully',
+    });
+  }),
+
+  // DELETE /api/vets/:id - Delete veterinarian
+  http.delete(`${API_BASE_URL}/api/vets/:id`, ({ params }) => {
+    const { id } = params;
+    console.log('🔵 MSW: Intercepted DELETE /vets/:id', { id });
+    
+    const vetIndex = veterinariansList.findIndex((v) => v.id === id);
+
+    if (vetIndex === -1) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Veterinarian not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    veterinariansList.splice(vetIndex, 1);
+
+    return HttpResponse.json({
+      success: true,
+      message: 'Veterinarian deleted successfully',
+    });
+  }),
+
+  // POST /api/vets/:id/assign - Assign vet to pets
+  http.post(`${API_BASE_URL}/api/vets/:id/assign`, async ({ params, request }) => {
+    const { id } = params;
+    const body = await request.json();
+    console.log('🔵 MSW: Intercepted POST /vets/:id/assign', { id, body });
+    
+    const vet = veterinariansList.find((v) => v.id === id);
+
+    if (!vet) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Veterinarian not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: 'Pets assigned successfully',
+    });
+  }),
+
+  // POST /api/vets/:id/unassign - Unassign vet from pets
+  http.post(`${API_BASE_URL}/api/vets/:id/unassign`, async ({ params, request }) => {
+    const { id } = params;
+    const body = await request.json();
+    console.log('🔵 MSW: Intercepted POST /vets/:id/unassign', { id, body });
+    
+    const vet = veterinariansList.find((v) => v.id === id);
+
+    if (!vet) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Veterinarian not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: 'Pets unassigned successfully',
+    });
+  }),
+
+  // GET /api/vets/:id/pets - Get pets assigned to vet
+  http.get(`${API_BASE_URL}/api/vets/:id/pets`, ({ params }) => {
+    const { id } = params;
+    console.log('🔵 MSW: Intercepted GET /vets/:id/pets', { id });
+    
+    const vet = veterinariansList.find((v) => v.id === id);
+
+    if (!vet) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Veterinarian not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    // Mock: return pet-1 and pet-2 as assigned to vet-1
+    const mockAssignments = id === 'vet-1' 
+      ? [{ petId: 'pet-1' }, { petId: 'pet-2' }]
+      : [];
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        pets: mockAssignments,
+      },
+      message: `Retrieved ${mockAssignments.length} assigned pet(s)`,
+    });
+  }),
+
+  // GET /api/pets/:petId/vets - Get vets assigned to pet
+  http.get(`${API_BASE_URL}/api/pets/:petId/vets`, ({ params }) => {
+    const { petId } = params;
+    console.log('🔵 MSW: Intercepted GET /pets/:petId/vets', { petId });
+    
+    // Mock: return vet-1 as assigned to pet-1
+    const mockAssignedVets = petId === 'pet-1' 
+      ? veterinariansList.filter(v => v.id === 'vet-1')
+      : [];
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        veterinarians: mockAssignedVets,
+        total: mockAssignedVets.length,
+      },
+      message: 'Retrieved veterinarians for pet',
+    });
+  }),
+];
+
+// Appointment HANDLERS
+const appointmentsHandlers = [
+  // GET /api/appointments - Get appointments with filter
+  http.get(`${API_BASE_URL}/api/appointments`, ({ request }) => {
+    const url = new URL(request.url);
+    const filter = url.searchParams.get('filter') || 'upcoming';
+    
+    console.log('🔵 MSW: Intercepted GET /api/appointments', { filter });
+
+    const appointments = filter === 'past' ? pastAppointmentsList : upcomingAppointmentsList;
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        appointments,
+        total: appointments.length,
+      },
+      message: `Retrieved ${appointments.length} ${filter} appointment(s)`,
+    });
+  }),
+
+  // GET /api/appointments/:id - Get appointment by ID
+  http.get(`${API_BASE_URL}/api/appointments/:id`, ({ params }) => {
+    const { id } = params;
+    console.log('🔵 MSW: Intercepted GET /api/appointments/:id', { id });
+    
+    // Search in both upcoming and past
+    const appointment = 
+      upcomingAppointmentsList.find((a) => a.id === id) ||
+      pastAppointmentsList.find((a) => a.id === id);
+
+    if (!appointment) {
+      return HttpResponse.json(
+        {
+          success: false,
+          error: 'Appointment not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json({
+      success: true,
+      data: { appointment },
+      message: 'Appointment retrieved successfully',
+    });
+  }),
+
+  // GET /api/pets/:petId/appointments/last-vet - Get last vet for pet
+  http.get(`${API_BASE_URL}/api/appointments/last-vet/:petId`, ({ params }) => {
+    const { petId } = params;
+    console.log('🔵 MSW: Intercepted GET /api/appointments/last-vet/:petId', { petId });
+    
+    // Find most recent appointment for this pet
+    const allAppointments = [...upcomingAppointmentsList, ...pastAppointmentsList];
+    const petAppointments = allAppointments.filter(a => a.petId === petId);
+    
+    // Sort by date and time to get the most recent
+    petAppointments.sort((a, b) => {
+      const dateCompare = b.appointmentDate.localeCompare(a.appointmentDate);
+      if (dateCompare !== 0) return dateCompare;
+      return b.appointmentTime.localeCompare(a.appointmentTime);
+    });
+
+    const veterinarianId = petAppointments.length > 0 ? petAppointments[0].veterinarianId : null;
+
+    return HttpResponse.json({
+      success: true,
+      data: {
+        veterinarianId,
+      },
+      message: veterinarianId 
+        ? 'Last veterinarian retrieved successfully'
+        : 'No appointments found for this pet',
+    });
+  }),
+
+  // POST /api/appointments - Create appointment
+  http.post(`${API_BASE_URL}/api/appointments`, async ({ request }) => {
+    const body = (await request.json()) as AppointmentFormData;
+    console.log('🔵 MSW: Intercepted POST /api/appointments', body);
+    
+    // Get the pet and vet from existing mocks
+    const pet = petsList.find(p => p.id === body.petId) || mockPets[0];
+    const vet = veterinariansList.find(v => v.id === body.veterinarianId) || mockVeterinarians[0];
+    
+    const newAppointment: AppointmentWithRelations = {
+      id: `appt-${Date.now()}`,
+      userId: 'user-1',
+      petId: body.petId,
+      veterinarianId: body.veterinarianId,
+      appointmentDate: body.appointmentDate,
+      // Add time seconds if not present
+      appointmentTime: body.appointmentTime.length === 5 
+        ? `${body.appointmentTime}:00` 
+        : body.appointmentTime,
+      appointmentType: body.appointmentType,
+      reasonForVisit: body.reasonForVisit || null,
+      visitNotes: body.visitNotes || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      pet,
+      veterinarian: vet,
+    };
+
+    // Determine if upcoming or past based on date
+    const today = new Date().toISOString().split('T')[0];
+    if (newAppointment.appointmentDate >= today) {
+      upcomingAppointmentsList.push(newAppointment);
+    } else {
+      pastAppointmentsList.push(newAppointment);
+    }
+
+    return HttpResponse.json(
+      {
+        success: true,
+        data: { appointment: newAppointment },
+        message: 'Appointment created successfully',
+      },
+      { status: 201 }
+    );
+  }),
+
+  // PUT /api/appointments/:id - Update appointment
+  http.put(`${API_BASE_URL}/api/appointments/:id`, async ({ params, request }) => {
+    const { id } = params;
+    const body = (await request.json()) as Partial<AppointmentFormData>;
+    console.log('🔵 MSW: Intercepted PUT /api/appointments/:id', { id, body });
+    
+    // Search in upcoming list
+    const upcomingIndex = upcomingAppointmentsList.findIndex((a) => a.id === id);
+    
+    if (upcomingIndex !== -1) {
+      const existing = upcomingAppointmentsList[upcomingIndex];
+      const updatedAppointment: AppointmentWithRelations = {
+        ...existing,
+        ...(body.petId && { petId: body.petId }),
+        ...(body.veterinarianId && { veterinarianId: body.veterinarianId }),
+        ...(body.appointmentDate && { appointmentDate: body.appointmentDate }),
+        ...(body.appointmentTime && { 
+          appointmentTime: body.appointmentTime.length === 5 
+            ? `${body.appointmentTime}:00` 
+            : body.appointmentTime 
+        }),
+        ...(body.appointmentType && { appointmentType: body.appointmentType }),
+        ...(body.reasonForVisit !== undefined && { reasonForVisit: body.reasonForVisit || null }),
+        ...(body.visitNotes !== undefined && { visitNotes: body.visitNotes || null }),
+        updatedAt: new Date().toISOString(),
+      };
+
+      upcomingAppointmentsList[upcomingIndex] = updatedAppointment;
+
+      return HttpResponse.json({
+        success: true,
+        data: { appointment: updatedAppointment },
+        message: 'Appointment updated successfully',
+      });
+    }
+
+    // Search in past list
+    const pastIndex = pastAppointmentsList.findIndex((a) => a.id === id);
+    
+    if (pastIndex !== -1) {
+      const existing = pastAppointmentsList[pastIndex];
+      const updatedAppointment: AppointmentWithRelations = {
+        ...existing,
+        ...(body.visitNotes !== undefined && { visitNotes: body.visitNotes || null }),
+        updatedAt: new Date().toISOString(),
+      };
+
+      pastAppointmentsList[pastIndex] = updatedAppointment;
+
+      return HttpResponse.json({
+        success: true,
+        data: { appointment: updatedAppointment },
+        message: 'Appointment updated successfully',
+      });
+    }
+
+    return HttpResponse.json(
+      {
+        success: false,
+        error: 'Appointment not found',
+      },
+      { status: 404 }
+    );
+  }),
+
+  // PATCH /api/appointments/:id/notes - Update visit notes
+  http.patch(`${API_BASE_URL}/api/appointments/:id/notes`, async ({ params, request }) => {
+    const { id } = params;
+    const body = (await request.json()) as { visitNotes: string };
+    console.log('🔵 MSW: Intercepted PATCH /api/appointments/:id/notes', { id, body });
+    
+    // Usually only for past appointments
+    const pastIndex = pastAppointmentsList.findIndex((a) => a.id === id);
+    
+    if (pastIndex !== -1) {
+      const updatedAppointment: AppointmentWithRelations = {
+        ...pastAppointmentsList[pastIndex],
+        visitNotes: body.visitNotes,
+        updatedAt: new Date().toISOString(),
+      };
+
+      pastAppointmentsList[pastIndex] = updatedAppointment;
+
+      return HttpResponse.json({
+        success: true,
+        data: { appointment: updatedAppointment },
+        message: 'Visit notes updated successfully',
+      });
+    }
+
+    return HttpResponse.json(
+      {
+        success: false,
+        error: 'Appointment not found',
+      },
+      { status: 404 }
+    );
+  }),
+
+  // DELETE /api/appointments/:id - Delete appointment
+  http.delete(`${API_BASE_URL}/api/appointments/:id`, ({ params }) => {
+    const { id } = params;
+    console.log('🔵 MSW: Intercepted DELETE /api/appointments/:id', { id });
+    
+    // Try to find and remove from upcoming
+    const upcomingIndex = upcomingAppointmentsList.findIndex((a) => a.id === id);
+    if (upcomingIndex !== -1) {
+      upcomingAppointmentsList.splice(upcomingIndex, 1);
+
+      return HttpResponse.json({
+        success: true,
+        message: 'Appointment deleted successfully',
+      });
+    }
+
+    // Try to find and remove from past
+    const pastIndex = pastAppointmentsList.findIndex((a) => a.id === id);
+    if (pastIndex !== -1) {
+      pastAppointmentsList.splice(pastIndex, 1);
+
+      return HttpResponse.json({
+        success: true,
+        message: 'Appointment deleted successfully',
+      });
+    }
+
+    return HttpResponse.json(
+      {
+        success: false,
+        error: 'Appointment not found',
+      },
+      { status: 404 }
+    );
+  }),
+];
+
+
+
+
 // EXPORT ALL HANDLERS
 export const handlers = [
   ...petsHandlers,
@@ -1035,7 +1630,8 @@ export const handlers = [
   ...weightTargetsHandlers,
   ...dryFoodHandlers,
   ...wetFoodHandlers,
-  // add next handlers
+  ...veterinariansHandlers,
+  ...appointmentsHandlers,
 ];
 
 

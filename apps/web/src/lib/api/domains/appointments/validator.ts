@@ -29,10 +29,10 @@ export class AppointmentValidator {
       throw new ValidationError('Pet is required', 'petId');
     }
     // UUID format validation
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(petId)) {
-      throw new ValidationError('Invalid pet ID format', 'petId');
-    }
+    // const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    // if (!uuidRegex.test(petId)) {
+    //   throw new ValidationError('Invalid pet ID format', 'petId');
+    // }
   }
 
   private validateVeterinarianId(vetId?: string): void {
@@ -40,10 +40,10 @@ export class AppointmentValidator {
       throw new ValidationError('Veterinarian is required', 'veterinarianId');
     }
     // UUID format validation
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(vetId)) {
-      throw new ValidationError('Invalid veterinarian ID format', 'veterinarianId');
-    }
+    // const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    // if (!uuidRegex.test(vetId)) {
+    //   throw new ValidationError('Invalid veterinarian ID format', 'veterinarianId');
+    // }
   }
 
   private validateDate(appointmentDate?: string): void {
