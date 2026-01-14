@@ -291,62 +291,57 @@ describe('Appointments Queries', () => {
 
   describe('useCreateAppointment', () => {
     it('should create new appointment and invalidate upcoming/past lists', async () => {
-      // STEP 1: Fetch upcoming appointments first (so query exists in cache)
-      const { result: upcomingResult, queryClient } = renderHookWithQuery(() => 
-        useAppointments('upcoming')
-      );
+        const { result: upcomingResult, queryClient } = renderHookWithQuery(() => 
+          useAppointments('upcoming')
+        );
+        
+        await waitFor(() => {
+          expect(upcomingResult.current.isSuccess).toBe(true);
+        });
+        
+        expect(upcomingResult.current.data).toHaveLength(2);
+        
+        const { result: mutationResult } = renderHookWithQuery(
+          () => useCreateAppointment(),
+          { queryClient }
+        );
       
-      await waitFor(() => {
-        expect(upcomingResult.current.isSuccess).toBe(true);
+        const petId = mockPets[0].id;
+        const vetId = mockVeterinarians[0].id;
+        
+        // ✅ Use dynamic future date
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 45); // 45 days from now
+        
+        const newAppointmentData: AppointmentFormData = {
+          petId,
+          veterinarianId: vetId,
+          appointmentDate: futureDate.toISOString().split('T')[0],  // ✅ Dynamic
+          appointmentTime: '14:00',
+          appointmentType: 'surgery',
+          reasonForVisit: 'Emergency',
+          visitNotes: '',
+        };
+      
+        const createdAppointment = await mutationResult.current.mutateAsync(newAppointmentData);
+      
+        await waitFor(() => {
+          expect(mutationResult.current.isSuccess).toBe(true);
+        });
+      
+        expect(createdAppointment).toBeDefined();
+        expect(createdAppointment?.appointmentType).toBe('surgery');
+        expect(createdAppointment?.reasonForVisit).toBe('Emergency');
+      
+        const upcomingQueryState = queryClient.getQueryState(appointmentKeys.upcoming());
+        expect(upcomingQueryState).toBeDefined();
+      
+        // Now this will work because the appointment is actually in the upcoming list
+        await waitFor(() => {
+          expect(upcomingResult.current.data).toHaveLength(3);
+          expect(upcomingResult.current.data?.find(a => a.appointmentType === 'surgery')).toBeDefined();
+        });
       });
-      
-      expect(upcomingResult.current.data).toHaveLength(2);
-      
-      // STEP 2: Create mutation with SAME queryClient
-      const { result: mutationResult } = renderHookWithQuery(
-        () => useCreateAppointment(),
-        { queryClient }
-      );
-  
-      // Use actual pet and vet IDs from mockPets and mockVeterinarians (which are UUIDs)
-      const petId = mockPets[0].id; // UUID from mockPets
-      const vetId = mockVeterinarians[0].id; // UUID from mockVeterinarians
-      
-      const newAppointmentData: AppointmentFormData = {
-        petId,
-        veterinarianId: vetId,
-        appointmentDate: '2025-02-15',
-        appointmentTime: '14:00',
-        appointmentType: 'surgery',
-        reasonForVisit: 'Emergency',
-        visitNotes: '',
-      };
-  
-      // STEP 3: Execute mutation
-      let createdAppointment: AppointmentWithRelations | undefined;
-      await waitFor(async () => {
-        createdAppointment = await mutationResult.current.mutateAsync(newAppointmentData);
-      });
-  
-      await waitFor(() => {
-        expect(mutationResult.current.isSuccess).toBe(true);
-      });
-  
-      // STEP 4: Verify appointment was created with correct data
-      expect(createdAppointment).toBeDefined();
-      expect(createdAppointment?.appointmentType).toBe('surgery');
-      expect(createdAppointment?.reasonForVisit).toBe('Emergency');
-  
-      // STEP 5: Verify cache invalidation happened
-      const upcomingQueryState = queryClient.getQueryState(appointmentKeys.upcoming());
-      expect(upcomingQueryState).toBeDefined();
-      
-      // STEP 6: Verify the query refetched (appointments list updates automatically)
-      await waitFor(() => {
-        expect(upcomingResult.current.data).toHaveLength(3);
-        expect(upcomingResult.current.data?.find(a => a.appointmentType === 'surgery')).toBeDefined();
-      });
-    });
 
     it('should create appointment with all appointment types', async () => {
       const { result: upcomingResult, queryClient } = renderHookWithQuery(() => 

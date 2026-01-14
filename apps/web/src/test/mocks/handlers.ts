@@ -141,12 +141,21 @@ export function resetMockVeterinarians() {
   veterinariansList = [...mockVeterinarians];
 }
 
+// Generate dynamic dates for mock appointments
+const today = new Date();
+const thirtyDaysFromNow = new Date(today);
+thirtyDaysFromNow.setDate(today.getDate() + 30);
+const sixtyDaysFromNow = new Date(today);
+sixtyDaysFromNow.setDate(today.getDate() + 60);
+const thirtyDaysAgo = new Date(today);
+thirtyDaysAgo.setDate(today.getDate() - 30)
+
 export const mockUpcomingAppointments: AppointmentWithRelations[] = [
   {
     id: 'appt-1',
     petId: 'pet-1',
     veterinarianId: 'vet-1',
-    appointmentDate: '2025-02-01',
+    appointmentDate: thirtyDaysFromNow.toISOString().split('T')[0],
     appointmentTime: '10:00:00',
     appointmentType: 'checkup',
     reasonForVisit: 'Annual checkup',
@@ -161,7 +170,7 @@ export const mockUpcomingAppointments: AppointmentWithRelations[] = [
     id: 'appt-2',
     petId: 'pet-2',
     veterinarianId: 'vet-2',
-    appointmentDate: '2025-02-05',
+    appointmentDate: sixtyDaysFromNow.toISOString().split('T')[0],
     appointmentTime: '14:30:00',
     appointmentType: 'vaccination',
     reasonForVisit: 'Booster shots',
@@ -179,7 +188,7 @@ export const mockPastAppointments: AppointmentWithRelations[] = [
     id: 'appt-past-1',
     petId: 'pet-1',
     veterinarianId: 'vet-1',
-    appointmentDate: '2024-12-15',
+    appointmentDate: thirtyDaysAgo.toISOString().split('T')[0],
     appointmentTime: '11:00:00',
     appointmentType: 'checkup',
     reasonForVisit: 'Regular checkup',
@@ -1468,6 +1477,7 @@ const appointmentsHandlers = [
 
     // Determine if upcoming or past based on date
     const today = new Date().toISOString().split('T')[0];
+
     if (newAppointment.appointmentDate >= today) {
       upcomingAppointmentsList.push(newAppointment);
     } else {
