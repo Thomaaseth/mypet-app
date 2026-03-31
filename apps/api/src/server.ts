@@ -41,3 +41,4 @@ process.on('SIGTERM', () => {
 app.listen(config.env.port, () => {
   serverLogger.info({ port: config.env.port }, 'API server started');
 });
+

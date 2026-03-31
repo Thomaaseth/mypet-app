@@ -356,25 +356,16 @@ export const emailTemplates = {
    * Email service functions
    */
   export const emailService = {
-    /**
-     * Send email verification
-     */
     async sendVerificationEmail(user: { email: string; name: string }, verificationUrl: string): Promise<EmailResult> {
       const { subject, html } = emailTemplates.verifyEmail(user.name, verificationUrl);
       return sendEmail({ to: user.email, subject, html });
     },
   
-    /**
-     * Send password reset email
-     */
     async sendPasswordResetEmail(user: { email: string; name: string }, resetUrl: string): Promise<EmailResult> {
       const { subject, html } = emailTemplates.resetPassword(user.name, resetUrl);
       return sendEmail({ to: user.email, subject, html });
     },
   
-    /**
-     * Send email change verification
-     */
     async sendEmailChangeVerification(user: { email: string; name: string }, newEmail: string, verificationUrl: string): Promise<EmailResult> {
       const { subject, html } = emailTemplates.changeEmail(user.name, newEmail, verificationUrl);
       // Send to the NEW email address

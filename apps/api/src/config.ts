@@ -1,6 +1,5 @@
 import type { MigrationConfig } from "drizzle-orm/migrator";
-// import { getConfig } from "@/shared/config/config";
-import { getConfig } from "../../../packages/shared/src/config/config";
+import { getConfig } from "@/shared/config/config";
 
 function envOrThrow(key: string): string {
     const value = process.env[key];

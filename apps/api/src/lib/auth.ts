@@ -29,7 +29,7 @@ export const auth = betterAuth({
         cookiePrefix: "pettr-auth", 
         crossSubDomainCookies: process.env.NODE_ENV === "production" ? {
             enabled: true,
-            domain: ".yourdomain.com" // Set actual domain for production
+            domain: ".yourdomain.com" // Set actual domain for production!!!
         } : undefined,
     },
     emailAndPassword: {
