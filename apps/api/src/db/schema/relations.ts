@@ -5,6 +5,7 @@ import { weightEntries } from './weight-entries';
 import { veterinarians } from './veterinarians';
 import { petVeterinarians } from './pet-veterinarians';
 import { appointments } from './appointments';
+import { petNotes } from './pet-notes';
 
 export const petsRelations = relations(pets, ({ one, many }) => ({
   user: one(user, {
@@ -14,12 +15,14 @@ export const petsRelations = relations(pets, ({ one, many }) => ({
   weightEntries: many(weightEntries),
   petVeterinarians: many(petVeterinarians),
   appointments: many(appointments),
+  petNotes: many(petNotes),
 }));
 
 export const userRelations = relations(user, ({ many }) => ({
   pets: many(pets),
   veterinarians: many(veterinarians),
   appointments: many(appointments),
+  petNotes: many(petNotes),
 }));
 
 export const weightEntriesRelations = relations(weightEntries, ({ one }) => ({

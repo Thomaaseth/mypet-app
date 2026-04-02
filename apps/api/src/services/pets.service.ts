@@ -79,6 +79,7 @@ export class PetsService {
       throw new BadRequestError('Notes must be 1000 characters or less');
     }
 
+    // DO NOT USE MICROCHIP => likely GDPR concerns!
     // Microchip number format validation (if provided)
     // if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
     //   // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)

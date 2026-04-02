@@ -17,7 +17,7 @@ import {
 import weightEntriesRoutes from './weight-entries.routes';
 import weightTargetsRoutes from './weight-targets.routes';
 import { VeterinariansService } from '@/services/veterinarians.service';
-
+import petNotesRoutes from './pet-notes.routes'
 const router = Router();
 
 // Apply auth middleware to all pet routes
@@ -25,6 +25,7 @@ router.use(globalAuthHandler);
 
 router.use('/:petId/weights', weightEntriesRoutes);
 router.use('/:petId/weight-target', weightTargetsRoutes);
+router.use('/:petId/notes', petNotesRoutes);
 
 // GET /api/pets - Get all user's pets
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

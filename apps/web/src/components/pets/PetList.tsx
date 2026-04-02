@@ -295,7 +295,7 @@ export default function PetList() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground text-sm">
-                      Food management and vet records will be available here soon!
+                      Symptoms tracker, medecine tracker and more coming soon!
                     </p>
                   </CardContent>
                 </Card>
