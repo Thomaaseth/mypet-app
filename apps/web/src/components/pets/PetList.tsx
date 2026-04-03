@@ -29,6 +29,7 @@ import { petErrorHandler } from '@/lib/api/pets';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 import { WeightTracker } from './WeightTracker';
 import { FoodTracker } from './FoodTracker';
+import NotesWidget from './NotesWidget/NotesWidget';
 
 export default function PetList() {
   const { data: pets, isPending, error } = usePets();
@@ -285,6 +286,11 @@ export default function PetList() {
 
                 {/* Food Tracker Section - Full Width */}
                 <FoodTracker 
+                  petId={pet.id}
+                />
+
+                {/* Notes section - Full Width */}
+                <NotesWidget
                   petId={pet.id}
                 />
 
