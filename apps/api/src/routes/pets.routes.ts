@@ -18,6 +18,9 @@ import weightEntriesRoutes from './weight-entries.routes';
 import weightTargetsRoutes from './weight-targets.routes';
 import { VeterinariansService } from '@/services/veterinarians.service';
 import petNotesRoutes from './pet-notes.routes'
+import { upload } from '@/lib/upload';
+import { StorageService } from '@/services/storage.service';
+
 const router = Router();
 
 // Apply auth middleware to all pet routes
@@ -130,6 +133,70 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
 
     const newPet = await PetsService.createPet(newPetData);
     respondWithCreated(res, { pet: newPet }, 'Pet created successfully');
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /api/pets/:id/image - Upload or replace a pet's photo
+router.post('/:id/image', upload.single('image'), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const petId = req.params.id;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
+    }
+
+    if (!req.file) {
+      throw new BadRequestError('No file provided');
+    }
+
+    // Check pet ownership
+    await PetsService.getPetById(petId, userId);
+
+    const { path: storagePath, signedUrl } = await StorageService.uploadedPetImage(
+      req.file.buffer,
+      req.file.mimetype,
+      petId,
+      userId,
+    );
+
+    // Persist storage path to db
+    const updatedPet = await PetsService.updatePet(petId, userId, { imageUrl: storagePath });
+    respondWithSuccess(res, { pet: updatedPet, signedUrl }, 'Pet image uploaded successfully')
+  } catch (error) {
+    next(error)
+  }
+})
+
+// DELETE /api/pets/:id/image - Remove a photo
+router.delete('/:id/image', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const petId = req.params.id;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
+    }
+
+    // Verify ownership and get current imageUrl
+    const pet = await PetsService.getPetById(petId, userId);
+
+    if (pet.imageUrl) {
+      await StorageService.deletePetImage(pet.imageUrl);
+    }
+
+    // Null out the imageUrl in DB regardless (idempotent)
+    const updatedPet = await PetsService.updatePet(petId, userId, { imageUrl: null });
+
+    respondWithSuccess(res, { pet: updatedPet }, 'Pet image removed successfully');
   } catch (error) {
     next(error);
   }

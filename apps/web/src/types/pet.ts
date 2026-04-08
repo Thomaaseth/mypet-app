@@ -10,7 +10,7 @@ export interface Pet {
   gender: PetGender;
   birthDate: string | null; // ISO date string
   isNeutered: boolean;
-  microchipNumber: string | null;
+  microchipNumber: string | null; // Not collected, column kept in db
   imageUrl: string | null;
   notes: string | null;
   isActive: boolean;
@@ -28,7 +28,7 @@ export interface PetFormData {
   weight: string; // String for form input (the weight value)
   weightUnit: WeightUnit; // Unit selection
   isNeutered: boolean;
-  microchipNumber: string;
+  // microchipNumber: string;
   notes: string;
 }
 

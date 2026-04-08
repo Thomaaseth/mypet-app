@@ -79,7 +79,7 @@ export class PetsService {
       throw new BadRequestError('Notes must be 1000 characters or less');
     }
 
-    // DO NOT USE MICROCHIP => likely GDPR concerns!
+    // DO NOT USE MICROCHIP # => likely GDPR concerns!
     // Microchip number format validation (if provided)
     // if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
     //   // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)
@@ -230,7 +230,7 @@ export class PetsService {
         gender: petData.gender,
         birthDate: petData.birthDate || null,
         isNeutered: petData.isNeutered,
-        microchipNumber: petData.microchipNumber || null,
+        microchipNumber: null, // Not collected, GDPR data
         imageUrl: petData.imageUrl,
         notes: petData.notes || null,
         isActive: petData.isActive,
@@ -298,8 +298,9 @@ export class PetsService {
         ...updateData,
         species: updateData.species === '' ? null : updateData.species,
         birthDate: updateData.birthDate === '' ? null : updateData.birthDate,
-        microchipNumber: updateData.microchipNumber === '' ? null : updateData.microchipNumber,
+        // microchipNumber: not collected
         notes: updateData.notes === '' ? null : updateData.notes,
+        imageUrl: updateData.imageUrl === '' ? null : updateData.imageUrl,
       };
 
       // Execute update

@@ -23,7 +23,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
         weight: '',
         weightUnit: 'kg',
         isNeutered: pet.isNeutered,
-        microchipNumber: pet.microchipNumber || '',
+        // microchipNumber: pet.microchipNumber || '',
         notes: pet.notes || '',
       };
     }
@@ -37,7 +37,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
       weight: '',
       weightUnit: 'kg',
       isNeutered: false,
-      microchipNumber: '',
+      // microchipNumber: '',
       notes: '',
       ...defaultValues,
     };
@@ -59,7 +59,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
       weight: '',
       weightUnit: 'kg',
       isNeutered: newPet.isNeutered,
-      microchipNumber: newPet.microchipNumber || '',
+      // microchipNumber: newPet.microchipNumber || '',
       notes: newPet.notes || '',
     };
     

@@ -60,7 +60,7 @@ export default function PetForm({
       weight: formData.weight ?? '',
       weightUnit: formData.weightUnit,
       isNeutered: formData.isNeutered,
-      microchipNumber: formData.microchipNumber ?? '',
+      // microchipNumber: null,
       notes: formData.notes ?? '',
     };
     
@@ -254,7 +254,7 @@ export default function PetForm({
         </div>
       )}
 
-      {/* Microchip Number */}
+      {/* Microchip Number 
       <div className="space-y-2">
         <Label htmlFor="microchipNumber">Microchip Number</Label>
         <Input
@@ -269,7 +269,7 @@ export default function PetForm({
         <p className="text-xs text-muted-foreground">
           Optional: Letters and numbers only
         </p>
-      </div>
+      </div> */}
 
       {/* Is Neutered */}
       <div className="flex items-center space-x-2">
