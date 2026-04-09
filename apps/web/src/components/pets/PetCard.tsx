@@ -26,12 +26,13 @@ import { useWeightEntries } from '@/queries/weights';
 
 interface PetCardProps {
   pet: Pet;
+  signedUrl: string | null;
   onEdit: (pet: Pet) => void;
   onDelete: (pet: Pet) => void;
   onView?: (pet: Pet) => void;
 }
 
-export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
+export default function PetCard({ pet, signedUrl, onEdit, onDelete, onView }: PetCardProps) {
   const [imageError, setImageError] = useState(false);
 
   const age = calculatePetAge(pet.birthDate);
@@ -103,9 +104,9 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
 
       <CardContent className="space-y-4">
         <div className="w-full">
-          {pet.imageUrl && !imageError ? (
+          {signedUrl && !imageError ? (
             <img
-              src={pet.imageUrl}
+              src={signedUrl}
               alt={`Photo of ${pet.name}`}
               className="w-full h-32 object-cover rounded-md"
               onError={() => setImageError(true)}
@@ -157,12 +158,12 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
           </div>
 
           {/* Microchip */}
-          {pet.microchipNumber && (
+          {/* {pet.microchipNumber && (
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Chip: {pet.microchipNumber}</span>
             </div>
-          )}
+          )} */}
 
           {/* Notes Preview */}
           {pet.notes && (

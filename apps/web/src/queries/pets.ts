@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { petApi, petErrorHandler } from '@/lib/api/pets'
+import { petApi, petErrorHandler } from '@/lib/api/domains/pets' // ← new file, has uploadPetImage
 import { toastService } from '@/lib/toast'
 import type { Pet, PetFormData } from '@/types/pet'
+import type { PetWithSignedUrl, PetImageUploadResponse } from '@/lib/api/domains/pets/types'
 
 // QUERY KEYS - Centralized for cache management
 export const petKeys = {
@@ -17,7 +18,10 @@ export function usePets() {
       queryKey: petKeys.all,
       queryFn: async () => {
         const response = await petApi.getPets()
-        return response.pets
+        console.log('🔍 raw API response:', response);
+        console.log('🔍 response.pets:', response.pets);
+        console.log('🔍 first pet item:', response.pets?.[0]);
+        return response.pets // PetWithSignedUrl[]
       },
     })
   }
@@ -26,7 +30,7 @@ export function usePets() {
 export function usePet(petId: string) {
     return useQuery({
         queryKey: petKeys.detail(petId),
-        queryFn: () => petApi.getPetById(petId),
+        queryFn: () => petApi.getPetById(petId), // { pet, signedUrl } 
         enabled: Boolean(petId), // only run if petId exists
     })
   }
@@ -76,7 +80,7 @@ export function useUpdatePet() {
         // Transform data
         const transformedData = {
           ...petData,
-          weight: petData.weight ? petData.weight.replace(',', '.') : ''
+          weight: petData.weight ? petData.weight.replace(',', '.') : '',
         }
         return petApi.updatePet(petId, transformedData)
       },
@@ -105,13 +109,13 @@ export function useDeletePet() {
         await queryClient.cancelQueries({ queryKey: petKeys.all })
   
         // Snapshot previous value
-        const previousPets = queryClient.getQueryData<Pet[]>(petKeys.all)
+        const previousPets = queryClient.getQueryData<PetWithSignedUrl[]>(petKeys.all)
   
         // Optimistically remove pet from cache
         if (previousPets) {
-          queryClient.setQueryData<Pet[]>(
+          queryClient.setQueryData<PetWithSignedUrl[]>(
             petKeys.all,
-            previousPets.filter(pet => pet.id !== petId)
+            previousPets.filter((p) => p.pet.id !== petId)
           )
         }
   
@@ -129,8 +133,8 @@ export function useDeletePet() {
       },
       onSuccess: (_data, petId, context) => {
         // Get pet name from the snapshot for toast
-        const deletedPet = context?.previousPets?.find(p => p.id === petId);
-        const petName = deletedPet?.name || 'Pet';
+        const deletedPet = context?.previousPets?.find((p) => p.pet.id === petId);
+        const petName = deletedPet?.pet.name || 'Pet';
         
         toastService.success('Pet deleted', `${petName} has been removed.`)
       },
@@ -140,11 +144,54 @@ export function useDeletePet() {
       },
     })
   }
+
+  // UPLOAD image
+  export function useUploadPetImage(petId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: (file: File) => petApi.uploadPetImage(petId, file),
+      onSuccess: (response: PetImageUploadResponse) => {
+      // invalidate both list and detail so signed urls are refreshed
+      queryClient.invalidateQueries({ queryKey: petKeys.all });
+      queryClient.invalidateQueries({ queryKey: petKeys.detail(petId) });
+      toastService.success('Photo updated', `Your pet's photo has been updated!`)
+      },
+      onError: (error) => {
+        const appError = petErrorHandler(error);
+        toastService.error('Failed to upload photo', appError.message)
+      }
+    })
+  }
+
+  // DELETE image
+  export function useDeletePetImage(petId: string) {
+    const queryClient = useQueryClient();
   
+    return useMutation({
+      mutationFn: () => petApi.deletePetImage(petId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: petKeys.all });
+        queryClient.invalidateQueries({ queryKey: petKeys.detail(petId) });
+        toastService.success('Photo removed', `Your pet's photo has been removed.`);
+      },
+      onError: (error) => {
+        const appError = petErrorHandler(error);
+        toastService.error('Failed to remove photo', appError.message);
+      },
+    });
+  }
 
 // Helper: Get pet by ID from cache (no API call)
 export function usePetFromCache(petId: string): Pet | undefined {
-    const queryClient = useQueryClient()
-    const pets = queryClient.getQueryData<Pet[]>(petKeys.all)
-    return pets?.find(pet => pet.id === petId)
-  }
+  const queryClient = useQueryClient()
+  const pets = queryClient.getQueryData<PetWithSignedUrl[]>(petKeys.all)
+  return pets?.find((p) => p.pet.id === petId)?.pet
+}
+
+// Return the full PetWithSignedUrl wrapper from cache
+export function usePetWithSignedUrlFromCache(petId: string): PetWithSignedUrl | undefined {
+  const queryClient = useQueryClient()
+  const pets = queryClient.getQueryData<PetWithSignedUrl[]>(petKeys.all)
+  return pets?.find((p) => p.pet.id === petId)
+}

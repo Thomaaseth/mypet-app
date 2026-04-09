@@ -20,6 +20,7 @@ import { VeterinariansService } from '@/services/veterinarians.service';
 import petNotesRoutes from './pet-notes.routes'
 import { upload } from '@/lib/upload';
 import { StorageService } from '@/services/storage.service';
+import { storageLogger } from '@/lib/supabase';
 
 const router = Router();
 
@@ -39,9 +40,23 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
     }
 
     const pets = await PetsService.getUserPets(userId);
-    const total = pets.length;
 
-    respondWithSuccess(res, { pets, total }, `Retrieved ${total} pet(s)`);
+    // generate signed url for pets that have an image
+    const petsWithSignedUrls = await Promise.all(
+      pets.map(async (pet) =>  {
+        if(!pet.imageUrl) return { pet, signedUrl: null };
+        try {
+          const signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
+          return { pet, signedUrl };
+        } catch {
+          // not throw if signed url fails
+          storageLogger.warn({ petId: pet.id }, 'Failed to generate signed url for pet');
+          return { pet, signedUrl: null}
+        }
+      })
+    )
+
+    respondWithSuccess(res, { pets: petsWithSignedUrls, total: petsWithSignedUrls.length }, `Retrieved ${petsWithSignedUrls.length} pet(s)`);
   } catch (error) {
     next(error);
   }
@@ -102,7 +117,18 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFu
     }
 
     const pet = await PetsService.getPetById(petId, userId);
-    respondWithSuccess(res, { pet }, 'Pet retrieved successfully');
+
+    // Generate signed URL if pet has an image
+    let signedUrl: string | null = null;
+      if (pet.imageUrl) {
+        try {
+          signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
+        } catch {
+          storageLogger.warn({ petId }, 'Failed to generate signed URL for pet');
+        }
+    }
+    
+    respondWithSuccess(res, { pet, signedUrl }, 'Pet retrieved successfully');
   } catch (error) {
     next(error);
   }

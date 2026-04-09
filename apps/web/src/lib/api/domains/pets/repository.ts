@@ -1,5 +1,6 @@
+import { formatDateForDisplay } from '@/lib/validations/weight';
 import { get, post, put, del } from '../../base';
-import type { PetsApiResponse } from './types';
+import type { PetImageUploadResponse, PetsApiResponse } from './types';
 import type { Pet, PetFormData } from '@/types/pet';
 
 
@@ -9,9 +10,9 @@ export class PetRepository {
     return await get<PetsApiResponse>('/api/pets');
   }
 
-  async getPetById(petId: string): Promise<Pet> {
-    const result = await get<{ pet: Pet }>(`/api/pets/${petId}`);
-    return result.pet;
+  async getPetById(petId: string): Promise<{ pet: Pet; signedUrl: string | null }> {
+    const result = await get<{ pet: Pet; signedUrl: string | null }>(`/api/pets/${petId}`);
+    return { pet: result.pet, signedUrl: result.signedUrl };
   }
 
   async createPet(petData: PetFormData): Promise<Pet> {
@@ -36,7 +37,20 @@ export class PetRepository {
     const result = await get<{ count: number }>('/api/pets/stats/count');
     return result.count;
   }
+
+  async uploadPetImage(petId: string, file: File): Promise<PetImageUploadResponse> {
+    const formData = new FormData();
+    formData.append('image', file);
+    const result = await post<PetImageUploadResponse, FormData>(`/api/pets/${petId}/image`, formData);
+    return result;
+  }
+
+  async deletePetImage(petId: string): Promise<Pet>{
+    const result = await del<{ pet: Pet}>(`/api/pets/${petId}/image`);
+    return result.pet;
+  }
 }
+
 
 // Default repository instance
 export const petRepository = new PetRepository();

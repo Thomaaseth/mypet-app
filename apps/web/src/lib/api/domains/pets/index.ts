@@ -15,13 +15,15 @@ export const petApi = {
   deletePet: (petId: string) => petService.deletePet(petId),
   permanentlyDeletePet: (petId: string) => petService.permanentlyDeletePet(petId),
   getPetCount: () => petService.getPetCount(),
+  uploadPetImage: (petId: string, file: File) => petService.uploadPetImage(petId, file),
+  deletePetImage: (petId: string) => petService.deletePetImage(petId),
 };
 
 // Export the same error handler interface
 export const petErrorHandler = (error: unknown) => petService.mapError(error);
 
 // Export types for consumers
-export type { PetsApiResponse, PetError } from './types';
+export type { PetsApiResponse, PetError, PetImageUploadResponse  } from './types';
 
 // Export individual components for testing or advanced use
 export { PetRepository } from './repository';

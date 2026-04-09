@@ -1,4 +1,4 @@
-import type { PetsApiResponse, PetError } from './types';
+import type { PetsApiResponse, PetError, PetImageUploadResponse } from './types';
 import type { PetRepository } from './repository';
 import type { PetValidator } from './validator';
 import { 
@@ -25,7 +25,7 @@ export class PetService {
     }
   }
 
-  async getPetById(petId: string): Promise<Pet> {
+  async getPetById(petId: string): Promise<{ pet: Pet; signedUrl: string | null }> {
     try {
       return await this.repository.getPetById(petId);
     } catch (error) {
@@ -87,6 +87,24 @@ export class PetService {
       return await this.repository.getPetCount();
     } catch (error) {
       console.error('Error fetching pet count:', error);
+      throw error;
+    }
+  }
+
+  async uploadPetImage(petId: string, file: File): Promise<PetImageUploadResponse> {
+    try {
+      return await this.repository.uploadPetImage(petId, file);
+    } catch (error) {
+      console.error('Error uploading pet image:', error);
+      throw error;
+    }
+  }
+
+  async deletePetImage(petId: string): Promise<Pet> {
+    try {
+      return await this.repository.deletePetImage(petId);
+    } catch (error) {
+      console.error('Error deleting pet image:', error);
       throw error;
     }
   }
@@ -154,9 +172,11 @@ export class PetService {
     } else if (message.includes('birth') || message.includes('date')) {
       field = 'birthDate';
       code = 'INVALID_DATE';
-    } else if (message.includes('microchip')) {
-      field = 'microchipNumber';
-      code = 'INVALID_MICROCHIP';
+    // } else if (message.includes('microchip')) {
+    //   field = 'microchipNumber';
+    //   code = 'INVALID_MICROCHIP';
+    } else if (message.includes('image') || message.includes('upload')) {
+      code = 'IMAGE_UPLOAD_ERROR'
     } else if (message.includes('not found')) {
       code = 'PET_NOT_FOUND';
     } else if (message.includes('unauthorized') || message.includes('forbidden')) {

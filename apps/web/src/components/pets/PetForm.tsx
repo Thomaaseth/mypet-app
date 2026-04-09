@@ -17,10 +17,12 @@ import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Pet, PetFormData } from '@/types/pet';
 import { commonSpeciesSuggestions, petFormSchema } from '@/lib/validations/pet';
+import { PetImageUpload } from '@/components/pets/PetImageUpload';
 
 interface PetFormProps {
-  pet?: Pet; // If provided, we're editing
-  onSubmit: (data: PetFormData) => Promise<Pet | null>; // Allow return type to match hook
+  pet?: Pet; // if provided, we're editing
+  signedUrl?: string | null; // only in edit mode
+  onSubmit: (data: PetFormData) => Promise<Pet | null>; // allow return type to match hook
   onCancel?: () => void;
   isLoading?: boolean;
   error?: string;
@@ -28,6 +30,7 @@ interface PetFormProps {
 
 export default function PetForm({ 
   pet, 
+  signedUrl = null,
   onSubmit, 
   onCancel, 
   isLoading = false,
@@ -87,6 +90,18 @@ export default function PetForm({
         </Alert>
       )}
 
+      {/* Pet Photo — edit mode only, requires existing petId */}
+      {isEditing && (
+        <div className="space-y-2">
+          <Label>Pet Photo</Label>
+          <PetImageUpload
+            petId={pet.id}
+            petName={pet.name}
+            signedUrl={signedUrl}
+          />
+        </div>
+      )}
+
       {/* Pet Name */}
       <div className="space-y-2">
         <Label htmlFor="name">Pet Name *</Label>
@@ -112,13 +127,13 @@ export default function PetForm({
             setValue('species', '');
             }}
         >
-            <SelectTrigger>
+          <SelectTrigger>
             <SelectValue placeholder="Select cat or dog" />
-            </SelectTrigger>
-            <SelectContent>
+          </SelectTrigger>
+          <SelectContent>
             <SelectItem value="cat">Cat</SelectItem>
             <SelectItem value="dog">Dog</SelectItem>
-            </SelectContent>
+          </SelectContent>
         </Select>
         {errors.animalType && (
             <p className="text-sm text-destructive">{errors.animalType.message}</p>
@@ -150,14 +165,14 @@ export default function PetForm({
                     suggestion.toLowerCase().includes(watchedSpecies.toLowerCase())
                 )
                 .map((suggestion: string) => (
-                    <button
+                  <button
                     key={suggestion}
                     type="button"
                     className="w-full px-3 py-2 text-left text-sm hover:bg-muted focus:bg-muted focus:outline-none"
                     onMouseDown={() => handleSpeciesSuggestion(suggestion)}
-                    >
+                  >
                     {suggestion}
-                    </button>
+                  </button>
                 ))
                 }
             </div>

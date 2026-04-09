@@ -24,7 +24,7 @@ export const pets = pgTable('pets', {
   birthDate: date('birth_date'),
   isNeutered: boolean('is_neutered').default(false),
   microchipNumber: varchar('microchip_number', { length: 50 }),
-  imageUrl: text('image_url'), // Placeholder 
+  imageUrl: text('image_url'),
   notes: text('notes'),
   isActive: boolean('is_active').default(true), // Soft delete flag
   createdAt: timestamp('created_at').defaultNow().notNull(),
