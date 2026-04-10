@@ -37,8 +37,7 @@ import {
             throw new BadRequestError(`File size exceeds the ${maxMB}MB limit`);
         }
 
-        const ext = mimeType.split('/')[1];
-        const storagePath = `${userId}/${petId}.${ext}`;
+        const storagePath = `${userId}/${petId}.webp`;
 
         storageLogger.info({ petId, userId, mimeType, bytes: file.byteLength }, 'Uploading image');
 
