@@ -5,8 +5,7 @@ import { eq, and, desc, count } from 'drizzle-orm';
 import type { PetNote, NewPetNote } from '../db/schema/pet-notes';
 import { BadRequestError, NotFoundError } from '@/middleware/errors';
 import { dbLogger } from '@/lib/logger';
-import { copyFile, cp } from 'fs';
-import { StringOrBuffer } from 'bun';
+
 
 const MAX_NOTES_PER_PET = 20;
 const MAX_CONTENT_LENGTH = 200;
@@ -139,7 +138,11 @@ export class PetNotesService {
                         content: data.content.trim(),
                         updatedAt: new Date(),
                     })
-                    .where(eq(petNotes.id, noteId))
+                    .where(and(
+                        eq(petNotes.id, noteId),
+                        eq(petNotes.petId, petId),
+                        eq(petNotes.userId, userId)
+                    ))
                     .returning()
 
                 return updated;
@@ -173,7 +176,11 @@ export class PetNotesService {
                 }
                 await db
                     .delete(petNotes)
-                    .where(eq(petNotes.id, noteId))
+                    .where(and(
+                        eq(petNotes.id, noteId),
+                        eq(petNotes.petId, petId),
+                        eq(petNotes.userId, userId)
+                    ))
         } catch (error) {
             if (error instanceof NotFoundError || error instanceof BadRequestError) {
                 throw error;

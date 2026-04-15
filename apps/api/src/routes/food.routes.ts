@@ -4,27 +4,7 @@ import { FoodService } from '../services/food';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
-
-type DryFoodFormData = {
-  brandName?: string;
-  productName?: string;
-  bagWeight: string;
-  bagWeightUnit: 'kg' | 'pounds';
-  dailyAmount: string;
-  dryDailyAmountUnit: 'grams';
-  dateStarted: string;
-};
-
-type WetFoodFormData = {
-  brandName?: string;
-  productName?: string;
-  numberOfUnits: string; // String from form
-  weightPerUnit: string;
-  wetWeightUnit: 'grams' | 'oz';
-  dailyAmount: string;
-  wetDailyAmountUnit: 'grams' | 'oz';
-  dateStarted: string;
-};
+import type { DryFoodFormData, WetFoodFormData } from '../services/food';
 
 const router = Router();
 

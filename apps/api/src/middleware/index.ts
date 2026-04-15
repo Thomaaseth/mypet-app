@@ -43,7 +43,7 @@ export function middlewareLogResponse(req: Request, res: Response, next: NextFun
 
 export function errorMiddleware(err: Error, _: Request, res: Response, __: NextFunction) {
     let statusCode = 500;
-    let message = err.message;
+    let message = "Something went wrong on our end";
 
     switch (err.constructor) {
         case BadRequestError:
@@ -61,10 +61,6 @@ export function errorMiddleware(err: Error, _: Request, res: Response, __: NextF
         case NotFoundError:
             statusCode = 404;
             message = err.message;
-            break;
-        default:
-            statusCode = 500;
-            message = "Something went wrong on our end";
             break;
     }
 

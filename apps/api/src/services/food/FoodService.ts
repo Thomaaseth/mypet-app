@@ -591,7 +591,10 @@ export class FoodService {
           dateFinished: this.toDateString(newDate),
           updatedAt: new Date()
         })
-        .where(eq(foodEntries.id, foodId))
+        .where(and(
+          eq(foodEntries.id, foodId),
+          eq(foodEntries.petId, petId)
+        ))
         .returning();
       
       if (!updatedEntry) {

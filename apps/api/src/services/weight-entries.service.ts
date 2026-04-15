@@ -1,6 +1,6 @@
 import { db } from '../db';
 import { weightEntries } from '../db/schema/weight-entries';
-import { pets } from '../db/schema/pets';
+import { Pet } from '../db/schema/pets';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import type { WeightEntry, NewWeightEntry, WeightEntryFormData, WeightUnit } from '../db/schema/weight-entries';
 import { 
@@ -59,7 +59,7 @@ export class WeightEntriesService {
   }
 
   // business rules validation helper
-  private static validateBusinessRules(entryData: WeightEntryFormData, pet: any): void {
+  private static validateBusinessRules(entryData: WeightEntryFormData, pet: Pet): void {
     const weightValue = parseFloat(entryData.weight.toString());
     this.validateWeightLimits(weightValue, pet.animalType, entryData.weightUnit);
   }

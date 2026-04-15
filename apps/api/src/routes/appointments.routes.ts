@@ -143,8 +143,7 @@ router.put('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFu
       throw new BadRequestError(`Validation error: ${firstError.message}`);
     }
 
-    const updateData: Partial<AppointmentFormData> = validation.data;
-    delete (updateData as any).id; // Remove id from update data
+    const { id: _, ...updateData } = validation.data;
 
     const updatedAppointment = await AppointmentsService.updateAppointment(
       appointmentId,

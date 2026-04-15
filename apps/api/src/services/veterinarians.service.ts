@@ -374,6 +374,9 @@ export class VeterinariansService {
   // Get vets assigned to a pet
   static async getVetsForPet(petId: string, userId: string): Promise<Veterinarian[]> {
     try {
+      // Validate pet exists and belongs to user
+      await PetsService.getPetById(petId, userId);
+      
       // Get all vet-pet assignments for this pet
       const assignments = await db
         .select({
