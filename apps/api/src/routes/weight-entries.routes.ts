@@ -4,7 +4,7 @@ import { globalAuthHandler } from '../middleware/auth.middleware';
 import { BadRequestError } from '../middleware/errors';
 import { respondWithSuccess } from '../lib/json';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
-
+import { weightEntryFormSchema } from '../../../web/src/lib/validations/weight'
 
 const router = Router({ mergeParams: true }); // mergeParams to access petId from parent route
 
@@ -65,7 +65,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
   try {
     const { petId } = req.params;
     const userId = req.authSession?.user.id;
-    const { weight, date, weightUnit } = req.body;
+    // const { weight, date, weightUnit } = req.body;
 
     if (!userId) {
       throw new BadRequestError('User session not found');
@@ -75,16 +75,17 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
       throw new BadRequestError('Pet ID is required');
     }
 
-    if (!weight || !date || !weightUnit) {
-      throw new BadRequestError('Weight, unit and date are required');
+    const validation = weightEntryFormSchema.safeParse(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
     }
 
     const weightEntry = await WeightEntriesService.createWeightEntry(
-      petId, 
-      userId, 
-      { weight, date, weightUnit }
+      petId,
+      userId,
+      validation.data
     );
-    
     respondWithSuccess(res, { weightEntry }, 'Weight entry updated successfully');
   } catch (error) {
     next(error);
@@ -96,7 +97,6 @@ router.put('/:weightId', async (req: AuthenticatedRequest, res: Response, next: 
   try {
     const { petId, weightId } = req.params;
     const userId = req.authSession?.user.id;
-    const updateData = req.body;
 
     if (!userId) {
       throw new BadRequestError('User session not found');
@@ -106,11 +106,17 @@ router.put('/:weightId', async (req: AuthenticatedRequest, res: Response, next: 
       throw new BadRequestError('Pet ID and Weight ID are required');
     }
 
+    const validation = weightEntryFormSchema.partial().safeParse(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
+    }
+
     const weightEntry = await WeightEntriesService.updateWeightEntry(
       petId, 
       weightId, 
       userId, 
-      updateData
+      validation.data
     );
     
 

@@ -20,12 +20,36 @@ import {
     // Validates and upload image and returns storage path + signed url
     // Path is {userId}/{petId}.{ext} - use upsert to replace existing image
 
+    private static validateMagicBytes(file: Buffer): void {
+        const isRIFF =
+            file[0] === 0x52 && // R
+            file[1] === 0x49 && // I
+            file[2] === 0x46 && // F
+            file[3] === 0x46;   // F
+
+        const isWEBP =
+            file[8]  === 0x57 && // W
+            file[9]  === 0x45 && // E
+            file[10] === 0x42 && // B
+            file[11] === 0x50;   // P
+        
+            if (!isRIFF || !isWEBP) {
+                throw new BadRequestError('Invalid file content. Only WebP images are accepted.')
+            }
+    }
+
     static async uploadedPetImage(
         file: Buffer, 
         mimeType: string,
         petId: string,
         userId: string,
     ): Promise<UploadedImage> {
+        // Validate Magic bytes
+        if (file.byteLength < 12) {
+            throw new BadRequestError('Invalid file content. Only WebP images are accepted.');
+        }
+        StorageService.validateMagicBytes(file);
+
         // Validate mime type
         if(!ALLOWED_MIME_TYPES.includes(mimeType as AllowedMimeType)) {
             throw new BadRequestError(`Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`);
@@ -37,6 +61,7 @@ import {
             throw new BadRequestError(`File size exceeds the ${maxMB}MB limit`);
         }
 
+        // Files are converted to wepb before reaching the backend
         const storagePath = `${userId}/${petId}.webp`;
 
         storageLogger.info({ petId, userId, mimeType, bytes: file.byteLength }, 'Uploading image');

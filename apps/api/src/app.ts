@@ -12,6 +12,7 @@ import foodRoutes from '@/routes/food.routes';
 import adminRoutes from '@/routes/admin.routes';
 import vetRoutes from '@/routes/veterinarians.routes';
 import appointmentRoutes from '@/routes/appointments.routes';
+import helmet from "helmet";
 
 export const app = express();
 
@@ -21,6 +22,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.use(helmet())
 
 app.use(middlewareLogResponse);
 

@@ -64,6 +64,13 @@
       "when": 1775139189628,
       "tag": "0008_loud_lockjaw",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1776265254279,
+      "tag": "0009_special_shadow_king",
+      "breakpoints": true
     }
   ]
 }

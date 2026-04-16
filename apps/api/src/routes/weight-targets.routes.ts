@@ -4,6 +4,7 @@ import { globalAuthHandler } from '../middleware/auth.middleware';
 import { BadRequestError } from '../middleware/errors';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess } from '../lib/json';
+import { weightTargetSchema } from '../../../web/src/lib/validations/weight';
 
 const router = Router({ mergeParams: true }); // mergeParams to access petId from parent route
 
@@ -38,7 +39,6 @@ router.put('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
   try {
     const { petId } = req.params;
     const userId = req.authSession?.user.id;
-    const { minWeight, maxWeight, weightUnit } = req.body;
 
     if (!userId) {
       throw new BadRequestError('User session not found');
@@ -48,14 +48,16 @@ router.put('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
       throw new BadRequestError('Pet ID is required');
     }
 
-    if (!minWeight || !maxWeight || !weightUnit) {
-      throw new BadRequestError('Minimum weight, maximum weight, and weight unit are required');
+    const validation = weightTargetSchema.safeParse(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
     }
 
     const weightTarget = await WeightTargetsService.upsertWeightTarget(
       petId, 
       userId, 
-      { minWeight, maxWeight, weightUnit }
+      validation.data
     );
     
     respondWithSuccess(res, { weightTarget }, 'Weight target saved successfully');

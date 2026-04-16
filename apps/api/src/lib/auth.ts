@@ -1,4 +1,3 @@
-// apps/api/src/lib/auth.ts
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { db } from "../db"
@@ -31,6 +30,22 @@ export const auth = betterAuth({
             enabled: true,
             domain: ".yourdomain.com" // Set actual domain for production!!!
         } : undefined,
+    },
+    rateLimit: {
+        enabled: true,
+        window: 60,        // better-auth default — 60 second window
+        max: 100,          // better-auth default — 100 requests per window
+        storage: "database",
+        customRules: {
+            "/sign-in/email": {
+                window: 10,   // better-auth default
+                max: 3,       // better-auth default
+            },
+            "/forget-password": {
+                window: 60,
+                max: 3,       // 3 attempts before lockout
+            },
+        },
     },
     emailAndPassword: {
         enabled: true,

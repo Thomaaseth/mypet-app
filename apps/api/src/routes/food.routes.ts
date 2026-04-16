@@ -5,6 +5,7 @@ import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
 import type { DryFoodFormData, WetFoodFormData } from '../services/food';
+import { dryFoodSchema, wetFoodSchema, updateDryFoodSchema, updateWetFoodSchema } from '../../../web/src/lib/validations/food'
 
 const router = Router();
 
@@ -70,16 +71,12 @@ router.post('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response,
       throw new BadRequestError('Pet ID is required');
     }
 
-    const dryFoodData: DryFoodFormData = req.body;
-
-    // Basic validation
-    if (!dryFoodData || typeof dryFoodData !== 'object') {
-      throw new BadRequestError('Request body is required');
+    const validation = dryFoodSchema.safeParse(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`)
     }
-
-    if (!dryFoodData.dailyAmount || !dryFoodData.dateStarted) {
-      throw new BadRequestError('Daily amount and purchase date are required');
-    }
+    const dryFoodData: DryFoodFormData = validation.data;
 
     const newDryFoodEntry = await FoodService.createDryFoodEntry(petId, userId, dryFoodData);
     // Create method returns raw entry, so we need to add calculations
@@ -109,12 +106,13 @@ router.put('/:petId/food/dry/:foodId', async (req: AuthenticatedRequest, res: Re
      throw new BadRequestError('Pet ID and Food ID are required');
    }
 
-   const updateData: Partial<DryFoodFormData> = req.body;
+  const validation = updateDryFoodSchema.safeParse(req.body);
+  if (!validation.success) {
+    const firstError = validation.error.errors[0];
+    throw new BadRequestError(`Validation error: ${firstError.message}`);
+  }
 
-   if (!updateData || typeof updateData !== 'object') {
-     throw new BadRequestError('Request body is required');
-   }
-
+  const updateData: Partial<DryFoodFormData> = validation.data;
    const updatedDryFoodEntry = await FoodService.updateDryFoodEntry(petId, foodId, userId, updateData);
    // Service already returns entry with calculations - no need to calculate again
 
@@ -183,17 +181,13 @@ router.post('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response,
      throw new BadRequestError('Pet ID is required');
    }
 
-   const wetFoodData: WetFoodFormData = req.body;
-
-   // Basic validation
-   if (!wetFoodData || typeof wetFoodData !== 'object') {
-     throw new BadRequestError('Request body is required');
+   const validation = wetFoodSchema.safeParse(req.body);
+   if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
    }
 
-   if (!wetFoodData.dailyAmount || !wetFoodData.dateStarted) {
-     throw new BadRequestError('Daily amount and purchase date are required');
-   }
-
+   const wetFoodData: WetFoodFormData = validation.data;
    const newWetFoodEntry = await FoodService.createWetFoodEntry(petId, userId, wetFoodData);
    // Create method returns raw entry, so we need to add calculations
    const calculations = FoodService.calculateWetFoodRemaining(newWetFoodEntry);
@@ -222,12 +216,13 @@ router.put('/:petId/food/wet/:foodId', async (req: AuthenticatedRequest, res: Re
      throw new BadRequestError('Pet ID and Food ID are required');
    }
 
-   const updateData: Partial<WetFoodFormData> = req.body;
-
-   if (!updateData || typeof updateData !== 'object') {
-     throw new BadRequestError('Request body is required');
+   const validation = updateWetFoodSchema.safeParse(req.body);
+   if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
    }
 
+   const updateData: Partial<WetFoodFormData> = validation.data;
    const updatedWetFoodEntry = await FoodService.updateWetFoodEntry(petId, foodId, userId, updateData);
    // Service already returns entry with calculations - no need to calculate again
 

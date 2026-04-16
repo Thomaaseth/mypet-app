@@ -26,6 +26,31 @@ export const weightEntryFormSchema = z.object({
     }, 'Date cannot be in the future'),
 });
 
+export const weightTargetSchema = z.object({
+  minWeight: z.string()
+    .min(1, 'Minimum weight is required')
+    .refine((val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num > 0;
+    }, 'Minimum weight must be a positive number'),
+  maxWeight: z.string()
+    .min(1, 'Maximum weight is required')
+    .refine((val) => {
+      const num = parseFloat(val);
+      return !isNaN(num) && num > 0;
+    }, 'Maximum weight must be a positive number'),
+  weightUnit: z.enum(['kg', 'lbs'], {
+    errorMap: () => ({ message: 'Please select a valid weight unit' }),
+  }),
+}).refine((data) => {
+  const min = parseFloat(data.minWeight);
+  const max = parseFloat(data.maxWeight);
+  return max > min;
+}, {
+  message: 'Maximum weight must be greater than minimum weight',
+  path: ['maxWeight'],
+});
+
 // Enhanced validation with unit-specific weight limits
 export const createWeightEntrySchema = (
   weightUnit: WeightUnit,
@@ -84,6 +109,7 @@ export const createWeightEntrySchema = (
 
 // Export types
 export type WeightFormData = z.infer<typeof weightEntryFormSchema>;
+export type WeightTargetFormData = z.infer<typeof weightTargetSchema>;
 
 // Utility functions for validation
 export const validateWeightEntry = (
