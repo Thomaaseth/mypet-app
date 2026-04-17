@@ -18,6 +18,6 @@
       "@/shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "../../packages/shared/src/validations/appointments.ts", "../../packages/shared/src/validations/food.ts", "../../packages/shared/src/validations/password.ts", "../../packages/shared/src/validations/pet-notes.ts", "../../packages/shared/src/validations/pet.ts", "../../packages/shared/src/validations/veterinarians.ts", "../../packages/shared/src/validations/weight.ts"],
   "exclude": ["node_modules"]
 }

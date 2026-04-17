@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { petApi, petErrorHandler } from '@/lib/api/domains/pets' // ← new file, has uploadPetImage
+import { petApi, petErrorHandler } from '@/lib/api/domains/pets'
 import { toastService } from '@/lib/toast'
 import type { Pet, PetFormData } from '@/types/pet'
 import type { PetWithSignedUrl, PetImageUploadResponse } from '@/lib/api/domains/pets/types'

@@ -20,9 +20,9 @@ export class PetValidator {
     }
 
     // Microchip validation (optional)
-    if (data.microchipNumber !== undefined) {
-      this.validateMicrochip(data.microchipNumber);
-    }
+    // if (data.microchipNumber !== undefined) {
+    //   this.validateMicrochip(data.microchipNumber);
+    // }
 
     // Notes validation (optional)
     if (data.notes !== undefined) {
@@ -123,9 +123,9 @@ export class PetValidator {
       transformed.notes = transformed.notes.trim();
     }
 
-    if (transformed.microchipNumber) {
-      transformed.microchipNumber = transformed.microchipNumber.replace(/[\s-]/g, '');
-    }
+    // if (transformed.microchipNumber) {
+    //   transformed.microchipNumber = transformed.microchipNumber.replace(/[\s-]/g, '');
+    // }
 
     return transformed;
   }

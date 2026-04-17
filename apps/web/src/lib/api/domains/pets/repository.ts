@@ -1,4 +1,3 @@
-import { formatDateForDisplay } from '@/lib/validations/weight';
 import { get, post, put, del } from '../../base';
 import type { PetImageUploadResponse, PetsApiResponse } from './types';
 import type { Pet, PetFormData } from '@/types/pet';

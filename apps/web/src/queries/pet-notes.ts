@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { petNoteApi, petNoteErrorHandler } from "@/lib/api/domains/pet-notes";
 import { toast, toastService } from "@/lib/toast";
 import type { PetNote, PetNoteFormData } from '@/types/pet-notes';
-import { string } from "zod";
 
 // QUERY KEYS
 export const petNoteKeys = {

@@ -4,7 +4,7 @@ import { globalAuthHandler } from '../middleware/auth.middleware';
 import { BadRequestError } from '../middleware/errors';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess } from '../lib/json';
-import { weightTargetSchema } from '../../../web/src/lib/validations/weight';
+import { weightTargetSchema } from '@/shared/validations/weight'
 
 const router = Router({ mergeParams: true }); // mergeParams to access petId from parent route
 

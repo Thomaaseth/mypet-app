@@ -6,7 +6,6 @@ import type {
   WeightFormData, 
   WeightChartData 
 } from '@/types/weights'
-import type { WeightUnit } from '@/types/pet'
 import { formatDateForDisplay } from '@/lib/validations/weight'
 
 // QUERY KEYS - Centralized for cache management

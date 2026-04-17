@@ -23,7 +23,7 @@ export const petApi = {
 export const petErrorHandler = (error: unknown) => petService.mapError(error);
 
 // Export types for consumers
-export type { PetsApiResponse, PetError, PetImageUploadResponse  } from './types';
+export type { PetsApiResponse, PetError, PetImageUploadResponse } from './types';
 
 // Export individual components for testing or advanced use
 export { PetRepository } from './repository';

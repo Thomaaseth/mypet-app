@@ -16,9 +16,7 @@ export const appointmentKeys = {
   lastVet: (petId: string) => ['appointments', 'last-vet', petId] as const,
 };
 
-// ============================================
 // QUERIES (READ operations)
-// ============================================
 
 // Fetch appointments with filter (upcoming or past)
 export function useAppointments(filter: AppointmentFilter = 'upcoming') {
@@ -58,9 +56,7 @@ export function useAppointmentFromCache(appointmentId: string) {
   );
 }
 
-// ============================================
 // MUTATIONS (WRITE operations)
-// ============================================
 
 // CREATE
 export function useCreateAppointment() {

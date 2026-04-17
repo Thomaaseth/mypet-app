@@ -1,4 +1,9 @@
-import { validateDryFoodData, validateWetFoodData, validateUpdateDryFoodData, validateUpdateWetFoodData } from '@/lib/validations/food';
+import { 
+  validateDryFoodData, 
+  validateWetFoodData, 
+  validateUpdateDryFoodData, 
+  validateUpdateWetFoodData 
+} from '@/lib/validations/food';
 import type { DryFoodFormData, WetFoodFormData } from '@/types/food';
 import { ValidationError } from '../../errors';
 

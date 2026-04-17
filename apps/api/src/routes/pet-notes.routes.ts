@@ -3,7 +3,10 @@ import type { Response, NextFunction } from 'express';
 import { PetNotesService } from '../services/pet-notes.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '@/middleware/auth.middleware';
 import { respondWithSuccess, respondWithCreated } from '@/lib/json';
-import { validateCreateNote, validateUpdateNote } from '../../../web/src/lib/validations/pet-notes';
+import { 
+    validateCreateNote, 
+    validateUpdateNote 
+} from '@/shared/validations/pet-notes';
 import { BadRequestError } from '@/middleware/errors';
 
 const router = Router({ mergeParams: true});

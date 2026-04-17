@@ -9,7 +9,7 @@ import {
   validateUpdateVisitNotes,
   type AppointmentFormData,
   type UpdateVisitNotesData,
-} from '../../../web/src/lib/validations/appointments';
+} from '@/shared/validations/appointments';
 import { 
   BadRequestError, 
   NotFoundError 

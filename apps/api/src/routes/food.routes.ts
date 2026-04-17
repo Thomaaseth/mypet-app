@@ -5,7 +5,12 @@ import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
 import type { DryFoodFormData, WetFoodFormData } from '../services/food';
-import { dryFoodSchema, wetFoodSchema, updateDryFoodSchema, updateWetFoodSchema } from '../../../web/src/lib/validations/food'
+import { 
+  dryFoodSchema, 
+  wetFoodSchema, 
+  updateDryFoodSchema, 
+  updateWetFoodSchema 
+} from '@/shared/validations/food';
 
 const router = Router();
 

@@ -8,7 +8,7 @@ import {
   validateCreateVeterinarian, 
   validateUpdateVeterinarian,
   type VeterinarianFormData,
-} from '../../../web/src/lib/validations/veterinarians';
+} from '@/shared/validations/veterinarians';
 import { 
   BadRequestError, 
   NotFoundError 
