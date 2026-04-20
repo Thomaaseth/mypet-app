@@ -61,7 +61,7 @@ describe('Pets Queries', () => {
       // Assert data matches mock
       expect(result.current.data).toEqual(mockPets);
       expect(result.current.data).toHaveLength(2);
-      expect(result.current.data?.[0].name).toBe('Fluffy');
+      expect(result.current.data?.[0].pet.name).toBe('Fluffy');
     });
 
     it('should handle empty pets list', async () => {
@@ -121,8 +121,8 @@ describe('Pets Queries', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(result.current.data?.id).toBe(petId);
-      expect(result.current.data?.name).toBe('Fluffy');
+      expect(result.current.data?.pet.id).toBe(petId);
+      expect(result.current.data?.pet.name).toBe('Fluffy');
     });
 
     it('should handle pet not found', async () => {
@@ -199,7 +199,6 @@ describe('Pets Queries', () => {
         weight: '25.5',
         weightUnit: 'kg',
         isNeutered: false,
-        microchipNumber: '',
         notes: '',
       };
   
@@ -226,7 +225,7 @@ describe('Pets Queries', () => {
       await waitFor(() => {
         // The usePets() query should auto-refetch and include the new pet
         expect(petsQueryResult.current.data).toHaveLength(3);
-        expect(petsQueryResult.current.data?.find(p => p.name === 'Buddy')).toBeDefined();
+        expect(petsQueryResult.current.data?.find(p => p.pet.name === 'Buddy')).toBeDefined();
       });
     });
 
@@ -254,7 +253,6 @@ describe('Pets Queries', () => {
         weight: '',
         weightUnit: 'kg',
         isNeutered: false,
-        microchipNumber: '',
         notes: '',
       };
 
@@ -281,8 +279,8 @@ describe('Pets Queries', () => {
     });
     
     expect(petsListResult.current.data).toHaveLength(2);
-    const originalPet = petsListResult.current.data?.find(p => p.id === petId);
-    expect(originalPet?.name).toBe('Fluffy'); // Original name
+    const originalPet = petsListResult.current.data?.find(p => p.pet.id === petId);
+    expect(originalPet?.pet.name).toBe('Fluffy'); // Original name
     
     // STEP 2: Fetch individual pet (so detail cache exists)
     const { result: petDetailResult } = renderHookWithQuery(
@@ -294,7 +292,7 @@ describe('Pets Queries', () => {
       expect(petDetailResult.current.isSuccess).toBe(true);
     });
     
-    expect(petDetailResult.current.data?.name).toBe('Fluffy');
+    expect(petDetailResult.current.data?.pet.name).toBe('Fluffy');
     
     // STEP 3: Create update mutation with SAME queryClient
     const { result: mutationResult } = renderHookWithQuery(
@@ -326,11 +324,11 @@ describe('Pets Queries', () => {
     // STEP 6: Verify the data was updated (auto-refetch happened)
     await waitFor(() => {
       // List should reflect the update
-      const updatedPetInList = petsListResult.current.data?.find(p => p.id === petId);
-      expect(updatedPetInList?.name).toBe('Fluffy Updated');
+      const updatedPetInList = petsListResult.current.data?.find(p => p.pet.id === petId);
+      expect(updatedPetInList?.pet.name).toBe('Fluffy Updated');
       
       // Detail should reflect the update
-      expect(petDetailResult.current.data?.name).toBe('Fluffy Updated');
+      expect(petDetailResult.current.data?.pet.name).toBe('Fluffy Updated');
     });
   });
 

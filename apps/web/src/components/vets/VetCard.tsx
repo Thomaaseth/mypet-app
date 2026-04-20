@@ -53,9 +53,11 @@ export default function VetCard({
   const { data: assignedPetData } = useVetPets(vet.id);
 
   // Calculate which pets are assigned
-  const assignedPets = allPets?.filter(pet => 
+  const assignedPetsWithSignedUrl = allPets?.filter( ({pet}) => 
     assignedPetData?.some(assignment => assignment.petId === pet.id)
   ) || [];
+
+  const assignedPets = assignedPetsWithSignedUrl.map(({ pet }) => pet)
 
   return (
     <Card className="group hover:shadow-md transition-shadow duration-200">

@@ -390,11 +390,12 @@ const petsHandlers = [
   // GET /api/pets - Get all pets
   http.get(`${API_BASE_URL}/api/pets`, () => {
     console.log('🔵 MSW: Intercepted GET /pets');
+    const petsWithSignedUrls = petsList.map((pet) => ({ pet, signedUrl: null }));
     return HttpResponse.json({
       success: true,
       data: {
-        pets: petsList,
-        total: petsList.length,
+        pets: petsWithSignedUrls,
+        total: petsWithSignedUrls.length,
       },
       message: `Retrieved ${petsList.length} pet(s)`,
     });
@@ -417,7 +418,7 @@ const petsHandlers = [
 
     return HttpResponse.json({
       success: true,
-      data: { pet },
+      data: { pet, signedUrl: null },
       message: 'Pet retrieved successfully',
     });
   }),
