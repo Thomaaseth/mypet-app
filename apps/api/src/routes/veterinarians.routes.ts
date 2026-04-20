@@ -7,6 +7,7 @@ import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { 
   validateCreateVeterinarian, 
   validateUpdateVeterinarian,
+  validatePetAssignment,
   type VeterinarianFormData,
 } from '@/shared/validations/veterinarians';
 import { 
@@ -184,11 +185,12 @@ router.post('/:id/assign', async (req: AuthenticatedRequest, res: Response, next
       throw new BadRequestError('Veterinarian ID is required');
     }
 
-    const { petIds } = req.body;
-
-    if (!petIds || !Array.isArray(petIds) || petIds.length === 0) {
-      throw new BadRequestError('At least one pet ID is required');
+    const validation = validatePetAssignment(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
     }
+    const { petIds } = validation.data;
 
     await VeterinariansService.assignVetToPets(vetId, userId, petIds);
     respondWithSuccess(res, null, 'Veterinarian assigned to pets successfully');
@@ -210,11 +212,12 @@ router.post('/:id/unassign', async (req: AuthenticatedRequest, res: Response, ne
       throw new BadRequestError('Veterinarian ID is required');
     }
 
-    const { petIds } = req.body;
-
-    if (!petIds || !Array.isArray(petIds) || petIds.length === 0) {
-      throw new BadRequestError('At least one pet ID is required');
+    const validation = validatePetAssignment(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
     }
+    const { petIds } = validation.data;
 
     await VeterinariansService.unassignVetFromPets(vetId, userId, petIds);
     respondWithSuccess(res, null, 'Veterinarian unassigned from pets successfully');

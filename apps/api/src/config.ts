@@ -27,6 +27,11 @@ export function getDatabaseUrl(): string {
 // Helper to get required env vars with test fallbacks
 function getRequiredEnv(key: string, testFallback?: string): string {
     const isTest = process.env.NODE_ENV === 'test';
+    const isProd = process.env.NODE_ENV === 'production';
+
+    if (isProd) {
+        return envOrThrow(key);
+    }
     
     if (isTest && testFallback) {
         return process.env[key] || testFallback;

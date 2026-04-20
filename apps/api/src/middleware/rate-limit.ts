@@ -2,7 +2,6 @@ import rateLimit from 'express-rate-limit';
 
 // strict rate limit for auth endpoints
 // 10 req per 15 min per IP
-
 export const authRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10,
@@ -10,6 +9,16 @@ export const authRateLimit = rateLimit({
     standardHeaders: true,
     legacyHeaders: false, 
 })
+
+// health check rate limiter
+// 30 req per minute per IP
+export const healthRateLimit = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30,
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
 
 // general rate limiter for all other API endpoints
 // 200 req per 15 min per IP
@@ -20,8 +29,4 @@ export const generalRateLimit = rateLimit({
     message: { error: 'Too many requests, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
-    // no rate limit on health checks endpoints
-    skip: (req) => {
-        return req.path === '/api/health' || req.path === '/api/ready';
-    }
 })

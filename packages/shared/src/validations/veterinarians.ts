@@ -94,6 +94,10 @@ export const validateUpdateVeterinarian = (data: unknown) => {
   return updateVeterinarianSchema.safeParse(data);
 };
 
+export const validatePetAssignment = (data: unknown) => {
+  return petAssignmentSchema.safeParse(data);
+}
+
 // Pet assignment schema for "Apply to other pets" feature
 export const petAssignmentSchema = z.object({
   petIds: z.array(z.string().uuid('Invalid pet ID')).min(1, 'Select at least one pet'),

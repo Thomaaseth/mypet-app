@@ -5,7 +5,7 @@ import { middlewareLogResponse, errorMiddleware } from "./middleware";
 import { healthCheck, readinessCheck } from "./handlers/health";
 import cors from 'cors';
 import { config } from "./config";
-import { authRateLimit, generalRateLimit } from "./middleware/rate-limit";
+import { authRateLimit, healthRateLimit, generalRateLimit } from "./middleware/rate-limit";
 
 import petRoutes from '@/routes/pets.routes';
 import foodRoutes from '@/routes/food.routes';
@@ -54,10 +54,10 @@ app.use('/api/vets', vetRoutes)
 app.use('/api/appointments', appointmentRoutes)
 
 // APP HEALTH   
-app.get('/api/health', (req, res, next) => {
+app.get('/api/health', healthRateLimit, (req, res, next) => {
     Promise.resolve(healthCheck(req, res)).catch(next);
 });
-app.get('/api/ready', (req, res, next) => {
+app.get('/api/ready', healthRateLimit, (req, res, next) => {
     Promise.resolve(readinessCheck(req, res)).catch(next);
 });
 
