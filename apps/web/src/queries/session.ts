@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { authClient } from '@/lib/auth-client'
 import { authErrorHandler } from '@/lib/errors/handlers'
+import { authLogger } from '@/lib/logger'
 import type { User } from '@/types/auth'
 import type { AppError } from '@/lib/errors'
 
@@ -15,12 +16,12 @@ export function useSession() {
   return useQuery({
     queryKey: sessionKeys.current,
     queryFn: async () => {
-      console.log('🔍 Checking user session...')
+      authLogger.debug('Checking user session');
       const sessionResponse = await authClient.getSession()
       
       if ('data' in sessionResponse && sessionResponse.data?.user) {
         const user = sessionResponse.data.user
-        console.log('✅ User found:', user)
+        authLogger.debug('Session found', { userId: user.id });
         
         return {
           id: user.id,
@@ -33,7 +34,7 @@ export function useSession() {
         } as User
       }
       
-      console.log('❌ No user found')
+      authLogger.debug('No active session');
       return null
     },
     retry: false, // Don't retry on auth failures
@@ -49,14 +50,14 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      console.log('🔄 Starting logout process...')
+      authLogger.info('Logout initiated');
       const { error } = await authClient.signOut({})
       
       if (error) {
         throw error
       }
       
-      console.log('✅ Logout successful')
+      authLogger.info('Logout successful');
     },
     onSuccess: () => {
       // Clear session from cache
@@ -67,7 +68,7 @@ export function useLogout() {
     },
     onError: (error) => {
       const appError = authErrorHandler(error)
-      console.error('❌ Logout failed:', appError.message)
+      authLogger.error('Logout failed', { code: appError.code, message: appError.message });
     },
   })
 }

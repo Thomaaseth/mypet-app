@@ -28,6 +28,11 @@ export const ENV_CONFIG = {
   
   export function getConfig() {
     const env = getEnvironment();
+
+    if (env === 'production') {
+      if (!process.env.API_URL) throw new Error('API_URL environment variable is not set');
+      if (!process.env.WEB_URL) throw new Error('WEB_URL environment variable is not set');
+    }
     return ENV_CONFIG[env];
   }
   

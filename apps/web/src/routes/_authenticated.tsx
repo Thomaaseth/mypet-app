@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
 import { authClient } from '@/lib/auth-client'
+import { routeLogger } from '@/lib/logger';
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ location }) => {
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/_authenticated')({
     
     // If no session, redirect to login
     if (!('data' in sessionResponse) || !sessionResponse.data?.user) {
-      console.log(`Route Guard: Blocking access to ${location.pathname} - No session`)
+      routeLogger.info('Unauthenticated access blocked — redirecting to login', { path: location.pathname });
       
       throw redirect({
         to: '/login',
@@ -18,7 +19,7 @@ export const Route = createFileRoute('/_authenticated')({
       })
     }
     
-    console.log(`Route Guard: Allowing access to ${location.pathname}`)
+    routeLogger.debug('Authenticated access granted', { path: location.pathname });
     
     // Return user data to be available in child routes
     return {

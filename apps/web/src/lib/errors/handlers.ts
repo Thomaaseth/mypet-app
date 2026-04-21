@@ -1,4 +1,5 @@
 import { AppError } from './types';
+import { authLogger } from '@/lib/logger';
 
 interface AuthClientError {
   error?: string;
@@ -33,7 +34,7 @@ export const authErrorHandler = (error: unknown): AppError => {
     message = 'An authentication error occurred';
   }
 
-  console.log('Auth Error Debug:', { error, message }); // Temporary debug log
+  authLogger.debug('Auth error handled', { err: error, message });
 
   // Better-auth specific error mapping
   if (message.includes('email')) {

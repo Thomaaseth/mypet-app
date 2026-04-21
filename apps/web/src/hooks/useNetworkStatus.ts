@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { networkLogger } from '@/lib/logger';
 
 
 export function useNetworkStatus(): boolean {
@@ -6,15 +7,15 @@ export function useNetworkStatus(): boolean {
 
   useEffect(() => {
     // Log initial state
-    console.log('[Network] Initial status:', navigator.onLine);
+    networkLogger.debug('Initial network status', { isOnline: navigator.onLine });
 
     const handleOnline = (): void => {
-      console.log('[Network] ✅ Online');
+      networkLogger.info('Network connection restored');
       setIsOnline(true);
     };
     
     const handleOffline = (): void => {
-      console.log('[Network] ❌ Offline');
+      networkLogger.warn('Network connection lost');
       setIsOnline(false);
     };
 

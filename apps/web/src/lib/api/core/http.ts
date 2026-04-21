@@ -1,4 +1,5 @@
 import { getApiUrl } from '@/lib/config';
+import { apiLogger } from '@/lib/logger';
 import type { 
   ApiRequestConfig, 
   ApiClientResponse,
@@ -10,6 +11,8 @@ import {
   ApiError 
 } from '../errors';
 import { parseApiResponse } from './parser';
+import { queryClient } from '@/lib/queryClient';
+import { sessionKeys } from '@/queries/session';
 
 // Base API configuration
 const API_BASE_URL = getApiUrl();
@@ -64,7 +67,7 @@ export async function makeApiRequest<TResponse = unknown>(
     method,
     requestBody: body,
     timestamp: new Date().toISOString(),
-    correlationId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    correlationId: crypto.randomUUID(),
   };
 
   // Create abort controller for timeout
@@ -128,7 +131,10 @@ export async function makeAuthenticatedRequest<TResponse = unknown>(
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
       // Handle authentication errors - could trigger logout logic here
-      console.warn('Authentication failed - user may need to log in again');
+      apiLogger.warn('Unauthenticated API request — session may have expired', { endpoint });
+      queryClient.setQueryData(sessionKeys.current, null);
+      window.location.href = '/login';
+      return new Promise(() => {}); // never resolves — page is redirecting anyway
     }
     throw error;
   }
