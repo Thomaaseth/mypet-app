@@ -1,8 +1,9 @@
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle"
-import { db } from "../db"
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "../db";
+import { admin } from "better-auth/plugins";
 import { config } from "../config";
-import { createAuthMiddleware, APIError } from "better-auth/api"
+import { createAuthMiddleware, APIError } from "better-auth/api";
 import { emailService } from "./email/email.service";
 import { authLogger } from './logger';
 
@@ -12,6 +13,7 @@ export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "pg",
     }),
+    plugins: [admin()],
     secret: config.auth.secret,
     baseURL: config.env.apiUrl,
     trustedOrigins: [config.env.webUrl],

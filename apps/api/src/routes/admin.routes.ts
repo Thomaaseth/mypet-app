@@ -2,7 +2,7 @@ import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { CronScheduler } from '../scheduler/cronScheduler';
 import { CronService } from '../services/cron.service';
-import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
+import { adminAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess, respondWithError } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
 import { getCronConfig } from '../config/cron.config';
@@ -11,7 +11,7 @@ import { logger } from '../lib/logger';
 const router = Router();
 
 // Apply auth middleware to all admin routes
-router.use(globalAuthHandler);
+router.use(adminAuthHandler);
 
 /**
  * GET /api/admin/cron/status
@@ -109,5 +109,13 @@ router.post('/cron/stop', async (req: AuthenticatedRequest, res: Response, next:
     next(error);
   }
 });
+
+// List of better-auth admin endpoints exposed:
+// POST /api/auth/admin/set-role
+// POST /api/auth/admin/ban-user
+// POST /api/auth/admin/unban-user
+// POST /api/auth/admin/impersonate-user
+// POST /api/auth/admin/revoke-user-session
+// GET /api/auth/admin/list-users
 
 export default router;
