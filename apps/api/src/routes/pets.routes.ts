@@ -2,7 +2,8 @@ import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { PetsService } from '../services/pets.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
-import { respondWithSuccess, respondWithCreated, respondWithError } from '../lib/json';
+import { userRateLimit } from '../middleware/rate-limit';
+import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { 
   validateCreatePet, 
   validateUpdatePet,
@@ -11,8 +12,6 @@ import {
 } from '@/shared/validations/pet';
 import { 
   BadRequestError, 
-  NotFoundError, 
-  UserForbiddenError 
 } from '../middleware/errors';
 import weightEntriesRoutes from './weight-entries.routes';
 import weightTargetsRoutes from './weight-targets.routes';
@@ -25,7 +24,7 @@ import { storageLogger } from '@/lib/supabase';
 const router = Router();
 
 // Apply auth middleware to all pet routes
-router.use(globalAuthHandler);
+router.use(globalAuthHandler, userRateLimit);
 
 router.use('/:petId/weights', weightEntriesRoutes);
 router.use('/:petId/weight-target', weightTargetsRoutes);

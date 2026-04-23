@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { PetNotesService } from '../services/pet-notes.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '@/middleware/auth.middleware';
+import { userRateLimit } from '../middleware/rate-limit';
 import { respondWithSuccess, respondWithCreated } from '@/lib/json';
 import { 
     validateCreateNote, 
@@ -11,7 +12,7 @@ import { BadRequestError } from '@/middleware/errors';
 
 const router = Router({ mergeParams: true});
 
-router.use(globalAuthHandler);
+router.use(globalAuthHandler, userRateLimit);
 
 // GET /api/pets/:petId/notes
 router.get('/', async(req: AuthenticatedRequest, res: Response, next: NextFunction) => {

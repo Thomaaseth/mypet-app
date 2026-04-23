@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { FoodService } from '../services/food';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
+import { userRateLimit } from '../middleware/rate-limit';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
 import type { DryFoodFormData, WetFoodFormData } from '../services/food';
@@ -15,7 +16,7 @@ import {
 const router = Router();
 
 // Apply auth middleware to all food routes
-router.use(globalAuthHandler);
+router.use(globalAuthHandler, userRateLimit);
 
 // DRY FOOD ROUTES
 // GET /api/pets/:petId/food/dry - Get all dry food entries

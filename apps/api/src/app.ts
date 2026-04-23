@@ -16,6 +16,10 @@ import helmet from "helmet";
 
 export const app = express();
 
+// Trust exactly one proxy hop
+// Required for req.ip to reflect the real client IP behind a reverse proxy
+app.set('trust proxy', 1);
+
 app.use(cors({
     origin: config.env.webUrl,
     credentials: true,

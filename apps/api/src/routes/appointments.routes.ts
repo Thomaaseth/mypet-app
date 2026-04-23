@@ -2,6 +2,7 @@ import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { AppointmentsService } from '../services/appointments.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
+import { userRateLimit } from '../middleware/rate-limit';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { 
   validateCreateAppointment, 
@@ -18,7 +19,7 @@ import {
 const router = Router();
 
 // Apply auth middleware to all appointment routes
-router.use(globalAuthHandler);
+router.use(globalAuthHandler, userRateLimit);
 
 // GET /api/appointments - Get all user's appointments (with filter)
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

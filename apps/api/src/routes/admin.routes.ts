@@ -3,6 +3,7 @@ import type { Response, NextFunction } from 'express';
 import { CronScheduler } from '../scheduler/cronScheduler';
 import { CronService } from '../services/cron.service';
 import { adminAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
+import { userRateLimit } from '../middleware/rate-limit';
 import { respondWithSuccess, respondWithError } from '../lib/json';
 import { BadRequestError } from '../middleware/errors';
 import { getCronConfig } from '../config/cron.config';
@@ -11,7 +12,7 @@ import { logger } from '../lib/logger';
 const router = Router();
 
 // Apply auth middleware to all admin routes
-router.use(adminAuthHandler);
+router.use(adminAuthHandler, userRateLimit);
 
 /**
  * GET /api/admin/cron/status

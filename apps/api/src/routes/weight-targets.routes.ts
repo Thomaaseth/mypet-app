@@ -1,6 +1,7 @@
 import { Router, Response, NextFunction } from 'express';
 import { WeightTargetsService } from '../services/weight-targets.service';
 import { globalAuthHandler } from '../middleware/auth.middleware';
+import { userRateLimit } from '../middleware/rate-limit';
 import { BadRequestError } from '../middleware/errors';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { respondWithSuccess } from '../lib/json';
@@ -9,7 +10,7 @@ import { weightTargetSchema } from '@/shared/validations/weight'
 const router = Router({ mergeParams: true }); // mergeParams to access petId from parent route
 
 // Apply auth middleware to all routes
-router.use(globalAuthHandler);
+router.use(globalAuthHandler, userRateLimit);
 
 // GET /api/pets/:petId/weight-target - Get weight target for a pet
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

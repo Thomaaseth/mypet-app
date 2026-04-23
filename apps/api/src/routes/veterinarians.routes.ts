@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import type { Response, NextFunction } from 'express';
 import { VeterinariansService } from '../services/veterinarians.service';
-import { PetsService } from '@/services/pets.service';
 import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth.middleware';
+import { userRateLimit } from '../middleware/rate-limit';
 import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { 
   validateCreateVeterinarian, 
@@ -18,7 +18,7 @@ import {
 const router = Router();
 
 // Apply auth middleware to all veterinarian routes
-router.use(globalAuthHandler);
+router.use(globalAuthHandler, userRateLimit);
 
 // GET /api/vets - Get all user's veterinarians
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
