@@ -47,6 +47,7 @@ type Config = {
         port: number;
         apiUrl: string;
         webUrl: string;
+        cookieDomain: string | undefined;
     };
     db: {
         url: string;
@@ -69,6 +70,7 @@ export const config: Config = {
         port: envConfig.API_PORT,
         apiUrl: envConfig.API_URL,
         webUrl: envConfig.WEB_URL,
+        cookieDomain: process.env.COOKIE_DOMAIN,
     },
     db: {
         url: getDatabaseUrl(),

@@ -20,6 +20,8 @@ import petNotesRoutes from './pet-notes.routes'
 import { upload } from '@/lib/upload';
 import { StorageService } from '@/services/storage.service';
 import { storageLogger } from '@/lib/supabase';
+import { csrfOriginGuard } from '@/middleware/csrf.middleware';
+import { config } from '@/config';
 
 const router = Router();
 
@@ -163,8 +165,8 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
   }
 });
 
-// POST /api/pets/:id/image - Upload or replace a pet's photo
-router.post('/:id/image', upload.single('image'), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+// POST /api/pets/:id/image - Upload or replace a pet's photo 
+router.post('/:id/image', csrfOriginGuard(config.env.webUrl), upload.single('image'), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.authSession?.user.id;
     if (!userId) {

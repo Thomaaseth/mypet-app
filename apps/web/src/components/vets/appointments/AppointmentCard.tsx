@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { AppointmentWithRelations, AppointmentType } from '@/types/appointments';
-import { formatDateForDisplay, formatTimeForDisplay, isUpcomingAppointment } from '@/lib/validations/appointments';
+import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
 import { useState } from 'react';
 
 interface AppointmentCardProps {
