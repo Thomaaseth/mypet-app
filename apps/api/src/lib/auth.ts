@@ -28,27 +28,30 @@ export const auth = betterAuth({
     advanced: {
         useSecureCookies: process.env.NODE_ENV === "production",
         cookiePrefix: "pettr-auth", 
+            ipAddress: {
+        ipAddressHeaders: ["x-forwarded-for"],
+        },
         crossSubDomainCookies: process.env.NODE_ENV === "production" ? {
             enabled: true,
             domain: ".yourdomain.com" // Set actual domain for production!!!
         } : undefined,
     },
-    rateLimit: {
-        enabled: true,
-        window: 60,        // better-auth default — 60 second window
-        max: 100,          // better-auth default — 100 requests per window
-        storage: "database",
-        customRules: {
-            "/sign-in/email": {
-                window: 10,   // better-auth default
-                max: 3,       // better-auth default
-            },
-            "/forget-password": {
-                window: 60,
-                max: 3,       // 3 attempts before lockout
-            },
-        },
-    },
+    // rateLimit: {
+    //     enabled: true,
+    //     window: 60,        // better-auth default — 60 second window
+    //     max: 100,          // better-auth default — 100 requests per window
+    //     storage: "memory", // due to bug on "database" storage - revisit if resolved
+    //     // customRules: {
+    //     //     "/sign-in/email": {
+    //     //         window: 10,   // better-auth default
+    //     //         max: 3,       // better-auth default
+    //     //     },
+    //     //     "/forget-password": {
+    //     //         window: 60,
+    //     //         max: 3,       // 3 attempts before lockout
+    //     //     },
+    //     // },
+    // },
     emailAndPassword: {
         enabled: true,
         disableSignUp: false,
