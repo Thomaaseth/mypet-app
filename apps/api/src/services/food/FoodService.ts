@@ -16,6 +16,7 @@ import { FoodValidations } from './validations';
 import { FoodCalculations } from './calculations';
 import type { DryFoodFormData, WetFoodFormData } from './types';
 import { dbLogger } from '../../lib/logger';
+import { validateUUID } from '@/lib/validateUUID';
 
 
 export class FoodService {
@@ -135,7 +136,7 @@ export class FoodService {
   static async updateDryFoodEntry(petId: string, foodId: string, userId: string, data: Partial<DryFoodFormData>): Promise<DryFoodEntry> {
     try {
       // Input validation
-      FoodValidations.validateUUID(foodId, 'food entry ID');
+      validateUUID(foodId, 'food entry ID');
       
       if (Object.keys(data).length === 0) {
         throw new BadRequestError('At least one field must be provided for update');
@@ -187,7 +188,7 @@ export class FoodService {
 
   static async getDryFoodEntryById(petId: string, foodId: string, userId: string): Promise<DryFoodEntry> {
     try {
-      FoodValidations.validateUUID(foodId, 'food entry ID')
+      validateUUID(foodId, 'food entry ID')
       await this.verifyPetOwnership(petId, userId);
 
       const [entry] = await db
@@ -302,7 +303,7 @@ export class FoodService {
   static async updateWetFoodEntry(petId: string, foodId: string, userId: string, data: Partial<WetFoodFormData>): Promise<WetFoodEntry> {
     try {
       // 🔒 STEP 1: Input validation (fail fast)
-      FoodValidations.validateUUID(foodId, 'food entry ID');
+      validateUUID(foodId, 'food entry ID');
       
       if (Object.keys(data).length === 0) {
         throw new BadRequestError('At least one field must be provided for update');
@@ -354,7 +355,7 @@ export class FoodService {
 
   static async getWetFoodEntryById(petId: string, foodId: string, userId: string): Promise<WetFoodEntry> {
     try {
-      FoodValidations.validateUUID(foodId, 'food entry ID')
+      validateUUID(foodId, 'food entry ID')
       await this.verifyPetOwnership(petId, userId);
 
       const [entry] = await db
@@ -414,7 +415,7 @@ export class FoodService {
   static async deleteFoodEntry(petId: string, foodId: string, userId: string): Promise<void> {
     try {
       // Input validation
-      FoodValidations.validateUUID(foodId, 'food entry ID');
+      validateUUID(foodId, 'food entry ID');
       
       // Authorization check
       await this.verifyPetOwnership(petId, userId);
@@ -499,7 +500,7 @@ export class FoodService {
     userId: string
   ): Promise<DryFoodEntry | WetFoodEntry> {
     try {
-      FoodValidations.validateUUID(foodId, 'food entry ID');
+      validateUUID(foodId, 'food entry ID');
       await this.verifyPetOwnership(petId, userId);
   
       const [updatedEntry] = await db
@@ -544,7 +545,7 @@ export class FoodService {
   ): Promise<DryFoodEntry | WetFoodEntry> {
     try {
       // Validations
-      FoodValidations.validateUUID(foodId, 'food entry ID');
+      validateUUID(foodId, 'food entry ID');
       
       if (!(newDate instanceof Date) || isNaN(newDate.getTime())) {
         throw new BadRequestError('Invalid date provided');

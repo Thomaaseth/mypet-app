@@ -5,6 +5,7 @@ import { eq, and, desc, count } from 'drizzle-orm';
 import type { PetNote, NewPetNote } from '../db/schema/pet-notes';
 import { BadRequestError, NotFoundError } from '@/middleware/errors';
 import { dbLogger } from '@/lib/logger';
+import { validateUUID } from '@/lib/validateUUID';
 
 
 const MAX_NOTES_PER_PET = 20;
@@ -30,13 +31,6 @@ export class PetNotesService {
         }
     }
 
-    private static async validateUUID(id: string, fieldName: string): Promise<void> {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (!id || !uuidRegex.test(id)) {
-            throw new BadRequestError(`Invalid ${fieldName} format`)
-        }
-    }
-
     private static validateContent(content: string): void {
         if (!content || content.trim().length === 0) {
             throw new BadRequestError('Notes cannot be empty')
@@ -49,7 +43,7 @@ export class PetNotesService {
     // GET all notes
     static async getNotes(petId: string, userId: string): Promise<PetNote[]> {
         try {
-            this.validateUUID(petId, 'pet ID');
+            validateUUID(petId, 'pet ID');
             await this.verifyPetOwnership(petId, userId)
         
             return await db
@@ -71,7 +65,7 @@ export class PetNotesService {
 
     static async createNote(petId: string, userId: string, data: PetNoteFormData): Promise<PetNote> {
         try {
-            this.validateUUID(petId, 'pet ID');
+            validateUUID(petId, 'pet ID');
             this.validateContent(data.content);
             await this.verifyPetOwnership(petId, userId);
 
@@ -114,8 +108,8 @@ export class PetNotesService {
         data: PetNoteFormData
     ): Promise<PetNote> {
         try {
-            this.validateUUID(petId, 'Pet ID');
-            this.validateUUID(noteId, 'note ID');
+            validateUUID(petId, 'Pet ID');
+            validateUUID(noteId, 'note ID');
             this.validateContent(data.content);
             await this.verifyPetOwnership(petId, userId);
 
@@ -158,8 +152,8 @@ export class PetNotesService {
 
     static async deleteNote(petId: string, noteId: string, userId: string): Promise<void> {
         try {
-            this.validateUUID(petId, 'Pet ID');
-            this.validateUUID(noteId, 'note ID');
+            validateUUID(petId, 'Pet ID');
+            validateUUID(noteId, 'note ID');
             await this.verifyPetOwnership(petId, userId);
 
             const [existing] = await db

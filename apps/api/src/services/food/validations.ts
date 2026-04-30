@@ -136,10 +136,4 @@ export class FoodValidations {
     // Validate common fields
     this.validateCommonInputs(data);
   }
-
-  static validateUUID(id: string, fieldName: string = 'ID'): void {
-    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      throw new BadRequestError(`Invalid ${fieldName} format`);
-    }
-  }
 }

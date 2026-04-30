@@ -9,6 +9,7 @@ import {
 import { dbLogger } from '../lib/logger';
 import { PetsService } from './pets.service';
 import { VeterinariansService } from './veterinarians.service';
+import { validateUUID } from '@/lib/validateUUID';
 
 // Type for appointment form data (matches validation schema)
 export interface AppointmentFormData {
@@ -22,13 +23,6 @@ export interface AppointmentFormData {
 }
 
 export class AppointmentsService {
-  // UUID validation helper (for database-generated IDs only)
-  private static validateUUID(id: string, fieldName: string): void {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!id || !uuidRegex.test(id)) {
-      throw new BadRequestError(`Invalid ${fieldName} format`);
-    }
-  }
 
   // Verify pet ownership (reuse pattern from other services)
   private static async verifyPetOwnership(petId: string, userId: string): Promise<void> {
@@ -244,7 +238,7 @@ export class AppointmentsService {
       }
 
       // Validate database UUID
-      this.validateUUID(appointmentId, 'appointment ID');
+      validateUUID(appointmentId, 'appointment ID');
 
       const appointment = await db.query.appointments.findFirst({
         where: and(
@@ -280,7 +274,7 @@ export class AppointmentsService {
       }
 
       // Validate database UUID
-      this.validateUUID(petId, 'pet ID');
+      validateUUID(petId, 'pet ID');
 
       // Verify pet ownership
       await this.verifyPetOwnership(petId, userId);
@@ -382,7 +376,7 @@ export class AppointmentsService {
       }
 
       // Validate database UUID
-      this.validateUUID(appointmentId, 'appointment ID');
+      validateUUID(appointmentId, 'appointment ID');
 
       // Validate update data
       this.validateAppointmentInputs(updateData, true);
@@ -481,7 +475,7 @@ export class AppointmentsService {
       }
 
       // Validate database UUID
-      this.validateUUID(appointmentId, 'appointment ID');
+      validateUUID(appointmentId, 'appointment ID');
 
       if (visitNotes.length > 1000) {
         throw new BadRequestError('Visit notes must be less than 1000 characters');
@@ -527,7 +521,7 @@ export class AppointmentsService {
       }
 
       // Validate database UUID
-      this.validateUUID(appointmentId, 'appointment ID');
+      validateUUID(appointmentId, 'appointment ID');
 
       // Verify appointment exists and user owns it
       await this.getAppointmentById(appointmentId, userId);

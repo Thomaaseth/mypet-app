@@ -9,6 +9,7 @@ import {
   UserForbiddenError 
 } from '../middleware/errors';
 import { dbLogger } from '@/lib/logger';
+import { validateUUID } from '@/lib/validateUUID';
 
 export class PetsService {
   // input validation helpers
@@ -140,12 +141,6 @@ export class PetsService {
     }
   }
 
-  private static validateUUID(id: string, fieldName: string = 'ID'): void {
-    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      throw new BadRequestError(`Invalid ${fieldName} format`);
-    }
-  }
-
   // Get all pets for a user
   static async getUserPets(userId: string): Promise<Pet[]> {
     try {
@@ -177,7 +172,7 @@ export class PetsService {
   static async getPetById(petId: string, userId: string): Promise<Pet> {
     try {
       // Input validation
-      this.validateUUID(petId, 'pet ID');
+      validateUUID(petId, 'pet ID');
       if (!userId || typeof userId !== 'string') {
         throw new BadRequestError('Valid user ID is required');
       }
@@ -279,7 +274,7 @@ export class PetsService {
   ): Promise<Pet> {
     try {
       // Input validation
-      this.validateUUID(petId, 'pet ID');
+      validateUUID(petId, 'pet ID');
       if (!userId || typeof userId !== 'string') {
         throw new BadRequestError('Valid user ID is required');
       }

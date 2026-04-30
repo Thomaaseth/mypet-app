@@ -10,6 +10,7 @@ import {
 } from '../middleware/errors';
 import { PetsService } from './pets.service';
 import { dbLogger } from '../lib/logger';
+import { validateUUID } from '@/lib/validateUUID';
 
 export class WeightEntriesService {
   // Verify pet ownership (helper method)
@@ -101,12 +102,6 @@ export class WeightEntriesService {
     }
   }
 
-  private static validateUUID(id: string, fieldName: string = 'ID'): void {
-    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      throw new BadRequestError(`Invalid ${fieldName} format`);
-    }
-  }
-
   // Check for duplicate weight entries on the same date
   private static async checkDuplicateDate(petId: string, date: string): Promise<void> {
     const existingEntry = await db
@@ -155,7 +150,7 @@ export class WeightEntriesService {
   // Get a single weight entry by ID (with ownership check)
   static async getWeightEntryById(petId: string, weightId: string, userId: string): Promise<WeightEntry> {
     try {
-      this.validateUUID(weightId, 'weight entry ID');
+      validateUUID(weightId, 'weight entry ID');
       // Verify pet ownership first
       await this.verifyPetOwnership(petId, userId);
 

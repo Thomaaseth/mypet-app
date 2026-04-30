@@ -9,16 +9,9 @@ import {
 } from '../middleware/errors';
 import { dbLogger } from '../lib/logger';
 import { PetsService } from './pets.service';
+import { validateUUID } from '@/lib/validateUUID';
 
 export class VeterinariansService {
-  // UUID validation helper
-  private static validateUUID(id: string, fieldName: string): void {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!id || !uuidRegex.test(id)) {
-      throw new BadRequestError(`Invalid ${fieldName} format`);
-    }
-  }
-
   // Input validation helper
   private static validateVeterinarianInputs(data: Partial<NewVeterinarian>, isUpdate: boolean): void {
     // Required fields for creation
@@ -109,7 +102,7 @@ export class VeterinariansService {
   // Get a single veterinarian by ID
   static async getVeterinarianById(vetId: string, userId: string): Promise<Veterinarian> {
     try {
-      this.validateUUID(vetId, 'veterinarian ID');
+      validateUUID(vetId, 'veterinarian ID');
       
       if (!userId || typeof userId !== 'string') {
         throw new BadRequestError('Valid user ID is required');
@@ -190,7 +183,7 @@ export class VeterinariansService {
   ): Promise<Veterinarian> {
     try {
       // Input validation
-      this.validateUUID(vetId, 'veterinarian ID');
+      validateUUID(vetId, 'veterinarian ID');
       if (!userId || typeof userId !== 'string') {
         throw new BadRequestError('Valid user ID is required');
       }
