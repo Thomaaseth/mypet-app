@@ -13,9 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import EasyCrop, { type Area } from 'react-easy-crop';
-import { isModuleNamespaceObject } from 'util/types';
-import { fi } from 'zod/v4/locales';
-import { cp } from 'fs';
+
 
 // Canva utility
 async function getCroppedImageAsFile(imageSrc: string, croppedAreaPixels: Area, fileName: string): Promise<File> {

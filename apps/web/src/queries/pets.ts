@@ -2,13 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { petApi, petErrorHandler } from '@/lib/api/domains/pets'
 import { toastService } from '@/lib/toast'
 import type { Pet, PetFormData } from '@/types/pet'
-import type { PetWithSignedUrl, PetImageUploadResponse } from '@/lib/api/domains/pets/types'
+import type { PetImageUploadResponse } from '@/lib/api/domains/pets/types'
 
 // QUERY KEYS - Centralized for cache management
 export const petKeys = {
     all: ['pets'] as const,
     detail: (id: string) => ['pets', id] as const,
     count: () => ['pets', 'count'] as const,
+    signedUrl: (id: string) => ['pets', id, 'signed-url'] as const,
+
   }
 
 // QUERIES (READ operations)
@@ -18,10 +20,7 @@ export function usePets() {
       queryKey: petKeys.all,
       queryFn: async () => {
         const response = await petApi.getPets()
-        console.log('🔍 raw API response:', response);
-        console.log('🔍 response.pets:', response.pets);
-        console.log('🔍 first pet item:', response.pets?.[0]);
-        return response.pets // PetWithSignedUrl[]
+        return response.pets // Pet[]
       },
     })
   }
@@ -30,10 +29,21 @@ export function usePets() {
 export function usePet(petId: string) {
     return useQuery({
         queryKey: petKeys.detail(petId),
-        queryFn: () => petApi.getPetById(petId), // { pet, signedUrl } 
-        enabled: Boolean(petId), // only run if petId exists
+        queryFn: () => petApi.getPetById(petId), // Pet
+        enabled: Boolean(petId),
     })
   }
+
+export function usePetSignedUrl(petId: string, hasImage: boolean) {
+    return useQuery({
+        queryKey: petKeys.signedUrl(petId),
+        queryFn: () => petApi.getPetSignedUrl(petId),
+        enabled: Boolean(petId) && hasImage, // only fetch if pet actually has an image
+        staleTime: 55 * 60 * 1000, // 55 min, under Supabase's 1h URL expiry
+        gcTime: 60 * 60 * 1000,    // 60 min, keep in cache for the full URL lifetime
+        retry: false,
+    })
+}
 
 // Get pet count
 export function usePetCount() {
@@ -109,13 +119,13 @@ export function useDeletePet() {
         await queryClient.cancelQueries({ queryKey: petKeys.all })
   
         // Snapshot previous value
-        const previousPets = queryClient.getQueryData<PetWithSignedUrl[]>(petKeys.all)
+        const previousPets = queryClient.getQueryData<Pet[]>(petKeys.all)
   
         // Optimistically remove pet from cache
         if (previousPets) {
-          queryClient.setQueryData<PetWithSignedUrl[]>(
+          queryClient.setQueryData<Pet[]>(
             petKeys.all,
-            previousPets.filter((p) => p.pet.id !== petId)
+            previousPets.filter((p) => p.id !== petId)
           )
         }
   
@@ -133,8 +143,8 @@ export function useDeletePet() {
       },
       onSuccess: (_data, petId, context) => {
         // Get pet name from the snapshot for toast
-        const deletedPet = context?.previousPets?.find((p) => p.pet.id === petId);
-        const petName = deletedPet?.pet.name || 'Pet';
+        const deletedPet = context?.previousPets?.find((p) => p.id === petId);
+        const petName = deletedPet?.name || 'Pet';
         
         toastService.success('Pet deleted', `${petName} has been removed.`)
       },
@@ -173,6 +183,7 @@ export function useDeletePet() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: petKeys.all });
         queryClient.invalidateQueries({ queryKey: petKeys.detail(petId) });
+        queryClient.removeQueries({ queryKey: petKeys.signedUrl(petId) });
         toastService.success('Photo removed', `Your pet's photo has been removed.`);
       },
       onError: (error) => {
@@ -185,13 +196,6 @@ export function useDeletePet() {
 // Helper: Get pet by ID from cache (no API call)
 export function usePetFromCache(petId: string): Pet | undefined {
   const queryClient = useQueryClient()
-  const pets = queryClient.getQueryData<PetWithSignedUrl[]>(petKeys.all)
-  return pets?.find((p) => p.pet.id === petId)?.pet
-}
-
-// Return the full PetWithSignedUrl wrapper from cache
-export function usePetWithSignedUrlFromCache(petId: string): PetWithSignedUrl | undefined {
-  const queryClient = useQueryClient()
-  const pets = queryClient.getQueryData<PetWithSignedUrl[]>(petKeys.all)
-  return pets?.find((p) => p.pet.id === petId)
+  const pets = queryClient.getQueryData<Pet[]>(petKeys.all)
+  return pets?.find((p) => p.id === petId)
 }

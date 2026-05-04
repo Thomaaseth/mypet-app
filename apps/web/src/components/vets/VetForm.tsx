@@ -252,7 +252,7 @@ export default function VetForm({
           </div>
 
           <div className="space-y-2">
-            {pets.map(({ pet }) => (
+            {pets.map((pet) => (
               <div key={pet.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-muted/50">
                 <Checkbox
                   id={`pet-${pet.id}`}

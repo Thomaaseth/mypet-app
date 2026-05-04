@@ -23,17 +23,18 @@ import type { Pet } from '@/types/pet';
 import { calculatePetAge } from '@/lib/validations/pet';
 import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
+import { usePetSignedUrl } from '@/queries/pets';
 
 interface PetCardProps {
   pet: Pet;
-  signedUrl: string | null;
   onEdit: (pet: Pet) => void;
   onDelete: (pet: Pet) => void;
   onView?: (pet: Pet) => void;
 }
 
-export default function PetCard({ pet, signedUrl, onEdit, onDelete, onView }: PetCardProps) {
+export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
   const [imageError, setImageError] = useState(false);
+  const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
 
   const age = calculatePetAge(pet.birthDate);
 

@@ -19,7 +19,6 @@ import { VeterinariansService } from '@/services/veterinarians.service';
 import petNotesRoutes from './pet-notes.routes'
 import { upload } from '@/lib/upload';
 import { StorageService } from '@/services/storage.service';
-import { storageLogger } from '@/lib/supabase';
 import { csrfOriginGuard } from '@/middleware/csrf.middleware';
 import { config } from '@/config';
 
@@ -43,21 +42,21 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
     const pets = await PetsService.getUserPets(userId);
 
     // generate signed url for pets that have an image
-    const petsWithSignedUrls = await Promise.all(
-      pets.map(async (pet) =>  {
-        if(!pet.imageUrl) return { pet, signedUrl: null };
-        try {
-          const signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
-          return { pet, signedUrl };
-        } catch {
-          // not throw if signed url fails
-          storageLogger.warn({ petId: pet.id }, 'Failed to generate signed url for pet');
-          return { pet, signedUrl: null}
-        }
-      })
-    )
+    // const petsWithSignedUrls = await Promise.all(
+    //   pets.map(async (pet) =>  {
+    //     if(!pet.imageUrl) return { pet, signedUrl: null };
+    //     try {
+    //       const signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
+    //       return { pet, signedUrl };
+    //     } catch {
+    //       // not throw if signed url fails
+    //       storageLogger.warn({ petId: pet.id }, 'Failed to generate signed url for pet');
+    //       return { pet, signedUrl: null}
+    //     }
+    //   })
+    // )
 
-    respondWithSuccess(res, { pets: petsWithSignedUrls, total: petsWithSignedUrls.length }, `Retrieved ${petsWithSignedUrls.length} pet(s)`);
+    respondWithSuccess(res, { pets, total: pets.length }, `Retrieved ${pets.length} pet(s)`);
   } catch (error) {
     next(error);
   }
@@ -120,16 +119,44 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFu
     const pet = await PetsService.getPetById(petId, userId);
 
     // Generate signed URL if pet has an image
-    let signedUrl: string | null = null;
-      if (pet.imageUrl) {
-        try {
-          signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
-        } catch {
-          storageLogger.warn({ petId }, 'Failed to generate signed URL for pet');
-        }
-    }
+    // let signedUrl: string | null = null;
+    //   if (pet.imageUrl) {
+    //     try {
+    //       signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
+    //     } catch {
+    //       storageLogger.warn({ petId }, 'Failed to generate signed URL for pet');
+    //     }
+    // }
     
-    respondWithSuccess(res, { pet, signedUrl }, 'Pet retrieved successfully');
+    respondWithSuccess(res, { pet }, 'Pet retrieved successfully');
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/pets/:id/signed-url - Generate a signed URL for a pet's image
+router.get('/:id/signed-url', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const petId = req.params.id;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
+    }
+
+    // Verify ownership and get pet — also validates UUID format
+    const pet = await PetsService.getPetById(petId, userId);
+
+    if (!pet.imageUrl) {
+      throw new BadRequestError('Pet has no image');
+    }
+
+    const signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
+
+    respondWithSuccess(res, { signedUrl }, 'Signed URL generated successfully');
   } catch (error) {
     next(error);
   }

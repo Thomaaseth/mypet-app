@@ -1,18 +1,17 @@
 import type { Pet, PetFormData } from '@/types/pet'
 
-export interface PetWithSignedUrl {
-    pet: Pet;
-    signedUrl: string | null;
-}
 
 export interface PetsApiResponse {
-    pets: PetWithSignedUrl[];
+    pets: Pet[];
     total: number;
 }
 
 export interface PetApiResponse {
     pet: Pet;
-    signedUrl: string | null;
+}
+
+export interface PetSignedUrlResponse {
+    signedUrl: string;
 }
 
 // returned by POST /api/pets/:id/image

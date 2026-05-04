@@ -126,7 +126,7 @@ export default function AppointmentForm({
             <SelectValue placeholder="Select a pet" />
           </SelectTrigger>
           <SelectContent>
-            {pets?.map(({ pet }) => (
+            {pets?.map((pet) => (
               <SelectItem key={pet.id} value={pet.id}>
                 {pet.name} ({pet.animalType})
               </SelectItem>

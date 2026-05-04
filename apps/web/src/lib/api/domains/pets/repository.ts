@@ -1,5 +1,5 @@
 import { get, post, put, del } from '../../base';
-import type { PetImageUploadResponse, PetsApiResponse } from './types';
+import type { PetApiResponse, PetImageUploadResponse, PetsApiResponse, PetSignedUrlResponse } from './types';
 import type { Pet, PetFormData } from '@/types/pet';
 
 
@@ -9,9 +9,14 @@ export class PetRepository {
     return await get<PetsApiResponse>('/api/pets');
   }
 
-  async getPetById(petId: string): Promise<{ pet: Pet; signedUrl: string | null }> {
-    const result = await get<{ pet: Pet; signedUrl: string | null }>(`/api/pets/${petId}`);
-    return { pet: result.pet, signedUrl: result.signedUrl };
+  async getPetById(petId: string): Promise<Pet> {
+    const result = await get<PetApiResponse>(`/api/pets/${petId}`);
+    return result.pet;
+  }
+
+  async getPetSignedUrl(petId: string): Promise<string> {
+    const result = await get<PetSignedUrlResponse>(`/api/pets/${petId}/signed-url`);
+    return result.signedUrl;
   }
 
   async createPet(petData: PetFormData): Promise<Pet> {

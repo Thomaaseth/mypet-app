@@ -25,11 +25,20 @@ export class PetService {
     }
   }
 
-  async getPetById(petId: string): Promise<{ pet: Pet; signedUrl: string | null }> {
+  async getPetById(petId: string): Promise<Pet> {
     try {
       return await this.repository.getPetById(petId);
     } catch (error) {
       console.error('Error fetching pet:', error);
+      throw error;
+    }
+  }
+
+  async getPetSignedUrl(petId: string): Promise<string> {
+    try {
+      return await this.repository.getPetSignedUrl(petId);
+    } catch (error) {
+      console.error('Error fetching signed URL:', error);
       throw error;
     }
   }

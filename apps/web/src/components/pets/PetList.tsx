@@ -21,16 +21,38 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Heart, Loader2 } from 'lucide-react';
-import { usePets, useCreatePet, useUpdatePet, useDeletePet } from '@/queries/pets';
+import { usePets, useCreatePet, useUpdatePet, useDeletePet, usePetSignedUrl } from '@/queries/pets';
 import PetCard from './PetCard';
 import PetForm from './PetForm';
 import type { Pet, PetFormData } from '@/types/pet';
-import type { PetWithSignedUrl } from '@/lib/api/domains/pets/types';
 import { petErrorHandler } from '@/lib/api/domains/pets';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 import { WeightTracker } from './WeightTracker';
 import { FoodTracker } from './FoodTracker';
 import NotesWidget from './NotesWidget/NotesWidget';
+
+function EditPetForm({ 
+  pet, 
+  onSubmit, 
+  onCancel, 
+  isLoading 
+}: { 
+  pet: Pet; 
+  onSubmit: (data: PetFormData) => Promise<Pet | null>; 
+  onCancel: () => void; 
+  isLoading: boolean; 
+}) {
+  const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
+  return (
+    <PetForm
+      pet={pet}
+      signedUrl={signedUrl ?? null}
+      onSubmit={onSubmit}
+      onCancel={onCancel}
+      isLoading={isLoading}
+    />
+  );
+}
 
 export default function PetList() {
   const { data: pets, isPending, error } = usePets();
@@ -52,7 +74,7 @@ export default function PetList() {
   // Set active tab to first pet when pets load
   useEffect(() => {
     if (pets && pets.length > 0 && !activeTab) {
-      setActiveTab(pets[0].pet.id); // Auto-select first pet (latest added => desc order)
+      setActiveTab(pets[0].id); // Auto-select first pet (latest added => desc order)
     }
   }, [pets, activeTab]);
 
@@ -93,7 +115,7 @@ export default function PetList() {
       const deletedPetId = deletingPet.id;
       
       // Find the index of the pet being deleted
-      const deletedIndex = pets.findIndex((p) => p.pet.id === deletedPetId);
+      const deletedIndex = pets.findIndex((p) => p.id === deletedPetId);
       
       // Determine which pet to navigate to after deletion
       let nextPetId: string | null = null;
@@ -102,10 +124,10 @@ export default function PetList() {
         // If there are other pets, navigate to the next one
         if (deletedIndex < pets.length - 1) {
           // Navigate to the next pet (same index after deletion)
-          nextPetId = pets[deletedIndex + 1].pet.id;
+          nextPetId = pets[deletedIndex + 1].id;
         } else {
           // We're deleting the last pet, navigate to the previous one
-          nextPetId = pets[deletedIndex - 1].pet.id;
+          nextPetId = pets[deletedIndex - 1].id;
         }
       }
       
@@ -233,7 +255,7 @@ export default function PetList() {
         {/* Pet Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex justify-center w-full">
-            {pets?.map(( { pet }) => (
+            {pets?.map((pet) => (
               <TabsTrigger 
                 key={pet.id} 
                 value={pet.id}
@@ -246,14 +268,13 @@ export default function PetList() {
           </TabsList>
 
           {/* Pet Tab Content */}
-          {pets?.map(({ pet, signedUrl }) => (
+          {pets?.map((pet) => (
             <TabsContent key={pet.id} value={pet.id} className="mt-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <PetCard
                       pet={pet}
-                      signedUrl={signedUrl}
                       onEdit={() => setEditingPet(pet)}
                       onDelete={() => setDeletingPet(pet)}
                     />
@@ -335,9 +356,8 @@ export default function PetList() {
               </DialogDescription>
             </DialogHeader>
             {editingPet && (
-              <PetForm
+              <EditPetForm
                 pet={editingPet}
-                signedUrl={pets.find((p) => p.pet.id === editingPet.id)?.signedUrl ?? null}
                 onSubmit={handleUpdatePet}
                 onCancel={() => setEditingPet(null)}
                 isLoading={isActionLoading}
