@@ -7,6 +7,7 @@ import { getApiUrl } from '@/lib/env';
 import type { WeightTarget } from '@/types/weight-targets';
 import type { Veterinarian } from '@/types/veterinarian';
 import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
+import PetList from '@/components/pets/PetList';
 
 
 
@@ -390,12 +391,11 @@ const petsHandlers = [
   // GET /api/pets - Get all pets
   http.get(`${API_BASE_URL}/api/pets`, () => {
     console.log('🔵 MSW: Intercepted GET /pets');
-    const petsWithSignedUrls = petsList.map((pet) => ({ pet, signedUrl: null }));
     return HttpResponse.json({
       success: true,
       data: {
-        pets: petsWithSignedUrls,
-        total: petsWithSignedUrls.length,
+        pets: petsList,
+        total: petsList.length,
       },
       message: `Retrieved ${petsList.length} pet(s)`,
     });
@@ -418,8 +418,27 @@ const petsHandlers = [
 
     return HttpResponse.json({
       success: true,
-      data: { pet, signedUrl: null },
+      data: { pet },
       message: 'Pet retrieved successfully',
+    });
+  }),
+
+  // GET /api/pets/:id/signed-url - Get signed URL for pet image
+  http.get(`${API_BASE_URL}/api/pets/:id/signed-url`, ({ params }) => {
+    const { id } = params;
+    const pet = petsList.find((p) => p.id === id);
+
+    if (!pet) {
+      return HttpResponse.json(
+        { success: false, error: 'Pet not found' },
+        { status: 404 }
+      );
+    }
+
+    return HttpResponse.json({
+      success: true,
+      data: { signedUrl: pet.imageUrl ? 'https://mock-signed-url.com/image.webp' : null },
+      message: 'Signed URL generated successfully',
     });
   }),
 

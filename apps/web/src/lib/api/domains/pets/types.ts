@@ -11,7 +11,7 @@ export interface PetApiResponse {
 }
 
 export interface PetSignedUrlResponse {
-    signedUrl: string;
+    signedUrl: string | null;
 }
 
 // returned by POST /api/pets/:id/image

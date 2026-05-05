@@ -41,7 +41,6 @@ export function usePetSignedUrl(petId: string, hasImage: boolean) {
         enabled: Boolean(petId) && hasImage, // only fetch if pet actually has an image
         staleTime: 55 * 60 * 1000, // 55 min, under Supabase's 1h URL expiry
         gcTime: 60 * 60 * 1000,    // 60 min, keep in cache for the full URL lifetime
-        retry: false,
     })
 }
 
@@ -183,7 +182,6 @@ export function useDeletePet() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: petKeys.all });
         queryClient.invalidateQueries({ queryKey: petKeys.detail(petId) });
-        queryClient.removeQueries({ queryKey: petKeys.signedUrl(petId) });
         toastService.success('Photo removed', `Your pet's photo has been removed.`);
       },
       onError: (error) => {

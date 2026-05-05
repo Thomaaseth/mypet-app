@@ -14,7 +14,7 @@ export class PetRepository {
     return result.pet;
   }
 
-  async getPetSignedUrl(petId: string): Promise<string> {
+  async getPetSignedUrl(petId: string): Promise<string | null> {
     const result = await get<PetSignedUrlResponse>(`/api/pets/${petId}/signed-url`);
     return result.signedUrl;
   }

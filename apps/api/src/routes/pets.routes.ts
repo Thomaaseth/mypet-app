@@ -41,21 +41,6 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
 
     const pets = await PetsService.getUserPets(userId);
 
-    // generate signed url for pets that have an image
-    // const petsWithSignedUrls = await Promise.all(
-    //   pets.map(async (pet) =>  {
-    //     if(!pet.imageUrl) return { pet, signedUrl: null };
-    //     try {
-    //       const signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
-    //       return { pet, signedUrl };
-    //     } catch {
-    //       // not throw if signed url fails
-    //       storageLogger.warn({ petId: pet.id }, 'Failed to generate signed url for pet');
-    //       return { pet, signedUrl: null}
-    //     }
-    //   })
-    // )
-
     respondWithSuccess(res, { pets, total: pets.length }, `Retrieved ${pets.length} pet(s)`);
   } catch (error) {
     next(error);
@@ -117,16 +102,6 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFu
     }
 
     const pet = await PetsService.getPetById(petId, userId);
-
-    // Generate signed URL if pet has an image
-    // let signedUrl: string | null = null;
-    //   if (pet.imageUrl) {
-    //     try {
-    //       signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
-    //     } catch {
-    //       storageLogger.warn({ petId }, 'Failed to generate signed URL for pet');
-    //     }
-    // }
     
     respondWithSuccess(res, { pet }, 'Pet retrieved successfully');
   } catch (error) {
@@ -151,7 +126,7 @@ router.get('/:id/signed-url', async (req: AuthenticatedRequest, res: Response, n
     const pet = await PetsService.getPetById(petId, userId);
 
     if (!pet.imageUrl) {
-      throw new BadRequestError('Pet has no image');
+      return respondWithSuccess(res, { signedUrl: null }, 'No image');
     }
 
     const signedUrl = await StorageService.getSignedUrl(pet.imageUrl);
