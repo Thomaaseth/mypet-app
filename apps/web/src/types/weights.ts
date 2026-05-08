@@ -17,6 +17,8 @@ export interface WeightFormData {
   date: string; // HTML date input format: YYYY-MM-DD
 }
 
+
+// MOVE THOSE TYPES TO DOMAIN
 // API response types
 export interface WeightEntriesApiResponse {
   weightEntries: WeightEntry[];

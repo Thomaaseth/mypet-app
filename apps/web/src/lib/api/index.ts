@@ -42,10 +42,10 @@ export { vetApi, vetErrorHandler } from './domains/vets';
 export { appointmentApi, appointmentErrorHandler } from './domains/appointments';
 
 
-export type { PetsApiResponse, PetError, PetImageUploadResponse } from './domains/pets';
+export type { PetError, PetImageUploadResponse } from './domains/pets';
 export type { WeightEntriesApiResponse, WeightError } from './domains/weights';
-export type { FoodEntriesApiResponse, FoodError } from './domains/food';
-export type { VeterinariansApiResponse, VeterinarianError } from './domains/vets';
-export type { AppointmentsApiResponse, AppointmentError } from './domains/appointments';
+// export type { FoodEntriesApiResponse, FoodError } from './domains/food';
+export type { VeterinarianError } from './domains/vets';
+export type { AppointmentError } from './domains/appointments';
 
 

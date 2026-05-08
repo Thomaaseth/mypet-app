@@ -22,10 +22,7 @@ export const appointmentKeys = {
 export function useAppointments(filter: AppointmentFilter = 'upcoming') {
   return useQuery({
     queryKey: filter === 'upcoming' ? appointmentKeys.upcoming() : appointmentKeys.past(),
-    queryFn: async () => {
-      const response = await appointmentApi.getAppointments(filter);
-      return response.appointments;
-    },
+    queryFn: () => appointmentApi.getAppointments(filter),
   });
 }
 

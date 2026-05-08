@@ -33,18 +33,18 @@ export interface PetFormData {
 }
 
 // API response types
-export interface PetsApiResponse {
-  pets: Pet[];
-  total: number;
-}
+// export interface PetsApiResponse {
+//   pets: Pet[];
+//   total: number;
+// }
 
-export interface PetApiResponse {
-  pet: Pet;
-}
+// export interface PetApiResponse {
+//   pet: Pet;
+// }
 
 // Error types
-export interface PetError {
-  message: string;
-  field?: keyof PetFormData;
-  code?: string;
-}
+// export interface PetError {
+//   message: string;
+//   field?: keyof PetFormData;
+//   code?: string;
+// }

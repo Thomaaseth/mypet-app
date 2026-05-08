@@ -50,18 +50,18 @@ export interface UpdateVisitNotesData {
 }
 
 // API response types
-export interface AppointmentsApiResponse {
-  appointments: AppointmentWithRelations[];
-  total: number;
-}
+// export interface AppointmentsApiResponse {
+//   appointments: AppointmentWithRelations[];
+//   total: number;
+// }
 
-export interface AppointmentApiResponse {
-  appointment: AppointmentWithRelations;
-}
+// export interface AppointmentApiResponse {
+//   appointment: AppointmentWithRelations;
+// }
 
-export interface LastVetApiResponse {
-  veterinarianId: string | null;
-}
+// export interface LastVetApiResponse {
+//   veterinarianId: string | null;
+// }
 
 // Error types
 export interface AppointmentError {

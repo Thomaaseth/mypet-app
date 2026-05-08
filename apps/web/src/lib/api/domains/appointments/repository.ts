@@ -1,17 +1,17 @@
 import { get, post, put, patch, del } from '../../base';
 import type { 
-  AppointmentsApiResponse,
   AppointmentWithRelations,
   AppointmentFormData,
   UpdateVisitNotesData,
-  LastVetApiResponse,
   AppointmentFilter,
 } from '@/types/appointments';
 
 // Handles data access operations using existing API functions
 export class AppointmentRepository {
-  async getAppointments(filter: AppointmentFilter = 'upcoming'): Promise<AppointmentsApiResponse> {
-    return await get<AppointmentsApiResponse>('/api/appointments', { filter });
+
+  async getAppointments(filter: AppointmentFilter = 'upcoming'): Promise<AppointmentWithRelations[]> {
+    const result = await get<{ appointments: AppointmentWithRelations[] }>('/api/appointments', { filter });
+    return result.appointments;
   }
 
   async getAppointmentById(appointmentId: string): Promise<AppointmentWithRelations> {
@@ -22,7 +22,7 @@ export class AppointmentRepository {
   }
 
   async getLastVetForPet(petId: string): Promise<string | null> {
-    const result = await get<LastVetApiResponse>(`/api/appointments/last-vet/${petId}`);
+    const result = await get<{ veterinarianId: string | null }>(`/api/appointments/last-vet/${petId}`);
     return result.veterinarianId;
   }
 

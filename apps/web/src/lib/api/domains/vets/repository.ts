@@ -1,11 +1,12 @@
 import { get, post, put, del } from '../../base';
-import type { VeterinariansApiResponse } from './types';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 
 // Handles data access operations using existing API functions
 export class VetRepository {
-  async getVeterinarians(): Promise<VeterinariansApiResponse> {
-    return await get<VeterinariansApiResponse>('/api/vets');
+
+  async getVeterinarians(): Promise<Veterinarian[]> {
+    const result = await get<{ veterinarians: Veterinarian[] } >('/api/vets');
+    return result.veterinarians
   }
 
   async getVeterinarianById(vetId: string): Promise<Veterinarian> {

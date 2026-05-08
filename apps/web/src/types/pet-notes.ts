@@ -14,10 +14,10 @@ export interface PetNoteFormData {
 }
 
 // API response types
-export interface PetNotesApiResponse {
-    notes: PetNote[];
-    total: number;
-}
+// export interface PetNotesApiResponse {
+//     notes: PetNote[];
+//     total: number;
+// }
 
 export interface PetNoteApiResponse {
     note: PetNote;

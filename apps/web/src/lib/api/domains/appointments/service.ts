@@ -8,7 +8,6 @@ import {
   ForbiddenError 
 } from '../../errors';
 import type { 
-  AppointmentsApiResponse,
   AppointmentWithRelations,
   AppointmentFormData,
   AppointmentError,
@@ -21,7 +20,7 @@ export class AppointmentService {
     private validator: AppointmentValidator
   ) {}
 
-  async getAppointments(filter: AppointmentFilter = 'upcoming'): Promise<AppointmentsApiResponse> {
+  async getAppointments(filter: AppointmentFilter = 'upcoming'): Promise<AppointmentWithRelations[]> {
     try {
       return await this.repository.getAppointments(filter);
     } catch (error) {

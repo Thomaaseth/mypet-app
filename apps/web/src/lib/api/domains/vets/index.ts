@@ -29,7 +29,7 @@ export const vetApi = {
 export const vetErrorHandler = (error: unknown) => vetService.mapError(error);
 
 // Export types for consumers
-export type { VeterinariansApiResponse, VeterinarianError } from './types';
+export type { VeterinarianError } from './types';
 
 // Export individual components for testing or advanced use
 export { VetRepository } from './repository';

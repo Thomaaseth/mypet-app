@@ -28,7 +28,7 @@ export const appointmentApi = {
 export const appointmentErrorHandler = (error: unknown) => appointmentService.mapError(error);
 
 // Export types for consumers
-export type { AppointmentsApiResponse, AppointmentError } from './types';
+export type { AppointmentError } from './types';
 
 // Export individual components for testing or advanced use
 export { AppointmentRepository } from './repository';

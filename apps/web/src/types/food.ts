@@ -92,22 +92,6 @@ export type WetFoodFormData = {
   dateStarted: string;
 };
 
-// API response types
-export type DryFoodEntriesApiResponse = {
-  foodEntries: DryFoodEntry[];
-  total: number;
-};
-
-export type WetFoodEntriesApiResponse = {
-  foodEntries: WetFoodEntry[];
-  total: number;
-};
-
-export type AllFoodEntriesApiResponse = {
-  foodEntries: (DryFoodEntry | WetFoodEntry)[];
-  total: number;
-};
-
 // Unit labels
 export const DRY_FOOD_BAG_UNITS = ['kg', 'pounds'] as const;
 export const DRY_FOOD_DAILY_UNITS = ['grams'] as const;

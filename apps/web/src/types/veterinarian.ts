@@ -41,24 +41,19 @@ export interface Veterinarian {
   }
   
   // API response types
-  export interface VeterinariansApiResponse {
-    veterinarians: Veterinarian[];
-    total: number;
-  }
+  // export interface VeterinarianApiResponse {
+  //   veterinarian: Veterinarian;
+  // }
   
-  export interface VeterinarianApiResponse {
-    veterinarian: Veterinarian;
-  }
+  // export interface VetPetsApiResponse {
+  //   pets: Array<{
+  //     petId: string;
+  //   }>;
+  // }
   
-  export interface VetPetsApiResponse {
-    pets: Array<{
-      petId: string;
-    }>;
-  }
-  
-  // Error types
-  export interface VeterinarianError {
-    message: string;
-    field?: keyof VeterinarianFormData;
-    code?: string;
-  }
+  // // Error types
+  // export interface VeterinarianError {
+  //   message: string;
+  //   field?: keyof VeterinarianFormData;
+  //   code?: string;
+  // }

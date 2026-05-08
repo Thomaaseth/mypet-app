@@ -1,4 +1,4 @@
-import type { VeterinariansApiResponse, VeterinarianError } from './types';
+import type { VeterinarianError } from './types';
 import type { VetRepository } from './repository';
 import type { VetValidator } from './validator';
 import { 
@@ -16,7 +16,7 @@ export class VetService {
     private validator: VetValidator
   ) {}
 
-  async getVeterinarians(): Promise<VeterinariansApiResponse> {
+  async getVeterinarians(): Promise<Veterinarian[]> {
     try {
       return await this.repository.getVeterinarians();
     } catch (error) {

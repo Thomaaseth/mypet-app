@@ -4,16 +4,13 @@ import type {
   WetFoodEntry,
   DryFoodFormData,
   WetFoodFormData,
-  DryFoodEntriesApiResponse,
-  WetFoodEntriesApiResponse,
-  AllFoodEntriesApiResponse
 } from '@/types/food';
 
 export class FoodRepository {
   // Dry food methods
-  async getDryFoodEntries(petId: string): Promise<DryFoodEntriesApiResponse> {
-    return await get<DryFoodEntriesApiResponse>(
-      `/api/pets/${petId}/food/dry`);
+  async getDryFoodEntries(petId: string): Promise<DryFoodEntry[]> {
+    const result = await get<{ foodEntries: DryFoodEntry[] }>(`/api/pets/${petId}/food/dry`);
+    return result.foodEntries
   }
 
   async getDryFoodEntryById(petId: string, foodId: string): Promise<DryFoodEntry> {
@@ -38,17 +35,18 @@ export class FoodRepository {
     return result.foodEntry;
   }
 
-  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntriesApiResponse> {
-    return await get<DryFoodEntriesApiResponse>(
-      `/api/pets/${petId}/food/finished`,
-      { foodType: 'dry', limit }
+  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntry[]> {
+    const result = await get<{ foodEntries: DryFoodEntry[] }>(
+        `/api/pets/${petId}/food/finished`,
+        { foodType: 'dry', limit }
     );
+    return result.foodEntries;
   }
 
   // Wet food methods
-  async getWetFoodEntries(petId: string): Promise<WetFoodEntriesApiResponse> {
-    return await get<WetFoodEntriesApiResponse>(
-      `/api/pets/${petId}/food/wet`);
+  async getWetFoodEntries(petId: string): Promise<WetFoodEntry[]> {
+    const result = await get<{ foodEntries: WetFoodEntry[] }>(`/api/pets/${petId}/food/wet`);
+    return result.foodEntries;
   }
 
   async getWetFoodEntryById(petId: string, foodId: string): Promise<WetFoodEntry> {
@@ -73,17 +71,18 @@ export class FoodRepository {
     return result.foodEntry;
   }
 
-  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntriesApiResponse> {
-    return await get<WetFoodEntriesApiResponse>(
-      `/api/pets/${petId}/food/finished`,
-      { foodType: 'wet', limit }
+  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntry[]> {
+    const result = await get<{ foodEntries: WetFoodEntry[] }>(
+        `/api/pets/${petId}/food/finished`,
+        { foodType: 'wet', limit }
     );
+    return result.foodEntries;
   }
 
   // Combined methods
-  async getAllFoodEntries(petId: string): Promise<AllFoodEntriesApiResponse> {
-    return await get<AllFoodEntriesApiResponse>(
-      `/api/pets/${petId}/food`);
+  async getAllFoodEntries(petId: string): Promise<(DryFoodEntry | WetFoodEntry)[]> {
+    const result = await get<{ foodEntries: (DryFoodEntry | WetFoodEntry)[] }>(`/api/pets/${petId}/food`);
+    return result.foodEntries;
   }
 
   async deleteFoodEntry(petId: string, foodId: string): Promise<void> {

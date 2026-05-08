@@ -19,10 +19,7 @@ export const vetKeys = {
 export function useVeterinarians() {
   return useQuery({
     queryKey: vetKeys.all,
-    queryFn: async () => {
-      const response = await vetApi.getVeterinarians();
-      return response.veterinarians;
-    },
+    queryFn: () => vetApi.getVeterinarians(),
   });
 }
 

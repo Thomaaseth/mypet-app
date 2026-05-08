@@ -5,9 +5,6 @@ import type {
   WetFoodEntry, 
   DryFoodFormData, 
   WetFoodFormData,
-  DryFoodEntriesApiResponse,
-  WetFoodEntriesApiResponse,
-  AllFoodEntriesApiResponse
 } from '@/types/food';
 import { 
   ApiError,
@@ -30,7 +27,7 @@ export class FoodService {
   ) {}
 
   // Dry food methods
-  async getDryFoodEntries(petId: string): Promise<DryFoodEntriesApiResponse> {
+  async getDryFoodEntries(petId: string): Promise<DryFoodEntry[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getDryFoodEntries(petId);
@@ -74,7 +71,7 @@ export class FoodService {
       }
     }
 
-  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntriesApiResponse> {
+  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntry[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getFinishedDryFoodEntries(petId, limit);
@@ -84,7 +81,7 @@ export class FoodService {
   }
 
   // Wet food methods
-  async getWetFoodEntries(petId: string): Promise<WetFoodEntriesApiResponse> {
+  async getWetFoodEntries(petId: string): Promise<WetFoodEntry[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getWetFoodEntries(petId);
@@ -128,7 +125,7 @@ export class FoodService {
     }
   }
 
-  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntriesApiResponse> {
+  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntry[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getFinishedWetFoodEntries(petId, limit);
@@ -138,7 +135,7 @@ export class FoodService {
   }
 
   // Combined methods
-  async getAllFoodEntries(petId: string): Promise<AllFoodEntriesApiResponse> {
+  async getAllFoodEntries(petId: string): Promise<(DryFoodEntry | WetFoodEntry)[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getAllFoodEntries(petId);

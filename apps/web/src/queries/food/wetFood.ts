@@ -12,10 +12,7 @@ import { dryFoodSchema } from '@/lib/validations/food'
 export function useActiveWetFood(petId: string) {
   return useQuery({
     queryKey: foodKeys.wetActive(petId),
-    queryFn: async () => {
-      const response = await wetFoodApi.getWetFoodEntries(petId)
-      return response.foodEntries
-    },
+    queryFn: () => wetFoodApi.getWetFoodEntries(petId),
     enabled: !!petId,
     select: (data) => {
       // Calculate low stock entries
@@ -36,9 +33,9 @@ export function useFinishedWetFood(petId: string) {
   return useQuery({
     queryKey: foodKeys.wetFinished(petId),
     queryFn: async () => {
-      const response = await wetFoodApi.getFinishedWetFoodEntries(petId)
+      const entries = await wetFoodApi.getFinishedWetFoodEntries(petId)
       // Sort by dateFinished DESC
-      return response.foodEntries.sort((a, b) => {
+      return entries.sort((a, b) => {
         if (!a.dateFinished || !b.dateFinished) return 0
         return new Date(b.dateFinished).getTime() - new Date(a.dateFinished).getTime()
       })

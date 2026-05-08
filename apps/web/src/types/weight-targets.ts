@@ -18,9 +18,9 @@ export interface WeightTargetFormData {
 }
 
 // API response types
-export interface WeightTargetApiResponse {
-  weightTarget: WeightTarget | null; // null when no target exists
-}
+// export interface WeightTargetApiResponse {
+//   weightTarget: WeightTarget | null; // null when no target exists
+// }
 
 // Error types
 export interface WeightTargetError {

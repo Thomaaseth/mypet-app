@@ -1,9 +1,6 @@
 import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
 
-export interface AppointmentsApiResponse {
-  appointments: AppointmentWithRelations[];
-  total: number;
-}
+
 
 export interface AppointmentApiResponse {
   appointment: AppointmentWithRelations;

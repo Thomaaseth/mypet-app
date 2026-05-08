@@ -10,10 +10,7 @@ import { calculateExpectedDays } from '@/lib/utils/food-formatting'
 export function useActiveDryFood(petId: string) {
   return useQuery({
     queryKey: foodKeys.dryActive(petId),
-    queryFn: async () => {
-      const response = await dryFoodApi.getDryFoodEntries(petId)
-      return response.foodEntries
-    },
+    queryFn: () => dryFoodApi.getDryFoodEntries(petId),
     enabled: !!petId,
     select: (data) => {
       // Calculate low stock entries
@@ -33,9 +30,9 @@ export function useFinishedDryFood(petId: string) {
   return useQuery({
     queryKey: foodKeys.dryFinished(petId),
     queryFn: async () => {
-      const response = await dryFoodApi.getFinishedDryFoodEntries(petId)
+      const entries = await dryFoodApi.getFinishedDryFoodEntries(petId)
       // Sort by dateFinished DESC (most recent first)
-      return response.foodEntries.sort((a, b) => {
+      return entries.sort((a, b) => {
         if (!a.dateFinished || !b.dateFinished) return 0
         return new Date(b.dateFinished).getTime() - new Date(a.dateFinished).getTime()
       })
