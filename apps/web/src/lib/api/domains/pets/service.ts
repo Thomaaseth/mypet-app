@@ -34,7 +34,7 @@ export class PetService {
     }
   }
 
-  async getPetSignedUrl(petId: string): Promise<string> {
+  async getPetSignedUrl(petId: string): Promise<string | null> {
     try {
       return await this.repository.getPetSignedUrl(petId);
     } catch (error) {

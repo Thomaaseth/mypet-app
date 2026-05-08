@@ -5,8 +5,10 @@ import type { Pet, PetFormData } from '@/types/pet';
 
 // Handles data access operations using existing API functions
 export class PetRepository {
-  async getPets(): Promise<PetsApiResponse> {
-    return await get<PetsApiResponse>('/api/pets');
+  
+  async getPets(): Promise<Pet[]> {
+    const result = await get<PetsApiResponse>('/api/pets');
+    return result.pets
   }
 
   async getPetById(petId: string): Promise<Pet> {

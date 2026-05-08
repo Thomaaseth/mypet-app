@@ -16,7 +16,6 @@ export const petApi = {
   permanentlyDeletePet: (petId: string) => petService.permanentlyDeletePet(petId),
   getPetCount: () => petService.getPetCount(),
   getPetSignedUrl: (petId: string) => petService.getPetSignedUrl(petId),
-
   uploadPetImage: (petId: string, file: File) => petService.uploadPetImage(petId, file),
   deletePetImage: (petId: string) => petService.deletePetImage(petId),
 };

@@ -18,10 +18,11 @@ export const petKeys = {
 export function usePets() {
     return useQuery({
       queryKey: petKeys.all,
-      queryFn: async () => {
-        const response = await petApi.getPets()
-        return response.pets // Pet[]
-      },
+      queryFn: () => petApi.getPets()
+      // queryFn: async () => {
+      //   const response = await petApi.getPets()
+      //   return response.pets // Pet[]
+      // },
     })
   }
 
