@@ -1,5 +1,5 @@
 import { get, post, put, del } from '../../base';
-import type { PetApiResponse, PetImageUploadResponse, PetsApiResponse, PetSignedUrlResponse } from './types';
+import type { PetApiResponse, PetImageUploadResponse, PetSignedUrlResponse } from './types';
 import type { Pet, PetFormData } from '@/types/pet';
 
 
@@ -7,7 +7,7 @@ import type { Pet, PetFormData } from '@/types/pet';
 export class PetRepository {
   
   async getPets(): Promise<Pet[]> {
-    const result = await get<PetsApiResponse>('/api/pets');
+    const result = await get<{ pets: Pet[] }>('/api/pets');
     return result.pets
   }
 
@@ -37,11 +37,6 @@ export class PetRepository {
 
   async permanentlyDeletePet(petId: string): Promise<void> {
     await del<{ message: string }>(`/api/pets/${petId}/permanent`);
-  }
-
-  async getPetCount(): Promise<number> {
-    const result = await get<{ count: number }>('/api/pets/stats/count');
-    return result.count;
   }
 
   async uploadPetImage(petId: string, file: File): Promise<PetImageUploadResponse> {

@@ -1,4 +1,4 @@
-import type { PetsApiResponse, PetError, PetImageUploadResponse } from './types';
+import type { PetError, PetImageUploadResponse } from './types';
 import type { PetRepository } from './repository';
 import type { PetValidator } from './validator';
 import { 
@@ -16,7 +16,7 @@ export class PetService {
     private validator: PetValidator
   ) {}
 
-  async getPets(): Promise<PetsApiResponse> {
+  async getPets(): Promise<Pet[]> {
     try {
       return await this.repository.getPets();
     } catch (error) {
@@ -87,15 +87,6 @@ export class PetService {
       await this.repository.permanentlyDeletePet(petId);
     } catch (error) {
       console.error('Error permanently deleting pet:', error);
-      throw error;
-    }
-  }
-
-  async getPetCount(): Promise<number> {
-    try {
-      return await this.repository.getPetCount();
-    } catch (error) {
-      console.error('Error fetching pet count:', error);
       throw error;
     }
   }

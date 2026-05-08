@@ -377,27 +377,4 @@ export class PetsService {
       throw new BadRequestError('Failed to permanently delete pet');
     }
   }
-
-  // Get pet count for a user
-  static async getUserPetCount(userId: string): Promise<number> {
-    try {
-      // Basic user ID validation
-      if (!userId || typeof userId !== 'string') {
-        return 0;
-      }
-
-      const result = await db
-        .select()
-        .from(pets)
-        .where(and(
-          eq(pets.userId, userId),
-          eq(pets.isActive, true)
-        ));
-
-      return result.length;
-    } catch (error) {
-      dbLogger.error({ err: error }, 'Error getting pet count');
-      return 0;
-    }
-  }
 }

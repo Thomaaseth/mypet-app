@@ -14,7 +14,6 @@ export const petApi = {
   updatePet: (petId: string, petData: Partial<PetFormData>) => petService.updatePet(petId, petData),
   deletePet: (petId: string) => petService.deletePet(petId),
   permanentlyDeletePet: (petId: string) => petService.permanentlyDeletePet(petId),
-  getPetCount: () => petService.getPetCount(),
   getPetSignedUrl: (petId: string) => petService.getPetSignedUrl(petId),
   uploadPetImage: (petId: string, file: File) => petService.uploadPetImage(petId, file),
   deletePetImage: (petId: string) => petService.deletePetImage(petId),
@@ -24,7 +23,7 @@ export const petApi = {
 export const petErrorHandler = (error: unknown) => petService.mapError(error);
 
 // Export types for consumers
-export type { PetsApiResponse, PetError, PetImageUploadResponse } from './types';
+export type { PetError, PetImageUploadResponse } from './types';
 
 // Export individual components for testing or advanced use
 export { PetRepository } from './repository';

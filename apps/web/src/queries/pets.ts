@@ -8,7 +8,6 @@ import type { PetImageUploadResponse } from '@/lib/api/domains/pets/types'
 export const petKeys = {
     all: ['pets'] as const,
     detail: (id: string) => ['pets', id] as const,
-    count: () => ['pets', 'count'] as const,
     signedUrl: (id: string) => ['pets', id, 'signed-url'] as const,
 
   }
@@ -19,10 +18,6 @@ export function usePets() {
     return useQuery({
       queryKey: petKeys.all,
       queryFn: () => petApi.getPets()
-      // queryFn: async () => {
-      //   const response = await petApi.getPets()
-      //   return response.pets // Pet[]
-      // },
     })
   }
 
@@ -44,14 +39,6 @@ export function usePetSignedUrl(petId: string, hasImage: boolean) {
         gcTime: 60 * 60 * 1000,    // 60 min, keep in cache for the full URL lifetime
     })
 }
-
-// Get pet count
-export function usePetCount() {
-    return useQuery({
-        queryKey: petKeys.count(),
-        queryFn: () => petApi.getPetCount(),
-    })
-  }
 
 // MUTATIONS (WRITE operations)
 // CREATE

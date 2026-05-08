@@ -21,7 +21,6 @@ import { http, HttpResponse } from 'msw';
 import {
   usePets,
   usePet,
-  usePetCount,
   useCreatePet,
   useUpdatePet,
   useDeletePet,
@@ -158,17 +157,7 @@ describe('Pets Queries', () => {
     });
   });
 
-  describe('usePetCount', () => {
-    it('should fetch pet count', async () => {
-      const { result } = renderHookWithQuery(() => usePetCount());
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(result.current.data).toBe(2);
-    });
-  });
+  
 
   // ============================================
   // WRITE OPERATIONS (Mutations)

@@ -48,21 +48,6 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
 });
 
 
-// GET /api/pets/stats/count - Get user's pet count
-router.get('/stats/count', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.authSession?.user.id;
-    if (!userId) {
-      throw new BadRequestError('User session not found');
-    }
-
-    const count = await PetsService.getUserPetCount(userId);
-    respondWithSuccess(res, { count }, `You have ${count} pet(s)`);
-  } catch (error) {
-    next(error);
-  }
-});
-
 // GET /api/pets/:petId/vets - Get veterinarians assigned to a pet
 router.get('/:petId/vets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
