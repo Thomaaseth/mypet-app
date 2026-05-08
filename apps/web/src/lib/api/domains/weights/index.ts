@@ -22,7 +22,7 @@ export const weightApi = {
 export const weightErrorHandler = (error: unknown) => weightService.mapError(error);
 
 // Export types for consumers
-export type { WeightEntriesApiResponse, WeightError } from './types';
+export type { WeightError } from './types';
 
 // Export individual components for testing or advanced use
 export { WeightRepository } from './repository';

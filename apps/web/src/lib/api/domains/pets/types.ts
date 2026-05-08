@@ -1,10 +1,5 @@
 import type { Pet, PetFormData } from '@/types/pet'
 
-
-export interface PetApiResponse {
-    pet: Pet;
-}
-
 export interface PetSignedUrlResponse {
     signedUrl: string | null;
 }

@@ -43,7 +43,7 @@ export { appointmentApi, appointmentErrorHandler } from './domains/appointments'
 
 
 export type { PetError, PetImageUploadResponse } from './domains/pets';
-export type { WeightEntriesApiResponse, WeightError } from './domains/weights';
+export type { WeightError } from './domains/weights';
 // export type { FoodEntriesApiResponse, FoodError } from './domains/food';
 export type { VeterinarianError } from './domains/vets';
 export type { AppointmentError } from './domains/appointments';

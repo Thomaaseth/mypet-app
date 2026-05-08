@@ -49,27 +49,6 @@ export interface UpdateVisitNotesData {
   visitNotes?: string;
 }
 
-// API response types
-// export interface AppointmentsApiResponse {
-//   appointments: AppointmentWithRelations[];
-//   total: number;
-// }
-
-// export interface AppointmentApiResponse {
-//   appointment: AppointmentWithRelations;
-// }
-
-// export interface LastVetApiResponse {
-//   veterinarianId: string | null;
-// }
-
-// Error types
-export interface AppointmentError {
-  message: string;
-  field?: keyof AppointmentFormData;
-  code?: string;
-}
-
 // Helper type for filter
 export type AppointmentFilter = 'upcoming' | 'past';
 

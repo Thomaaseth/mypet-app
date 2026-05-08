@@ -9,10 +9,9 @@ import {
 } from '../../errors';
 import type {
     PetNote,
-    PetNotesApiResponse,
     PetNoteFormData,
-    PetNoteError,
 } from '@/types/pet-notes';
+import type { PetNoteError } from './types';
 
 export class PetNoteService {
     constructor(
@@ -20,7 +19,7 @@ export class PetNoteService {
         private validator: PetNoteValidator
     ) {}
 
-    async getNotes(petId: string): Promise<PetNotesApiResponse> {
+    async getNotes(petId: string): Promise<PetNote[]> {
         try {
             return await this.repository.getNotes(petId);
         } catch (error) {
@@ -31,8 +30,7 @@ export class PetNoteService {
     async createNote(petId: string, data: PetNoteFormData): Promise<PetNote> {
         try {
             this.validator.validateNoteData(data);
-            const result = await this.repository.createNote(petId, data);
-            return result.note;
+            return await this.repository.createNote(petId, data);
         } catch (error) {
             throw this.handleError(error);
         }
@@ -41,8 +39,7 @@ export class PetNoteService {
     async updateNote(petId: string, noteId: string, data: PetNoteFormData): Promise<PetNote> {
         try {
             this.validator.validateNoteData(data);
-            const result = await this.repository.updateNote(petId, noteId, data);
-            return result.note;
+            return await this.repository.updateNote(petId, noteId, data);
         } catch (error) {
             throw this.handleError(error);
         }

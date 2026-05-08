@@ -1,14 +1,18 @@
 import { get, post, put, del } from '../../base';
 import type { 
-  WeightEntriesApiResponse,
   WeightEntry,
   WeightFormData
 } from '@/types/weights';
+import type { WeightUnit } from '@/types/pet';
 
 // Handles data access operations using existing API functions
 export class WeightRepository {
-  async getWeightEntries(petId: string): Promise<WeightEntriesApiResponse> {
-    return await get<WeightEntriesApiResponse>(`/api/pets/${petId}/weights`);
+  
+  async getWeightEntries(petId: string): Promise<WeightEntry[]> {
+    const result = await get<{ weightEntries: WeightEntry[]; weightUnit: WeightUnit }>(
+      `/api/pets/${petId}/weights`
+    );
+    return result.weightEntries;
   }
 
   async getWeightEntryById(petId: string, weightId: string): Promise<WeightEntry> {

@@ -13,10 +13,7 @@ export const petNoteKeys = {
 export function usePetNotes(petId: string) {
     return useQuery({
         queryKey: petNoteKeys.byPet(petId),
-        queryFn: async () => {
-            const response = await petNoteApi.getNotes(petId);
-            return response.notes;
-        },
+        queryFn: () => petNoteApi.getNotes(petId),
         enabled: !!petId,
     })
 }

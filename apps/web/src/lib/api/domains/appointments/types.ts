@@ -1,10 +1,5 @@
-import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
+import type { AppointmentFormData } from '@/types/appointments';
 
-
-
-export interface AppointmentApiResponse {
-  appointment: AppointmentWithRelations;
-}
 
 export interface AppointmentError {
   message: string;

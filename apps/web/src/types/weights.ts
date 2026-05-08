@@ -20,22 +20,22 @@ export interface WeightFormData {
 
 // MOVE THOSE TYPES TO DOMAIN
 // API response types
-export interface WeightEntriesApiResponse {
-  weightEntries: WeightEntry[];
-  total: number;
-  weightUnit: WeightUnit; // The unit used for this pet
-}
+// export interface WeightEntriesApiResponse {
+//   weightEntries: WeightEntry[];
+//   total: number;
+//   weightUnit: WeightUnit; // The unit used for this pet
+// }
 
-export interface WeightEntryApiResponse {
-  weightEntry: WeightEntry;
-}
+// export interface WeightEntryApiResponse {
+//   weightEntry: WeightEntry;
+// }
 
-// Error types
-export interface WeightError {
-  message: string;
-  field?: keyof WeightFormData;
-  code?: string;
-}
+// // Error types
+// export interface WeightError {
+//   message: string;
+//   field?: keyof WeightFormData;
+//   code?: string;
+// }
 
 // Chart data interface for display
 export interface WeightChartData {

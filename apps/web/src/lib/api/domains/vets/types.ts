@@ -1,8 +1,4 @@
-import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
-
-export interface VeterinarianApiResponse {
-  veterinarian: Veterinarian;
-}
+import type { VeterinarianFormData } from '@/types/veterinarian';
 
 export interface VeterinarianError {
   message: string;

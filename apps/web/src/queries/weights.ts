@@ -26,10 +26,7 @@ interface UseWeightEntriesOptions {
 export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
   return useQuery({
     queryKey: weightKeys.byPet(petId),
-    queryFn: async () => {
-      const response = await weightApi.getWeightEntries(petId)
-      return response.weightEntries
-    },
+    queryFn: () => weightApi.getWeightEntries(petId),
     enabled: !!petId, // Only run if petId exists
     staleTime: 30 * 60 * 1000, // 30 mins
     refetchOnWindowFocus: true,

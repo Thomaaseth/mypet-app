@@ -1,19 +1,17 @@
 import type { WeightRepository } from './repository';
 import type { WeightValidator } from './validator';
 import type { 
-  WeightEntriesApiResponse,
   WeightEntry,
   WeightFormData,
-  WeightError
 } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
 import {
   ApiError,
   NotFoundError,
-//   ValidationError,
   UnauthorizedError,
   ForbiddenError,
 } from '../../errors';
+import type { WeightError } from './types';
 
 export class WeightService {
   constructor(
@@ -21,7 +19,7 @@ export class WeightService {
     private validator: WeightValidator
   ) {}
 
-  async getWeightEntries(petId: string): Promise<WeightEntriesApiResponse> {
+  async getWeightEntries(petId: string): Promise<WeightEntry[]> {
     try {
       return await this.repository.getWeightEntries(petId);
     } catch (error) {

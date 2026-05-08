@@ -13,19 +13,9 @@ export interface PetNoteFormData {
     content: string;
 }
 
-// API response types
-// export interface PetNotesApiResponse {
-//     notes: PetNote[];
-//     total: number;
+// // Error type
+// export interface PetNoteError {
+//     message: string;
+//     field?: keyof PetNoteFormData;
+//     code: string;
 // }
-
-export interface PetNoteApiResponse {
-    note: PetNote;
-}
-
-// Error type
-export interface PetNoteError {
-    message: string;
-    field?: keyof PetNoteFormData;
-    code: string;
-}

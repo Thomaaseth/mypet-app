@@ -10,9 +10,9 @@ import {
 import type { 
   AppointmentWithRelations,
   AppointmentFormData,
-  AppointmentError,
   AppointmentFilter,
 } from '@/types/appointments';
+import type { AppointmentError } from './types';
 
 export class AppointmentService {
   constructor(
