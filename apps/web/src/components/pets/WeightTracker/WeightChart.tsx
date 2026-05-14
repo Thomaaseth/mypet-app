@@ -5,9 +5,8 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from '@/components/ui/chart';
-import type { WeightChartData } from '@/types/weights';
+import type { WeightChartData } from '@/queries/weights';
 import type { WeightUnit } from '@/types/pet';
 import { Button } from '@/components/ui/button';
 

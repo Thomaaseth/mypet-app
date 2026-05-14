@@ -4,7 +4,6 @@ import { toastService } from '@/lib/toast'
 import type { 
   WeightEntry, 
   WeightFormData, 
-  WeightChartData 
 } from '@/types/weights'
 import { formatDateForDisplay } from '@/lib/validations/weight'
 
@@ -19,6 +18,13 @@ export const weightKeys = {
 // QUERIES (READ operations)
 interface UseWeightEntriesOptions {
   petId: string;
+}
+
+// Chart data interface for display
+export interface WeightChartData {
+  date: string; // For display: "Jan 15, 2024"
+  weight: number; // Parsed number for chart
+  originalDate: string; // Original ISO date for sorting
 }
 
 

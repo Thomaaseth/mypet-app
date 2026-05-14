@@ -12,10 +12,3 @@ export interface PetNote {
 export interface PetNoteFormData {
     content: string;
 }
-
-// // Error type
-// export interface PetNoteError {
-//     message: string;
-//     field?: keyof PetNoteFormData;
-//     code: string;
-// }

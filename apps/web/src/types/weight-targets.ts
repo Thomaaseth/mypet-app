@@ -17,11 +17,6 @@ export interface WeightTargetFormData {
   weightUnit: WeightUnit;
 }
 
-// API response types
-// export interface WeightTargetApiResponse {
-//   weightTarget: WeightTarget | null; // null when no target exists
-// }
-
 // Error types
 export interface WeightTargetError {
   message: string;

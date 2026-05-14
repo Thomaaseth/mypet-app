@@ -40,20 +40,3 @@ export interface Veterinarian {
     petId: string;
   }
   
-  // API response types
-  // export interface VeterinarianApiResponse {
-  //   veterinarian: Veterinarian;
-  // }
-  
-  // export interface VetPetsApiResponse {
-  //   pets: Array<{
-  //     petId: string;
-  //   }>;
-  // }
-  
-  // // Error types
-  // export interface VeterinarianError {
-  //   message: string;
-  //   field?: keyof VeterinarianFormData;
-  //   code?: string;
-  // }

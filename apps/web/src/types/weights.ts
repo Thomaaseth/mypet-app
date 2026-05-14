@@ -17,29 +17,3 @@ export interface WeightFormData {
   date: string; // HTML date input format: YYYY-MM-DD
 }
 
-
-// MOVE THOSE TYPES TO DOMAIN
-// API response types
-// export interface WeightEntriesApiResponse {
-//   weightEntries: WeightEntry[];
-//   total: number;
-//   weightUnit: WeightUnit; // The unit used for this pet
-// }
-
-// export interface WeightEntryApiResponse {
-//   weightEntry: WeightEntry;
-// }
-
-// // Error types
-// export interface WeightError {
-//   message: string;
-//   field?: keyof WeightFormData;
-//   code?: string;
-// }
-
-// Chart data interface for display
-export interface WeightChartData {
-  date: string; // For display: "Jan 15, 2024"
-  weight: number; // Parsed number for chart
-  originalDate: string; // Original ISO date for sorting
-}
