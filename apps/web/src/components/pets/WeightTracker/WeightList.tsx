@@ -103,7 +103,7 @@ export default function WeightList({
               <TableCell className="font-medium">
                 {formatDateForDisplay(entry.date)}
               </TableCell>
-              <TableCell>
+              <TableCell className='font-display'>
                 {entry.weight} {entry.weightUnit}
               </TableCell>
               <TableCell className="text-right">

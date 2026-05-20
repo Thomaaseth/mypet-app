@@ -14,6 +14,7 @@ import {
 } from '@/queries/pet-notes';
 import { NotesWidgetSkeleton } from '@/components/ui/skeletons/NotesSkeleton';
 import type { PetNote } from '@/types/pet-notes';
+import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/ui/typography';
 
 const MAX_CONTENT_LENGTH = 200;
 const MAX_NOTES = 20;
@@ -119,9 +120,9 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
   return (
     <div className="flex items-center gap-2">
       <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground flex-shrink-0" />
-      <p className="text-sm flex-1 break-words min-w-0 py-1">
+      <BodyText className="text-sm flex-1 break-words min-w-0 py-1">
         {note.content}
-      </p>
+      </BodyText >
       <div className="flex items-center gap-1 flex-shrink-0">
         <Button
           size="icon"
@@ -210,7 +211,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-2">
             <NotebookPen className="h-5 w-5" />
             Notes
           </CardTitle>
@@ -294,10 +295,10 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
                   <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
                     <NotebookPen className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-semibold mb-1">No notes yet</p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Add things you want to remember about your pet.
-                  </p>
+                  <EmptyStateTitle className="mb-1">No notes yet</EmptyStateTitle>
+                    <EmptyStateDescription className="mb-4">
+                      Add things you want to remember about your pet.
+                    </EmptyStateDescription>
                   <Button onClick={handleStartAdd} disabled={isAdding}>
                     <Plus className="h-4 w-4 mr-1" />
                     Add note

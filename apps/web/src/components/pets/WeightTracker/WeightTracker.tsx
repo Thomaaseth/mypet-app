@@ -21,7 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Plus, Scale, AlertCircle, ChevronDown, ChevronRight, Calendar, Target, X } from 'lucide-react';
+import { Plus, Scale, AlertCircle, ChevronDown, ChevronRight, Calendar, Target, X,  TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import WeightForm from './WeightForm';
 import WeightChart from './WeightChart';
 import WeightList from './WeightList';
@@ -39,6 +39,7 @@ import { useWeightTarget, useUpsertWeightTarget, useDeleteWeightTarget } from '@
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import TargetRangeForm from './TargetRangeForm';
 import type { WeightTargetFormData } from '@/types/weight-targets';
+import { MutedText, SectionTitle } from '@/components/ui/typography';
 
 interface WeightTrackerProps {
   petId: string;
@@ -83,6 +84,17 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   };
   
   const status = getWeightStatus();
+
+  const getWeightTrend = () => {
+    if (chartData.length < 2) return null;
+    const secondToLast = chartData[chartData.length - 2].weight;
+    const last = chartData[chartData.length - 1].weight;
+    const difference = last - secondToLast;
+    if (Math.abs(difference) < 0.1) return 'stable';
+    return difference > 0 ? 'increasing' : 'decreasing';
+  };
+  
+  const trend = getWeightTrend();
 
   // Mutations
   const createWeightMutation = useCreateWeightEntry(petId, animalType);
@@ -229,15 +241,35 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           </div>
         </div>
       </CardHeader>
-      
       <CardContent className="space-y-6">
+      
+      <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <SectionTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Weight Progress
+              </SectionTitle>
+              {trend && (
+                <div className="flex items-center gap-1 text-sm">
+                  {trend === 'increasing' && <TrendingUp className="h-4 w-4 text-orange-500" />}
+                  {trend === 'decreasing' && <TrendingDown className="h-4 w-4 text-blue-500" />}
+                  {trend === 'stable' && <Minus className="h-4 w-4 text-green-500" />}
+                  <span className="text-muted-foreground capitalize">{trend}</span>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
         <WeightChart 
           data={chartData} 
           weightUnit={weightUnit}
           targetWeightMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
           targetWeightMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
           onAddEntry={() => setIsAddDialogOpen(true)}
-        />
+          />
+        </CardContent>
+        </Card>
 
         {/* Target Range Display Badge (when exists) */}
         {hasTargetRange && weightTarget && (
@@ -252,7 +284,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               }`} />
               <div className="flex items-center gap-1.5 text-sm">
                 <span className="text-muted-foreground">Target:</span>
-                <span className="font-semibold">
+                <span className="font-semibold font-display">
                   {weightTarget.minWeight}-{weightTarget.maxWeight} {weightUnit}
                 </span>
                 {status && status !== 'within' && (
@@ -309,7 +341,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           </Alert>
         )}
 
-        {/* Add Weight Dialog - Controlled programmatically */}
+        {/* Add Weight Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent>
             <DialogHeader>
@@ -359,21 +391,21 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Why track a target weight range?</DialogTitle>
-            </DialogHeader>
+            </DialogHeader>History
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
+              <MutedText>
                 A healthy weight range helps you monitor if your pet is underweight, 
                 overweight, or right on track. Your veterinarian can provide the best 
                 guidance based on:
-              </p>
+              </MutedText>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                 <li>Breed and body type</li>
                 <li>Age and activity level</li>
                 <li>Overall health condition</li>
               </ul>
               <div className="bg-muted p-3 rounded-md">
-                <p className="text-sm font-semibold">
-                  💡 At your next visit, simply ask your vet &quot;What&apos;s a healthy weight 
+                <p className="text-sm font-medium">
+                  At your next visit, simply ask your vet &quot;What&apos;s a healthy weight 
                   range for your pet.&quot; Then add it to the app.
                 </p>
               </div>
@@ -405,7 +437,9 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    <CardTitle className="text-lg">Weight History</CardTitle>
+                    <SectionTitle className="flex items-center gap-2">
+                    Weight History
+                  </SectionTitle>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
@@ -423,8 +457,8 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
             <CollapsibleContent>
               <CardContent className="pt-0">
                 {weightEntries.length === 0 ? (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground">
-                    <p>No weight entries yet. Add your first entry above!</p>
+                  <div className="flex items-center justify-center h-32">
+                    <MutedText>No weight entries yet. Add your first entry above!</MutedText>
                   </div>
                 ) : (
                   <WeightList

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -23,6 +23,7 @@ import { formatDateForDisplay } from '@/lib/validations/food';
 import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDays } from '@/lib/utils/food-formatting';
 import { EditFinishDateDialog } from './EditFinishDateDialog';
 import { DeleteFoodEntryDialog } from './DeleteFoodEntryDialog';
+import { MutedText, EntryTitle } from '@/components/ui/typography';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -61,10 +62,10 @@ export function FoodHistorySection({
       <Card className="mt-6 border-dashed">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <History className="h-4 w-4" />
+            <MutedText className="font-display flex items-center gap-2">
+            <History className="h-4 w-4" />
               Recent {foodType === 'dry' ? 'Dry' : 'Wet'} Food History ({entries.length})
-            </CardTitle>
+            </MutedText>
             <Button
               variant="ghost"
               size="sm"
@@ -88,11 +89,11 @@ export function FoodHistorySection({
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="secondary" className="text-xs">Finished</Badge>
-                      <h4 className="font-medium text-sm">
+                      <EntryTitle>
                         {entry.brandName && entry.productName 
                           ? `${entry.brandName} - ${entry.productName}`
                           : entry.brandName || entry.productName || `${foodType === 'dry' ? 'Dry' : 'Wet'} Food`}
-                      </h4>
+                      </EntryTitle>
                       {entry.feedingStatus && entry.actualDaysElapsed && (
                         <Badge 
                           variant="outline" 

@@ -8,7 +8,8 @@ import { DryFoodTracker } from './DryFoodTracker';
 import { WetFoodTracker } from './WetFoodTracker';
 import { FoodTrackerProvider, useFoodTrackerContext } from './FoodTrackerContext';
 import { formatDateForDisplay } from '@/lib/validations/food';
-import type { DryFoodEntry, WetFoodEntry, WetFoodFormData } from '@/types/food';
+import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
+import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
 
 
 interface FoodTrackerProps {
@@ -58,18 +59,16 @@ function FoodTrackerContent() {
                     : 'bg-blue-50 border-blue-200'
                 }`}>
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply
-                  </p>
-                  <p className="text-2xl font-bold">
+                <MetricLabel>{FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply</MetricLabel>
+                  <MetricValue>
                     {activeFoodEntries[0].remainingDays > 0 ? `${activeFoodEntries[0].remainingDays} days` : 'Running out'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
+                  </MetricValue>
+                  <MutedText>
                     {activeFoodEntries[0].remainingDays > 0 
                       ? `Runs out ${formatDateForDisplay(activeFoodEntries[0].depletionDate)}`
                       : 'Needs restocking'
                     }
-                  </p>
+                  </MutedText>
                 </div>
               </div>
             ) : (
@@ -87,18 +86,16 @@ function FoodTrackerContent() {
                         : 'bg-blue-50 border-blue-200'
                     }`}>
                     <div className="text-center">
-                      <p className="text-sm text-muted-foreground mb-1">
-                        {FOOD_TYPE_LABELS[entry.foodType]} Supply
-                      </p>
-                      <p className="text-2xl font-bold">
+                    <MetricLabel>{FOOD_TYPE_LABELS[entry.foodType]} Supply</MetricLabel>
+                      <MetricValue>
                         {entry.remainingDays > 0 ? `${entry.remainingDays} days` : 'Running out'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
+                      </MetricValue>
+                      <MutedText>
                         {entry.remainingDays > 0 
                           ? `Runs out ${formatDateForDisplay(entry.depletionDate)}`
                           : 'Needs restocking'
                         }
-                      </p>
+                      </MutedText>
                     </div>
                   </div>
                 ))}

@@ -9,13 +9,22 @@ import {
 import type { WeightChartData } from '@/queries/weights';
 import type { WeightUnit } from '@/types/pet';
 import { Button } from '@/components/ui/button';
+import { EmptyStateTitle, 
+  EmptyStateDescription, 
+  StatLabel, 
+  StatValue, 
+  MetricLabel, 
+  MetricValue, 
+  BodyText,
+  SectionTitle 
+} from '@/components/ui/typography';
 
 interface WeightChartProps {
   data: WeightChartData[];
   weightUnit: WeightUnit;
   targetWeightMin?: number;
   targetWeightMax?: number;
-  className?: string;
+  // className?: string;
   onAddEntry?: () => void;
 }
 
@@ -24,40 +33,27 @@ export default function WeightChart({
   weightUnit,
   targetWeightMin,
   targetWeightMax, 
-  className, 
+  // className, 
   onAddEntry
  }: WeightChartProps) {
 
-
-
-  // If no data, show empty state
   if (data.length === 0) {
     return (
-      <Card className={className}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Weight Progress
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-8 px-4">
-            <div className="rounded-full bg-muted p-3 mb-4">
-              <TrendingUp className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">No weight tracked yet</h3>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Add your first weight entry to start tracking your pet&apos;s weight progress.
-            </p>
-            {onAddEntry && (
-              <Button onClick={onAddEntry}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Entry
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-8 px-4">
+        <div className="rounded-full bg-muted p-3 mb-4">
+          <TrendingUp className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <EmptyStateTitle className="mb-2">No weight tracked yet</EmptyStateTitle>
+        <EmptyStateDescription className="text-center mb-6">
+          Add your first weight entry to start tracking your pet&apos;s weight progress.
+        </EmptyStateDescription>
+        {onAddEntry && (
+          <Button onClick={onAddEntry}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add First Entry
+          </Button>
+        )}
+      </div>
     );
   }
 
@@ -94,34 +90,12 @@ export default function WeightChart({
   } satisfies ChartConfig; 
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Weight Progress
-          </div>
-          {trend && (
-            <div className="flex items-center gap-1 text-sm">
-              {trend === 'increasing' && <TrendingUp className="h-4 w-4 text-orange-500" />}
-              {trend === 'decreasing' && <TrendingDown className="h-4 w-4 text-blue-500" />}
-              {trend === 'stable' && <Minus className="h-4 w-4 text-green-500" />}
-              <span className="text-muted-foreground capitalize">{trend}</span>
-            </div>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
         <div className="space-y-4">
           {/* Latest Weight Display */}
           <div className="text-center p-4 bg-muted/50 rounded-lg">
-            <p className="text-sm text-muted-foreground">Current Weight</p>
-            <p className="text-2xl font-bold">
-              {latestWeight.weight} {weightUnit}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              as of {latestWeight.date}
-            </p>
+            <MetricLabel>Current Weight</MetricLabel>
+            <MetricValue>{latestWeight.weight} {weightUnit}</MetricValue>
+            <MetricLabel className="text-xs">as of {latestWeight.date}</MetricLabel>
           </div>
 
         {/* Chart */}
@@ -176,14 +150,14 @@ export default function WeightChart({
                     return (
                       <div className="bg-background border border-border rounded-lg shadow-lg p-3 space-y-1.5">
                         {/* Date */}
-                        <p className="text-sm font-medium text-foreground">{data.date}</p>
+                        <BodyText className="font-medium text-foreground">{data.date}</BodyText>
                         
                         {/* Weight */}
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-chart-2" />
                           <span className="text-sm">
                             <span className="text-muted-foreground">Weight: </span>
-                            <span className="font-semibold">{weight} {weightUnit}</span>
+                            <span className="font-semibold font-display">{weight} {weightUnit}</span>
                           </span>
                         </div>
                         
@@ -192,7 +166,7 @@ export default function WeightChart({
                           <div className="flex items-center gap-2 pt-1 border-t border-border/50">
                             <div className="w-3 h-2 bg-success/20 border border-success border-dashed rounded-sm" />
                             <span className="text-xs text-muted-foreground">
-                              Target: {targetWeightMin}-{targetWeightMax} {weightUnit}
+                              Target: <span className="font-display">{targetWeightMin}-{targetWeightMax} {weightUnit}</span>
                             </span>
                           </div>
                         )}
@@ -238,21 +212,19 @@ export default function WeightChart({
           {data.length > 1 && (
             <div className="grid grid-cols-3 gap-4 text-center text-sm">
               <div>
-                <p className="text-muted-foreground">Entries</p>
-                <p className="font-semibold">{data.length}</p>
+                <StatLabel>Entries</StatLabel>
+                <StatValue>{data.length}</StatValue>
               </div>
               <div>
-                <p className="text-muted-foreground">Min</p>
-                <p className="font-semibold">{minWeight.toFixed(4)} {weightUnit}</p>
+                <StatLabel>Min</StatLabel>
+                <StatValue>{minWeight.toFixed(2)} {weightUnit}</StatValue>
               </div>
               <div>
-                <p className="text-muted-foreground">Max</p>
-                <p className="font-semibold">{maxWeight.toFixed(4)} {weightUnit}</p>
+                <StatLabel>Max</StatLabel>
+                <StatValue>{maxWeight.toFixed(2)} {weightUnit}</StatValue>
               </div>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
   );
 }

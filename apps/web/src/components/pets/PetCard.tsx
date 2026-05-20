@@ -60,7 +60,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-lg">{pet.name}</CardTitle>
+            <CardTitle>{pet.name}</CardTitle>
             {pet.species ? (
                 <p className="text-sm text-muted-foreground">{pet.species}</p>
                 ) : (

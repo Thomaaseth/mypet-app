@@ -18,6 +18,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SectionTitle, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/typography';
 
 // Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
@@ -98,7 +99,6 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const hasActiveEntry = activeFoodEntries.length > 0;
   const disableAddButton = hasActiveEntry;
   const tooltipText = "You can only have one active entry per type of food at any time. Please edit/delete the existing active entry if you need to make changes.";
-  console.log(`[${foodType}] GenericFoodTracker - Active entries:`, activeFoodEntries.length, 'Disabled:', disableAddButton);
 
   const handleCreateEntry = async (data: TFormData) => {
     setIsCreating(true);
@@ -167,7 +167,7 @@ if (!hasActiveEntries) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+        <SectionTitle>{labels.entriesTitle}</SectionTitle>
       </div>
 
       {/* Error Display */}
@@ -185,10 +185,10 @@ if (!hasActiveEntries) {
             <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
               <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{labels.emptyTitle}</h3>
-            <p className="text-muted-foreground mb-4 text-sm">
+            <EmptyStateTitle className="mb-2">{labels.emptyTitle}</EmptyStateTitle>
+            <EmptyStateDescription className="mb-4">
               {labels.emptyDescription}
-            </p>
+            </EmptyStateDescription>
             
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
@@ -243,7 +243,7 @@ if (!hasActiveEntries) {
 return (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
-      <h3 className="text-lg font-semibold">{labels.entriesTitle}</h3>
+      <SectionTitle>{labels.entriesTitle}</SectionTitle>
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogTrigger asChild>
           <Tooltip>
