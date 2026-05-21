@@ -24,6 +24,7 @@ import {
 import type { AppointmentWithRelations, AppointmentType } from '@/types/appointments';
 import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
 import { useState } from 'react';
+import { MutedText, BodyText } from '@/components/ui/typography';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
@@ -194,14 +195,14 @@ export default function AppointmentCard({
         {/* Veterinarian Info - Fixed height to accommodate clinic name + vet name + 2-line address */}
         <div className="pt-2 border-t space-y-2 h-[100px]">
           <div className="flex items-center gap-2 text-sm font-medium">
-            <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span>{appointment.veterinarian.clinicName || appointment.veterinarian.vetName}</span>
           </div>
           {appointment.veterinarian.clinicName && (
-            <p className="text-sm text-muted-foreground flex items-center gap-1 ml-6">
-              <Building2 className="h-3 w-3" />
+            <MutedText className="flex items-center gap-1 ml-6">
+              <Stethoscope className="h-3 w-3" />
               {appointment.veterinarian.vetName}
-            </p>
+            </MutedText>
           )}
           <div className="flex items-start gap-2 text-sm text-muted-foreground ml-6">
             <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -215,8 +216,8 @@ export default function AppointmentCard({
             <button
               type="button"
               onClick={handleDiscussionPointsToggle}
-              className="flex items-center justify-between w-full text-xs font-medium text-muted-foreground mb-1 hover:text-foreground transition-colors"
-            >
+              className="flex items-center justify-between w-full text-sm font-medium text-body-foreground mb-1 hover:text-foreground transition-colors"
+              >
               <span>Discussion points:</span>
               {isMyContentExpanded ? (
                 <ChevronDown className="h-3 w-3" />
@@ -225,22 +226,22 @@ export default function AppointmentCard({
               )}
             </button>
           ) : (
-            <p className="text-xs font-medium text-muted-foreground mb-1">Discussion points:</p>
+            <BodyText className="font-medium mb-1">Discussion points:</BodyText>
           )}
           {(isUpcoming || isMyContentExpanded) && (
-            <p className="text-sm whitespace-pre-wrap break-words">
+            <BodyText className="whitespace-pre-wrap break-words">
               {appointment.reasonForVisit}
-            </p>
+            </BodyText>
           )}
         </div>
 
         {/* Visit Summary - Fixed height for ~200 characters */}
         {(!isUpcoming || hasAppointmentTimePassed) && (
           <div className="h-[150px]">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Visit summary:</p>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+            <BodyText className="font-medium mb-1">Visit summary:</BodyText>
+            <MutedText className="text-xs whitespace-pre-wrap break-words">
               {appointment.visitNotes}
-            </p>
+            </MutedText>
           </div>
         )}
 

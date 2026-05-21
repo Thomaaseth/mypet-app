@@ -30,6 +30,7 @@ import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 import { WeightTracker } from './WeightTracker';
 import { FoodTracker } from './FoodTracker';
 import NotesWidget from './NotesWidget/NotesWidget';
+import { PageTitle, EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 
 function EditPetForm({ 
   pet, 
@@ -156,8 +157,8 @@ export default function PetList() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold">Unable to load pets</h3>
-              <p className="text-muted-foreground">{appError.message}</p>
+              <EmptyStateTitle>Unable to load pets</EmptyStateTitle>
+                <MutedText>{appError.message}</MutedText>
               <Button onClick={() => window.location.reload()}>
                 Try Again
               </Button>
@@ -179,10 +180,10 @@ export default function PetList() {
                 <Heart className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold">No pets yet</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Add your first pet to start managing their information, tracking their health, and keeping all their details in one place.
-                </p>
+                <EmptyStateTitle className="text-xl">No pets yet</EmptyStateTitle>
+                  <EmptyStateDescription className="max-w-md">
+                    Add your first pet to start managing...
+                  </EmptyStateDescription>
               </div>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
@@ -212,11 +213,6 @@ export default function PetList() {
     );
   }
 
-  console.log('🐾 pets data:', pets);
-  console.log('🐾 pets type:', typeof pets);
-  console.log('🐾 first item:', pets?.[0]);
-  console.log('🐾 first item keys:', pets?.[0] ? Object.keys(pets[0]) : 'no first item');
-
   // Main pet list with tabs
   return (
     <div className="container mx-auto py-8 px-4">
@@ -224,10 +220,10 @@ export default function PetList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">My Pets</h1>
-            <p className="text-muted-foreground">
+          <PageTitle>My Pets</PageTitle>
+            <MutedText>
               Manage your {pets?.length} pet{pets.length !== 1 ? 's' : ''}
-            </p>
+            </MutedText>
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
@@ -279,31 +275,6 @@ export default function PetList() {
                       onDelete={() => setDeletingPet(pet)}
                     />
                   </div>
-
-                  {/* Quick Stats */}
-                  {/* <div>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Quick Stats</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-3">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Species:</span>
-                            <span>{pet.species || 'Not specified'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Gender:</span>
-                            <span className="capitalize">{pet.gender}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Spayed/Neutered:</span>
-                            <span>{pet.isNeutered ? 'Yes' : 'No'}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div> */}
                 </div>
 
                 {/* Weight Tracker Section - Full Width */}
@@ -325,7 +296,7 @@ export default function PetList() {
                 {/* Coming Soon Card */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Coming Soon</CardTitle>
+                    <CardTitle className="text-lg">More coming soon...</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground text-sm">

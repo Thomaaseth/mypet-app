@@ -17,7 +17,7 @@ export const basePetFormSchema = z.object({
     .string()
     .min(1, 'Pet name is required')
     .max(50, 'Pet name must be less than 50 characters')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Pet name can only contain letters, spaces, hyphens, apostrophes, and periods'),
+    .regex(/^[\p{L}\s\-'\.]+$/u, 'Pet name can only contain letters, spaces, hyphens, apostrophes, and periods'),
   
   animalType: z.enum(['cat', 'dog'], {
   errorMap: () => ({ message: 'Please select if this is a cat or dog' })
@@ -26,7 +26,7 @@ export const basePetFormSchema = z.object({
   species: z
     .string()
     .max(50, 'Species/breed must be less than 50 characters')
-    .regex(/^[a-zA-Z\s\-'\.]*$/, 'Species/breed can only contain letters, spaces, hyphens, apostrophes, and periods')
+    .regex(/^[\p{L}\s\-'\.]*$/u, 'Species/breed can only contain letters, spaces, hyphens, apostrophes, and periods')
     .optional()
     .or(z.literal('')),
   

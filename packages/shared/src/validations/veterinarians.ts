@@ -9,12 +9,12 @@ export const baseVeterinarianFormSchema = z.object({
     .string()
     .min(1, 'Veterinarian name is required')
     .max(100, 'Veterinarian name must be less than 100 characters')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'Veterinarian name can only contain letters, spaces, hyphens, apostrophes, and periods'),
+    .regex(/^[\p{L}\s\-'\.]+$/u, 'Veterinarian name can only contain letters, spaces, hyphens, apostrophes, and periods'),
   
   clinicName: z
     .string()
     .max(100, 'Clinic name must be less than 100 characters')
-    .regex(/^[a-zA-Z0-9\s\-'\.&]*$/, 'Clinic name can only contain letters, numbers, spaces, hyphens, apostrophes, periods, and ampersands')
+    .regex(/^[\p{L}\p{N}\s\-'\.&]*$/u, 'Clinic name can only contain letters, numbers, spaces, hyphens, apostrophes, periods, and ampersands')
     .optional()
     .or(z.literal('')),
   
@@ -57,7 +57,7 @@ export const baseVeterinarianFormSchema = z.object({
     .string()
     .min(1, 'City is required')
     .max(100, 'City must be less than 100 characters')
-    .regex(/^[a-zA-Z\s\-'\.]+$/, 'City can only contain letters, spaces, hyphens, apostrophes, and periods'),
+    .regex(/^[\p{L}\s\-'\.]+$/u, 'City can only contain letters, spaces, hyphens, apostrophes, and periods'),
   
   zipCode: z
     .string()

@@ -23,6 +23,7 @@ import AppointmentForm from './AppointmentForm';
 import EditNotesDialog from './EditNotesDialog';
 import DeleteAppointmentDialog from './DeleteAppointmentDialog';
 import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
+import { EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 
 export default function AppointmentTracker() {
   const { data: upcomingAppointments, isPending: isPendingUpcoming } = useAppointments('upcoming');
@@ -119,10 +120,10 @@ export default function AppointmentTracker() {
         <CardContent>
           <div className="text-center py-8">
             <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No appointments yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Schedule your first vet appointment
-            </p>
+            <EmptyStateTitle className="mb-2">No appointments yet</EmptyStateTitle>
+              <EmptyStateDescription className="mb-4">
+                Schedule your first vet appointment
+              </EmptyStateDescription>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -202,8 +203,8 @@ export default function AppointmentTracker() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : upcomingAppointments?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No upcoming appointments
+              <div className="text-center py-8">
+                <MutedText>No upcoming appointments</MutedText>
               </div>
             ) : (
               <>
@@ -263,8 +264,8 @@ export default function AppointmentTracker() {
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : pastAppointments?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No past appointments
+              <div className="text-center py-8">
+                <MutedText>No past appointments</MutedText>
               </div>
             ) : (
               <>

@@ -10,7 +10,8 @@ import {
   Mail,
   MapPin,
   Globe,
-  Building2,
+  Stethoscope,
+  Building2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -22,6 +23,7 @@ import {
 import type { Veterinarian } from '@/types/veterinarian';
 import { usePets } from '@/queries/pets';
 import { useVetPets } from '@/queries/vets';
+import { MutedText } from '@/components/ui/typography';
 
 interface VetCardProps {
   vet: Veterinarian;
@@ -63,15 +65,14 @@ export default function VetCard({
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">
+              <CardTitle>
                 {vet.clinicName || vet.vetName}
               </CardTitle>
             </div>
             {vet.clinicName && (
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <Building2 className="h-3 w-3" />
+              <MutedText className="flex items-center gap-1">
                 {vet.vetName}
-              </p>
+              </MutedText>
             )}
             {assignedPetCount > 0 && (
               <Badge variant="secondary" className="text-xs mt-1">
@@ -156,11 +157,11 @@ export default function VetCard({
         </div>
 
         {/* Notes - Fixed height */}
-        <div className="text-sm text-muted-foreground pt-3 border-t h-[80px]">
+        <div className="pt-3 border-t h-[80px]">
           {vet.notes && (
-            <p className="whitespace-pre-wrap break-words">
+            <MutedText className="whitespace-pre-wrap break-words">
               {vet.notes}
-            </p>
+            </MutedText>
           )}
         </div>
 
@@ -168,7 +169,7 @@ export default function VetCard({
         <div className="pt-3 border-t h-[120px]">
           {assignedPets.length > 0 && (
             <>
-              <p className="text-xs font-medium text-muted-foreground mb-2">Assigned Pets:</p>
+              <MutedText className="font-medium mb-2">Assigned Pets:</MutedText>
               <div className="flex flex-wrap gap-1">
                 {assignedPets.map((pet) => (
                   <Badge key={pet.id} variant="default" className="text-xs">

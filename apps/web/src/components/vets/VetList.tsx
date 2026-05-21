@@ -33,6 +33,7 @@ import VetForm from './VetForm';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { AppointmentTracker } from './appointments';
 import { vetErrorHandler, vetApi } from '@/lib/api';
+import { PageTitle, EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 
 export default function VetList() {
   const { data: vets, isPending, error } = useVeterinarians();
@@ -172,8 +173,8 @@ export default function VetList() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold">Unable to load veterinarians</h3>
-              <p className="text-muted-foreground">{appError.message}</p>
+              <EmptyStateTitle>Unable to load veterinarians</EmptyStateTitle>
+              <MutedText>{appError.message}</MutedText>
               <Button onClick={() => window.location.reload()}>Try Again</Button>
             </div>
           </CardContent>
@@ -193,11 +194,10 @@ export default function VetList() {
                 <Stethoscope className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold">No veterinarians yet</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Add your first veterinarian to keep track of your pets' healthcare
-                  providers and their contact information.
-                </p>
+              <EmptyStateTitle>No veterinarians yet</EmptyStateTitle>
+                <EmptyStateDescription className="max-w-md">
+                  Add your first veterinarian to keep track...
+                </EmptyStateDescription>
               </div>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
@@ -235,10 +235,8 @@ export default function VetList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">My Veterinarians</h1>
-            <p className="text-muted-foreground">
-              Manage your pets' healthcare providers
-            </p>
+            <PageTitle>My Veterinarians</PageTitle>
+            <MutedText>Manage your pets&apos; healthcare providers</MutedText>
           </div>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>

@@ -24,6 +24,7 @@ import { calculatePetAge } from '@/lib/validations/pet';
 import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
 import { usePetSignedUrl } from '@/queries/pets';
+import { MutedText } from '@/components/ui/typography';
 
 interface PetCardProps {
   pet: Pet;
@@ -50,8 +51,8 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
     <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center">
       <div className="text-center">
         <Heart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No photo</p>
-      </div>
+        <MutedText>No photo</MutedText>
+        </div>
     </div>
   );
 
@@ -62,9 +63,9 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
           <div className="space-y-1">
             <CardTitle>{pet.name}</CardTitle>
             {pet.species ? (
-                <p className="text-sm text-muted-foreground">{pet.species}</p>
+                <MutedText className="capitalize">{pet.species}</MutedText>
                 ) : (
-                <p className="text-sm text-muted-foreground capitalize">{pet.animalType}</p>
+                <MutedText className="capitalize">{pet.animalType}</MutedText>
                 )}
           </div>
           <CardAction>
@@ -168,14 +169,9 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
 
           {/* Notes Preview */}
           {pet.notes && (
-            <div className="text-sm text-muted-foreground">
-              <p className="line-clamp-2">
-                {pet.notes.length > 100 
-                  ? `${pet.notes.substring(0, 100)}...` 
-                  : pet.notes
-                }
-              </p>
-            </div>
+            <MutedText className="line-clamp-2">
+              {pet.notes.length > 100 ? `${pet.notes.substring(0, 100)}...` : pet.notes}
+            </MutedText>
           )}
         </div>
 
