@@ -63,14 +63,20 @@ export default function VetCard({
     <Card className="group hover:shadow-md transition-shadow duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="space-y-1 flex-1">
+          <div className="space-y-1 flex-1 h-[64px]">
             <div className="flex items-center gap-2">
+            {vet.clinicName ? (
+                <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              ) : (
+                <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              )}
               <CardTitle>
                 {vet.clinicName || vet.vetName}
               </CardTitle>
             </div>
             {vet.clinicName && (
               <MutedText className="flex items-center gap-1">
+                <Stethoscope className="h-3 w-3 flex-shrink-0" />
                 {vet.vetName}
               </MutedText>
             )}
@@ -106,7 +112,6 @@ export default function VetCard({
                       setIsDropdownOpen(false);
                       onDelete(vet);
                     }}
-                    className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
@@ -119,7 +124,7 @@ export default function VetCard({
 
       <CardContent className="flex flex-col">
         {/* Contact Information - Fixed height */}
-        <div className="space-y-2 text-sm h-[120px]">
+        <div className="space-y-2 text-sm h-[140px]">
           <a 
             href={`tel:${vet.phone}`} 
             className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"

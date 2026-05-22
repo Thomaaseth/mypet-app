@@ -215,7 +215,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             <NotebookPen className="h-5 w-5" />
             Notes
           </CardTitle>
-          {!isAtLimit && (
+          {notes && notes.length > 0 && !isAtLimit && (
             <Button
               onClick={handleStartAdd}
               disabled={isAdding}
