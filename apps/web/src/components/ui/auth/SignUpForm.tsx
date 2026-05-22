@@ -13,7 +13,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { authErrorHandler } from '../../../lib/errors/handlers';
 import { signUpPasswordSchema } from '@/lib/validations/password';
 import { useSessionContext } from '@/contexts/SessionContext';
-
+import { PageTitle, MutedText } from '@/components/ui/typography';
 
 const signUpSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -66,10 +66,8 @@ export default function SignUpForm() {
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Create an account</h1>
-        <p className="text-muted-foreground">
-          Enter your information to get started with Pettr.
-        </p>
+        <PageTitle>Create an account</PageTitle>
+        <MutedText>Enter your information to get started with Pettr.</MutedText>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

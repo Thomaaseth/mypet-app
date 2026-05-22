@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { toastService } from '@/lib/toast';
 import { useSessionContext } from '@/contexts/SessionContext';
+import { PageTitle, MutedText } from '@/components/ui/typography';
 
 // Zod schema for sign in
 const signInSchema = z.object({
@@ -66,10 +67,8 @@ export default function SignInForm() {
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Welcome back</h1>
-        <p className="text-muted-foreground">
-          Enter your credentials to access your account
-        </p>
+        <PageTitle>Welcome back</PageTitle>
+        <MutedText>Enter your credentials to access your account</MutedText>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

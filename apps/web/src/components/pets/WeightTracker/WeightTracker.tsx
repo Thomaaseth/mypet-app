@@ -167,6 +167,12 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
     return <WeightTrackerSkeleton />;
   }
 
+  console.log('WeightTracker render:', { 
+    isPending, 
+    hasData: !!data, 
+    chartDataLength: chartData.length 
+  });
+
   // Error state
   if (error) {
     const appError = weightErrorHandler(error);

@@ -12,7 +12,7 @@ import { useVetPets } from '@/queries/vets';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
-
+import { SectionTitle, MutedText } from '../ui/typography';
 
 interface VetFormProps {
   vet?: Veterinarian;
@@ -245,10 +245,8 @@ export default function VetForm({
       {pets && pets.length > 0 && (
         <div className="space-y-4 p-4 border rounded-md bg-muted/50">
           <div className="space-y-2">
-            <Label className="text-base font-semibold">Assign to Pets (Optional)</Label>
-            <p className="text-sm text-muted-foreground">
-              Select which pets use this veterinarian.
-            </p>
+          <SectionTitle>Assign to Pets</SectionTitle>
+          <MutedText>Select which pets use this veterinarian.</MutedText>
           </div>
 
           <div className="space-y-2">
