@@ -8,3 +8,4 @@ export const Route = createLazyFileRoute('/_authenticated/pets')({
 function PetsPage() {
   return <PetList />
 }
+

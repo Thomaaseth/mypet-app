@@ -157,7 +157,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const addInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: notes, isPending, error: fetchError } = usePetNotes(petId);
+  const { data: notes, error: fetchError } = usePetNotes(petId);
   const createMutation = useCreatePetNote(petId);
   const updateMutation = useUpdatePetNote(petId);
   const deleteMutation = useDeletePetNote(petId);
@@ -205,7 +205,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
     setDeletingNoteId(null);
   };
 
-  if (isPending) return <NotesWidgetSkeleton />;
+  if (notes === undefined) return <NotesWidgetSkeleton />;
 
   return (
     <Card className="w-full">

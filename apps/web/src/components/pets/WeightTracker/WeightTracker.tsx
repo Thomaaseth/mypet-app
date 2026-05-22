@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -57,7 +57,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   // Queries
   const {  
     data, 
-    isPending, 
     error 
   } = useWeightEntries({ petId });
   
@@ -162,16 +161,11 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
     }
   };
 
-  // Loading state
-  if (isPending) {
+  
+  if (data === undefined) {
+    console.log('SKELETON RENDERING for petId:', petId);
     return <WeightTrackerSkeleton />;
   }
-
-  console.log('WeightTracker render:', { 
-    isPending, 
-    hasData: !!data, 
-    chartDataLength: chartData.length 
-  });
 
   // Error state
   if (error) {

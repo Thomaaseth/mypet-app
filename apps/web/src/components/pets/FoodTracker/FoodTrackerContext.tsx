@@ -95,8 +95,8 @@ export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProp
   // ============================================
   // LOADING & ERROR STATES
   // ============================================
-  const isDryLoading = activeDryQuery.isPending || finishedDryQuery.isPending;
-  const isWetLoading = activeWetQuery.isPending || finishedWetQuery.isPending;
+  const isDryLoading = activeDryQuery.data === undefined || finishedDryQuery.data === undefined;
+  const isWetLoading = activeWetQuery.data === undefined || finishedWetQuery.data === undefined;
   const isLoading = isDryLoading || isWetLoading;
 
   const dryError = activeDryQuery.error?.message ?? finishedDryQuery.error?.message ?? null;
