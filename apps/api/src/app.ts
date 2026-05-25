@@ -32,7 +32,12 @@ app.use(helmet())
 app.use(middlewareLogResponse);
 
 // Auth rate limit
-app.use('/api/auth', authRateLimit);
+// app.use('/api/auth', authRateLimit);
+// Apply authRateLimit only to mutating auth endpoints
+app.use('/api/auth/sign-in', authRateLimit);
+app.use('/api/auth/sign-up', authRateLimit);
+app.use('/api/auth/forget-password', authRateLimit);
+app.use('/api/auth/reset-password', authRateLimit);
 
 // Better-auth routes
 app.all('/api/auth/*splat', toNodeHandler(auth));

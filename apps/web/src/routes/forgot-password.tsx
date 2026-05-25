@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import ForgotPasswordForm from '@/components/ui/auth/ForgotPasswordForm';
-import { authClient } from '@/lib/auth-client';
+import { sessionQueryOptions } from '@/queries/session'
 
 function ForgotPasswordPage() {
   return (
@@ -12,11 +12,8 @@ function ForgotPasswordPage() {
 
 export const Route = createFileRoute('/forgot-password')({
   component: ForgotPasswordPage,
-  beforeLoad: async () => {
-    const session = await authClient.getSession();
-    
-    if (session.data?.user) {
-      throw redirect({ to: '/' });
-    }
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.ensureQueryData(sessionQueryOptions)
+    if (user) throw redirect({ to: '/' })
   },
 });

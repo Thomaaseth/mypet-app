@@ -1,9 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
 import { authClient } from '@/lib/auth-client'
 import { authErrorHandler } from '@/lib/errors/handlers'
 import { authLogger } from '@/lib/logger'
 import type { User } from '@/types/auth'
-import type { AppError } from '@/lib/errors'
 
 // QUERY KEYS
 export const sessionKeys = {
@@ -11,36 +10,39 @@ export const sessionKeys = {
 }
 
 // QUERY (READ operation)
-// Fetch current user session, returns user object or null if not authenticated
+// Shared query options — used by both useSession and beforeLoad route guards
+// ensures a single cache entry is reused everywhere
+export const sessionQueryOptions = queryOptions({
+  queryKey: sessionKeys.current,
+  queryFn: async (): Promise<User | null> => {
+    authLogger.debug('Checking user session');
+    const sessionResponse = await authClient.getSession()
+
+    if ('data' in sessionResponse && sessionResponse.data?.user) {
+      const user = sessionResponse.data.user
+      authLogger.debug('Session found', { userId: user.id });
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        emailVerified: user.emailVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        image: user.image,
+      } satisfies User
+    }
+
+    authLogger.debug('No active session');
+    return null
+  },
+  retry: false,
+  staleTime: 1000 * 60 * 5,   // 5 minutes
+  gcTime: 1000 * 60 * 10,      // 10 minutes
+})
+
 export function useSession() {
-  return useQuery({
-    queryKey: sessionKeys.current,
-    queryFn: async () => {
-      authLogger.debug('Checking user session');
-      const sessionResponse = await authClient.getSession()
-      
-      if ('data' in sessionResponse && sessionResponse.data?.user) {
-        const user = sessionResponse.data.user
-        authLogger.debug('Session found', { userId: user.id });
-        
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          emailVerified: user.emailVerified,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-          image: user.image,
-        } as User
-      }
-      
-      authLogger.debug('No active session');
-      return null
-    },
-    retry: false, // Don't retry on auth failures
-    staleTime: 1000 * 60 * 5, // Consider fresh for 5 minutes
-    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
-  })
+  return useQuery(sessionQueryOptions)
 }
 
 // MUTATIONS (WRITE operations)

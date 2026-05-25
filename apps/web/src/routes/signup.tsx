@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import SignUpForm from '@/components/ui/auth/SignUpForm';
 import { z } from 'zod';
-import { authClient } from '@/lib/auth-client';
+import { sessionQueryOptions } from '@/queries/session'
 
 const signupSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -18,12 +18,9 @@ function SignupPage() {
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
   validateSearch: signupSearchSchema,
-  beforeLoad: async () => {
-    // check is user is already logged in
-    const session = await authClient.getSession();
-
-    if (session.data?.user) {
-      throw redirect({ to: '/' });
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.ensureQueryData(sessionQueryOptions)
+    if (user) throw redirect({ to: '/' })
     }
   }
-});
+);
