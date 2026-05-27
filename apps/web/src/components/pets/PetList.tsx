@@ -246,13 +246,14 @@ export default function PetList() {
 
         {/* Pet Tabs */}
         <Tabs value={activeTab} onValueChange={setUserSelectedTab} className="w-full">
-          <TabsList className="flex justify-center w-full">
-            {pets?.map((pet) => (
+        <TabsList className="flex w-full overflow-x-auto scrollbar-none justify-start">
+          {pets?.map((pet) => (
               <TabsTrigger 
                 key={pet.id} 
                 value={pet.id}
-                className="flex items-center gap-2 text-left min-w-[120px]"
-              >
+                className="flex items-center gap-2 flex-shrink-0 min-w-[160px]"
+                
+                >
                 <Heart className="h-4 w-4" />
                 <span className="truncate">{pet.name}</span>
               </TabsTrigger>

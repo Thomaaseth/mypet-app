@@ -141,7 +141,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                <CardHeader className="pb-3">
                <div className="flex items-start gap-2">
                 <div className="flex-1 min-w-0">
-                  <SectionTitle className="truncate">
+                  <SectionTitle>
                     {entry.brandName && entry.productName
                       ? `${entry.brandName} - ${entry.productName}`
                       : entry.brandName || entry.productName || 'Wet Food'}

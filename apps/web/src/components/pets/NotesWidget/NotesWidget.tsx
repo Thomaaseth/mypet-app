@@ -1,17 +1,22 @@
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { NotebookPen, Plus, Trash2, Check, X, AlertCircle, Loader2, Pencil } from 'lucide-react';
+import { NotebookPen, Plus, Trash2, Check, X, AlertCircle, Loader2, Pencil, MoreHorizontal } from 'lucide-react';
 import {
   usePetNotes,
   useCreatePetNote,
   useUpdatePetNote,
   useDeletePetNote,
 } from '@/queries/pet-notes';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { NotesWidgetSkeleton } from '@/components/ui/skeletons/NotesSkeleton';
 import type { PetNote } from '@/types/pet-notes';
 import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/ui/typography';
@@ -123,31 +128,39 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
       <BodyText className="text-sm flex-1 break-words min-w-0 py-1">
         {note.content}
       </BodyText >
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-7 w-7"
-          onClick={handleStartEdit}
-          disabled={isDeleting}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-7 w-7 hover:text-destructive"
-          onClick={() => onDelete(note.id)}
-          disabled={isDeleting}
-        >
-          {isDeleting ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Trash2 className="h-3.5 w-3.5" />
-          )}
-        </Button>
+      <div className="flex-shrink-0">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-7 w-7"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <MoreHorizontal className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleStartEdit}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => onDelete(note.id)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </div>
+      </div>
   );
 }
 

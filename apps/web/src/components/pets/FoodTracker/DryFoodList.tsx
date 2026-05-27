@@ -135,9 +135,8 @@ export function DryFoodList({
               <Card key={entry.id} className="relative">
                 <CardHeader className="pb-3">
                 <div className="flex items-start gap-2">
-                  {/* Title + metadata takes all remaining space and truncates */}
                   <div className="flex-1 min-w-0">
-                  <SectionTitle className="line-clamp-1">
+                  <SectionTitle>
                     {entry.brandName && entry.productName
                         ? `${entry.brandName} - ${entry.productName}`
                         : entry.brandName || entry.productName || 'Dry Food'}

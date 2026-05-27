@@ -58,25 +58,23 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
 
   return (
     <Card className="group hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle>{pet.name}</CardTitle>
-            {pet.species ? (
-                <MutedText className="capitalize">{pet.species}</MutedText>
-                ) : (
-                <MutedText className="capitalize">{pet.animalType}</MutedText>
-                )}
-          </div>
-          <CardAction>
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+      <CardHeader className="pb-3 !flex !flex-row !items-start !justify-between !gap-2">
+        <div className="space-y-1 min-w-0 flex-1">
+          <CardTitle className="truncate">{pet.name}</CardTitle>
+          {pet.species ? (
+            <MutedText className="capitalize">{pet.species}</MutedText>
+          ) : (
+            <MutedText className="capitalize">{pet.animalType}</MutedText>
+          )}
+        </div>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+              <MoreHorizontal className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
                 {onView && (
                   <>
                     <DropdownMenuItem onClick={() => onView(pet)}>
@@ -100,8 +98,6 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </CardAction>
-        </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
