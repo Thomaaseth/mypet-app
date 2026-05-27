@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -151,7 +149,7 @@ if (isLoading) {
         <Skeleton className="h-10 w-32" /> {/* Add Button */}
       </div>
 
-      {/* Show skeleton for 1 entry (most common case) */}
+      {/* Show skeleton for 1 entry */}
       <FoodEntriesSkeleton count={1} />
     </div>
   );
@@ -193,10 +191,10 @@ if (!hasActiveEntries) {
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="min-w-[140px]">
-                  {isCreating ? (
+                {isCreating ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Adding...
+                      <span className="hidden sm:inline">Adding...</span>
                     </>
                   ) : (
                     <>
@@ -250,8 +248,8 @@ return (
             <TooltipTrigger asChild>
               <span>
                 <Button disabled={true}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {labels.addButton}
+                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{labels.addButton}</span>
                 </Button>
               </span>
             </TooltipTrigger>

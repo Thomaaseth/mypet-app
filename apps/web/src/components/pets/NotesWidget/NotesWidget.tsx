@@ -221,8 +221,8 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
               disabled={isAdding}
             >
               <Plus className="h-4 w-4 mr-1" />
-              Add note
-            </Button>
+              <span className="hidden sm:inline">Add note</span>
+              </Button>
           )}
         </div>
       </CardHeader>

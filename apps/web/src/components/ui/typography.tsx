@@ -19,7 +19,8 @@ export function PageTitle({
 }: React.ComponentProps<'h1'>) {
   return (
     <h1
-      className={cn('text-3xl font-bold', className)}
+      className={cn('font-bold', className)}
+      style={{ fontSize: 'clamp(1.25rem, 5vw, 1.875rem)' }}
       {...props}
     />
   );
@@ -34,7 +35,8 @@ export function SectionTitle({
 }: React.ComponentProps<'h3'>) {
   return (
     <h3
-      className={cn('text-lg font-bold', className)}
+      className={cn('font-bold', className)}
+      style={{ fontSize: 'clamp(0.9rem, 3.5vw, 1.125rem)' }}
       {...props}
     />
   );
@@ -103,32 +105,33 @@ export function StatValue({
 // e.g. food history rows, future list items
 
 export function EntryTitle({
-    className,
-    ...props
-  }: React.ComponentProps<'h4'>) {
-    return (
-      <h4
-        className={cn('text-sm font-bold', className)}
-        {...props}
-      />
-    );
-  }
+  className,
+  ...props
+}: React.ComponentProps<'h4'>) {
+  return (
+    <h4
+      className={cn('text-sm font-bold', className)}
+      {...props}
+    />
+  );
+}
 
 // ─── Metric Display ───────────────────────────────────────────────────────────
 // For prominent single-value displays — "current weight", "days remaining" hero numbers
 // Larger than StatValue, same Bricolage Grotesque via font-display
 
 export function MetricValue({
-    className,
-    ...props
-  }: React.ComponentProps<'p'>) {
-    return (
-      <p
-        className={cn('text-2xl font-bold font-display', className)}
-        {...props}
-      />
-    );
-  }
+  className,
+  ...props
+}: React.ComponentProps<'p'>) {
+  return (
+    <p
+      className={cn('font-bold font-display', className)}
+      style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)' }}
+      {...props}
+    />
+  );
+}
   
   export function MetricLabel({
     className,

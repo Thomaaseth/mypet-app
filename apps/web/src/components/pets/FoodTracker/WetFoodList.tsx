@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +19,14 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Calendar, Package, Utensils, Loader2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Edit, Trash2, Calendar, Package, Utensils, MoreHorizontal, CheckSquare } from 'lucide-react';
 import { WetFoodForm } from './WetFoodForm';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
@@ -134,57 +139,56 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
            return (
              <Card key={entry.id} className="relative">
                <CardHeader className="pb-3">
-                 <div className="flex justify-between items-start">
-                   <div className="flex-1">
-                     <SectionTitle>
-                       {entry.brandName && entry.productName 
-                         ? `${entry.brandName} - ${entry.productName}`
-                         : entry.brandName || entry.productName || 'Wet Food'}
-                     </SectionTitle>
-                     <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
-                       <span className="flex items-center gap-1">
-                         <Package className="h-4 w-4" />
-                         {entry.numberOfUnits} × {entry.weightPerUnit} {entry.wetWeightUnit}
-                       </span>
-                       <span className="flex items-center gap-1">
-                         <Utensils className="h-4 w-4" />
-                         {entry.dailyAmount} {entry.wetDailyAmountUnit}/day
-                       </span>
-                       <span className="flex items-center gap-1">
-                         <Calendar className="h-4 w-4" />
-                         {formatDateForDisplay(entry.dateStarted)}
-                       </span>
-                     </div>
-                   </div>
-                   <div className="flex items-center gap-2 ml-4">
-                     {getStatusSection(entry)}
-                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setMarkingFinishedEntry(entry)}
-                      className="text-xs px-2 py-1 h-7"
-                    >
-                      Mark Finished
-                    </Button>
-                     <Button
-                       variant="outline"
-                       size="sm"
-                       onClick={() => setEditingEntry(entry)}
-                       disabled={isLoading}
-                       className="h-8 w-8 p-0"
-                     >
-                       <Edit className="h-4 w-4" />
-                     </Button>
-                     <Button
-                       variant="outline"
-                       size="sm"
-                       onClick={() => setDeletingEntry(entry)}
-                       disabled={isLoading}
-                       className="h-8 w-8 p-0"
-                     >
-                       <Trash2 className="h-4 w-4" />
-                     </Button>
-                   </div>
+               <div className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <SectionTitle className="truncate">
+                    {entry.brandName && entry.productName
+                      ? `${entry.brandName} - ${entry.productName}`
+                      : entry.brandName || entry.productName || 'Wet Food'}
+                  </SectionTitle>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Package className="h-4 w-4" />
+                      {entry.numberOfUnits} × {entry.weightPerUnit} {entry.wetWeightUnit}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Utensils className="h-4 w-4" />
+                      {entry.dailyAmount} {entry.wetDailyAmountUnit}/day
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      {formatDateForDisplay(entry.dateStarted)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {getStatusSection(entry)}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
+                          <CheckSquare className="h-4 w-4 mr-2" />
+                          Mark As Finished
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setDeletingEntry(entry)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                  </div>
                </CardHeader>
                <CardContent>

@@ -202,43 +202,43 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => setIsTargetRangeDialogOpen(true)}
                     >
-                      <Target className="h-4 w-4 mr-2" />
-                      Set Target Range
+                      <Target className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Set Target Range</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
                     <p className="font-semibold mb-1">Track your pet&apos;s healthy weight</p>
                     <p className="text-sm">
-                      Ask your vet for your pet&apos;s ideal weight range. This will show as a 
+                      Ask your vet for your pet&apos;s ideal weight range. This will show as a
                       shaded zone on the chart to help you monitor their health.
                     </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ) : (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setIsTargetRangeDialogOpen(true)}
               >
-                <Target className="h-4 w-4 mr-2" />
-                Edit Range
+                <Target className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Edit Range</span>
               </Button>
             )}
-            
+
             {/* Add Weight Entry Button */}
             {weightEntries.length > 0 && (
               <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Weight Entry
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Add Weight Entry</span>
               </Button>
             )}
-          </div>
+</div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -405,7 +405,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               </ul>
               <div className="bg-muted p-3 rounded-md">
                 <p className="text-sm font-medium">
-                  At your next visit, simply ask your vet &quot;What&apos;s a healthy weight 
+                  Ask your vet &quot;What&apos;s a healthy weight 
                   range for your pet.&quot; Then add it to the app.
                 </p>
               </div>

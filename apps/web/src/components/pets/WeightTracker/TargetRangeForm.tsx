@@ -207,8 +207,8 @@ export default function TargetRangeForm({
                 </ul>
                 <div className="bg-background border border-border rounded-md p-3">
                   <p className="text-sm font-medium">
-                    💡 At your next vet visit, simply ask: &quot;What&apos;s a healthy weight 
-                    range for my pet?&quot; Then add it to the app.
+                    Ask your vet &quot;What&apos;s a healthy weight 
+                    range for your pet.&quot; Then add it to the app.
                   </p>
                 </div>
               </div>

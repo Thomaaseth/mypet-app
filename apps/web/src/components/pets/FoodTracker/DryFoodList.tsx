@@ -1,7 +1,5 @@
-'use client';
-
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -21,7 +19,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Edit, Trash2, Calendar, Weight, Utensils } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Edit, Trash2, Calendar, Weight, Utensils, CheckSquare, MoreHorizontal } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
@@ -29,7 +34,6 @@ import { FoodHistorySection } from './FoodHistorySection';
 import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 import { formatRemainingWeight } from '@/lib/utils/food-formatting';
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
-
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
@@ -130,54 +134,57 @@ export function DryFoodList({
             return (
               <Card key={entry.id} className="relative">
                 <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <SectionTitle>
-                        {entry.brandName && entry.productName 
-                          ? `${entry.brandName} - ${entry.productName}`
-                          : entry.brandName || entry.productName || 'Dry Food'}
-                      </SectionTitle>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Weight className="h-4 w-4" />
-                          {entry.bagWeight} {entry.bagWeightUnit}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Utensils className="h-4 w-4" />
-                          {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {formatDateForDisplay(entry.dateStarted)}
-                        </span>
-                      </div>
+                <div className="flex items-start gap-2">
+                  {/* Title + metadata takes all remaining space and truncates */}
+                  <div className="flex-1 min-w-0">
+                  <SectionTitle className="line-clamp-1">
+                    {entry.brandName && entry.productName
+                        ? `${entry.brandName} - ${entry.productName}`
+                        : entry.brandName || entry.productName || 'Dry Food'}
+                    </SectionTitle>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Weight className="h-4 w-4" />
+                        {entry.bagWeight} {entry.bagWeightUnit}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Utensils className="h-4 w-4" />
+                        {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {formatDateForDisplay(entry.dateStarted)}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusSection(entry)}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setMarkingFinishedEntry(entry)}
-                        className="text-xs px-2 py-1 h-7"
-                      >
-                        Mark As Finished
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEditingEntry(entry)}
-                        disabled={isLoading}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeletingEntry(entry)}
-                        disabled={isLoading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  </div>
+                  {/* Actions never shrinks */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {getStatusSection(entry)}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
+                            <CheckSquare className="h-4 w-4 mr-2" />
+                            Mark As Finished
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setDeletingEntry(entry)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardHeader>

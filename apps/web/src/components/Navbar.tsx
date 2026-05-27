@@ -1,9 +1,16 @@
 import { Link, useNavigate, useLocation } from '@tanstack/react-router';
-import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
-import { LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2, Menu } from 'lucide-react';
 import { useSessionContext } from '@/contexts/SessionContext';
 import { useLogout } from '@/queries/session';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { PageTitle } from './ui/typography';
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -51,7 +58,7 @@ export const Navbar = () => {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link to="/" search={{}} className="flex items-center space-x-2">
-                <span className="text-xl font-bold">Pettr</span>
+                <PageTitle>Pettr</PageTitle>
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -71,14 +78,13 @@ export const Navbar = () => {
           {/* Logo/Brand */}
           <div className="flex items-center space-x-4">
             <Link to="/" search={{}} className="flex items-center space-x-2">
-              <span className="text-xl font-bold">Pettr</span>
+              <PageTitle>Pettr</PageTitle>
             </Link>
           </div>
 
-          {/* Navigation Items */}
-          <div className="flex items-center space-x-1">
+          {/* Desktop Navigation — hidden on mobile */}
+          <div className="hidden md:flex items-center space-x-1">
             {user ? (
-              // Authenticated navigation
               <>
                 {authenticatedNavItems.map((item) => (
                   <Button
@@ -90,12 +96,10 @@ export const Navbar = () => {
                     <Link to={item.href} search={{}}>{item.label}</Link>
                   </Button>
                 ))}
-                
-                {/* Logout button */}
                 <div className="flex items-center space-x-2 ml-4 pl-4 border-l">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
                     className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all duration-200 hover:scale-105"
@@ -110,7 +114,6 @@ export const Navbar = () => {
                 </div>
               </>
             ) : (
-              // Public navigation
               <>
                 {publicNavItems.map((item) => (
                   <Button
@@ -122,26 +125,74 @@ export const Navbar = () => {
                     <Link to={item.href} search={{}}>{item.label}</Link>
                   </Button>
                 ))}
-                
-                {/* Auth buttons */}
                 <div className="flex items-center space-x-2 ml-4">
-                  <Button 
-                    variant={isActivePath('/login') ? "default" : "ghost"} 
-                    size="sm" 
-                    asChild
-                  >
+                  <Button variant={isActivePath('/login') ? "default" : "ghost"} size="sm" asChild>
                     <Link to="/login" search={{}}>Login</Link>
-                    </Button>
-                  <Button 
-                    variant={isActivePath('/signup') ? "default" : "ghost"} 
-                    size="sm" 
-                    asChild
-                  >
+                  </Button>
+                  <Button variant={isActivePath('/signup') ? "default" : "ghost"} size="sm" asChild>
                     <Link to="/signup" search={{}}>Sign Up</Link>
                   </Button>
                 </div>
               </>
             )}
+          </div>
+
+          {/* Mobile Navigation — hidden on desktop */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {user ? (
+                  <>
+                    {authenticatedNavItems.map((item) => (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link
+                          to={item.href}
+                          search={{}}
+                          className={isActivePath(item.href) ? "font-semibold" : ""}
+                        >
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      disabled={logoutMutation.isPending}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      {logoutMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <LogOut className="mr-2 h-4 w-4" />
+                      )}
+                      Logout
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    {publicNavItems.map((item) => (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link to={item.href} search={{}}>
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/login" search={{}}>Login</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/signup" search={{}}>Sign Up</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

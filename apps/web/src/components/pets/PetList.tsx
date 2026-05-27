@@ -70,14 +70,10 @@ export default function PetList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [deletingPet, setDeletingPet] = useState<Pet | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('');
+  const [userSelectedTab, setUserSelectedTab] = useState<string | null>(null);
+  
+  const activeTab = userSelectedTab ?? pets?.[0]?.id ?? '';
 
-  // Set active tab to first pet when pets load
-  useEffect(() => {
-    if (pets && pets.length > 0 && !activeTab) {
-      setActiveTab(pets[0].id); // Auto-select first pet (latest added => desc order)
-    }
-  }, [pets, activeTab]);
 
   // Handle create pet
   const handleCreatePet = async (petData: PetFormData): Promise<Pet | null> => {
@@ -136,7 +132,7 @@ export default function PetList() {
       await deletePetMutation.mutateAsync(deletedPetId);
       
       // Update active tab to the next pet (or empty if no pets left)
-      setActiveTab(nextPetId || '');
+      setUserSelectedTab(nextPetId || '');
       
       // Close the dialog
       setDeletingPet(null);
@@ -249,7 +245,7 @@ export default function PetList() {
         </div>
 
         {/* Pet Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setUserSelectedTab} className="w-full">
           <TabsList className="flex justify-center w-full">
             {pets?.map((pet) => (
               <TabsTrigger 
@@ -265,45 +261,93 @@ export default function PetList() {
 
           {/* Pet Tab Content */}
           {pets?.map((pet) => (
+            // <TabsContent key={pet.id} value={pet.id} className="mt-6">
+            //   <div className="space-y-6">
+            //     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            //       <div>
+            //         <PetCard
+            //           pet={pet}
+            //           onEdit={() => setEditingPet(pet)}
+            //           onDelete={() => setDeletingPet(pet)}
+            //         />
+            //       </div>
+            //     </div>
+
+            //     {/* Weight Tracker Section - Full Width */}
+            //     <WeightTracker 
+            //       petId={pet.id} 
+            //       animalType={pet.animalType} 
+            //     />
+
+            //     {/* Food Tracker Section - Full Width */}
+            //     <FoodTracker 
+            //       petId={pet.id}
+            //     />
+
+            //     {/* Notes section - Full Width */}
+            //     <NotesWidget
+            //       petId={pet.id}
+            //     />
+
+            //     {/* Coming Soon Card */}
+            //     <Card>
+            //       <CardHeader>
+            //         <CardTitle className="text-lg">More coming soon...</CardTitle>
+            //       </CardHeader>
+            //       <CardContent>
+            //         <p className="text-muted-foreground text-sm">
+            //           Symptoms tracker, medecine tracker and more coming soon!
+            //         </p>
+            //       </CardContent>
+            //     </Card>
+            //   </div>
+            // </TabsContent>
             <TabsContent key={pet.id} value={pet.id} className="mt-6">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div>
-                    <PetCard
-                      pet={pet}
-                      onEdit={() => setEditingPet(pet)}
-                      onDelete={() => setDeletingPet(pet)}
-                    />
-                  </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+
+                {/* Left col — sticky pet card */}
+                <div className="lg:sticky lg:top-20">
+                  <PetCard
+                    pet={pet}
+                    onEdit={() => setEditingPet(pet)}
+                    onDelete={() => setDeletingPet(pet)}
+                  />
                 </div>
 
-                {/* Weight Tracker Section - Full Width */}
-                <WeightTracker 
-                  petId={pet.id} 
-                  animalType={pet.animalType} 
-                />
+                {/* Right col — scrollable trackers */}
+                <div className="min-w-0 space-y-6">
+                  {/* Weight + Food side by side, wrapping on smaller screens */}
+                  <div
+                      className="grid gap-6"
+                      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(420px, 100%), 1fr))' }}
+                      >                    
+                    <WeightTracker 
+                      petId={pet.id} 
+                      animalType={pet.animalType} 
+                    />
+                    <FoodTracker 
+                      petId={pet.id}
+                    />
+                  </div>
 
-                {/* Food Tracker Section - Full Width */}
-                <FoodTracker 
-                  petId={pet.id}
-                />
+                  {/* Notes full width within right col */}
+                  <NotesWidget
+                    petId={pet.id}
+                  />
 
-                {/* Notes section - Full Width */}
-                <NotesWidget
-                  petId={pet.id}
-                />
+                  {/* Coming Soon Card */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">More coming soon...</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground text-sm">
+                        Symptoms tracker, medecine tracker and more coming soon!
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-                {/* Coming Soon Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">More coming soon...</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-sm">
-                      Symptoms tracker, medecine tracker and more coming soon!
-                    </p>
-                  </CardContent>
-                </Card>
               </div>
             </TabsContent>
           ))}

@@ -28,11 +28,11 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"h2">) {
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <h2
-      data-slot="card-title"
-      className={cn("leading-none font-bold text-xl", className)}
+    <div
+      className={cn('font-bold font-display leading-none', className)}
+      style={{ fontSize: 'clamp(1rem, 3.5vw, 1.25rem)' }}
       {...props}
     />
   )
