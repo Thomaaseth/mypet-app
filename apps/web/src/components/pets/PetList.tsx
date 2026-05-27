@@ -251,9 +251,8 @@ export default function PetList() {
               <TabsTrigger 
                 key={pet.id} 
                 value={pet.id}
-                className="flex items-center gap-2 flex-shrink-0 min-w-[160px]"
-                
-                >
+                className="flex items-center gap-2 text-left min-w-[160px]"
+              >
                 <Heart className="h-4 w-4" />
                 <span className="truncate">{pet.name}</span>
               </TabsTrigger>

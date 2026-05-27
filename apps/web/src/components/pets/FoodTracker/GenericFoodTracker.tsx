@@ -247,7 +247,10 @@ return (
           <Tooltip>
             <TooltipTrigger asChild>
               <span>
-                <Button disabled={true}>
+              <Button 
+                  disabled={true}
+                  className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+                >
                   <Plus className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">{labels.addButton}</span>
                 </Button>

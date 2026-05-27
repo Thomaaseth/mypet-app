@@ -229,13 +229,14 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             Notes
           </CardTitle>
           {notes && notes.length > 0 && !isAtLimit && (
-            <Button
-              onClick={handleStartAdd}
+            <Button 
+              onClick={handleStartAdd} 
               disabled={isAdding}
+              className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
             >
-              <Plus className="h-4 w-4 mr-1" />
+              <Plus className="h-4 w-4 sm:mr-1" />
               <span className="hidden sm:inline">Add note</span>
-              </Button>
+            </Button>
           )}
         </div>
       </CardHeader>

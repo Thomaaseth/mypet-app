@@ -221,10 +221,11 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 </Tooltip>
               </TooltipProvider>
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
+              <Button 
+                variant="outline" 
+                size="sm" 
                 onClick={() => setIsTargetRangeDialogOpen(true)}
+                className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
               >
                 <Target className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Edit Range</span>
@@ -233,12 +234,15 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
 
             {/* Add Weight Entry Button */}
             {weightEntries.length > 0 && (
-              <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Button 
+                onClick={() => setIsAddDialogOpen(true)}
+                className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+              >
                 <Plus className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Add Weight Entry</span>
               </Button>
             )}
-</div>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -294,7 +298,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 )}
               </div>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
                 className="h-auto px-2 py-1 text-xs hover:bg-success/20"
                 onClick={() => setIsTargetRangeDialogOpen(true)}
@@ -322,11 +326,13 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   Learn more
                 </Button>
                 <Button 
-                  variant="link" 
-                  className="h-auto p-0"
+                  variant="outline" 
+                  size="sm" 
                   onClick={() => setIsTargetRangeDialogOpen(true)}
+                  className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                 >
-                  Set target range
+                  <Target className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Set Target Range</span>
                 </Button>
                 <Button
                   variant="ghost"
