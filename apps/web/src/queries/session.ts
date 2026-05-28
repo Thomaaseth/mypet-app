@@ -65,8 +65,7 @@ export function useLogout() {
       // Clear session from cache
       queryClient.setQueryData(sessionKeys.current, null)
       
-      // Optionally clear all queries (nuclear option)
-      // queryClient.clear()
+      queryClient.clear()
     },
     onError: (error) => {
       const appError = authErrorHandler(error)

@@ -146,7 +146,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                       ? `${entry.brandName} - ${entry.productName}`
                       : entry.brandName || entry.productName || 'Wet Food'}
                   </SectionTitle>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Package className="h-4 w-4" />
                       {entry.numberOfUnits} × {entry.weightPerUnit} {entry.wetWeightUnit}

@@ -13,6 +13,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className
       )}
+      style={{ fontSize: 'clamp(0.875rem, 2.5vw, 1rem)' }}
       {...props}
     />
   )

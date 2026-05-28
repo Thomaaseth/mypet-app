@@ -173,3 +173,30 @@ export function MutedText({
     />
   );
 }
+
+// ─── Forms Text ────────────────────────────────────────────────────────────────
+export function ErrorText({
+  className,
+  ...props
+}: React.ComponentProps<'p'>) {
+  return (
+    <p
+      className={cn('text-destructive', className)}
+      style={{ fontSize: 'clamp(0.7rem, 2.5vw, 0.875rem)' }}
+      {...props}
+    />
+  );
+}
+
+export function HelperText({
+  className,
+  ...props
+}: React.ComponentProps<'p'>) {
+  return (
+    <p
+      className={cn('text-muted-foreground', className)}
+      style={{ fontSize: 'clamp(0.7rem, 2.5vw, 0.875rem)' }}
+      {...props}
+    />
+  );
+}

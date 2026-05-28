@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ErrorText, HelperText } from '@/components/ui/typography';
 
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
@@ -63,7 +64,7 @@ export default function WeightForm({
       {/* Error Display */}
       {error && (
         <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
-            {error}
+          <ErrorText>{error}</ErrorText>
         </div>
       )}
 
@@ -82,14 +83,12 @@ export default function WeightForm({
           aria-invalid={!!errors.weight}
         />
         {errors.weight && (
-          <p className="text-sm text-destructive">{errors.weight.message}</p>
+          <ErrorText>{errors.weight.message}</ErrorText>
         )}
-          <p className="text-xs text-muted-foreground">
-            Maximum: {currentWeightUnit === 'kg' 
-              ? (animalType === 'cat' ? '15kg' : '90kg')
-              : (animalType === 'cat' ? '33lbs' : '198lbs')
-            }
-          </p>
+        <HelperText>Maximum: {currentWeightUnit === 'kg' 
+          ? (animalType === 'cat' ? '15kg' : '90kg')
+          : (animalType === 'cat' ? '33lbs' : '198lbs')
+        }</HelperText>
       </div>
 
       {/* Weight Unit */}
@@ -108,7 +107,7 @@ export default function WeightForm({
           </SelectContent>
         </Select>
         {errors.weightUnit && (
-          <p className="text-sm text-destructive">{errors.weightUnit.message}</p>
+          <ErrorText>{errors.weightUnit.message}</ErrorText>
         )}
       </div>
 
@@ -123,11 +122,9 @@ export default function WeightForm({
           aria-invalid={!!errors.date}
         />
         {errors.date && (
-          <p className="text-sm text-destructive">{errors.date.message}</p>
+          <ErrorText>{errors.date.message}</ErrorText>
         )}
-        <p className="text-xs text-muted-foreground">
-          Date cannot be in the future
-        </p>
+          <HelperText>Date cannot be in the future</HelperText>
       </div>
 
       {/* Action Buttons */}

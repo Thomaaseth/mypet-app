@@ -141,7 +141,7 @@ export function DryFoodList({
                         ? `${entry.brandName} - ${entry.productName}`
                         : entry.brandName || entry.productName || 'Dry Food'}
                     </SectionTitle>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Weight className="h-4 w-4" />
                         {entry.bagWeight} {entry.bagWeightUnit}

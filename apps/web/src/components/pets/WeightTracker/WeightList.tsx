@@ -18,13 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -144,26 +138,23 @@ export default function WeightList({
       </Table>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Weight Entry</DialogTitle>
-            <DialogDescription>
-              Update the weight and date for this entry.
-            </DialogDescription>
-          </DialogHeader>
-          {editingEntry && (
-            <WeightForm
-              animalType={animalType}
-              weightUnit={weightUnit}
-              weightEntry={editingEntry}
-              onSubmit={handleEditSubmit}
-              onCancel={handleEditCancel}
-              isLoading={isLoading}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        title="Edit Weight Entry"
+        description="Update the weight and date for this entry."
+      >
+        {editingEntry && (
+          <WeightForm
+            animalType={animalType}
+            weightUnit={weightUnit}
+            weightEntry={editingEntry}
+            onSubmit={handleEditSubmit}
+            onCancel={handleEditCancel}
+            isLoading={isLoading}
+          />
+        )}
+      </ResponsiveDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>

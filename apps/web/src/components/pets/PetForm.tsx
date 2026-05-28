@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { Pet, PetFormData } from '@/types/pet';
 import { commonSpeciesSuggestions, petFormSchema } from '@/lib/validations/pet';
 import { PetImageUpload } from '@/components/pets/PetImageUpload';
+import { MutedText, ErrorText, HelperText } from '../ui/typography';
 
 interface PetFormProps {
   pet?: Pet; // if provided, we're editing
@@ -112,7 +113,7 @@ export default function PetForm({
           aria-invalid={!!errors.name}
         />
         {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
+          <ErrorText>{errors.name.message}</ErrorText>
         )}
       </div>
 
@@ -136,7 +137,7 @@ export default function PetForm({
           </SelectContent>
         </Select>
         {errors.animalType && (
-            <p className="text-sm text-destructive">{errors.animalType.message}</p>
+            <ErrorText>{errors.animalType.message}</ErrorText>
         )}
         </div>
 
@@ -179,11 +180,11 @@ export default function PetForm({
             )}
         </div>
         {errors.species && (
-          <p className="text-sm text-destructive">{errors.species.message}</p>
+          <ErrorText>{errors.species.message}</ErrorText>
         )}
-        <p className="text-xs text-muted-foreground">
+        <HelperText>
           Optional: Enter your pet&apos;s breed or species, or leave blank
-        </p>
+        </HelperText>
       </div>
 
       {/* Gender */}
@@ -203,7 +204,7 @@ export default function PetForm({
           </SelectContent>
         </Select>
         {errors.gender && (
-          <p className="text-sm text-destructive">{errors.gender.message}</p>
+          <ErrorText>{errors.gender.message}</ErrorText>
         )}
       </div>
 
@@ -217,11 +218,11 @@ export default function PetForm({
           aria-invalid={!!errors.birthDate}
         />
         {errors.birthDate && (
-          <p className="text-sm text-destructive">{errors.birthDate.message}</p>
+          <ErrorText>{errors.birthDate.message}</ErrorText>
         )}
-        <p className="text-xs text-muted-foreground">
+        <HelperText>
           Optional: Your pet&apos;s birth date or approximate date
-        </p>
+        </HelperText>
       </div>
 
       {/* Weight - Only show in CREATE mode */}
@@ -252,20 +253,20 @@ export default function PetForm({
           </div>
         </div>
         {errors.weight && (
-          <p className="text-sm text-destructive">{errors.weight.message}</p>
+          <ErrorText>{errors.weight.message}</ErrorText>
         )}
-        <p className="text-xs text-muted-foreground">
+        <HelperText>
           Optional: Current weight (max 200kg / 440lbs)
-        </p>
+        </HelperText>
       </div>
       )}
 
       {/* Message for EDIT mode */}
       {isEditing && (
         <div className="space-y-2 p-4 bg-muted/50 rounded-md border border-muted">
-          <p className="text-sm text-muted-foreground">
-            💡 <strong>Weight Tracking:</strong> Use the Weight Tracker to add or update your pet&apos;s weight history.
-          </p>
+          <HelperText>
+            <strong>Weight Tracking:</strong> Use the Weight Tracker to add or update your pet&apos;s weight history.
+          </HelperText>
         </div>
       )}
 
@@ -312,11 +313,11 @@ export default function PetForm({
           aria-invalid={!!errors.notes}
         />
         {errors.notes && (
-          <p className="text-sm text-destructive">{errors.notes.message}</p>
+          <ErrorText>{errors.notes.message}</ErrorText>
         )}
-        <p className="text-xs text-muted-foreground">
+        <HelperText>
           Optional: Any additional information (max 1000 characters)
-        </p>
+        </HelperText>
       </div>
 
       {/* Action Buttons */}

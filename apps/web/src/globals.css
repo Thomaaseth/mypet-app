@@ -124,8 +124,10 @@
   --accent-foreground: oklch(0.18 0.02 11);
  
   /* Destructive */
-  --destructive: oklch(0.577 0.245 27.325);
- 
+  /* --destructive: oklch(0.577 0.245 27.325); */
+  --destructive: oklch(0.52 0.18 15); /* custom on brand red */
+
+
   /* Borders & inputs */
   --border: oklch(0.88 0.005 11);
   --input: oklch(0.88 0.005 11);

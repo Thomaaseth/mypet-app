@@ -125,9 +125,11 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
   return (
     <div className="flex items-center gap-2">
       <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground flex-shrink-0" />
-      <BodyText className="text-sm flex-1 break-words min-w-0 py-1">
+      <BodyText className="flex-1 break-words min-w-0 py-1"
+        style={{ fontSize: 'clamp(0.8rem, 3vw, 0.875rem)' }}
+      >
         {note.content}
-      </BodyText >
+      </BodyText>
       <div className="flex-shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

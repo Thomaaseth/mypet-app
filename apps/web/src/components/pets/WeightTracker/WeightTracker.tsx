@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,7 +20,6 @@ import WeightList from './WeightList';
 import { WeightTrackerSkeleton } from '@/components/ui/skeletons/WeightSkeleton';
 import { weightErrorHandler } from '@/lib/api/domains/weights';
 import type { WeightFormData, WeightEntry } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
 import { 
   useWeightEntries, 
   useCreateWeightEntry, 
@@ -39,7 +30,8 @@ import { useWeightTarget, useUpsertWeightTarget, useDeleteWeightTarget } from '@
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import TargetRangeForm from './TargetRangeForm';
 import type { WeightTargetFormData } from '@/types/weight-targets';
-import { MutedText, SectionTitle } from '@/components/ui/typography';
+import { MutedText, SectionTitle, HelperText, ErrorText } from '@/components/ui/typography';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 
 interface WeightTrackerProps {
   petId: string;
@@ -213,10 +205,9 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
                     <p className="font-semibold mb-1">Track your pet&apos;s healthy weight</p>
-                    <p className="text-sm">
-                      Ask your vet for your pet&apos;s ideal weight range. This will show as a
-                      shaded zone on the chart to help you monitor their health.
-                    </p>
+                    <HelperText>
+                      Ask your vet for your pet&apos;s ideal weight range...
+                    </HelperText>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -348,92 +339,77 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         )}
 
         {/* Add Weight Dialog */}
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Weight Entry</DialogTitle>
-              <DialogDescription>
-                Record your pet&apos;s weight. All entries will use {weightUnit} as the unit.
-              </DialogDescription>
-            </DialogHeader>
-            <WeightForm
-              animalType={animalType} 
-              weightUnit={weightUnit}
-              onSubmit={handleCreateEntry}
-              onCancel={() => setIsAddDialogOpen(false)}
-              isLoading={isActionLoading}
-            />
-          </DialogContent>
-        </Dialog>
+        <ResponsiveDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+          title="Add Weight Entry"
+          description={`Record your pet's weight. All entries will use ${weightUnit} as the unit.`}
+        >
+          <WeightForm
+            animalType={animalType}
+            weightUnit={weightUnit}
+            onSubmit={handleCreateEntry}
+            onCancel={() => setIsAddDialogOpen(false)}
+            isLoading={isActionLoading}
+          />
+        </ResponsiveDialog>
 
          {/* Target Range Dialog */}
-          <Dialog open={isTargetRangeDialogOpen} onOpenChange={setIsTargetRangeDialogOpen}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>
-                  {hasTargetRange ? 'Edit' : 'Set'} Target Weight Range
-                </DialogTitle>
-                <DialogDescription>
-                  Enter the healthy weight range for your pet as recommended by your vet.
-                </DialogDescription>
-              </DialogHeader>
-              <TargetRangeForm
-                key={`target-form-${isTargetRangeDialogOpen}`}
-                // petId={petId}
-                petName="your pet"
-                weightUnit={weightUnit}
-                currentMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
-                currentMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
-                onSubmit={handleUpsertTargetRange}
-                onCancel={() => setIsTargetRangeDialogOpen(false)}
-                onDelete={hasTargetRange ? handleDeleteTargetRange : undefined}
-                isLoading={upsertTargetMutation.isPending || deleteTargetMutation.isPending}
-              />
-            </DialogContent>
-          </Dialog>
+         <ResponsiveDialog
+            open={isTargetRangeDialogOpen}
+            onOpenChange={setIsTargetRangeDialogOpen}
+            title={`${hasTargetRange ? 'Edit' : 'Set'} Target Weight Range`}
+            description="Enter the healthy weight range for your pet as recommended by your vet."
+          >
+            <TargetRangeForm
+              key={`target-form-${isTargetRangeDialogOpen}`}
+              petName="your pet"
+              weightUnit={weightUnit}
+              currentMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
+              currentMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
+              onSubmit={handleUpsertTargetRange}
+              onCancel={() => setIsTargetRangeDialogOpen(false)}
+              onDelete={hasTargetRange ? handleDeleteTargetRange : undefined}
+              isLoading={upsertTargetMutation.isPending || deleteTargetMutation.isPending}
+            />
+          </ResponsiveDialog>
 
         {/* Learn More Dialog */}
-        <Dialog open={showLearnMoreDialog} onOpenChange={setShowLearnMoreDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Why track a target weight range?</DialogTitle>
-            </DialogHeader>History
-            <div className="space-y-4">
-              <MutedText>
-                A healthy weight range helps you monitor if your pet is underweight, 
-                overweight, or right on track. Your veterinarian can provide the best 
-                guidance based on:
-              </MutedText>
-              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Breed and body type</li>
-                <li>Age and activity level</li>
-                <li>Overall health condition</li>
-              </ul>
-              <div className="bg-muted p-3 rounded-md">
-                <p className="text-sm font-medium">
-                  Ask your vet &quot;What&apos;s a healthy weight 
-                  range for your pet.&quot; Then add it to the app.
-                </p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowLearnMoreDialog(false)}
-                >
-                  Close
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setShowLearnMoreDialog(false);
-                    setIsTargetRangeDialogOpen(true);
-                  }}
-                >
-                  Set Target Range
-                </Button>
-              </div>
+        <ResponsiveDialog
+          open={showLearnMoreDialog}
+          onOpenChange={setShowLearnMoreDialog}
+          title="Why track a target weight range?"
+        >
+          <div className="space-y-4">
+            <MutedText>
+              A healthy weight range helps you monitor if your pet is underweight, 
+              overweight, or right on track. Your veterinarian can provide the best 
+              guidance based on:
+            </MutedText>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li>Breed and body type</li>
+              <li>Age and activity level</li>
+              <li>Overall health condition</li>
+            </ul>
+            <div className="bg-muted p-3 rounded-md">
+              <p className="text-sm font-medium">
+                Ask your vet &quot;What&apos;s a healthy weight 
+                range for your pet.&quot; Then add it to the app.
+              </p>
             </div>
-          </DialogContent>
-        </Dialog>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowLearnMoreDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowLearnMoreDialog(false);
+                setIsTargetRangeDialogOpen(true);
+              }}>
+                Set Target Range
+              </Button>
+            </div>
+          </div>
+        </ResponsiveDialog>
 
         {/* Weight History Card with Collapsible Content */}
         <Card>
@@ -443,9 +419,9 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    <SectionTitle className="flex items-center gap-2">
+                    <MutedText className="font-display flex items-center gap-2">
                     Weight History
-                  </SectionTitle>
+                  </MutedText>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">

@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Heart, Loader2 } from 'lucide-react';
 import { usePets, useCreatePet, useUpdatePet, useDeletePet, usePetSignedUrl } from '@/queries/pets';
@@ -176,32 +169,27 @@ export default function PetList() {
                 <Heart className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <EmptyStateTitle className="text-xl">No pets yet</EmptyStateTitle>
+                <EmptyStateTitle>No pets yet</EmptyStateTitle>
                   <EmptyStateDescription className="max-w-md">
                     Add your first pet to start managing...
                   </EmptyStateDescription>
               </div>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="mt-4">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Pet
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Add New Pet</DialogTitle>
-                    <DialogDescription>
-                      Fill out your pet&apos;s information below. Only the name is required.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <PetForm
-                    onSubmit={handleCreatePet}
-                    onCancel={() => setIsCreateDialogOpen(false)}
-                    isLoading={isActionLoading}
-                  />
-                </DialogContent>
-              </Dialog>
+              <Button className="mt-4" onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your First Pet
+              </Button>
+              <ResponsiveDialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                title="Add New Pet"
+                description="Fill out your pet's information below. Only the name is required."
+              >
+                <PetForm
+                  onSubmit={handleCreatePet}
+                  onCancel={() => setIsCreateDialogOpen(false)}
+                  isLoading={isActionLoading}
+                />
+              </ResponsiveDialog>
             </div>
           </CardContent>
         </Card>
@@ -221,27 +209,22 @@ export default function PetList() {
               Manage your {pets?.length} pet{pets.length !== 1 ? 's' : ''}
             </MutedText>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Pet
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add New Pet</DialogTitle>
-                <DialogDescription>
-                  Fill out your pet&apos;s information below. Only the name is required.
-                </DialogDescription>
-              </DialogHeader>
-              <PetForm
-                onSubmit={handleCreatePet}
-                onCancel={() => setIsCreateDialogOpen(false)}
-                isLoading={isActionLoading}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Pet
+          </Button>
+          <ResponsiveDialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+            title="Add New Pet"
+            description="Fill out your pet's information below. Only the name is required."
+          >
+            <PetForm
+              onSubmit={handleCreatePet}
+              onCancel={() => setIsCreateDialogOpen(false)}
+              isLoading={isActionLoading}
+            />
+          </ResponsiveDialog>
         </div>
 
         {/* Pet Tabs */}
@@ -261,47 +244,6 @@ export default function PetList() {
 
           {/* Pet Tab Content */}
           {pets?.map((pet) => (
-            // <TabsContent key={pet.id} value={pet.id} className="mt-6">
-            //   <div className="space-y-6">
-            //     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            //       <div>
-            //         <PetCard
-            //           pet={pet}
-            //           onEdit={() => setEditingPet(pet)}
-            //           onDelete={() => setDeletingPet(pet)}
-            //         />
-            //       </div>
-            //     </div>
-
-            //     {/* Weight Tracker Section - Full Width */}
-            //     <WeightTracker 
-            //       petId={pet.id} 
-            //       animalType={pet.animalType} 
-            //     />
-
-            //     {/* Food Tracker Section - Full Width */}
-            //     <FoodTracker 
-            //       petId={pet.id}
-            //     />
-
-            //     {/* Notes section - Full Width */}
-            //     <NotesWidget
-            //       petId={pet.id}
-            //     />
-
-            //     {/* Coming Soon Card */}
-            //     <Card>
-            //       <CardHeader>
-            //         <CardTitle className="text-lg">More coming soon...</CardTitle>
-            //       </CardHeader>
-            //       <CardContent>
-            //         <p className="text-muted-foreground text-sm">
-            //           Symptoms tracker, medecine tracker and more coming soon!
-            //         </p>
-            //       </CardContent>
-            //     </Card>
-            //   </div>
-            // </TabsContent>
             <TabsContent key={pet.id} value={pet.id} className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
 
@@ -354,32 +296,23 @@ export default function PetList() {
         </Tabs>
 
         {/* Edit Pet Dialog */}
-        <Dialog 
-          open={!!editingPet} 
+        <ResponsiveDialog
+          open={!!editingPet}
           onOpenChange={(open) => {
-            // Only allow closing if not currently loading
-            if (!open && !isActionLoading) {
-              setEditingPet(null);
-            }
+            if (!open && !isActionLoading) setEditingPet(null);
           }}
+          title="Edit Pet"
+          description="Update your pet's information below."
         >
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Pet</DialogTitle>
-              <DialogDescription>
-                Update your pet&apos;s information below.
-              </DialogDescription>
-            </DialogHeader>
-            {editingPet && (
-              <EditPetForm
-                pet={editingPet}
-                onSubmit={handleUpdatePet}
-                onCancel={() => setEditingPet(null)}
-                isLoading={isActionLoading}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+          {editingPet && (
+            <EditPetForm
+              pet={editingPet}
+              onSubmit={handleUpdatePet}
+              onCancel={() => setEditingPet(null)}
+              isLoading={isActionLoading}
+            />
+          )}
+        </ResponsiveDialog>
 
         {/* Delete Pet Confirmation */}
         <AlertDialog 
