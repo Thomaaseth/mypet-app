@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppointmentWithRelations } from '@/types/appointments';
 import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
+import { HelperText, BodyText } from '@/components/ui/typography';
 
 interface EditNotesDialogProps {
   appointment: AppointmentWithRelations | null;
@@ -62,82 +57,61 @@ export default function EditNotesDialog({
   };
 
   return (
-    <Dialog open={!!appointment} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Edit Visit Notes</DialogTitle>
-          <DialogDescription asChild>
-            <div className="space-y-2">
-              <p>Update notes from this vet visit</p>
-              <div className="text-sm text-muted-foreground">
-                <p>
-                  <span className="font-medium">Pet:</span> {appointment.pet.name}
-                </p>
-                <p>
-                  <span className="font-medium">Vet:</span>{' '}
-                  {appointment.veterinarian.clinicName || appointment.veterinarian.vetName}
-                </p>
-                <p>
-                  <span className="font-medium">Date:</span> {displayDate} at {displayTime}
-                </p>
-              </div>
-            </div>
-          </DialogDescription>
-        </DialogHeader>
+    <ResponsiveDialog
+    open={!!appointment}
+    onOpenChange={(open) => { if (!open) onCancel(); }}
+    title="Edit Visit Notes"
+    description="Update notes from this vet visit"
+  >
+    {/* Appointment context info */}
+    <div className="space-y-1 -mt-2 mb-2">
+      <BodyText><span className="font-bold">Pet:</span> {appointment.pet.name}</BodyText>
+      <BodyText><span className="font-bold">Vet:</span> {appointment.veterinarian.clinicName || appointment.veterinarian.vetName}</BodyText>
+      <BodyText><span className="font-bold">Date:</span> {displayDate} at {displayTime}</BodyText>
+    </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {(error || localError) && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error || localError}</AlertDescription>
-            </Alert>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {(error || localError) && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error || localError}</AlertDescription>
+        </Alert>
+      )}
 
-          {/* Reason for Visit (read-only) */}
-          {appointment.reasonForVisit && (
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">Discussion Points (read-only)</Label>
-              <div className="text-sm border rounded-md p-3 bg-muted/50 text-muted-foreground">
-                {appointment.reasonForVisit}
-              </div>
-            </div>
-          )}
-
-          {/* Visit Notes "Visit summary" (editable) */}
-          <div className="space-y-2">
-            <Label htmlFor="visitNotes">Visit Summary</Label>
-            <Textarea
-              id="visitNotes"
-              placeholder="Notes and recommendations from the vet visit..."
-              rows={6}
-              value={visitNotes}
-              onChange={(e) => setVisitNotes(e.target.value)}
-              disabled={isLoading}
-              className="resize-none [word-break:break-word]"
-              maxLength={200}
-            />
-            <p className="text-xs text-muted-foreground">
-              {visitNotes.length}/200 characters
-            </p>
+      {appointment.reasonForVisit && (
+        <div className="space-y-2">
+          <Label className="text-muted-foreground">Discussion Points (read-only)</Label>
+          <div className="text-sm border rounded-md p-3 bg-muted/50 text-muted-foreground">
+            {appointment.reasonForVisit}
           </div>
+        </div>
+      )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Saving...' : 'Save Notes'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <div className="space-y-2">
+        <Label htmlFor="visitNotes">Visit Summary</Label>
+        <Textarea
+          id="visitNotes"
+          placeholder="Notes and recommendations from the vet visit..."
+          rows={6}
+          value={visitNotes}
+          onChange={(e) => setVisitNotes(e.target.value)}
+          disabled={isLoading}
+          className="resize-none [word-break:break-word]"
+          maxLength={200}
+        />
+        <HelperText>{visitNotes.length}/200 characters</HelperText>
+      </div>
+
+      <div className="flex justify-end gap-3 pt-2">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading ? 'Saving...' : 'Save Notes'}
+        </Button>
+      </div>
+    </form>
+  </ResponsiveDialog>
   );
 }

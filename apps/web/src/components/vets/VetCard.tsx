@@ -63,7 +63,7 @@ export default function VetCard({
     <Card className="group hover:shadow-md transition-shadow duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="space-y-1 flex-1 h-[64px]">
+          <div className="space-y-1 flex-1 h-[40px]">
             <div className="flex items-center gap-2">
             {vet.clinicName ? (
                 <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -89,7 +89,7 @@ export default function VetCard({
           <CardAction>
             <DropdownMenu modal={false} open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
                   <span className="sr-only">Open menu</span>
                 </Button>

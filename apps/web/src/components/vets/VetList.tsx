@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -172,28 +165,22 @@ export default function VetList() {
                   Add your first veterinarian to keep track...
                 </EmptyStateDescription>
               </div>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="mt-4">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Veterinarian
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Add New Veterinarian</DialogTitle>
-                    <DialogDescription>
-                      Fill out the veterinarian&apos;s information below. Fields marked
-                      with * are required.
-                    </DialogDescription>
-                  </DialogHeader>
+                <Button className="mt-4" onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Veterinarian
+                </Button>
+                <ResponsiveDialog
+                  open={isCreateDialogOpen}
+                  onOpenChange={setIsCreateDialogOpen}
+                  title="Add New Veterinarian"
+                  description="Fill out the veterinarian's information below. Fields marked with * are required."
+                >
                   <VetForm
                     onSubmit={handleCreateVet}
                     onCancel={() => setIsCreateDialogOpen(false)}
                     isLoading={isActionLoading}
                   />
-                </DialogContent>
-              </Dialog>
+                </ResponsiveDialog>
             </div>
           </CardContent>
         </Card>
@@ -209,30 +196,24 @@ export default function VetList() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <PageTitle>My Veterinarians</PageTitle>
-            <MutedText>Manage your pets&apos; healthcare providers</MutedText>
+            <MutedText>Manage your pets&apos; vets</MutedText>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Veterinarian
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Add New Veterinarian</DialogTitle>
-                <DialogDescription>
-                  Fill out the veterinarian&apos;s information below. Fields marked with
-                  * are required.
-                </DialogDescription>
-              </DialogHeader>
-              <VetForm
-                onSubmit={handleCreateVet}
-                onCancel={() => setIsCreateDialogOpen(false)}
-                isLoading={isActionLoading}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Vet
+          </Button>
+          <ResponsiveDialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+            title="Add New Veterinarian"
+            description="Fill out the veterinarian's information below. Fields marked with * are required."
+          >
+            <VetForm
+              onSubmit={handleCreateVet}
+              onCancel={() => setIsCreateDialogOpen(false)}
+              isLoading={isActionLoading}
+            />
+          </ResponsiveDialog>
         </div>
 
         {/* Vets Grid */}
@@ -252,24 +233,21 @@ export default function VetList() {
         <AppointmentTracker />
 
         {/* Edit Dialog */}
-        <Dialog open={!!editingVet} onOpenChange={() => setEditingVet(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Veterinarian</DialogTitle>
-              <DialogDescription>
-                Update the veterinarian&apos;s information below.
-              </DialogDescription>
-            </DialogHeader>
-            {editingVet && (
-              <VetForm
-                vet={editingVet}
-                onSubmit={handleUpdateVet}
-                onCancel={() => setEditingVet(null)}
-                isLoading={isActionLoading}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        <ResponsiveDialog
+          open={!!editingVet}
+          onOpenChange={(open) => { if (!open) setEditingVet(null); }}
+          title="Edit Veterinarian"
+          description="Update the veterinarian's information below."
+        >
+          {editingVet && (
+            <VetForm
+              vet={editingVet}
+              onSubmit={handleUpdateVet}
+              onCancel={() => setEditingVet(null)}
+              isLoading={isActionLoading}
+            />
+          )}
+        </ResponsiveDialog>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog
