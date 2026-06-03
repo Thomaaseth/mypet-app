@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
- Dialog,
- DialogContent,
- DialogDescription,
- DialogHeader,
- DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import {
  AlertDialog,
  AlertDialogAction,
@@ -248,14 +242,12 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
      )}
 
      {/* Edit Dialog */}
-     <Dialog open={!!editingEntry} onOpenChange={() => setEditingEntry(null)}>
-       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-         <DialogHeader>
-           <DialogTitle>Edit Wet Food Entry</DialogTitle>
-           <DialogDescription>
-             Update the details for this wet food entry.
-           </DialogDescription>
-         </DialogHeader>
+     <ResponsiveDialog
+        open={!!editingEntry}
+        onOpenChange={() => setEditingEntry(null)}
+        title="Edit Wet Food Entry"
+        description="Update the details for this wet food entry."
+      >
          {editingEntry && (
            <WetFoodForm
              initialData={{
@@ -273,8 +265,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
              submitLabel="Update Wet Food"
            />
          )}
-       </DialogContent>
-     </Dialog>
+       </ResponsiveDialog>
 
      {markingFinishedEntry && (
       <MarkAsFinishedDialog

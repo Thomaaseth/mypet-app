@@ -1,13 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, AlertCircle, UtensilsCrossed, Loader2 } from 'lucide-react';
 import { useErrorState } from '@/hooks/useErrorsState';
@@ -15,8 +7,9 @@ import { FoodEntriesSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { SectionTitle, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/typography';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 
 // Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
@@ -176,7 +169,7 @@ if (!hasActiveEntries) {
         </Alert>
       )}
 
-      {/* Enhanced Empty State - Match food entry card size */}
+      {/* Empty State - Match food entry card size */}
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
@@ -188,35 +181,21 @@ if (!hasActiveEntries) {
               {labels.emptyDescription}
             </EmptyStateDescription>
             
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="min-w-[140px]">
-                {isCreating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      <span className="hidden sm:inline">Adding...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {labels.emptyButtonText}
-                    </>
-                  )}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>{labels.dialogTitle}</DialogTitle>
-                  <DialogDescription>
-                    {labels.dialogDescription}
-                  </DialogDescription>
-                </DialogHeader>
-                <FormComponent
-                  onSubmit={handleCreateEntry}
-                  isLoading={isCreating}
-                />
-              </DialogContent>
-            </Dialog>
+            <Button className="min-w-[140px]" onClick={() => setIsAddDialogOpen(true)}>
+              {isCreating ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Adding...</>
+              ) : (
+                <><Plus className="h-4 w-4 mr-2" />{labels.emptyButtonText}</>
+              )}
+            </Button>
+            <ResponsiveDialog
+              open={isAddDialogOpen}
+              onOpenChange={setIsAddDialogOpen}
+              title={labels.dialogTitle}
+              description={labels.dialogDescription}
+            >
+              <FormComponent onSubmit={handleCreateEntry} isLoading={isCreating} />
+            </ResponsiveDialog>
           </div>
         </CardContent>
       </Card>
@@ -242,38 +221,27 @@ return (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
       <SectionTitle>{labels.entriesTitle}</SectionTitle>
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogTrigger asChild>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span>
-              <Button 
-                  disabled={true}
-                  className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
-                >
-                  <Plus className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">{labels.addButton}</span>
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              <p>{tooltipText}</p>
-            </TooltipContent>
-          </Tooltip>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{labels.dialogTitle}</DialogTitle>
-            <DialogDescription>
-              {labels.dialogDescription}
-            </DialogDescription>
-          </DialogHeader>
-          <FormComponent
-            onSubmit={handleCreateEntry}
-            isLoading={isCreating}
-          />
-        </DialogContent>
-      </Dialog>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            disabled={disableAddButton}
+            className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{labels.addButton}</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>...</TooltipContent>
+      </Tooltip>
+      <ResponsiveDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        title={labels.dialogTitle}
+        description={labels.dialogDescription}
+      >
+        <FormComponent onSubmit={handleCreateEntry} isLoading={isCreating} />
+      </ResponsiveDialog>
     </div>
 
     {/* Error Display */}

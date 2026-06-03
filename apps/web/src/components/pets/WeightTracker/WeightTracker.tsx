@@ -30,7 +30,7 @@ import { useWeightTarget, useUpsertWeightTarget, useDeleteWeightTarget } from '@
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import TargetRangeForm from './TargetRangeForm';
 import type { WeightTargetFormData } from '@/types/weight-targets';
-import { MutedText, SectionTitle, HelperText, ErrorText } from '@/components/ui/typography';
+import { MutedText, SectionTitle, HelperText, BodyText } from '@/components/ui/typography';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 
 interface WeightTrackerProps {
@@ -302,40 +302,38 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
 
         {/* Educational Banner (when no target + has entries + not dismissed) */}
         {!hasTargetRange && weightEntries.length > 0 && !isEducationalBannerDismissed && (
-          <Alert>
-            <Target className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>
-                Ask your vet for your pet&apos;s target weight range to see it on the chart.
-              </span>
-              <div className="flex items-center gap-2 ml-4">
-                <Button 
-                  variant="link" 
-                  className="h-auto p-0"
-                  onClick={() => setShowLearnMoreDialog(true)}
-                >
-                  Learn more
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setIsTargetRangeDialogOpen(true)}
-                  className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
-                >
-                  <Target className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Set Target Range</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={() => setIsEducationalBannerDismissed(true)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
+         <Alert>
+          <AlertDescription className="flex items-center justify-between gap-3 text-xs sm:text-sm">
+            <span>
+            Set a target weight range with your vet.
+            </span>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Button 
+                variant="link" 
+                className="h-auto p-0 text-xs sm:text-sm"
+                onClick={() => setShowLearnMoreDialog(true)}
+              >
+                Learn more
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsTargetRangeDialogOpen(true)}
+                className="h-8 w-8 p-0"
+              >
+                <Target className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => setIsEducationalBannerDismissed(true)}
+              >
+               <X className="h-4 w-4" />
+             </Button>
+           </div>
+         </AlertDescription>
+       </Alert>
         )}
 
         {/* Add Weight Dialog */}
@@ -392,10 +390,10 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               <li>Overall health condition</li>
             </ul>
             <div className="bg-muted p-3 rounded-md">
-              <p className="text-sm font-medium">
+              <BodyText>
                 Ask your vet &quot;What&apos;s a healthy weight 
                 range for your pet.&quot; Then add it to the app.
-              </p>
+              </BodyText>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowLearnMoreDialog(false)}>

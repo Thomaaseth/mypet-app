@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { NotebookPen, Plus, Trash2, Check, X, AlertCircle, Loader2, Pencil, MoreHorizontal } from 'lucide-react';
 import {
@@ -20,6 +19,8 @@ import {
 import { NotesWidgetSkeleton } from '@/components/ui/skeletons/NotesSkeleton';
 import type { PetNote } from '@/types/pet-notes';
 import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/ui/typography';
+import { Textarea } from '@/components/ui/textarea';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 
 const MAX_CONTENT_LENGTH = 200;
 const MAX_NOTES = 20;
@@ -39,16 +40,6 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(note.content);
   const [isSaving, setIsSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Focus input when entering edit mode
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      const length = inputRef.current.value.length;
-      inputRef.current.focus();
-      inputRef.current.setSelectionRange(length, length);
-    }
-  }, [isEditing]);
 
   const handleStartEdit = () => {
     setEditValue(note.content);
@@ -75,102 +66,91 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') handleCancel();
-  };
 
-  if (isEditing) {
     return (
+      <>
       <div className="flex items-center gap-2">
         <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground flex-shrink-0" />
-        <Input
-          ref={inputRef}
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          maxLength={MAX_CONTENT_LENGTH}
-          disabled={isSaving}
-          className="h-8 text-sm flex-1"
-        />
-        <span className="text-xs text-muted-foreground flex-shrink-0">
-          {editValue.length}/{MAX_CONTENT_LENGTH}
-        </span>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-7 w-7 flex-shrink-0 text-green-600 hover:text-green-700"
-          onClick={handleSave}
-          disabled={isSaving || !editValue.trim()}
+        <BodyText
+          className="flex-1 break-words min-w-0 py-1"
+          style={{ fontSize: 'clamp(0.8rem, 3vw, 0.875rem)' }}
         >
-          {isSaving ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Check className="h-3.5 w-3.5" />
-          )}
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-7 w-7 flex-shrink-0"
-          onClick={handleCancel}
-          disabled={isSaving}
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
+          {note.content}
+        </BodyText>
+        <div className="flex-shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-7 w-7"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleStartEdit}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onDelete(note.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="flex items-center gap-2">
-      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground flex-shrink-0" />
-      <BodyText className="flex-1 break-words min-w-0 py-1"
-        style={{ fontSize: 'clamp(0.8rem, 3vw, 0.875rem)' }}
+      <ResponsiveDialog
+        open={isEditing}
+        onOpenChange={(open) => { if (!open) handleCancel(); }}
+        title="Edit Note"
       >
-        {note.content}
-      </BodyText>
-      <div className="flex-shrink-0">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-7 w-7"
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <MoreHorizontal className="h-3.5 w-3.5" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleStartEdit}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => onDelete(note.id)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      </div>
+        <div className="space-y-4">
+          <Textarea
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            maxLength={MAX_CONTENT_LENGTH}
+            disabled={isSaving}
+            rows={4}
+            autoFocus
+            className="resize-none"
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              {editValue.length}/{MAX_CONTENT_LENGTH}
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving || !editValue.trim()}>
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Save
+              </Button>
+            </div>
+          </div>
+        </div>
+      </ResponsiveDialog>
+    </>
   );
 }
 
 export default function NotesWidget({ petId }: NotesWidgetProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
-  const addInputRef = useRef<HTMLInputElement>(null);
 
   const { data: notes, error: fetchError } = usePetNotes(petId);
   const createMutation = useCreatePetNote(petId);
@@ -178,13 +158,6 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
   const deleteMutation = useDeletePetNote(petId);
 
   const isAtLimit = (notes?.length ?? 0) >= MAX_NOTES;
-
-  // Focus the add input when it appears
-  useEffect(() => {
-    if (isAdding) {
-      addInputRef.current?.focus();
-    }
-  }, [isAdding]);
 
   const handleStartAdd = () => {
     setNewNoteContent('');
@@ -200,14 +173,11 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
     const trimmed = newNoteContent.trim();
     if (!trimmed || trimmed.length > MAX_CONTENT_LENGTH) return;
 
+    setIsCreating(true);
     await createMutation.mutateAsync({ content: trimmed });
+    setIsCreating(false);
     setNewNoteContent('');
     setIsAdding(false);
-  };
-
-  const handleAddKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') handleCreate();
-    if (e.key === 'Escape') handleCancelAdd();
   };
 
   const handleUpdate = async (noteId: string, content: string) => {
@@ -231,8 +201,8 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             Notes
           </CardTitle>
           {notes && notes.length > 0 && !isAtLimit && (
-            <Button 
-              onClick={handleStartAdd} 
+            <Button
+              onClick={handleStartAdd}
               disabled={isAdding}
               className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
             >
@@ -244,7 +214,6 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {/* Fetch error */}
         {fetchError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -252,47 +221,39 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
           </Alert>
         )}
 
-        {/* Add new note input */}
-        {isAdding && (
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground flex-shrink-0" />
-            <Input
-              ref={addInputRef}
+        {/* Add note dialog */}
+        <ResponsiveDialog
+          open={isAdding}
+          onOpenChange={(open) => { if (!open) handleCancelAdd(); }}
+          title="Add Note"
+        >
+          <div className="space-y-4">
+            <Textarea
               value={newNoteContent}
               onChange={(e) => setNewNoteContent(e.target.value)}
-              onKeyDown={handleAddKeyDown}
               placeholder="Type a note..."
               maxLength={MAX_CONTENT_LENGTH}
-              disabled={createMutation.isPending}
-              className="h-8 text-sm flex-1"
+              disabled={isCreating}
+              rows={4}
+              autoFocus
+              className="resize-none"
             />
-            <span className="text-xs text-muted-foreground flex-shrink-0">
-              {newNoteContent.length}/{MAX_CONTENT_LENGTH}
-            </span>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 flex-shrink-0 text-green-600 hover:text-green-700"
-              onClick={handleCreate}
-              disabled={createMutation.isPending || !newNoteContent.trim()}
-            >
-              {createMutation.isPending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Check className="h-3.5 w-3.5" />
-              )}
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-7 w-7 flex-shrink-0"
-              onClick={handleCancelAdd}
-              disabled={createMutation.isPending}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {newNoteContent.length}/{MAX_CONTENT_LENGTH}
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={handleCancelAdd} disabled={isCreating}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreate} disabled={isCreating || !newNoteContent.trim()}>
+                  {isCreating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  Add Note
+                </Button>
+              </div>
+            </div>
           </div>
-        )}
+        </ResponsiveDialog>
 
         {/* Notes list */}
         {notes && notes.length > 0 ? (
@@ -306,24 +267,23 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             />
           ))
         ) : (
-            !isAdding && (
-                <div className="text-center py-8">
-                  <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
-                    <NotebookPen className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <EmptyStateTitle className="mb-1">No notes yet</EmptyStateTitle>
-                    <EmptyStateDescription className="mb-4">
-                      Add things you want to remember about your pet.
-                    </EmptyStateDescription>
-                  <Button onClick={handleStartAdd} disabled={isAdding}>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add note
-                  </Button>
+          !isAdding && (
+            <div className="text-center py-8">
+              <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                <NotebookPen className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <EmptyStateTitle className="mb-1">No notes yet</EmptyStateTitle>
+              <EmptyStateDescription className="mb-4">
+                Add things you want to remember about your pet.
+              </EmptyStateDescription>
+              <Button onClick={handleStartAdd} disabled={isAdding}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add note
+              </Button>
             </div>
           )
         )}
 
-        {/* At limit warning */}
         {isAtLimit && (
           <p className="text-xs text-muted-foreground text-center pt-1">
             Maximum of {MAX_NOTES} notes reached.

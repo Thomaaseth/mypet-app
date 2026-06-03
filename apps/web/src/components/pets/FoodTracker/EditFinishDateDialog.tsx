@@ -1,15 +1,7 @@
-'use client';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { ErrorText, HelperText } from '@/components/ui/typography';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Loader2 } from 'lucide-react';
@@ -61,68 +53,47 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Edit Finish Date
-          </DialogTitle>
-          <DialogDescription>
-            Update when this food was actually finished. Must be between start date and today.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="dateStarted">Start Date (Reference)</Label>
-              <Input
-                id="dateStarted"
-                type="date"
-                value={entry.dateStarted}
-                disabled
-                className="bg-muted"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="dateFinished">Finish Date *</Label>
-              <Input
-                id="dateFinished"
-                type="date"
-                value={dateFinished}
-                onChange={(e) => setDateFinished(e.target.value)}
-                min={minDate}
-                max={maxDate}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Between {minDate} and {maxDate}
-              </p>
-            </div>
-
-            {error && (
-              <p className="text-sm text-red-600">{error}</p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update Date
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <ResponsiveDialog
+      open={isOpen}
+      onOpenChange={onClose}
+      title="Edit Finish Date"
+      description="Update when this food was actually finished. Must be between start date and today."
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid gap-2">
+          <Label htmlFor="dateStarted">Start Date (Reference)</Label>
+          <Input
+            id="dateStarted"
+            type="date"
+            value={entry.dateStarted}
+            disabled
+            className="bg-muted"
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="dateFinished">Finish Date *</Label>
+          <Input
+            id="dateFinished"
+            type="date"
+            value={dateFinished}
+            onChange={(e) => setDateFinished(e.target.value)}
+            min={minDate}
+            max={maxDate}
+            required
+          />
+          <HelperText>Between {minDate} and {maxDate}</HelperText>
+        </div>
+        {error && <ErrorText>{error}</ErrorText>}
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Update Date
+          </Button>
+        </div>
+      </form>
+    </ResponsiveDialog>
   );
 }

@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -240,32 +234,29 @@ export function DryFoodList({
       )}
   
       {/* Edit Dialog */}
-      <Dialog open={!!editingEntry} onOpenChange={() => setEditingEntry(null)}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Edit Dry Food Entry</DialogTitle>
-            <DialogDescription>
-              Update the details for this dry food entry.
-            </DialogDescription>
-          </DialogHeader>
-          {editingEntry && (
-            <DryFoodForm
-              initialData={{
-                brandName: editingEntry.brandName || '',
-                productName: editingEntry.productName || '',
-                bagWeight: editingEntry.bagWeight,
-                bagWeightUnit: editingEntry.bagWeightUnit,
-                dailyAmount: editingEntry.dailyAmount,
-                dryDailyAmountUnit: editingEntry.dryDailyAmountUnit,
-                dateStarted: editingEntry.dateStarted,
-              }}
-              onSubmit={handleUpdate}
-              isLoading={isLoading}
-              submitLabel="Update Dry Food"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={!!editingEntry}
+        onOpenChange={() => setEditingEntry(null)}
+        title="Edit Dry Food Entry"
+        description="Update the details for this dry food entry."
+      >
+        {editingEntry && (
+          <DryFoodForm
+            initialData={{
+              brandName: editingEntry.brandName || '',
+              productName: editingEntry.productName || '',
+              bagWeight: editingEntry.bagWeight,
+              bagWeightUnit: editingEntry.bagWeightUnit,
+              dailyAmount: editingEntry.dailyAmount,
+              dryDailyAmountUnit: editingEntry.dryDailyAmountUnit,
+              dateStarted: editingEntry.dateStarted,
+            }}
+            onSubmit={handleUpdate}
+            isLoading={isLoading}
+            submitLabel="Update Dry Food"
+          />
+        )}
+      </ResponsiveDialog>
 
       {markingFinishedEntry && (
         <MarkAsFinishedDialog
