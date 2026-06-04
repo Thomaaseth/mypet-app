@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -11,7 +10,10 @@ import {
   MapPin,
   Globe,
   Stethoscope,
-  Building2
+  Building2,
+  ChevronDown,
+  ChevronRight,
+  NotebookPen
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,26 +22,39 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import type { Veterinarian } from '@/types/veterinarian';
 import { usePets } from '@/queries/pets';
 import { useVetPets } from '@/queries/vets';
-import { MutedText } from '@/components/ui/typography';
+import { MutedText, HelperText, EntryTitle } from '@/components/ui/typography';
 
 interface VetCardProps {
   vet: Veterinarian;
   onEdit: (vet: Veterinarian) => void;
   onDelete: (vet: Veterinarian) => void;
-  assignedPetCount?: number;
 }
 
 export default function VetCard({
   vet,
   onEdit,
   onDelete,
-  assignedPetCount = 0,
 }: VetCardProps) {
-
+  
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  // Fetch assigned pets
+  const { data: allPets } = usePets();
+  const { data: assignedPetData } = useVetPets(vet.id);
+
+  // Calculate which pets are assigned
+  const assignedPets = allPets?.filter((pet) => 
+    assignedPetData?.some(assignment => assignment.petId === pet.id)
+  ) ?? [];
 
   const fullAddress = [
     vet.addressLine1,
@@ -50,43 +65,60 @@ export default function VetCard({
     .filter(Boolean)
     .join(', ');
 
-  // Fetch assigned pets
-  const { data: allPets } = usePets();
-  const { data: assignedPetData } = useVetPets(vet.id);
-
-  // Calculate which pets are assigned
-  const assignedPets = allPets?.filter((pet) => 
-    assignedPetData?.some(assignment => assignment.petId === pet.id)
-  ) || [];
-
   return (
-    <Card className="group hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1 flex-1 h-[40px]">
-            <div className="flex items-center gap-2">
-            {vet.clinicName ? (
-                <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              ) : (
-                <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              )}
-              <CardTitle>
-                {vet.clinicName || vet.vetName}
-              </CardTitle>
-            </div>
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+      <div className="flex items-start gap-3 py-4 px-6">
+        {/* Left — vet info */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center gap-2">
+              {vet.clinicName ? (
+              <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            ) : (
+              <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                )}
+                <EntryTitle className="text-sm">
+                  {vet.clinicName || vet.vetName}
+                </EntryTitle>
+              </div>
+
             {vet.clinicName && (
-              <MutedText className="flex items-center gap-1">
+              <MutedText className="flex items-center gap-1 text-xs ml-6">
                 <Stethoscope className="h-3 w-3 flex-shrink-0" />
                 {vet.vetName}
               </MutedText>
             )}
-            {assignedPetCount > 0 && (
-              <Badge variant="secondary" className="text-xs mt-1">
-                {assignedPetCount} {assignedPetCount === 1 ? 'pet' : 'pets'}
-              </Badge>
+            
+            <a
+              href={`tel:${vet.phone}`}
+              className="flex items-center gap-1 ml-6 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Phone className="h-3 w-3 flex-shrink-0" />
+                {vet.phone}
+            </a>
+
+            {assignedPets.length > 0 && (
+              <div className="flex flex-wrap gap-1 ml-6 pt-1">
+                {assignedPets.map((pet) => (
+                  <Badge key={pet.id} variant="default" className="text-xs">
+                    {pet.name}
+                  </Badge>
+                ))}
+              </div>
             )}
           </div>
-          <CardAction>
+          
+
+          {/* Right — expand + dropdown */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
             <DropdownMenu modal={false} open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 w-8 p-0">
@@ -95,110 +127,68 @@ export default function VetCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem 
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setIsDropdownOpen(false);
-                      onEdit(vet);
-                    }}
-                  >
-                    <Edit2 className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setIsDropdownOpen(false);
+                    onEdit(vet);
+                  }}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setIsDropdownOpen(false);
-                      onDelete(vet);
-                    }}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setIsDropdownOpen(false);
+                    onDelete(vet);
+                  }}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </CardAction>
-        </div>
-      </CardHeader>
-
-      <CardContent className="flex flex-col">
-        {/* Contact Information - Fixed height */}
-        <div className="space-y-2 text-sm h-[140px]">
-          <a 
-            href={`tel:${vet.phone}`} 
-            className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-          >
-            <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span>{vet.phone}</span>
-          </a>
-          
-          {vet.email && (
-            <a 
-              href={`mailto:${vet.email}`} 
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-            >
-              <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="truncate">{vet.email}</span>
-            </a>
-          )}
-
-          {vet.website && (
-            <a         
-              href={vet.website.startsWith('http') ? vet.website : `https://${vet.website}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-            >
-              <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="truncate">{vet.website}</span>
-            </a>
-          )}
-
-          <div className="flex items-start gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <span className="text-muted-foreground">{fullAddress}</span>
           </div>
         </div>
 
-        {/* Notes - Fixed height */}
-        <div className="pt-3 border-t h-[80px]">
-          {vet.notes && (
-            <MutedText className="whitespace-pre-wrap break-words">
-              {vet.notes}
-            </MutedText>
-          )}
-        </div>
-
-        {/* Assigned Pets - Fixed height */}
-        <div className="pt-3 border-t h-[120px]">
-          {assignedPets.length > 0 && (
-            <>
-              <MutedText className="font-medium mb-2">Assigned Pets:</MutedText>
-              <div className="flex flex-wrap gap-1">
-                {assignedPets.map((pet) => (
-                  <Badge key={pet.id} variant="default" className="text-xs">
-                    {pet.name}
-                  </Badge>
-                ))}
+        {/* Expanded details — sibling to the flex row, inside Collapsible */}
+        <CollapsibleContent>
+              <div className="px-6 pb-4 space-y-2 border-t pt-3 ml-6">
+                {vet.email && (
+                  <a
+                    href={`mailto:${vet.email}`}
+                    className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Mail className="h-3 w-3 flex-shrink-0" />
+                    {vet.email}
+                  </a>
+                )}
+                {vet.website && (
+                  <a
+                    href={vet.website.startsWith('http') ? vet.website : `https://${vet.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Globe className="h-3 w-3 flex-shrink-0" />
+                    {vet.website}
+                  </a>
+                )}
+                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                  <span>{fullAddress}</span>
+                </div>
+                {vet.notes && (
+                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <NotebookPen className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                  <HelperText>{vet.notes}</HelperText>
+                </div>                
+                )}
               </div>
-            </>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-3 border-t">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => onEdit(vet)}
-          >
-            <Edit2 className="h-4 w-4 mr-1" />
-            Edit
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+            </CollapsibleContent>
+          </Collapsible>
+        );
+      }

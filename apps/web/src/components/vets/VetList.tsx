@@ -198,10 +198,10 @@ export default function VetList() {
             <PageTitle>My Veterinarians</PageTitle>
             <MutedText>Manage your pets&apos; vets</MutedText>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
+          {/* <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Vet
-          </Button>
+          </Button> */}
           <ResponsiveDialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
@@ -217,16 +217,35 @@ export default function VetList() {
         </div>
 
         {/* Vets Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vets.map((vet) => (
-            <VetCard
-              key={vet.id}
-              vet={vet}
-              onEdit={setEditingVet}
-              onDelete={setDeletingVet}
-            />
-          ))}
-        </div>
+        <Card>
+          <CardHeader className="pb-0">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Stethoscope className="h-4 w-4" />
+                My Vets ({vets.length})
+              </CardTitle>
+              <Button 
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+              >
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Add Vet</span>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-border">
+              {vets.map((vet) => (
+                <VetCard
+                  key={vet.id}
+                  vet={vet}
+                  onEdit={setEditingVet}
+                  onDelete={setDeletingVet}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
                 
         {/* Appointments Section - Full Width Below Vets */}   
