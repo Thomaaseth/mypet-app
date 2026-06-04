@@ -30,7 +30,7 @@ import {
 import type { Veterinarian } from '@/types/veterinarian';
 import { usePets } from '@/queries/pets';
 import { useVetPets } from '@/queries/vets';
-import { MutedText, HelperText, EntryTitle } from '@/components/ui/typography';
+import { MutedText, HelperText, EntryTitle, SectionTitle, BodyText } from '@/components/ui/typography';
 
 interface VetCardProps {
   vet: Veterinarian;
@@ -76,28 +76,28 @@ export default function VetCard({
             ) : (
               <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 )}
-                <EntryTitle className="text-sm">
+                <SectionTitle>
                   {vet.clinicName || vet.vetName}
-                </EntryTitle>
+                </SectionTitle>
               </div>
 
             {vet.clinicName && (
-              <MutedText className="flex items-center gap-1 text-xs ml-6">
+              <BodyText className="flex items-center gap-1 ml-6">
                 <Stethoscope className="h-3 w-3 flex-shrink-0" />
                 {vet.vetName}
-              </MutedText>
+              </BodyText>
             )}
             
             <a
               href={`tel:${vet.phone}`}
-              className="flex items-center gap-1 ml-6 text-xs text-muted-foreground hover:text-primary transition-colors"
+              className="flex items-center gap-1 ml-6 text-sm hover:text-primary transition-colors"
             >
               <Phone className="h-3 w-3 flex-shrink-0" />
                 {vet.phone}
             </a>
 
             {assignedPets.length > 0 && (
-              <div className="flex flex-wrap gap-1 ml-6 pt-1">
+              <div className="flex flex-wrap gap-1 ml-6 pt-2">
                 {assignedPets.map((pet) => (
                   <Badge key={pet.id} variant="default" className="text-xs">
                     {pet.name}
@@ -160,7 +160,7 @@ export default function VetCard({
                 {vet.email && (
                   <a
                     href={`mailto:${vet.email}`}
-                    className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                   >
                     <Mail className="h-3 w-3 flex-shrink-0" />
                     {vet.email}
@@ -171,18 +171,18 @@ export default function VetCard({
                     href={vet.website.startsWith('http') ? vet.website : `https://${vet.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                   >
                     <Globe className="h-3 w-3 flex-shrink-0" />
                     {vet.website}
                   </a>
                 )}
-                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                <div className="flex items-start gap-2 text-sm">
                   <MapPin className="h-3 w-3 flex-shrink-0 mt-0.5" />
                   <span>{fullAddress}</span>
                 </div>
                 {vet.notes && (
-                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-start gap-2">
                   <NotebookPen className="h-3 w-3 flex-shrink-0 mt-0.5" />
                   <HelperText>{vet.notes}</HelperText>
                 </div>                

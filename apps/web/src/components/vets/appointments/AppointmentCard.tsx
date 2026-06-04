@@ -29,7 +29,7 @@ import {
 import type { AppointmentWithRelations, AppointmentType } from '@/types/appointments';
 import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
 import { useState } from 'react';
-import { MutedText, BodyText } from '@/components/ui/typography';
+import { MutedText, BodyText, SectionTitle } from '@/components/ui/typography';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
@@ -91,9 +91,9 @@ export default function AppointmentCard({
           <div className="flex items-start justify-between">
             <div className="space-y-1 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <CardTitle className="text-lg">
+                <SectionTitle>
                   {appointment.pet.name}
-                </CardTitle>
+                </SectionTitle>
               </div>
               <Badge variant={typeBadge.variant} className="text-xs">
                 {typeBadge.label}

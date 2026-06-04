@@ -58,7 +58,11 @@ export const Navbar = () => {
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link to="/" search={{}} className="flex items-center space-x-2">
-                <PageTitle>Pettr</PageTitle>
+                <img 
+                  src="/brand/Full-Logo-Color/SVG/Pettr_Logo_Full-Color_Wine-Ginger.svg" 
+                  alt="Pettr" 
+                  className="h-10 w-auto"
+                />
               </Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -78,7 +82,11 @@ export const Navbar = () => {
           {/* Logo/Brand */}
           <div className="flex items-center space-x-4">
             <Link to="/" search={{}} className="flex items-center space-x-2">
-              <PageTitle>Pettr</PageTitle>
+              <img 
+                src="/brand/Full-Logo-Color/SVG/Pettr_Logo_Full-Color_Wine-Ginger.svg" 
+                alt="Pettr" 
+                className="h-10 w-auto"
+              />
             </Link>
           </div>
 
