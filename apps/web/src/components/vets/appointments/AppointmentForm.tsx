@@ -113,7 +113,7 @@ export default function AppointmentForm({
 
       {/* Pet Selection */}
       <div className="space-y-2">
-        <Label htmlFor="petId">Pet *</Label>
+        <Label htmlFor="petId">Pet</Label>
         <Select
           value={selectedPetId}
           onValueChange={(value) => {
@@ -128,7 +128,7 @@ export default function AppointmentForm({
           <SelectContent>
             {pets?.map((pet) => (
               <SelectItem key={pet.id} value={pet.id}>
-                {pet.name} ({pet.animalType})
+                {pet.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -140,7 +140,7 @@ export default function AppointmentForm({
 
       {/* Veterinarian Selection */}
       <div className="space-y-2">
-        <Label htmlFor="veterinarianId">Veterinarian *</Label>
+        <Label htmlFor="veterinarianId">Veterinarian</Label>
         {selectedPetId && availableVetsData && availableVetsData.length === 0 ? (
           <div className="text-sm text-muted-foreground border rounded-md p-3 bg-muted/50">
             <p>No veterinarians assigned to this pet yet.</p>
@@ -172,7 +172,7 @@ export default function AppointmentForm({
       {/* Date and Time Row */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="appointmentDate">Date *</Label>
+          <Label htmlFor="appointmentDate">Date</Label>
           <Input
             id="appointmentDate"
             type="date"
@@ -186,7 +186,7 @@ export default function AppointmentForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="appointmentTime">Time *</Label>
+          <Label htmlFor="appointmentTime">Time</Label>
           <Select
             value={watch('appointmentTime')}
             onValueChange={(value) => setValue('appointmentTime', value)}
@@ -211,7 +211,7 @@ export default function AppointmentForm({
 
       {/* Appointment Type */}
       <div className="space-y-2">
-        <Label htmlFor="appointmentType">Appointment Type *</Label>
+        <Label htmlFor="appointmentType">Appointment Type</Label>
         <Select
           value={watch('appointmentType')}
           onValueChange={(value) => setValue('appointmentType', value as AppointmentType)}

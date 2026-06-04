@@ -29,10 +29,10 @@ const isValid5MinuteIncrement = (time: string): boolean => {
 // Base appointment form schema
 export const appointmentFormSchema = z.object({
   petId: z.string()
-    .uuid('Invalid pet ID'),
+    .uuid('Invalid pet'),
   
   veterinarianId: z.string()
-    .uuid('Invalid veterinarian ID'),
+    .uuid('Invalid veterinarian'),
   
   appointmentDate: z.string()
     .min(1, 'Date is required')
