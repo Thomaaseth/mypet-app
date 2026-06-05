@@ -1,6 +1,5 @@
-import { TrendingUp, TrendingDown, Minus, Plus } from 'lucide-react';
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer, ReferenceArea, ReferenceLine } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrendingUp, Plus } from 'lucide-react';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ReferenceArea } from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
@@ -16,17 +15,19 @@ import { EmptyStateTitle,
   MetricLabel, 
   MetricValue, 
   BodyText,
-  SectionTitle 
 } from '@/components/ui/typography';
+import { useIsMobile } from '@/hooks/useIsMobile';
+
 
 interface WeightChartProps {
   data: WeightChartData[];
   weightUnit: WeightUnit;
   targetWeightMin?: number;
   targetWeightMax?: number;
-  // className?: string;
   onAddEntry?: () => void;
 }
+
+
 
 export default function WeightChart({ 
   data, 
@@ -56,6 +57,9 @@ export default function WeightChart({
       </div>
     );
   }
+
+  const isMobile = useIsMobile();
+
 
   // Calculate weight trend
   const getWeightTrend = () => {
@@ -99,20 +103,17 @@ export default function WeightChart({
           </div>
 
         {/* Chart */}
-        <div className="flex justify-center">
-         <div className="w-full max-w-2xl">
-          <ChartContainer config={chartConfig}>
-           <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              accessibilityLayer
-              data={chartData}
-              margin={{
-                top: 20,
-                left: 20,
-                right: 20,
-                bottom: 12,
-              }}
-            >
+        <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] w-full">
+          <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{
+              top: 10,
+              left: 0,
+              right: 8,
+              bottom: 8,
+            }}
+          >
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="shortDate"
@@ -123,9 +124,10 @@ export default function WeightChart({
                 tickFormatter={(value) => value}
               />
               <YAxis
+                width={38}
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={4}
                 domain={[
                   (dataMin: number) => {
                     const minValue = targetWeightMin ? Math.min(dataMin, targetWeightMin) : dataMin;
@@ -191,37 +193,35 @@ export default function WeightChart({
                 dataKey="weight"
                 type="natural"
                 stroke="var(--color-weight)"
-                strokeWidth={3}
+                strokeWidth={isMobile ? 2 : 3}
                 dot={{
                   fill: "var(--color-weight)",
-                  strokeWidth: 2,
-                  r: 4,
+                  strokeWidth: 0,
+                  r: isMobile ? 2 : 4,
                 }}
                 activeDot={{
-                  r: 6,
+                  r: isMobile ? 4 : 6,
                   strokeWidth: 0,
                 }}
               />
             </LineChart>
-            </ResponsiveContainer>
           </ChartContainer>
-          </div>
-          </div>
+
 
           {/* Chart Stats */}
           {data.length > 1 && (
-            <div className="grid grid-cols-3 gap-4 text-center text-sm">
+            <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <StatLabel>Entries</StatLabel>
-                <StatValue>{data.length}</StatValue>
+                <StatValue className='text-sm sm:text-lg'>{data.length}</StatValue>
               </div>
               <div>
                 <StatLabel>Min</StatLabel>
-                <StatValue>{minWeight.toFixed(2)} {weightUnit}</StatValue>
+                <StatValue className='text-sm sm:text-lg'>{minWeight.toFixed(2)} {weightUnit}</StatValue>
               </div>
               <div>
                 <StatLabel>Max</StatLabel>
-                <StatValue>{maxWeight.toFixed(2)} {weightUnit}</StatValue>
+                <StatValue className='text-sm sm:text-lg'>{maxWeight.toFixed(2)} {weightUnit}</StatValue>
               </div>
             </div>
           )}

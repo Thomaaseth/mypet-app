@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -247,10 +247,10 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               </SectionTitle>
               {trend && (
                 <div className="flex items-center gap-1 text-sm">
-                  {trend === 'increasing' && <TrendingUp className="h-4 w-4 text-orange-500" />}
-                  {trend === 'decreasing' && <TrendingDown className="h-4 w-4 text-blue-500" />}
-                  {trend === 'stable' && <Minus className="h-4 w-4 text-green-500" />}
-                  <span className="text-muted-foreground capitalize">{trend}</span>
+                  {trend === 'increasing' && <TrendingUp className="h-4 w-4 text-primary" />}
+                  {trend === 'decreasing' && <TrendingDown className="h-4 w-4 text-secondary" />}
+                  {trend === 'stable' && <Minus className="h-4 w-4 text-accent" />}
+                  <span className="hidden min-[480px]:inline text-muted-foreground capitalize">{trend}</span>
                 </div>
               )}
             </div>

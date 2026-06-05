@@ -49,7 +49,7 @@ export function WeightChartSkeleton() {
 
         {/* Chart Area */}
         <div className="flex justify-center">
-          <Skeleton className="w-[400px] h-[200px] rounded" />
+          <Skeleton className="w-full h-[220px] sm:h-[300px] rounded" />
         </div>
 
         {/* Chart Stats */}

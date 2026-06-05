@@ -1,16 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   MoreHorizontal, 
   Edit2, 
   Trash2, 
   Calendar,
   Weight,
-  MapPin,
   Heart,
   HeartOff,
-  Eye 
+  Venus,
+  Mars,
+  CircleHelp,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -48,7 +48,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
 
   // Placeholder image when no image is available or error loading
   const placeholderImage = (
-    <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center">
+    <div className="w-full aspect-square bg-muted rounded-md flex items-center justify-center">
       <div className="text-center">
         <Heart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
         <MutedText>No photo</MutedText>
@@ -57,103 +57,110 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
   );
 
   return (
-    <Card className="group hover:shadow-md transition-shadow duration-200">
-      <CardHeader className="pb-3 !flex !flex-row !items-start !justify-between !gap-2">
-        <div className="space-y-1 min-w-0 flex-1">
-          <CardTitle className="truncate">{pet.name}</CardTitle>
-          {pet.species ? (
-            <MutedText className="capitalize">{pet.species}</MutedText>
-          ) : (
-            <MutedText className="capitalize">{pet.animalType}</MutedText>
-          )}
-        </div>
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-                {onView && (
-                  <>
-                    <DropdownMenuItem onClick={() => onView(pet)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <DropdownMenuItem onClick={() => onEdit(pet)}>
-                  <Edit2 className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => onDelete(pet)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-      </CardHeader>
+    <Card className="hover:shadow-md transition-shadow duration-200">
+      <CardHeader className="pb-0">
 
-      <CardContent className="space-y-4">
-        <div className="w-full">
-          {signedUrl && !imageError ? (
-            <img
-              src={signedUrl}
-              alt={`Photo of ${pet.name}`}
-              className="w-full h-32 object-cover rounded-md"
-              onError={() => setImageError(true)}
-            />
-          ) : (
-            placeholderImage
-          )}
-        </div>
-
-        {/* Pet Details */}
-        <div className="space-y-3">
-          {/* Basic Info Row */}
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1">
-              <Badge 
-                variant={pet.gender === 'male' ? 'default' : pet.gender === 'female' ? 'secondary' : 'outline'}
-                className="text-xs"
+        {/* Name + menu — always on top */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="font-bold text-base truncate">{pet.name}</p>
+            <MutedText className="capitalize">
+              {pet.species || pet.animalType}
+            </MutedText>
+          </div>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(pet)}>
+                <Edit2 className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onDelete(pet)}
+                className="text-destructive focus:text-destructive"
               >
-                {pet.gender === 'male' ? '♂' : pet.gender === 'female' ? '♀' : '?'} {pet.gender}
-              </Badge>
-              {pet.isNeutered && (
-                <Badge variant="outline" className="text-xs">
-                  {pet.isNeutered ? <HeartOff className="h-3 w-3" /> : <Heart className="h-3 w-3" />}
-                  <span className="ml-1">Spayed/Neutered</span>
-                </Badge>
-              )}
-            </div>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        </CardHeader>
+        <CardContent className="pt-1 px-4 pb-4">
+
+        {/* Photo left, info right on mobile/tablet — stacked on desktop */}
+        <div className="flex gap-3 lg:flex-col lg:gap-0">
+
+          {/* Photo */}
+          <div className="flex-shrink-0 w-[45%] aspect-square lg:w-full lg:aspect-square lg:mb-3">
+            {signedUrl && !imageError ? (
+              <img
+                src={signedUrl}
+                alt={`Photo of ${pet.name}`}
+                className="w-full h-full lg:h-auto object-cover rounded-md"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="w-full h-full lg:aspect-square bg-muted rounded-md flex items-center justify-center">
+                <Heart className="h-6 w-6 lg:h-8 lg:w-8 text-muted-foreground" />
+              </div>
+            )}
           </div>
 
-          {/* Age and Weight */}
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            {pet.birthDate && (
+          {/* Info */}
+          <div className="flex-1 min-w-0 space-y-2">
+
+            {/* Gender / Neutered / Age / Weight */}
+            <div className="flex flex-col gap-y-4 text-sm">
+
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{age}</span>
+                {pet.gender === 'male' && <Mars className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                {pet.gender === 'female' && <Venus className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                {pet.gender === 'unknown' && <CircleHelp className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                <span className="capitalize truncate">{pet.gender}</span>
               </div>
-            )}
-            {latestWeight ? (
+              {pet.isNeutered && (
+                <div className="flex items-center gap-2">
+                  <HeartOff className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="truncate">Spayed/Neutered</span>
+                </div>
+              )}
+              {pet.birthDate && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="truncate">{age}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2">
-                <Weight className="h-4 w-4 text-muted-foreground" />
-                <span>{latestWeight.weight} {latestWeight.weightUnit}</span>
+                <Weight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <span className="truncate">
+                  {latestWeight ? `${latestWeight.weight} ${latestWeight.weightUnit}` : 'No weight'}
+                </span>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Weight className="h-4 w-4" />
-                <span className="text-sm">No weight tracked</span>
+            </div>
+
+            {/* Notes handled in widget */}
+            {/* {pet.notes && (
+              <div className="flex items-start gap-2">
+                <NotebookPen className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <MutedText className="line-clamp-2 text-xs">
+                  {pet.notes}
+                </MutedText>
               </div>
-            )}
+            )} */}
           </div>
+
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
           {/* Microchip */}
           {/* {pet.microchipNumber && (
@@ -162,38 +169,3 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
               <span className="text-muted-foreground">Chip: {pet.microchipNumber}</span>
             </div>
           )} */}
-
-          {/* Notes Preview */}
-          {pet.notes && (
-            <MutedText className="line-clamp-2">
-              {pet.notes.length > 100 ? `${pet.notes.substring(0, 100)}...` : pet.notes}
-            </MutedText>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          {onView && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1"
-              onClick={() => onView(pet)}
-            >
-              View Details
-            </Button>
-          )}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={() => onEdit(pet)}
-          >
-            <Edit2 className="h-4 w-4 mr-1" />
-            Edit
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}

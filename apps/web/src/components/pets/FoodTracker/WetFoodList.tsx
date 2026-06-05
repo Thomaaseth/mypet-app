@@ -133,58 +133,58 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
            return (
              <Card key={entry.id} className="relative">
                <CardHeader className="pb-3">
-               <div className="flex items-start gap-2">
-                <div className="flex-1 min-w-0">
-                  <SectionTitle>
-                    {entry.brandName && entry.productName
-                      ? `${entry.brandName} - ${entry.productName}`
-                      : entry.brandName || entry.productName || 'Wet Food'}
-                  </SectionTitle>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <SectionTitle>
+                        {entry.brandName && entry.productName
+                          ? `${entry.brandName} - ${entry.productName}`
+                          : entry.brandName || entry.productName || 'Wet Food'}
+                      </SectionTitle>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {getStatusSection(entry)}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
+                              <CheckSquare className="h-4 w-4 mr-2" />
+                              Mark As Finished
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => setDeletingEntry(entry)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap min-[480px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1 shrink-0">
                       <Package className="h-4 w-4" />
                       {entry.numberOfUnits} × {entry.weightPerUnit} {entry.wetWeightUnit}
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 shrink-0">
                       <Utensils className="h-4 w-4" />
                       {entry.dailyAmount} {entry.wetDailyAmountUnit}/day
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 shrink-0">
                       <Calendar className="h-4 w-4" />
                       {formatDateForDisplay(entry.dateStarted)}
                     </span>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {getStatusSection(entry)}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
-                          <CheckSquare className="h-4 w-4 mr-2" />
-                          Mark As Finished
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => setDeletingEntry(entry)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                 </div>
-               </CardHeader>
+                </CardHeader>
                <CardContent>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                    <div>
@@ -200,7 +200,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                     <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>
                    </div>
                    <div>
-                    <StatLabel>Depletion Date</StatLabel>
+                    <StatLabel>Runs out</StatLabel>
                     <StatValue>{formatDateForDisplay(entry.depletionDate)}</StatValue>
                    </div>
                  </div>

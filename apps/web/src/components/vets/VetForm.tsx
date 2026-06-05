@@ -92,10 +92,10 @@ export default function VetForm({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="vetName">Veterinarian Name *</Label>
+        <Label htmlFor="vetName">Veterinarian Name</Label>
         <Input
           id="vetName"
-          placeholder="Dr. Sarah Johnson"
+          placeholder="Enter your vet's name"
           {...register('vetName')}
           aria-invalid={!!errors.vetName}
         />
@@ -108,7 +108,7 @@ export default function VetForm({
         <Label htmlFor="clinicName">Clinic Name</Label>
         <Input
           id="clinicName"
-          placeholder="Happy Paws Veterinary Clinic"
+          placeholder="Enter the clinic's name (optional)"
           {...register('clinicName')}
           aria-invalid={!!errors.clinicName}
         />
@@ -121,11 +121,11 @@ export default function VetForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number *</Label>
+        <Label htmlFor="phone">Phone Number</Label>
         <Input
           id="phone"
           type="tel"
-          placeholder="+1 (555) 123-4567"
+          placeholder="Enter contact number"
           {...register('phone')}
           aria-invalid={!!errors.phone}
         />
@@ -153,7 +153,7 @@ export default function VetForm({
         <Input
           id="website"
           type="text"
-          placeholder="www.pettr.health"
+          placeholder="www.pettr.life"
           {...register('website')}
           aria-invalid={!!errors.website}
         />
@@ -166,10 +166,10 @@ export default function VetForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="addressLine1">Address *</Label>
+        <Label htmlFor="addressLine1">Address</Label>
         <Input
           id="addressLine1"
-          placeholder="123 Main Street"
+          placeholder="Enter address"
           {...register('addressLine1')}
           aria-invalid={!!errors.addressLine1}
         />
@@ -182,24 +182,21 @@ export default function VetForm({
         <Label htmlFor="addressLine2">Address Line 2</Label>
         <Input
           id="addressLine2"
-          placeholder="Suite 100"
+          placeholder="(Optional)"
           {...register('addressLine2')}
           aria-invalid={!!errors.addressLine2}
         />
         {errors.addressLine2 && (
           <p className="text-sm text-destructive">{errors.addressLine2.message}</p>
         )}
-        <p className="text-xs text-muted-foreground">
-          Optional: Apartment, suite, unit, etc.
-        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="city">City *</Label>
+          <Label htmlFor="city">City</Label>
           <Input
             id="city"
-            placeholder="New York"
+            placeholder="Enter the city"
             {...register('city')}
             aria-invalid={!!errors.city}
           />
@@ -209,10 +206,10 @@ export default function VetForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="zipCode">ZIP Code *</Label>
+          <Label htmlFor="zipCode">ZIP Code</Label>
           <Input
             id="zipCode"
-            placeholder="10001"
+            placeholder="Enter the zip code"
             {...register('zipCode')}
             aria-invalid={!!errors.zipCode}
           />

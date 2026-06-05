@@ -164,7 +164,7 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
       <div className="space-y-3">
         {/* Image area — clickable to trigger upload */}
         <div
-          className="relative w-full h-48 rounded-lg overflow-hidden bg-muted cursor-pointer group"
+          className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer group"
           onClick={() => !isLoading && fileInputRef.current?.click()}
           role="button"
           aria-label={signedUrl ? `Change photo of ${petName}` : `Upload photo of ${petName}`}

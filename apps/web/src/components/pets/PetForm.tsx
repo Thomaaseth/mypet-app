@@ -105,7 +105,7 @@ export default function PetForm({
 
       {/* Pet Name */}
       <div className="space-y-2">
-        <Label htmlFor="name">Pet Name *</Label>
+        <Label htmlFor="name">Pet Name</Label>
         <Input
           id="name"
           placeholder="Enter your pet's name"
@@ -119,7 +119,7 @@ export default function PetForm({
 
       {/* Animal Type */}
         <div className="space-y-2">
-        <Label htmlFor="animalType">Animal Type *</Label>
+        <Label htmlFor="animalType">Animal Type</Label>
         <Select 
             value={watch('animalType')} 
             onValueChange={(value: 'cat' | 'dog') => {
@@ -189,7 +189,7 @@ export default function PetForm({
 
       {/* Gender */}
       <div className="space-y-2">
-        <Label htmlFor="gender">Gender</Label>
+        <Label htmlFor="sex">Sex</Label>
         <Select 
           value={watch('gender')} 
           onValueChange={(value: 'male' | 'female' | 'unknown') => setValue('gender', value)}

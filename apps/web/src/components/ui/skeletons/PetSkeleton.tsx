@@ -15,7 +15,7 @@ export function PetCardSkeleton() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Pet Image */}
-        <Skeleton className="w-full h-32 rounded-md" />
+        <Skeleton className="w-aspect-square rounded-md" />
         
         {/* Badges Row */}
         <div className="flex items-center justify-between">

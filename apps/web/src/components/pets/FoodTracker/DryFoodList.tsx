@@ -135,20 +135,6 @@ export function DryFoodList({
                         ? `${entry.brandName} - ${entry.productName}`
                         : entry.brandName || entry.productName || 'Dry Food'}
                     </SectionTitle>
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Weight className="h-4 w-4" />
-                        {entry.bagWeight} {entry.bagWeightUnit}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Utensils className="h-4 w-4" />
-                        {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDateForDisplay(entry.dateStarted)}
-                      </span>
-                    </div>
                   </div>
                   {/* Actions never shrinks */}
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -180,9 +166,23 @@ export function DryFoodList({
                       </DropdownMenu>
                     </div>
                   </div>
+                  <div className="flex flex-wrap min-[480px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground min-w-0">
+                      <span className="flex items-center gap-1 shrink-0">
+                        <Weight className="h-4 w-4" />
+                        {entry.bagWeight} {entry.bagWeightUnit}
+                      </span>
+                      <span className="flex items-center gap-1 shrink-0">
+                        <Utensils className="h-4 w-4" />
+                        {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
+                      </span>
+                      <span className="flex items-center gap-1 shrink-0">
+                        <Calendar className="h-4 w-4" />
+                        {formatDateForDisplay(entry.dateStarted)}
+                      </span>
+                    </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                  <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-2 min-[480px]:gap-4 mb-4">
                     <div>
                       <StatLabel>Remaining</StatLabel>
                       <StatValue>{formatRemainingWeight(entry.remainingWeight)} {entry.bagWeightUnit}</StatValue>
@@ -192,7 +192,7 @@ export function DryFoodList({
                       <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>
                     </div>
                     <div>
-                      <StatLabel>Depletion Date</StatLabel>
+                      <StatLabel>Runs out</StatLabel>
                       <StatValue>{formatDateForDisplay(entry.depletionDate)}</StatValue>
                     </div>
                   </div>
