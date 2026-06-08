@@ -10,7 +10,7 @@ describe('Business Logic Calculations', () => {
   describe('calculateDryFoodRemaining', () => {
     it('should calculate remaining days correctly for active dry food', async () => {
       const purchaseDate = new Date();
-      purchaseDate.setDate(purchaseDate.getDate() - 5); // 5 days ago
+      purchaseDate.setDate(purchaseDate.getDate() - 5); // 5 days ago (days elapsed = 6)
 
       const dryFoodEntry = makeDryFoodEntry({
         bagWeight: '2.00',
@@ -23,10 +23,10 @@ describe('Business Logic Calculations', () => {
 
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
-      // After 5 days at 100g/day, 500g consumed, 1500g remaining
-      // 1500g / 100g per day = 15 days remaining
-      expect(result.remainingDays).toBe(15);
-      expect(result.remainingWeight).toBeCloseTo(1.5, 2);
+      // After 5 days at 100g/day, daysElapsed=6 (day 1 counts), 600g consumed, 1400g remaining
+      // 1400g / 100g per day = 14 days remaining
+      expect(result.remainingDays).toBe(14);
+      expect(result.remainingWeight).toBeCloseTo(1.4, 2);
     });
 
     it('should return 0 remaining days for finished dry food', async () => {
@@ -52,7 +52,7 @@ describe('Business Logic Calculations', () => {
   describe('calculateWetFoodRemaining', () => {
     it('should calculate remaining days correctly for active wet food', async () => {
       const purchaseDate = new Date();
-      purchaseDate.setDate(purchaseDate.getDate() - 3); // 3 days ago
+      purchaseDate.setDate(purchaseDate.getDate() - 3); // started 3 days ago => daysElapsed=4 (dateStarted = day 1)
 
       const wetFoodEntry = makeWetFoodEntry({
         numberOfUnits: 12,
@@ -67,10 +67,10 @@ describe('Business Logic Calculations', () => {
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
 
       // Total: 12 × 85g = 1020g
-      // After 3 days at 170g/day: 510g consumed, 510g remaining
-      // 510g / 170g per day = 3 days remaining
-      expect(result.remainingDays).toBe(3);
-      expect(result.remainingWeight).toBeCloseTo(510, 1);
+      // daysElapsed=4 (day 1 counts), 4 × 170g = 680g consumed, 340g remaining
+      // 340g / 170g per day = 2 days remaining
+      expect(result.remainingDays).toBe(2);
+      expect(result.remainingWeight).toBeCloseTo(340, 1);
     });
 
     it('should handle unit conversions for wet food (oz to grams)', async () => {
@@ -88,12 +88,11 @@ describe('Business Logic Calculations', () => {
       });
 
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
-
       // Total: 6 × 3oz = 18oz
-      // After 1 day at 6oz/day: 6oz consumed, 12oz remaining
-      // 12oz / 6oz per day = 2 days remaining
-      expect(result.remainingDays).toBe(2);
-      expect(result.remainingWeight).toBeCloseTo(12, 1);
+      // daysElapsed=2 (day 1 counts), 2 × 6oz = 12oz consumed, 6oz remaining
+      // 6oz / 6oz per day = 1 day remaining
+      expect(result.remainingDays).toBe(1);
+      expect(result.remainingWeight).toBeCloseTo(6, 1);
     });
     
     it('should handle wet food with grams weight and oz daily amount', async () => {
@@ -113,11 +112,11 @@ describe('Business Logic Calculations', () => {
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
   
       // 10 units × 100g = 1000g total
-      // 10oz daily = 283.495g daily (10 × 28.3495)
-      // Day 1: 283.495g consumed, 716.505g remaining
-      // 716.505g / 283.495g per day = 2.52... -> 2 days remaining
-      expect(result.remainingDays).toBe(2);
-      expect(result.remainingWeight).toBeCloseTo(716.505, 1); // remaining in grams
+      // 10oz daily = 283.495g daily
+      // daysElapsed=2 (day 1 counts), 2 × 283.495g = 566.99g consumed, 433.01g remaining
+      // 433.01g / 283.495g per day = 1.52... -> 1 day remaining
+      expect(result.remainingDays).toBe(1);
+      expect(result.remainingWeight).toBeCloseTo(433.01, 1); // remaining in grams
     });
 
     it('should handle wet food with oz weight and grams daily amount', async () => {
@@ -136,12 +135,12 @@ describe('Business Logic Calculations', () => {
   
       const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
   
-      // 10 units × 1oz = 10oz = 283.495g total (10 × 28.3495)
+      // 10 units × 1oz = 10oz = 283.495g total
       // 50g daily
-      // Day 1: 50g consumed, 233.495g remaining
-      // 233.495g / 50g per day = 4.66... -> 4 days remaining
-      expect(result.remainingDays).toBe(4);
-      expect(result.remainingWeight).toBeCloseTo(8.24, 2); // 233.495g = 8.24oz
+      // daysElapsed=2 (day 1 counts), 2 × 50g = 100g consumed, 183.495g remaining
+      // 183.495g / 50g per day = 3.66... -> 3 days remaining
+      expect(result.remainingDays).toBe(3);
+      expect(result.remainingWeight).toBeCloseTo(6.47, 2); // 183.495g = 6.47oz
     });
   });
 
@@ -223,9 +222,9 @@ describe('Business Logic Calculations', () => {
       const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
 
       const expectedDepletionDate = new Date();
-      expectedDepletionDate.setDate(today.getDate() + 15);
+      expectedDepletionDate.setDate(today.getDate() + 14);
 
-      expect(result.remainingDays).toBe(15);
+      expect(result.remainingDays).toBe(14);
       expect(result.depletionDate.toDateString()).toBe(expectedDepletionDate.toDateString());
     });
 

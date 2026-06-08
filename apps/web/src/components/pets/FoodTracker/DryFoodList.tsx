@@ -184,38 +184,32 @@ export function DryFoodList({
                 <CardContent>
                   <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-2 min-[480px]:gap-4 mb-4">
                     <div>
-                      <StatLabel>Remaining</StatLabel>
+                      <StatLabel>~Remaining</StatLabel>
                       <StatValue>{formatRemainingWeight(entry.remainingWeight)} {entry.bagWeightUnit}</StatValue>
                     </div>
                     <div>
-                      <StatLabel>Days Left</StatLabel>
+                      <StatLabel>~Days Left</StatLabel>
                       <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>
                     </div>
                     <div>
-                      <StatLabel>Runs out</StatLabel>
+                      <StatLabel>~Runs out</StatLabel>
                       <StatValue>{formatDateForDisplay(entry.depletionDate)}</StatValue>
                     </div>
                   </div>
                   
                   {/* Progress Bar */}
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <StatLabel>Progress</StatLabel>
-                      <MutedText>{progressPercentage.toFixed(1)}% remaining</MutedText>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          progressPercentage > 50 
-                            ? 'bg-green-600' 
-                            : progressPercentage > 25 
-                            ? 'bg-yellow-600' 
-                            : 'bg-red-600'
-                        }`}
-                        style={{ width: `${progressPercentage}%` }}
-                      />
-                    </div>
-                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+  <div 
+    className={`h-2 rounded-full transition-all duration-300 ${
+      progressPercentage > 50 
+        ? 'bg-secondary' 
+        : progressPercentage > 20
+        ? 'bg-accent' 
+        : 'bg-primary'
+    }`}
+    style={{ width: `${progressPercentage}%` }}
+  />
+</div>
                 </CardContent>
               </Card>
             );

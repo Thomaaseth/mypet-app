@@ -16,15 +16,15 @@ export class FoodCalculations {
   static calculateDryFoodRemaining(entry: DryFoodEntry): { 
     remainingDays: number; 
     depletionDate: Date; 
-    remainingWeight: number 
+    remainingWeight: number;
   } {
     const today = new Date();
     const startDate = new Date(entry.dateStarted);
     
     // Day 1 logic: dateStarted = first day of consumption
-    const daysElapsed = Math.max(1, Math.floor(
+    const daysElapsed = Math.floor(
       (today.getTime() - startDate.getTime()) / MS_PER_DAY
-    ));
+    ) + 1;
     
     // Convert bag weight to grams for calculation
     let bagWeightInGrams = parseFloat(entry.bagWeight);
@@ -65,22 +65,22 @@ export class FoodCalculations {
       depletionDate = new Date(startDate);
       depletionDate.setDate(depletionDate.getDate() + totalConsumptionDays);
     }
-  
+
     return { remainingDays, depletionDate, remainingWeight };
   }
 
   static calculateWetFoodRemaining(entry: WetFoodEntry): { 
     remainingDays: number; 
     depletionDate: Date; 
-    remainingWeight: number 
+    remainingWeight: number;
   } {
     const today = new Date();
     const startDate = new Date(entry.dateStarted);
     
     // Day 1 logic: dateStarted counts as first day of consumption
-    const daysElapsed = Math.max(1, Math.floor(
+    const daysElapsed = Math.floor(
       (today.getTime() - startDate.getTime()) / MS_PER_DAY
-    ));   
+    ) + 1;
 
     // Convert total weight to grams for calculation
     let totalWeightInGrams = entry.numberOfUnits * parseFloat(entry.weightPerUnit);
@@ -121,7 +121,7 @@ export class FoodCalculations {
       depletionDate = new Date(startDate);
       depletionDate.setDate(depletionDate.getDate() + totalConsumptionDays);
     }
-    
+
     return { remainingDays, depletionDate, remainingWeight };
   }
 
@@ -148,11 +148,11 @@ export class FoodCalculations {
     const finishDate = new Date(entry.dateFinished);
     const startDate = new Date(entry.dateStarted);
     
-    // Calculate actual days elapsed (minimum 1 day)
-    const actualDaysElapsed = Math.max(1, Math.floor(
+    // Both start and end dates are INCLUSIVE (day 1 = dateStarted, last day = dateFinished)
+    const actualDaysElapsed = Math.floor(
       (finishDate.getTime() - startDate.getTime()) / MS_PER_DAY
-    ));
-    
+    ) + 1;
+
     // Calculate total weight in grams based on food type
     let totalWeightInGrams: number;
     

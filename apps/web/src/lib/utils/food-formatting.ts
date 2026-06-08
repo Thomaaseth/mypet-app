@@ -10,16 +10,14 @@ export function formatVariancePercentage(variance: number): string {
 export function getFeedingStatusColor(status: FeedingStatus): string {
   switch (status) {
     case 'overfeeding':
-      return 'bg-red-100 text-red-800 border-red-200';
-    case 'slightly-over':
-      return 'bg-orange-100 text-orange-800 border-orange-200';
     case 'underfeeding':
-      return 'bg-red-100 text-red-800 border-red-200';
+      return 'bg-primary/10 text-primary border-primary/20';
+    case 'slightly-over':
     case 'slightly-under':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return 'bg-accent/20 text-accent-foreground border-accent/30';
     case 'normal':
-      return 'bg-green-100 text-green-800 border-green-200';
-  }
+      return 'bg-secondary/10 text-secondary border-secondary/20';
+    }
 }
 
 export function getFeedingStatusLabel(status: FeedingStatus): string {
@@ -37,20 +35,20 @@ export function getFeedingStatusLabel(status: FeedingStatus): string {
   }
 }
 
-export function getFeedingStatusIcon(status: FeedingStatus): string {
-  switch (status) {
-    case 'overfeeding':
-      return '🔴';
-    case 'slightly-over':
-      return '🟠';
-    case 'underfeeding':
-      return '🔴';
-    case 'slightly-under':
-      return '🟡';
-    case 'normal':
-      return '🟢';
-  }
-}
+// export function getFeedingStatusIcon(status: FeedingStatus): string {
+//   switch (status) {
+//     case 'overfeeding':
+//       return '🔴';
+//     case 'slightly-over':
+//       return '🟠';
+//     case 'underfeeding':
+//       return '🔴';
+//     case 'slightly-under':
+//       return '🟡';
+//     case 'normal':
+//       return '🟢';
+//   }
+// }
 
 // export function formatConsumptionSummary(entry: DryFoodEntry | WetFoodEntry): string {
 //   if (!entry.actualDaysElapsed || !entry.feedingStatus) {
@@ -85,14 +83,13 @@ export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): 
   const expectedDays = calculateExpectedDays(entry);
   const daysDifference = Math.abs(entry.actualDaysElapsed - expectedDays);
   const statusLabel = getFeedingStatusLabel(entry.feedingStatus);
-  const icon = getFeedingStatusIcon(entry.feedingStatus);
 
   if (entry.feedingStatus === 'overfeeding' || entry.feedingStatus === 'slightly-over') {
-    return `${icon} ${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
+    return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
   } else if (entry.feedingStatus === 'underfeeding' || entry.feedingStatus === 'slightly-under') {
-    return `${icon} ${statusLabel} by ${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
+    return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
   } else {
-    return `${icon} ${statusLabel}`;
+    return statusLabel;
   }
 }
 

@@ -117,7 +117,7 @@ export function DryFoodForm({
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bagWeightUnit">Unit *</Label>
+          <Label htmlFor="bagWeightUnit">Unit</Label>
           <Select
             value={formData.bagWeightUnit}
             onValueChange={(value) => updateField('bagWeightUnit', value as 'kg' | 'pounds')}
@@ -137,7 +137,7 @@ export function DryFoodForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="dailyAmount">Daily Amount (grams) *</Label>
+        <Label htmlFor="dailyAmount">Daily Amount (grams)</Label>
         <Input
           id="dailyAmount"
           type="number"
@@ -153,7 +153,7 @@ export function DryFoodForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="dateStarted">Date Started *</Label>
+        <Label htmlFor="dateStarted">Date Started</Label>
         <Input
           id="dateStarted"
           type="date"

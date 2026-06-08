@@ -124,7 +124,7 @@ export function WetFoodForm({
 
       {/* Number of Units */}
       <div className="space-y-2">
-        <Label htmlFor="numberOfUnits">Number of Cans/Pouches *</Label>
+        <Label htmlFor="numberOfUnits">Number of Cans/Pouches</Label>
         <Input
           id="numberOfUnits"
           type="number"
@@ -143,7 +143,7 @@ export function WetFoodForm({
       {/* Weight Per Unit */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="weightPerUnit">Weight Per Unit *</Label>
+          <Label htmlFor="weightPerUnit">Weight Per Unit</Label>
           <Input
             id="weightPerUnit"
             type="number"
@@ -189,7 +189,7 @@ export function WetFoodForm({
       {/* Daily Amount */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="dailyAmount">Daily Amount *</Label>
+          <Label htmlFor="dailyAmount">Daily Amount</Label>
           <Input
             id="dailyAmount"
             type="number"
@@ -225,7 +225,7 @@ export function WetFoodForm({
 
       {/* Date Started */}
       <div className="space-y-2">
-        <Label htmlFor="dateStarted">Date Started *</Label>
+        <Label htmlFor="dateStarted">Date Started</Label>
         <Input
           id="dateStarted"
           type="date"

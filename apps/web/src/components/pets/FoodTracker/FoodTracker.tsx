@@ -53,11 +53,8 @@ function FoodTrackerContent() {
           <div className="space-y-3 mb-6">
             {activeFoodEntries.length === 1 && hasCalculatedFields(activeFoodEntries[0]) ? (
               // Single food entry
-              <div className={`p-4 rounded-lg border ${
-                  activeFoodEntries[0].foodType === 'dry' 
-                    ? 'bg-amber-50 border-amber-200' 
-                    : 'bg-blue-50 border-blue-200'
-                }`}>
+              <div className="p-4 rounded-lg border bg-muted">
+
                 <div className="text-center">
                 <MetricLabel>{FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply</MetricLabel>
                   <MetricValue>
@@ -78,13 +75,7 @@ function FoodTrackerContent() {
                 .filter(hasCalculatedFields)
                 .sort((a) => a.foodType === 'dry' ? -1 : 1)
                 .map((entry) => (
-                  <div 
-                    key={entry.id} 
-                    className={`p-4 rounded-lg border ${
-                      entry.foodType === 'dry' 
-                        ? 'bg-amber-50 border-amber-200' 
-                        : 'bg-blue-50 border-blue-200'
-                    }`}>
+                <div className="p-4 rounded-lg border bg-muted">
                     <div className="text-center">
                     <MetricLabel>{FOOD_TYPE_LABELS[entry.foodType]} Supply</MetricLabel>
                       <MetricValue>

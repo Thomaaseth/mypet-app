@@ -138,6 +138,18 @@ export function FoodHistorySection({
                         </span>
                       </>
                     )}
+                    {entry.actualDailyConsumption && (
+                      <span className="flex items-center gap-1">
+                        <Utensils className="h-3 w-3" />
+                        Avg {foodType === 'dry'
+                          ? `${entry.actualDailyConsumption.toFixed(1)} ${(entry as DryFoodEntry).dryDailyAmountUnit}`
+                          : `${(entry as WetFoodEntry).wetDailyAmountUnit === 'oz'
+                              ? (entry.actualDailyConsumption / 28.3495).toFixed(2)
+                              : entry.actualDailyConsumption.toFixed(1)
+                            } ${(entry as WetFoodEntry).wetDailyAmountUnit}`
+                        }/day
+                      </span>
+                    )}
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       Expected {calculateExpectedDays(entry)} days
@@ -159,7 +171,6 @@ export function FoodHistorySection({
                       </span>
                     )}
                   </div>
-              
                 </div>
                   
                   <div className="ml-4 flex-shrink-0">
