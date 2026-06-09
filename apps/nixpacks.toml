@@ -5,7 +5,7 @@ nixPkgs = ["bun"]
 cmds = ["bun install"]
 
 [phases.build]
-cmds = []
+cmds = ["echo 'skip'"]
 
 [start]
-cmd = "bun run src/server.ts"
+cmd = "bun run --filter=api start"

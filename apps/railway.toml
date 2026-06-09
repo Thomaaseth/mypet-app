@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "bun install"
 
 [deploy]
-startCommand = "bun run src/server.ts"
+startCommand = "bun run --filter=api start"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
