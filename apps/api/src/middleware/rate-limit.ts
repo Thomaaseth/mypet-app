@@ -10,9 +10,9 @@ import { logger } from '../lib/logger';
 const redisClient = process.env.REDIS_URL
   ? new Redis(process.env.REDIS_URL, {
       // Fail fast
-      enableOfflineQueue: false,
-      maxRetriesPerRequest: 1,
-      lazyConnect: true,
+      enableOfflineQueue: true,
+      maxRetriesPerRequest: 3,
+      connectTimeout: 10000,
     })
   : null;
 
