@@ -33,7 +33,7 @@ export const auth = betterAuth({
         },
         crossSubDomainCookies: process.env.NODE_ENV === "production" ? {
             enabled: true,
-            domain: ".yourdomain.com" // Set actual domain for production!!!
+            domain: process.env.COOKIE_DOMAIN // Set actual domain for production!!!
         } : undefined,
     },
     // rateLimit: {
