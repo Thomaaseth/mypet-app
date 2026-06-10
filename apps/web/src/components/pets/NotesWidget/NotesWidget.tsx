@@ -123,7 +123,6 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
             maxLength={MAX_CONTENT_LENGTH}
             disabled={isSaving}
             rows={4}
-            autoFocus
             className="resize-none"
           />
           <div className="flex items-center justify-between">
@@ -235,7 +234,6 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
               maxLength={MAX_CONTENT_LENGTH}
               disabled={isCreating}
               rows={4}
-              autoFocus
               className="resize-none"
             />
             <div className="flex items-center justify-between">

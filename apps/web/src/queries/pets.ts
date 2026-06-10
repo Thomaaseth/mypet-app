@@ -149,9 +149,16 @@ export function useDeletePet() {
     return useMutation({
       mutationFn: (file: File) => petApi.uploadPetImage(petId, file),
       onSuccess: (response: PetImageUploadResponse) => {
-      // invalidate both list and detail so signed urls are refreshed
-      queryClient.invalidateQueries({ queryKey: petKeys.all });
-      queryClient.invalidateQueries({ queryKey: petKeys.detail(petId) });
+      // Directly set the new signed URL in cache — no refetch needed,
+      queryClient.setQueryData(petKeys.signedUrl(petId), response.signedUrl);
+
+      // Update the pet in the list cache directly
+      queryClient.setQueryData<Pet[]>(petKeys.all, (prev) =>
+        prev?.map((p) => (p.id === petId ? response.pet : p)) ?? prev
+      );
+
+      // Update pet detail cache
+      queryClient.setQueryData(petKeys.detail(petId), response.pet);
       toastService.success('Photo updated', `Your pet's photo has been updated!`)
       },
       onError: (error) => {
