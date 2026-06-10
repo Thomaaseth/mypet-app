@@ -99,6 +99,7 @@ export default function TargetRangeForm({
     formState: { errors },
   } = useForm<TargetRangeFormData>({
     resolver: zodResolver(createTargetRangeSchema(weightUnit)),
+    shouldFocusError: false,
     defaultValues: {
       minWeight: currentMin?.toString() || '',
       maxWeight: currentMax?.toString() || '',

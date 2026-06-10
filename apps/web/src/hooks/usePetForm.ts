@@ -46,6 +46,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
   const form = useForm<PetFormData>({
     resolver: zodResolver(petFormSchema),
     defaultValues: getInitialValues(),
+    shouldFocusError: false,
   });
 
   // Reset form with new data (useful for switching between pets)

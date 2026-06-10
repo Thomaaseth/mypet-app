@@ -44,6 +44,7 @@ export function useAppointmentForm(options: UseAppointmentFormOptions = {}) {
   const form = useForm<AppointmentFormData>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues: getInitialValues(),
+    shouldFocusError: false,
   });
 
   // Reset form with new appointment data (useful for switching between appointments)

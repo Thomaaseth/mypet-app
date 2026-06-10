@@ -36,6 +36,7 @@ export function useWeightForm(options: UseWeightFormOptions) {
   const form = useForm<WeightFormData>({
     resolver: zodResolver(schema),
     defaultValues: getInitialValues(),
+    shouldFocusError: false,
   });
 
   const resetWithWeightEntry = (newWeightEntry: WeightEntry) => {

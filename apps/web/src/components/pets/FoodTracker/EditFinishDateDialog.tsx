@@ -4,7 +4,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ErrorText, HelperText } from '@/components/ui/typography';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 
 interface EditFinishDateDialogProps {

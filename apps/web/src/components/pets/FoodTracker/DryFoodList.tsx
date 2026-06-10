@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Edit, Trash2, Calendar, Weight, Utensils, CheckSquare, MoreHorizontal } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Weight, Utensils, CheckSquare, MoreHorizontal } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
@@ -151,7 +151,7 @@ export function DryFoodList({
                             Mark As Finished
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
-                            <Edit className="h-4 w-4 mr-2" />
+                            <Edit2 className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -199,17 +199,17 @@ export function DryFoodList({
                   
                   {/* Progress Bar */}
                   <div className="w-full bg-muted rounded-full h-2">
-  <div 
-    className={`h-2 rounded-full transition-all duration-300 ${
-      progressPercentage > 50 
-        ? 'bg-secondary' 
-        : progressPercentage > 20
-        ? 'bg-accent' 
-        : 'bg-primary'
-    }`}
-    style={{ width: `${progressPercentage}%` }}
-  />
-</div>
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        progressPercentage > 50 
+                          ? 'bg-secondary' 
+                          : progressPercentage > 20
+                          ? 'bg-accent' 
+                          : 'bg-primary'
+                      }`}
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             );

@@ -1,6 +1,6 @@
-'use client';
-
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,9 +12,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
+import { dryFoodSchema } from '@/lib/validations/food';
 import { DRY_FOOD_BAG_UNITS } from '@/types/food';
-import { validateDryFoodData } from '@/lib/validations/food';
+import { ErrorText } from '@/components/ui/typography';
+import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 
 interface DryFoodFormProps {
   initialData?: Partial<DryFoodFormData>;
@@ -23,81 +24,60 @@ interface DryFoodFormProps {
   submitLabel?: string;
 }
 
+type DryFoodFormValues = z.infer<typeof dryFoodSchema>;
+
 export function DryFoodForm({ 
   initialData, 
   onSubmit, 
   isLoading = false,
   submitLabel = 'Add Dry Food'
 }: DryFoodFormProps) {
-  const [formData, setFormData] = useState<DryFoodFormData>({
-    brandName: initialData?.brandName || '',
-    productName: initialData?.productName || '',
-    bagWeight: initialData?.bagWeight || '',
-    bagWeightUnit: initialData?.bagWeightUnit || 'kg',
-    dailyAmount: initialData?.dailyAmount || '',
-    dryDailyAmountUnit: initialData?.dryDailyAmountUnit || 'grams',
-    dateStarted: initialData?.dateStarted || new Date().toISOString().split('T')[0],
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<DryFoodFormValues>({
+    resolver: zodResolver(dryFoodSchema),
+    shouldFocusError: false,
+    defaultValues: {
+      brandName: initialData?.brandName ?? '',
+      productName: initialData?.productName ?? '',
+      bagWeight: initialData?.bagWeight ?? '',
+      bagWeightUnit: initialData?.bagWeightUnit ?? 'kg',
+      dailyAmount: initialData?.dailyAmount ?? '',
+      dryDailyAmountUnit: 'grams',
+      dateStarted: initialData?.dateStarted ?? new Date().toISOString().split('T')[0],
+    },
   });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    try {
-      // Validate form data
-      const validatedData = validateDryFoodData(formData);
-      await onSubmit(validatedData);
-    } catch (error) {
-      if (error instanceof Error) {
-        // Parse validation errors
-        if (error.message.includes('validation failed')) {
-          const errorMsg = error.message.replace('Dry food validation failed: ', '');
-          setErrors({ general: errorMsg });
-        } else {
-          setErrors({ general: error.message });
-        }
-      }
-    }
-  };
-
-  const updateField = (field: keyof DryFoodFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear field-specific error
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
+  
+  const onFormSubmit = async (data: DryFoodFormValues) => {
+    await onSubmit(data);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="brandName">Brand Name (Optional)</Label>
-        <Input
-          id="brandName"
-          value={formData.brandName}
-          onChange={(e) => updateField('brandName', e.target.value)}
-          placeholder="e.g., Royal Canin, Hill's"
-          maxLength={100}
-        />
-        {errors.brandName && (
-          <p className="text-sm text-red-600">{errors.brandName}</p>
-        )}
+          <Input
+              id="brandName"
+              placeholder="e.g., Royal Canin, Hill's"
+              maxLength={100}
+              {...register('brandName')}
+            />
+          {errors.brandName && <ErrorText>{errors.brandName.message}</ErrorText>}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="productName">Product Name (Optional)</Label>
         <Input
           id="productName"
-          value={formData.productName}
-          onChange={(e) => updateField('productName', e.target.value)}
           placeholder="e.g., Adult Chicken & Rice"
           maxLength={150}
+          {...register('productName')}
         />
-        {errors.productName && (
-          <p className="text-sm text-red-600">{errors.productName}</p>
-        )}
+        {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -107,20 +87,17 @@ export function DryFoodForm({
             id="bagWeight"
             type="number"
             step="0.01"
-            value={formData.bagWeight}
-            onChange={(e) => updateField('bagWeight', e.target.value)}
             placeholder="e.g., 5.5"
-            required
+            {...register('bagWeight')}
+            aria-invalid={!!errors.bagWeight}
           />
-          {errors.bagWeight && (
-            <p className="text-sm text-red-600">{errors.bagWeight}</p>
-          )}
+          {errors.bagWeight && <ErrorText>{errors.bagWeight.message}</ErrorText>}
         </div>
         <div className="space-y-2">
           <Label htmlFor="bagWeightUnit">Unit</Label>
           <Select
-            value={formData.bagWeightUnit}
-            onValueChange={(value) => updateField('bagWeightUnit', value as 'kg' | 'pounds')}
+            value={watch('bagWeightUnit')}
+            onValueChange={(value) => setValue('bagWeightUnit', value as 'kg' | 'pounds')}
           >
             <SelectTrigger>
               <SelectValue />
@@ -142,14 +119,11 @@ export function DryFoodForm({
           id="dailyAmount"
           type="number"
           step="0.01"
-          value={formData.dailyAmount}
-          onChange={(e) => updateField('dailyAmount', e.target.value)}
           placeholder="e.g., 120"
-          required
+          {...register('dailyAmount')}
+          aria-invalid={!!errors.dailyAmount}
         />
-        {errors.dailyAmount && (
-          <p className="text-sm text-red-600">{errors.dailyAmount}</p>
-        )}
+        {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -157,22 +131,12 @@ export function DryFoodForm({
         <Input
           id="dateStarted"
           type="date"
-          value={formData.dateStarted}
-          onChange={(e) => updateField('dateStarted', e.target.value)}
           max={new Date().toISOString().split('T')[0]}
-          required
+          {...register('dateStarted')}
+          aria-invalid={!!errors.dateStarted}
         />
-        {errors.dateStarted && (
-          <p className="text-sm text-red-600">{errors.dateStarted}</p>
-        )}
+        {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
       </div>
-
-      {errors.general && (
-        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-          {errors.general}
-        </div>
-      )}
-
       <Button type="submit" disabled={isLoading} className="w-full">
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {submitLabel}

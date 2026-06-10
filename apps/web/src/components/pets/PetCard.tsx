@@ -50,15 +50,30 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
   const placeholderImage = (
     <div className="w-full aspect-square bg-muted rounded-md flex items-center justify-center">
       <div className="text-center">
-        <Heart className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-        <MutedText>No photo</MutedText>
+        <img
+            src="/single/Pettr-Paw_2026.svg"
+            aria-hidden="true"
+            className="w-40 h-40 opacity-[1] pointer-events-none select-none"
+            alt=""
+          />        
+          <MutedText>No photo</MutedText>
         </div>
     </div>
   );
 
+
+
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
+    <Card className="group hover:shadow-md transition-shadow duration-200 relative overflow-hidden h-full">
       <CardHeader className="pb-0">
+  
+      {/* Decorative paw background */}
+      <img
+            src="/single/Pettr-Paw_2026.svg"
+            aria-hidden="true"
+            className="absolute -bottom-4 -right-4 w-2/5 opacity-[0.15] pointer-events-none select-none"
+            alt=""
+          />   
 
         {/* Name + menu — always on top */}
         <div className="flex items-start justify-between gap-2">

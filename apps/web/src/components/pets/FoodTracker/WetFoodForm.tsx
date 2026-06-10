@@ -1,6 +1,6 @@
-'use client';
-
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,18 +14,8 @@ import {
 import { Loader2 } from 'lucide-react';
 import type { WetFoodFormData } from '@/types/food';
 import { WET_FOOD_UNITS, WetFoodEntry } from '@/types/food';
-import { validateWetFoodData } from '@/lib/validations/food';
-
-// type WetFoodSubmitData = {
-//   brandName?: string;
-//   productName?: string;
-//   numberOfUnits: number; // Number for submission
-//   weightPerUnit: string;
-//   wetWeightUnit: 'grams' | 'oz';
-//   dailyAmount: string;
-//   wetDailyAmountUnit: 'grams' | 'oz';
-//   dateStarted: string;
-// };
+import { wetFoodSchema } from '@/lib/validations/food';
+import { ErrorText } from '@/components/ui/typography';
 
 interface WetFoodFormProps {
   initialData?: Partial<WetFoodFormData>;
@@ -34,77 +24,65 @@ interface WetFoodFormProps {
   submitLabel?: string;
 }
 
+type WetFoodFormValues = z.infer<typeof wetFoodSchema>;
+
+
 export function WetFoodForm({ 
   initialData, 
   onSubmit, 
   isLoading = false,
   submitLabel = 'Add Wet Food'
 }: WetFoodFormProps) {
-  const [formData, setFormData] = useState<WetFoodFormData>({
-    brandName: initialData?.brandName || '',
-    productName: initialData?.productName || '',
-    numberOfUnits: initialData?.numberOfUnits ? String(initialData.numberOfUnits) : '',
-    weightPerUnit: initialData?.weightPerUnit || '',
-    wetWeightUnit: initialData?.wetWeightUnit || 'grams',
-    dailyAmount: initialData?.dailyAmount || '',
-    wetDailyAmountUnit: initialData?.wetDailyAmountUnit || 'grams',
-    dateStarted: initialData?.dateStarted || new Date().toISOString().split('T')[0],
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<WetFoodFormValues>({
+    resolver: zodResolver(wetFoodSchema),
+    shouldFocusError: false,
+    defaultValues: {
+      brandName: initialData?.brandName ?? '',
+      productName: initialData?.productName ?? '',
+      numberOfUnits: initialData?.numberOfUnits ?? '',
+      weightPerUnit: initialData?.weightPerUnit ?? '',
+      wetWeightUnit: initialData?.wetWeightUnit ?? 'grams',
+      dailyAmount: initialData?.dailyAmount ?? '',
+      wetDailyAmountUnit: initialData?.wetDailyAmountUnit ?? 'grams',
+      dateStarted: initialData?.dateStarted ?? new Date().toISOString().split('T')[0],
+    },
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    try {
-      // Validate the form data
-      validateWetFoodData(formData);
-
-      // Submit the converted data
-      await onSubmit(formData);
-
-    } catch (error) {
-      if (error instanceof Error) {
-        // Parse validation errors
-        if (error.message.includes('validation failed')) {
-          const errorMsg = error.message.replace('Wet food validation failed: ', '');
-          setErrors({ general: errorMsg });
-        } else {
-          setErrors({ general: error.message });
-        }
-      }
-    }
+  const onFormSubmit = async (data: WetFoodFormValues) => {
+    await onSubmit(data);
   };
-
-  const updateField = (field: keyof WetFoodFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear field-specific error
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+  
+  // Recalculate total weight from watched values
+  const watchedUnits = watch('numberOfUnits');
+  const watchedWeightPerUnit = watch('weightPerUnit');
+  const totalWeight =
+    watchedUnits && watchedWeightPerUnit
+      ? parseInt(watchedUnits) * parseFloat(watchedWeightPerUnit)
+      : 0;
 
   // Calculate total weight for display
-  const totalWeight = formData.numberOfUnits && formData.weightPerUnit 
-    ? parseInt(formData.numberOfUnits) * parseFloat(formData.weightPerUnit)
-    : 0;
+  // const totalWeight = formData.numberOfUnits && formData.weightPerUnit 
+  //   ? parseInt(formData.numberOfUnits) * parseFloat(formData.weightPerUnit)
+  //   : 0;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
       {/* Brand Name */}
       <div className="space-y-2">
         <Label htmlFor="brandName">Brand Name (Optional)</Label>
         <Input
           id="brandName"
-          value={formData.brandName}
-          onChange={(e) => updateField('brandName', e.target.value)}
-          placeholder="e.g., Hill's, Wellness"
+          placeholder="e.g., Royal Canin, Hill's"
           maxLength={100}
+          {...register('brandName')}
         />
-        {errors.brandName && (
-          <p className="text-sm text-red-600">{errors.brandName}</p>
-        )}
+        {errors.brandName && <ErrorText>{errors.brandName.message}</ErrorText>}
       </div>
 
       {/* Product Name */}
@@ -112,14 +90,11 @@ export function WetFoodForm({
         <Label htmlFor="productName">Product Name (Optional)</Label>
         <Input
           id="productName"
-          value={formData.productName}
-          onChange={(e) => updateField('productName', e.target.value)}
           placeholder="e.g., Chicken Pâté, Tuna in Gravy"
           maxLength={150}
+          {...register('productName')}
         />
-        {errors.productName && (
-          <p className="text-sm text-red-600">{errors.productName}</p>
-        )}
+        {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
       </div>
 
       {/* Number of Units */}
@@ -130,14 +105,10 @@ export function WetFoodForm({
           type="number"
           min="1"
           step="1"
-          value={formData.numberOfUnits}
-          onChange={(e) => updateField('numberOfUnits', e.target.value)}
           placeholder="e.g., 12"
-          required
+          {...register('numberOfUnits')}
         />
-        {errors.numberOfUnits && (
-          <p className="text-sm text-red-600">{errors.numberOfUnits}</p>
-        )}
+        {errors.numberOfUnits && <ErrorText>{errors.numberOfUnits.message}</ErrorText>}
       </div>
 
       {/* Weight Per Unit */}
@@ -148,20 +119,17 @@ export function WetFoodForm({
             id="weightPerUnit"
             type="number"
             step="0.1"
-            value={formData.weightPerUnit}
-            onChange={(e) => updateField('weightPerUnit', e.target.value)}
             placeholder="e.g., 85"
-            required
+            {...register('weightPerUnit')}
+            aria-invalid={!!errors.weightPerUnit}
           />
-          {errors.weightPerUnit && (
-            <p className="text-sm text-red-600">{errors.weightPerUnit}</p>
-          )}
+          {errors.weightPerUnit && <ErrorText>{errors.weightPerUnit.message}</ErrorText>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="wetWeightUnit">Unit *</Label>
+          <Label htmlFor="wetWeightUnit">Unit</Label>
           <Select
-            value={formData.wetWeightUnit}
-            onValueChange={(value) => updateField('wetWeightUnit', value as 'grams' | 'oz')}
+            value={watch('wetWeightUnit')}
+            onValueChange={(value) => setValue('wetWeightUnit', value as 'grams' | 'oz')}
           >
             <SelectTrigger>
               <SelectValue />
@@ -177,11 +145,12 @@ export function WetFoodForm({
         </div>
       </div>
 
+
       {/* Total Weight Display */}
       {totalWeight > 0 && (
         <div className="bg-blue-50 p-3 rounded-md">
           <p className="text-sm text-blue-800">
-            Total Weight: {totalWeight.toFixed(1)} {formData.wetWeightUnit}
+            Total Weight: {totalWeight.toFixed(1)} {watch('wetWeightUnit')}
           </p>
         </div>
       )}
@@ -194,20 +163,17 @@ export function WetFoodForm({
             id="dailyAmount"
             type="number"
             step="0.1"
-            value={formData.dailyAmount}
-            onChange={(e) => updateField('dailyAmount', e.target.value)}
             placeholder="e.g., 85"
-            required
+            {...register('dailyAmount')}
+            aria-invalid={!!errors.dailyAmount}
           />
-          {errors.dailyAmount && (
-            <p className="text-sm text-red-600">{errors.dailyAmount}</p>
-          )}
+          {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="wetDailyAmountUnit">Unit *</Label>
+          <Label htmlFor="wetDailyAmountUnit">Unit</Label>
           <Select
-            value={formData.wetDailyAmountUnit}
-            onValueChange={(value) => updateField('wetDailyAmountUnit', value as 'grams' | 'oz')}
+            value={watch('wetDailyAmountUnit')}
+            onValueChange={(value) => setValue('wetDailyAmountUnit', value as 'grams' | 'oz')}
           >
             <SelectTrigger>
               <SelectValue />
@@ -229,22 +195,12 @@ export function WetFoodForm({
         <Input
           id="dateStarted"
           type="date"
-          value={formData.dateStarted}
-          onChange={(e) => updateField('dateStarted', e.target.value)}
           max={new Date().toISOString().split('T')[0]}
-          required
+          {...register('dateStarted')}
+          aria-invalid={!!errors.dateStarted}
         />
-        {errors.dateStarted && (
-          <p className="text-sm text-red-600">{errors.dateStarted}</p>
-        )}
+        {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
       </div>
-
-      {/* General Errors */}
-      {errors.general && (
-        <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-          {errors.general}
-        </div>
-      )}
 
       {/* Submit Button */}
       <Button type="submit" disabled={isLoading} className="w-full">

@@ -46,6 +46,7 @@ export function useVetForm(options: UseVetFormOptions = {}) {
   const form = useForm({
     resolver: zodResolver(baseVeterinarianFormSchema),
     defaultValues: getInitialValues(),
+    shouldFocusError: false,
   });
 
   // Reset form with new vet data (useful for switching between vets)

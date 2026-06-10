@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Edit, Trash2, Calendar, Package, Utensils, MoreHorizontal, CheckSquare } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Package, Utensils, MoreHorizontal, CheckSquare } from 'lucide-react';
 import { WetFoodForm } from './WetFoodForm';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
@@ -155,7 +155,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                               Mark As Finished
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
-                              <Edit className="h-4 w-4 mr-2" />
+                              <Edit2 className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />

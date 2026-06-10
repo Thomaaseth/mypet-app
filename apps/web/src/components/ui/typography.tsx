@@ -182,7 +182,6 @@ export function ErrorText({
   return (
     <p
       className={cn('text-destructive', className)}
-      style={{ fontSize: 'clamp(0.7rem, 2.5vw, 0.875rem)' }}
       {...props}
     />
   );
@@ -195,7 +194,6 @@ export function HelperText({
   return (
     <p
       className={cn('text-muted-foreground', className)}
-      style={{ fontSize: 'clamp(0.7rem, 2.5vw, 0.875rem)' }}
       {...props}
     />
   );

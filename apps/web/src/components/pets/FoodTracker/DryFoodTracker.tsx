@@ -1,5 +1,3 @@
-'use client';
-
 import { DryFoodForm } from './DryFoodForm';
 import { DryFoodList } from './DryFoodList';
 import { GenericFoodTracker } from './GenericFoodTracker';
