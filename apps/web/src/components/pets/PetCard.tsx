@@ -53,7 +53,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
         <img
             src="/single/Pettr-Paw_2026.svg"
             aria-hidden="true"
-            className="w-40 h-40 opacity-[1] pointer-events-none select-none"
+            className="w-16 h-16 opacity-30 pointer-events-none select-none mx-auto mb-2"
             alt=""
           />        
           <MutedText>No photo</MutedText>
@@ -123,9 +123,17 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
               />
             ) : (
               <div className="w-full h-full lg:aspect-square bg-muted rounded-md flex items-center justify-center">
-                <Heart className="h-6 w-6 lg:h-8 lg:w-8 text-muted-foreground" />
+              <div className="flex flex-col items-center gap-2">
+                <img
+                  src="/single/Pettr-Paw_2026.svg"
+                  aria-hidden="true"
+                  className="w-10 h-10 lg:w-14 lg:h-14 opacity-30 pointer-events-none select-none"
+                  alt=""
+                />
+                <MutedText>No photo</MutedText>
               </div>
-            )}
+            </div>
+          )}
           </div>
 
           {/* Info */}

@@ -109,7 +109,7 @@ export default function VetCard({
           
 
           {/* Right — expand + dropdown */}
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <CollapsibleTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                 {isExpanded ? (

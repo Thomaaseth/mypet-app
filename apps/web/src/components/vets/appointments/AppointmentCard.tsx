@@ -100,7 +100,7 @@ export default function AppointmentCard({
               </Badge>
             </div>
             <CardAction>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <CollapsibleTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                   {isExpanded ? (

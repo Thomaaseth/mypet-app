@@ -248,7 +248,7 @@ export default function PetList() {
               <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
 
                 {/* Left col — sticky pet card */}
-                <div className="lg:sticky lg:top-20">
+                <div className="lg:sticky lg:top-4">
                   <PetCard
                     pet={pet}
                     onEdit={() => setEditingPet(pet)}
