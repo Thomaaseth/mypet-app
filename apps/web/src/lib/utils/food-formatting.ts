@@ -25,41 +25,15 @@ export function getFeedingStatusLabel(status: FeedingStatus): string {
     case 'overfeeding':
       return 'Overfeeding';
     case 'slightly-over':
-      return 'Slightly Overfeeding';
+      return 'Slightly over';
     case 'underfeeding':
       return 'Underfeeding';
     case 'slightly-under':
-      return 'Slightly Underfeeding';
+      return 'Slightly under';
     case 'normal':
       return 'Normal';
   }
 }
-
-// export function getFeedingStatusIcon(status: FeedingStatus): string {
-//   switch (status) {
-//     case 'overfeeding':
-//       return '🔴';
-//     case 'slightly-over':
-//       return '🟠';
-//     case 'underfeeding':
-//       return '🔴';
-//     case 'slightly-under':
-//       return '🟡';
-//     case 'normal':
-//       return '🟢';
-//   }
-// }
-
-// export function formatConsumptionSummary(entry: DryFoodEntry | WetFoodEntry): string {
-//   if (!entry.actualDaysElapsed || !entry.feedingStatus) {
-//     return '';
-//   }
-
-//   const statusLabel = getFeedingStatusLabel(entry.feedingStatus);
-//   const icon = getFeedingStatusIcon(entry.feedingStatus);
-  
-//   return `${icon} ${statusLabel} - ${entry.actualDaysElapsed} days`;
-// }
 
 export function calculateExpectedDays(entry: DryFoodEntry | WetFoodEntry): number {
   if (entry.foodType === 'dry') {
@@ -80,17 +54,32 @@ export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): 
     return '';
   }
 
-  const expectedDays = calculateExpectedDays(entry);
-  const daysDifference = Math.abs(entry.actualDaysElapsed - expectedDays);
+  // const expectedDays = calculateExpectedDays(entry);
+  // const daysDifference = Math.abs(entry.actualDaysElapsed - expectedDays);
   const statusLabel = getFeedingStatusLabel(entry.feedingStatus);
 
-  if (entry.feedingStatus === 'overfeeding' || entry.feedingStatus === 'slightly-over') {
-    return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
-  } else if (entry.feedingStatus === 'underfeeding' || entry.feedingStatus === 'slightly-under') {
-    return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
-  } else {
-    return statusLabel;
+  if (entry.actualDailyConsumption) {
+    const unit = entry.foodType === 'dry'
+      ? (entry as DryFoodEntry).dryDailyAmountUnit
+      : (entry as WetFoodEntry).wetDailyAmountUnit;
+    const avg = entry.foodType === 'wet' && (entry as WetFoodEntry).wetDailyAmountUnit === 'oz'
+      ? (entry.actualDailyConsumption / 28.3495).toFixed(2)
+      : entry.actualDailyConsumption.toFixed(1);
+    
+    const shortUnit = unit === 'grams' ? 'g' : unit; // 'oz' stays 'oz'
+
+    return `${statusLabel} • ${avg}${shortUnit}/day`;
   }
+
+  return statusLabel;
+
+  // if (entry.feedingStatus === 'overfeeding' || entry.feedingStatus === 'slightly-over') {
+  //   return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
+  // } else if (entry.feedingStatus === 'underfeeding' || entry.feedingStatus === 'slightly-under') {
+  //   return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
+  // } else {
+  //   return statusLabel;
+  // }
 }
 
 /**

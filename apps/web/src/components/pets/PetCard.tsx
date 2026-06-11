@@ -6,7 +6,6 @@ import {
   Trash2, 
   Calendar,
   Weight,
-  Heart,
   HeartOff,
   Venus,
   Mars,

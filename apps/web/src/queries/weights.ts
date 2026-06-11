@@ -23,6 +23,7 @@ interface UseWeightEntriesOptions {
 // Chart data interface for display
 export interface WeightChartData {
   date: string; // For display: "Jan 15, 2024"
+  timestamp: number;   // Unix ms — for time-scale X axis
   weight: number; // Parsed number for chart
   originalDate: string; // Original ISO date for sorting
 }
@@ -45,6 +46,7 @@ export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
       // Convert to chart data format
       const chartData: WeightChartData[] = sortedEntries.map(entry => ({
         date: formatDateForDisplay(entry.date),
+        timestamp: new Date(entry.date).getTime(),
         weight: parseFloat(entry.weight),
         originalDate: entry.date,
       }))

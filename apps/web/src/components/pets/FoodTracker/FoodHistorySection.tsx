@@ -15,7 +15,9 @@ import {
   Hourglass,
   Calendar,
   CheckCircle,
-  MoreHorizontal 
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight, 
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,6 +42,8 @@ interface FoodHistorySectionProps {
   isLoading?: boolean;
 }
 
+const PAGE_SIZE = 5;
+
 export function FoodHistorySection({ 
   entries, 
   foodType, 
@@ -51,6 +55,7 @@ export function FoodHistorySection({
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
+  const [currentPage, setCurrentPage ] = useState(1);
 
   const handleDelete = async () => {
     if (!deletingEntry) return;
@@ -60,6 +65,12 @@ export function FoodHistorySection({
       setDeletingEntry(null);
     }
   };
+
+  const totalPages = Math.ceil(entries.length / PAGE_SIZE);
+  const paginatedEntries = entries.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   if (entries.length === 0) return null;
 
@@ -75,8 +86,13 @@ export function FoodHistorySection({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="h-8 w-8 p-0"
+              onClick={() => {
+                setIsExpanded(prev => {
+                  if (prev) setCurrentPage(1);
+                  return !prev;
+                });
+              }}
+                className="h-8 w-8 p-0"
             >
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4" />
@@ -90,7 +106,7 @@ export function FoodHistorySection({
         {isExpanded && (
           <CardContent className="pt-0">
             <div className="space-y-3">
-              {entries.map((entry) => (
+              {paginatedEntries.map((entry) => (
                 <div key={entry.id} className="flex items-start justify-between p-3 bg-muted/30 rounded-lg">
                 <div className="flex-1 min-w-0">
               
@@ -137,18 +153,6 @@ export function FoodHistorySection({
                           {(entry as WetFoodEntry).dailyAmount} {(entry as WetFoodEntry).wetDailyAmountUnit}/day
                         </span>
                       </>
-                    )}
-                    {entry.actualDailyConsumption && (
-                      <span className="flex items-center gap-1">
-                        <Utensils className="h-3 w-3" />
-                        Avg {foodType === 'dry'
-                          ? `${entry.actualDailyConsumption.toFixed(1)} ${(entry as DryFoodEntry).dryDailyAmountUnit}`
-                          : `${(entry as WetFoodEntry).wetDailyAmountUnit === 'oz'
-                              ? (entry.actualDailyConsumption / 28.3495).toFixed(2)
-                              : entry.actualDailyConsumption.toFixed(1)
-                            } ${(entry as WetFoodEntry).wetDailyAmountUnit}`
-                        }/day
-                      </span>
                     )}
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
@@ -204,6 +208,34 @@ export function FoodHistorySection({
                   </div>
                 </div>
               ))}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-3 border-t border-border mt-3">
+                  <MutedText>
+                    Page {currentPage} of {totalPages}
+                  </MutedText>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => setCurrentPage(p => p - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => setCurrentPage(p => p + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         )}

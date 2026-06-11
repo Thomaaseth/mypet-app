@@ -40,11 +40,7 @@ export type {
   WetFoodEntry, 
   DryFoodFormData, 
   WetFoodFormData,
-  // DryFoodEntriesApiResponse,
-  // WetFoodEntriesApiResponse,
-  // AllFoodEntriesApiResponse,
   FoodError,
-  // FoodEntriesApiResponse
 } from './types';
 
 export { FoodRepository } from './repository';

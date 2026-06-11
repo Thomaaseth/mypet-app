@@ -35,7 +35,7 @@ export class FoodRepository {
     return result.foodEntry;
   }
 
-  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntry[]> {
+  async getFinishedDryFoodEntries(petId: string, limit: number = 50): Promise<DryFoodEntry[]> {
     const result = await get<{ foodEntries: DryFoodEntry[] }>(
         `/api/pets/${petId}/food/finished`,
         { foodType: 'dry', limit }
@@ -71,7 +71,7 @@ export class FoodRepository {
     return result.foodEntry;
   }
 
-  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntry[]> {
+  async getFinishedWetFoodEntries(petId: string, limit: number = 50): Promise<WetFoodEntry[]> {
     const result = await get<{ foodEntries: WetFoodEntry[] }>(
         `/api/pets/${petId}/food/finished`,
         { foodType: 'wet', limit }

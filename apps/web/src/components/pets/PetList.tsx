@@ -236,7 +236,12 @@ export default function PetList() {
                 value={pet.id}
                 className="flex items-center gap-2 text-left min-w-[160px]"
               >
-                <Heart className="h-4 w-4" />
+              <img
+                  src="/single/Pettr-Paw_Solid-black_2026.svg"
+                  aria-hidden="true"
+                  className="w-4 h-4 opacity-[0.5] pointer-events-none select-none"
+                  alt=""
+                />   
                 <span className="truncate">{pet.name}</span>
               </TabsTrigger>
             ))}
