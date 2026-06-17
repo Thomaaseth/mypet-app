@@ -26,8 +26,9 @@ import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
 import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
-import { formatRemainingWeight } from '@/lib/utils/food-formatting';
+import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-formatting';
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
+import { FoodUnitLabel } from './FoodUnitLabel'
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
@@ -166,14 +167,14 @@ export function DryFoodList({
                       </DropdownMenu>
                     </div>
                   </div>
-                  <div className="flex flex-wrap min-[480px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground min-w-0">
+                  <div className="flex flex-wrap @min-[280px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground min-w-0">
                       <span className="flex items-center gap-1 shrink-0">
                         <Weight className="h-4 w-4" />
-                        {entry.bagWeight} {entry.bagWeightUnit}
+                        <span>{entry.bagWeight} <FoodUnitLabel unit={entry.bagWeightUnit}/></span>
                       </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Utensils className="h-4 w-4" />
-                        {entry.dailyAmount} {entry.dryDailyAmountUnit}/day
+                        <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit={entry.dryDailyAmountUnit} />/day </span>
                       </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Calendar className="h-4 w-4" />
@@ -182,8 +183,8 @@ export function DryFoodList({
                     </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 min-[480px]:grid-cols-3 gap-2 min-[480px]:gap-4 mb-4">
-                    <div>
+                <div className="grid grid-cols-2 @min-[320px]:grid-cols-3 gap-6 @min-[480px]:gap-4 mb-4">
+                <div>
                       <StatLabel>~Remaining</StatLabel>
                       <StatValue>{formatRemainingWeight(entry.remainingWeight)} {entry.bagWeightUnit}</StatValue>
                     </div>

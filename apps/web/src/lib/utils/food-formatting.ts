@@ -97,3 +97,14 @@ export function formatRemainingWeight(weight: number): string {
     return weight.toFixed(1).replace(/\.?0+$/, '');
   }
 }
+
+/**
+ * Trim a decimal string to at most 1 decimal place
+ * - "85.00" -> "85"
+ * - "85.50" -> "85.5"
+ * - "85.96" -> "86" (rounds)
+ */
+export function formatFoodQuantity(value: string): string {
+  const num = parseFloat(value);
+  return num.toFixed(1).replace(/\.?0+$/, '');
+}

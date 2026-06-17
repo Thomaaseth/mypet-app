@@ -26,8 +26,10 @@ import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { FoodHistorySection } from './FoodHistorySection';
 import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
-import { formatRemainingWeight } from '@/lib/utils/food-formatting';
+import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-formatting';
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
+import { FoodUnitLabel } from './FoodUnitLabel'
+
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
@@ -170,15 +172,15 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                         </DropdownMenu>
                     </div>
                   </div>
-                  <div className="flex flex-wrap min-[480px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap @min-[320px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 shrink-0">
                       <Package className="h-4 w-4" />
-                      {entry.numberOfUnits} × {entry.weightPerUnit} {entry.wetWeightUnit}
-                    </span>
+                      <span>{entry.numberOfUnits} x {formatFoodQuantity(entry.weightPerUnit)} <FoodUnitLabel unit={entry.wetWeightUnit} /></span>
+                      </span>
                     <span className="flex items-center gap-1 shrink-0">
                       <Utensils className="h-4 w-4" />
-                      {entry.dailyAmount} {entry.wetDailyAmountUnit}/day
-                    </span>
+                      <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit={entry.wetDailyAmountUnit} />/day</span>
+                      </span>
                     <span className="flex items-center gap-1 shrink-0">
                       <Calendar className="h-4 w-4" />
                       {formatDateForDisplay(entry.dateStarted)}
@@ -186,15 +188,11 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                   </div>
                 </CardHeader>
                <CardContent>
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                   <div>
-                    <StatLabel>~Total Weight</StatLabel>
-                    <StatValue>{formatRemainingWeight(totalWeight)} {entry.wetWeightUnit}</StatValue>
-                   </div>
-                   <div>
+               <div className="grid grid-cols-2 @min-[320px]:grid-cols-3 gap-6 @min-[320px]:gap-4 mb-4">
+               <div>
                     <StatLabel>~Remaining</StatLabel>
                     <StatValue>{formatRemainingWeight(entry.remainingWeight)} {entry.wetWeightUnit}</StatValue>
-                   </div>
+                    </div>
                    <div>
                     <StatLabel>~Days Left</StatLabel>
                     <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>

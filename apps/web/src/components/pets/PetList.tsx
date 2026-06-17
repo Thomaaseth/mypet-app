@@ -264,10 +264,8 @@ export default function PetList() {
                 {/* Right col — scrollable trackers */}
                 <div className="min-w-0 space-y-6">
                   {/* Weight + Food side by side, wrapping on smaller screens */}
-                  <div
-                      className="grid gap-6"
-                      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(420px, 100%), 1fr))' }}
-                      >                    
+                  <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
+                 
                     <WeightTracker 
                       petId={pet.id} 
                       animalType={pet.animalType} 
