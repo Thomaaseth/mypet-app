@@ -43,8 +43,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTargetRangeDialogOpen, setIsTargetRangeDialogOpen] = useState(false);
   const [showLearnMoreDialog, setShowLearnMoreDialog] = useState(false);
-  const [isEducationalBannerDismissed, setIsEducationalBannerDismissed] = 
-    useLocalStorage(`weight-target-banner-dismissed-${petId}`, false);
 
   // Queries
   const {  
@@ -300,7 +298,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         )}
 
         {/* Educational Banner (when no target + has entries + not dismissed) */}
-        {!hasTargetRange && weightEntries.length > 0 && !isEducationalBannerDismissed && (
+        {!hasTargetRange && weightEntries.length > 0  && (
          <Alert>
           <AlertDescription className="flex items-center justify-between gap-3 text-xs sm:text-sm">
             <span>
@@ -309,7 +307,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
             <div className="flex items-center gap-1 flex-shrink-0">
               <Button 
                 variant="link" 
-                className="h-auto p-0 text-xs sm:text-sm"
+                className="h-0 p-1 text-xs sm:text-sm"
                 onClick={() => setShowLearnMoreDialog(true)}
               >
                 Learn more
@@ -322,14 +320,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               >
                 <Target className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => setIsEducationalBannerDismissed(true)}
-              >
-               <X className="h-4 w-4" />
-             </Button>
            </div>
          </AlertDescription>
        </Alert>
@@ -409,6 +399,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         </ResponsiveDialog>
 
         {/* Weight History Card with Collapsible Content */}
+        {weightEntries.length > 0 && (
         <Card>
           <Collapsible open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
             <CollapsibleTrigger asChild>
@@ -454,6 +445,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
             </CollapsibleContent>
           </Collapsible>
         </Card>
+        )}
       </CardContent>
     </Card>
   );

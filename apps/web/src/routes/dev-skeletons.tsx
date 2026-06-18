@@ -7,7 +7,6 @@ export const Route = createFileRoute('/dev-skeletons')({
 })
 
 function RouteComponent() {
-  return <VetListSkeleton />
-
-  // return <PetListSkeleton />
+  // return <VetListSkeleton />
+  return <PetListSkeleton />
 }
