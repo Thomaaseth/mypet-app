@@ -1,5 +1,8 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { WeightTrackerSkeleton } from './WeightSkeleton';
+import { FoodTrackerSkeleton } from './FoodSkeleton';
+import { NotesWidgetSkeleton } from './NotesSkeleton';
 
 export function PetCardSkeleton() {
   return (
@@ -47,57 +50,39 @@ export function PetListSkeleton() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="space-y-6">
-        {/* Header Skeleton */}
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-9 w-32" /> {/* Title */}
-            <Skeleton className="h-5 w-48" /> {/* Description */}
+          <div className="space-y-1">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="h-5 w-40" />
           </div>
-          <Skeleton className="h-10 w-24" /> {/* Add button */}
+          <Skeleton className="h-10 w-28" />
         </div>
+        <Skeleton className="h-10 w-full" />
 
-        {/* Tabs Skeleton */}
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Skeleton className="h-10 w-24" /> {/* Tab 1 */}
-            <Skeleton className="h-10 w-20" /> {/* Tab 2 */}
-            <Skeleton className="h-10 w-28" /> {/* Tab 3 */}
-          </div>
-          
-          {/* Tab Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+          <div className="lg:sticky lg:top-4">
             <PetCardSkeleton />
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <Skeleton className="h-6 w-24" /> {/* Quick Stats title */}
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="flex justify-between">
-                      <Skeleton className="h-4 w-20" />
-                      <Skeleton className="h-4 w-16" />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <Skeleton className="h-6 w-28" /> {/* Coming Soon title */}
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-4 w-full" />
-                </CardContent>
-              </Card>
+          </div>
+          <div className="min-w-0 space-y-6">
+            <div className="grid grid-cols-1 3xl:grid-cols-2 gap-6">
+              <WeightTrackerSkeleton />
+              <FoodTrackerSkeleton />
             </div>
+            <NotesWidgetSkeleton />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-40" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full" />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
 export function PetFormSkeleton() {
   return (
     <div className="space-y-6">
@@ -137,7 +122,7 @@ export function PetFormSkeleton() {
         <Skeleton className="h-3 w-44" /> {/* Help text */}
       </div>
 
-      Microchip
+      {/* Microchip */}
       <div className="space-y-2">
         <Skeleton className="h-4 w-32" /> {/* Label */}
         <Skeleton className="h-10 w-full" /> {/* Input */}
