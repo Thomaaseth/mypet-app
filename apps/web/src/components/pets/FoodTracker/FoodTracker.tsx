@@ -40,10 +40,13 @@ function FoodTrackerContent() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <UtensilsCrossed className="h-5 w-5" />
-          Food Tracker
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UtensilsCrossed className="h-5 w-5" />
+            <CardTitle>Food Tracker</CardTitle>  {/* spacer, exact default Button height */}
+          </div>
+        <div aria-hidden="true" className="h-9.5" />
+      </div>
       </CardHeader>
       <CardContent>
         {/* Food Status Summary - Restored! */}

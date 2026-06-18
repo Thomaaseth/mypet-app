@@ -64,7 +64,7 @@ export function PetListSkeleton() {
             <PetCardSkeleton />
           </div>
           <div className="min-w-0 space-y-6">
-            <div className="grid grid-cols-1 3xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
               <WeightTrackerSkeleton />
               <FoodTrackerSkeleton />
             </div>

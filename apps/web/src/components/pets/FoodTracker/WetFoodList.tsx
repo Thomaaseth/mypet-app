@@ -172,7 +172,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                         </DropdownMenu>
                     </div>
                   </div>
-                  <div className="flex flex-wrap @min-[320px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap @min-[240px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 shrink-0">
                       <Package className="h-4 w-4" />
                       <span>{entry.numberOfUnits} x {formatFoodQuantity(entry.weightPerUnit)} <FoodUnitLabel unit={entry.wetWeightUnit} /></span>
