@@ -50,8 +50,8 @@ export default function WeightChart({
           Add your first weight entry to start tracking your pet&apos;s weight progress.
         </EmptyStateDescription>
         {onAddEntry && (
-          <Button onClick={onAddEntry}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button size="sm" onClick={onAddEntry}>
+            <Plus className="h-4 w-4" />
             Add First Entry
           </Button>
         )}

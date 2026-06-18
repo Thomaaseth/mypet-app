@@ -201,11 +201,12 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
           </CardTitle>
           {notes && notes.length > 0 && !isAtLimit && (
             <Button
+              size="sm"
               onClick={handleStartAdd}
               disabled={isAdding}
               className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
             >
-              <Plus className="h-4 w-4 sm:mr-1" />
+              <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add note</span>
             </Button>
           )}
@@ -245,7 +246,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
                   Cancel
                 </Button>
                 <Button onClick={handleCreate} disabled={isCreating || !newNoteContent.trim()}>
-                  {isCreating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {isCreating && <Loader2 className="h-4 w-4 animate-spin sm:mr-2" />}
                   Add Note
                 </Button>
               </div>
@@ -274,8 +275,8 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
               <EmptyStateDescription className="mb-4">
                 Add things you want to remember about your pet.
               </EmptyStateDescription>
-              <Button onClick={handleStartAdd} disabled={isAdding}>
-                <Plus className="h-4 w-4 mr-1" />
+              <Button size="sm" onClick={handleStartAdd} disabled={isAdding}>
+                <Plus className="h-4 w-4" />
                 Add note
               </Button>
             </div>

@@ -174,8 +174,8 @@ export default function PetList() {
                     Add your first pet to start managing...
                   </EmptyStateDescription>
               </div>
-              <Button className="mt-4" onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="mt-4" size="sm" onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4" />
                 Add Your First Pet
               </Button>
               <ResponsiveDialog

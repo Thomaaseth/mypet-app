@@ -196,11 +196,11 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   <TooltipTrigger asChild>
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() => setIsTargetRangeDialogOpen(true)}
+                      className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                     >
-                      <Target className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Set Target Range</span>
+                      <Target className="h-4 w-4" />
+                      <span className="hidden sm:inline">Set Range</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
@@ -213,12 +213,11 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               </TooltipProvider>
             ) : (
               <Button 
-                variant="outline" 
-                size="sm" 
+                variant="outline"  
                 onClick={() => setIsTargetRangeDialogOpen(true)}
                 className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
-              >
-                <Target className="h-4 w-4 sm:mr-2" />
+                >
+                <Target className="h-4 w-4" />
                 <span className="hidden sm:inline">Edit Range</span>
               </Button>
             )}
@@ -226,10 +225,11 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
             {/* Add Weight Entry Button */}
             {weightEntries.length > 0 && (
               <Button 
+                size="sm"
                 onClick={() => setIsAddDialogOpen(true)}
-                className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
-              >
-                <Plus className="h-4 w-4 sm:mr-2" />
+                className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
+                >
+                <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Weight Entry</span>
               </Button>
             )}
@@ -250,7 +250,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   {trend === 'increasing' && <TrendingUp className="h-4 w-4 text-primary" />}
                   {trend === 'decreasing' && <TrendingDown className="h-4 w-4 text-secondary" />}
                   {trend === 'stable' && <Minus className="h-4 w-4 text-accent" />}
-                  <span className="hidden min-[480px]:inline text-muted-foreground capitalize">{trend}</span>
+                  <span className="hidden @min-[260px]:inline text-muted-foreground capitalize">{trend}</span>
                 </div>
               )}
             </div>

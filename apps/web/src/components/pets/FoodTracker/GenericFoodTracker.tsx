@@ -181,11 +181,11 @@ if (!hasActiveEntries) {
               {labels.emptyDescription}
             </EmptyStateDescription>
             
-            <Button className="min-w-[140px]" onClick={() => setIsAddDialogOpen(true)}>
+            <Button className="min-w-[140px]" size="sm" onClick={() => setIsAddDialogOpen(true)}>
               {isCreating ? (
                 <><Loader2 className="h-4 w-4 animate-spin mr-2" />Adding...</>
               ) : (
-                <><Plus className="h-4 w-4 mr-2" />{labels.emptyButtonText}</>
+                <><Plus className="h-4 w-4" />{labels.emptyButtonText}</>
               )}
             </Button>
             <ResponsiveDialog
@@ -224,6 +224,7 @@ return (
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
+            size="sm"
             disabled={disableAddButton}
             className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
             onClick={() => setIsAddDialogOpen(true)}

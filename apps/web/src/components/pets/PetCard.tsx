@@ -24,7 +24,7 @@ import { calculatePetAge } from '@/lib/validations/pet';
 import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
 import { usePetSignedUrl } from '@/queries/pets';
-import { MutedText } from '@/components/ui/typography';
+import { MutedText, SectionTitle } from '@/components/ui/typography';
 
 interface PetCardProps {
   pet: Pet;
@@ -78,7 +78,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
         {/* Name + menu — always on top */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="font-bold text-base truncate">{pet.name}</p>
+            <SectionTitle>{pet.name}</SectionTitle>
             <MutedText className="capitalize">
               {pet.species || pet.animalType}
             </MutedText>

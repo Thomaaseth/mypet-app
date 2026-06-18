@@ -147,13 +147,13 @@ export function DryFoodList({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
                             <CheckSquare className="h-4 w-4 mr-2" />
                             Mark As Finished
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
-                            <Edit2 className="h-4 w-4 mr-2" />
-                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
