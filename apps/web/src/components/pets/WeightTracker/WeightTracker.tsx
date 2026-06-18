@@ -448,6 +448,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                     onUpdateEntry={handleUpdateEntry}
                     onDeleteEntry={handleDeleteEntry}
                     isLoading={isActionLoading}
+                    isHistoryOpen={isHistoryOpen}
                   />
                 )}
               </CardContent>

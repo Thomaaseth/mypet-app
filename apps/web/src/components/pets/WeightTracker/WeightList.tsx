@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Table,
@@ -31,6 +31,10 @@ import { formatDateForDisplay } from '@/lib/validations/weight';
 import WeightForm from './WeightForm';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
 import type { WeightUnit } from '@/types/pet';
+import { usePagination } from '@/hooks/usePagination';
+import { PaginationControls } from '@/components/ui/pagination-controls';
+
+const PAGE_SIZE = 5;
 
 interface WeightListProps {
   animalType: 'cat' | 'dog';
@@ -39,6 +43,7 @@ interface WeightListProps {
   onUpdateEntry: (weightId: string, data: Partial<WeightFormData>) => Promise<WeightEntry | null>;
   onDeleteEntry: (weightId: string) => Promise<boolean>;
   isLoading?: boolean;
+  isHistoryOpen: boolean;
 }
 
 export default function WeightList({ 
@@ -47,7 +52,8 @@ export default function WeightList({
   weightUnit, 
   onUpdateEntry, 
   onDeleteEntry,
-  isLoading = false 
+  isLoading = false,
+  isHistoryOpen,
 }: WeightListProps) {
   const [editingEntry, setEditingEntry] = useState<WeightEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<WeightEntry | null>(null);
@@ -57,6 +63,15 @@ export default function WeightList({
   const sortedEntries = [...weightEntries].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const { currentPage, totalPages, paginatedItems, goToNextPage, goToPreviousPage, resetPage } =
+  usePagination(sortedEntries, PAGE_SIZE);
+
+  useEffect(() => {
+    if (!isHistoryOpen) {
+      resetPage();
+    }
+  }, [isHistoryOpen, resetPage]);
 
   const handleEditClick = (entry: WeightEntry) => {
     setEditingEntry(entry);
@@ -101,7 +116,7 @@ export default function WeightList({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedEntries.map((entry) => (
+          {paginatedItems.map((entry) => (
             <TableRow key={entry.id}>
               <TableCell className="font-medium">
                 {formatDateForDisplay(entry.date)}
@@ -136,6 +151,13 @@ export default function WeightList({
           ))}
         </TableBody>
       </Table>
+
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPrevious={goToPreviousPage}
+        onNext={goToNextPage}
+      />
 
       {/* Edit Dialog */}
       <ResponsiveDialog

@@ -16,8 +16,6 @@ import {
   Calendar,
   CheckCircle,
   MoreHorizontal,
-  ChevronLeft,
-  ChevronRight, 
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,6 +30,8 @@ import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDay
 import { EditFinishDateDialog } from './EditFinishDateDialog';
 import { DeleteFoodEntryDialog } from './DeleteFoodEntryDialog';
 import { MutedText, EntryTitle } from '@/components/ui/typography';
+import { usePagination } from '@/hooks/usePagination';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -55,7 +55,6 @@ export function FoodHistorySection({
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
-  const [currentPage, setCurrentPage ] = useState(1);
 
   const handleDelete = async () => {
     if (!deletingEntry) return;
@@ -66,11 +65,8 @@ export function FoodHistorySection({
     }
   };
 
-  const totalPages = Math.ceil(entries.length / PAGE_SIZE);
-  const paginatedEntries = entries.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  const { currentPage, totalPages, paginatedItems: paginatedEntries, goToNextPage, goToPreviousPage, resetPage } =
+  usePagination(entries, PAGE_SIZE);
 
   if (entries.length === 0) return null;
 
@@ -88,7 +84,7 @@ export function FoodHistorySection({
               size="sm"
               onClick={() => {
                 setIsExpanded(prev => {
-                  if (prev) setCurrentPage(1);
+                  if (prev) resetPage();
                   return !prev;
                 });
               }}
@@ -208,34 +204,14 @@ export function FoodHistorySection({
                   </div>
                 </div>
               ))}
+              
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between pt-3 border-t border-border mt-3">
-                  <MutedText>
-                    Page {currentPage} of {totalPages}
-                  </MutedText>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={() => setCurrentPage(p => p - 1)}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 w-7 p-0"
-                      onClick={() => setCurrentPage(p => p + 1)}
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronRight className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPrevious={goToPreviousPage}
+                onNext={goToNextPage}
+              />
             </div>
           </CardContent>
         )}

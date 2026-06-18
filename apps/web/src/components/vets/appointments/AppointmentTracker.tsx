@@ -136,8 +136,8 @@ export default function AppointmentTracker() {
               <EmptyStateDescription className="mb-4">
                 Schedule your first vet appointment
               </EmptyStateDescription>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4" />
                 Book Appointment
               </Button>
             </div>
@@ -175,7 +175,7 @@ export default function AppointmentTracker() {
                   onClick={() => setIsCreateDialogOpen(true)}
                   className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                 >
-                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">Book Appointment</span>
                 </Button>
               )}
@@ -207,8 +207,8 @@ export default function AppointmentTracker() {
                     <EmptyStateDescription className="mb-4">
                       Book a vet appointment to keep track of your pet's health.
                     </EmptyStateDescription>
-                    <Button onClick={() => setIsCreateDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button size= "sm" onClick={() => setIsCreateDialogOpen(true)}>
+                      <Plus className="h-4 w-4" />
                       Book Appointment
                     </Button>
                   </div>

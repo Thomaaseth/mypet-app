@@ -79,6 +79,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --breakpoint-3xl: 120rem; /* 1920px */
 }
 
 /* Colors */

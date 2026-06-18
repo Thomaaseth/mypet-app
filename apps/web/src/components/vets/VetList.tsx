@@ -165,8 +165,8 @@ export default function VetList() {
                   Add your first veterinarian to keep track...
                 </EmptyStateDescription>
               </div>
-                <Button className="mt-4" onClick={() => setIsCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button className="mt-4" size="sm" onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="h-4 w-4" />
                   Add Your First Veterinarian
                 </Button>
                 <ResponsiveDialog
@@ -225,10 +225,11 @@ export default function VetList() {
                 My Vets ({vets.length})
               </CardTitle>
               <Button 
+                size="sm"
                 onClick={() => setIsCreateDialogOpen(true)}
                 className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
               >
-                <Plus className="h-4 w-4 sm:mr-2" />
+                <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Vet</span>
               </Button>
             </div>
