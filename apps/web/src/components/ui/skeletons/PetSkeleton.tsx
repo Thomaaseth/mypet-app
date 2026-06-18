@@ -4,55 +4,39 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function PetCardSkeleton() {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+      <CardHeader className="pb-0">
+        <div className="flex items-start justify-between gap-2">
           <div className="space-y-2">
-            <Skeleton className="h-6 w-32" /> {/* Pet name */}
-            <Skeleton className="h-4 w-24" /> {/* Species */}
+            <Skeleton className="h-5 w-28" /> {/* Pet name */}
+            <Skeleton className="h-4 w-20" /> {/* Species */}
           </div>
-          <Skeleton className="h-8 w-8" /> {/* Menu button */}
+          <Skeleton className="h-8 w-8 flex-shrink-0" /> {/* Dropdown menu button */}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Pet Image */}
-        <Skeleton className="w-aspect-square rounded-md" />
-        
-        {/* Badges Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <Skeleton className="h-6 w-16" /> {/* Gender badge */}
-            <Skeleton className="h-6 w-24" /> {/* Neutered badge */}
+      <CardContent className="pt-1 px-4 pb-4">
+        <div className="flex gap-3 lg:flex-col lg:gap-0">
+          {/* Photo */}
+          <Skeleton className="flex-shrink-0 w-[45%] aspect-square lg:w-full lg:aspect-square lg:mb-3 rounded-md" />
+
+          {/* Info — vertical stack, matches real gender/neutered/age/weight rows */}
+          <div className="flex-1 min-w-0 flex flex-col gap-y-4">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4" />
+              <Skeleton className="h-4 w-16" />
+            </div>
           </div>
-        </div>
-        
-        {/* Age and Weight */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-4 w-4" /> {/* Calendar icon */}
-            <Skeleton className="h-4 w-16" /> {/* Age */}
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-4 w-4" /> {/* Weight icon */}
-            <Skeleton className="h-4 w-12" /> {/* Weight */}
-          </div>
-        </div>
-        
-        {/* Microchip */}
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-4" /> {/* MapPin icon */}
-          <Skeleton className="h-4 w-20" /> {/* Microchip */}
-        </div>
-        
-        {/* Notes */}
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </div>
-        
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          <Skeleton className="h-9 flex-1" /> {/* View button */}
-          <Skeleton className="h-9 flex-1" /> {/* Edit button */}
         </div>
       </CardContent>
     </Card>
@@ -153,7 +137,7 @@ export function PetFormSkeleton() {
         <Skeleton className="h-3 w-44" /> {/* Help text */}
       </div>
 
-      {/* Microchip */}
+      Microchip
       <div className="space-y-2">
         <Skeleton className="h-4 w-32" /> {/* Label */}
         <Skeleton className="h-10 w-full" /> {/* Input */}

@@ -155,7 +155,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
 
   
   if (data === undefined) {
-    console.log('SKELETON RENDERING for petId:', petId);
     return <WeightTrackerSkeleton />;
   }
 

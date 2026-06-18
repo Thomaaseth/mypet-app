@@ -24,7 +24,7 @@ import { calculatePetAge } from '@/lib/validations/pet';
 import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
 import { usePetSignedUrl } from '@/queries/pets';
-import { MutedText, SectionTitle } from '@/components/ui/typography';
+import { MutedText, SectionTitle, EntryTitle } from '@/components/ui/typography';
 
 interface PetCardProps {
   pet: Pet;
@@ -146,25 +146,25 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 {pet.gender === 'male' && <Mars className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 {pet.gender === 'female' && <Venus className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 {pet.gender === 'unknown' && <CircleHelp className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-                <span className="capitalize truncate">{pet.gender}</span>
+                <EntryTitle className="truncate">{pet.gender}</EntryTitle>
               </div>
               {pet.isNeutered && (
                 <div className="flex items-center gap-2">
                   <HeartOff className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <span className="truncate">Spayed/Neutered</span>
+                  <EntryTitle className="truncate">Spayed/Neutered</EntryTitle>
                 </div>
               )}
               {pet.birthDate && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <span className="truncate">{age}</span>
+                  <EntryTitle className="truncate">{age}</EntryTitle>
                 </div>
               )}
               <div className="flex items-center gap-2">
                 <Weight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <span className="truncate">
+                <EntryTitle className="truncate">
                   {latestWeight ? `${latestWeight.weight} ${latestWeight.weightUnit}` : 'No weight'}
-                </span>
+                </EntryTitle>
               </div>
             </div>
 
