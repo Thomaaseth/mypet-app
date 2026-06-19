@@ -61,15 +61,22 @@ export default function WeightChart({
 
   const isMobile = useIsMobile();
   
-  type TimeRange = '3M' | '6M' | '1Y' | 'ALL';
-  
+  type TimeRange = '3M' | '6M' | '1Y' | '2Y' | 'ALL';
+
   const [timeRange, setTimeRange] = useState<TimeRange>('1Y');
+
+  const TIME_RANGE_MONTHS: Record<Exclude<TimeRange, 'ALL'>, number> = {
+    '3M': 3,
+    '6M': 6,
+    '1Y': 12,
+    '2Y': 24,
+  };
   
   const cutoffDate = (() => {
     if (timeRange === 'ALL') return null;
     const d = new Date();
-    const months = timeRange === '3M' ? 3 : timeRange === '6M' ? 6 : 12;
-    d.setMonth(d.getMonth() - months);
+    // const months = timeRange === '3M' ? 3 : timeRange === '6M' ? 6 : 12;
+    d.setMonth(d.getMonth() - TIME_RANGE_MONTHS[timeRange]);
     return d;
   })();
   
@@ -136,8 +143,8 @@ export default function WeightChart({
           </div>
 
         {/* Time Range Filter */}
-        <div className="flex items-center gap-1 justify-center">
-          {(['3M', '6M', '1Y', 'ALL'] as TimeRange[]).map((range) => (
+        <div className="flex items-center gap-1 justify-end">
+          {(['3M', '6M', '1Y', '2Y', 'ALL'] as TimeRange[]).map((range) => (
             <Button
               key={range}
               variant={timeRange === range ? 'default' : 'outline'}

@@ -43,9 +43,9 @@ function FoodTrackerContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UtensilsCrossed className="h-5 w-5" />
-            <CardTitle>Food Tracker</CardTitle>  {/* spacer, exact default Button height */}
+            <CardTitle>Food Tracker</CardTitle>  
           </div>
-        <div aria-hidden="true" className="h-9.5" />
+        <div aria-hidden="true" className="h-9.5" /> {/* spacer, exact default Button height */}
       </div>
       </CardHeader>
       <CardContent>
