@@ -74,7 +74,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
     '2Y': 24,
   };
 
-  const [timeRange, setTimeRange] = useState<TimeRange>('1Y');
+  const [timeRange, setTimeRange] = useState<TimeRange>('6M');
   
   const cutoffDate = (() => {
     if (timeRange === 'ALL') return null;
@@ -268,8 +268,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-      
+      <CardContent className="space-y-3">
       <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -296,40 +295,34 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           onAddEntry={() => setIsAddDialogOpen(true)}
           latestWeight={latestWeight ? { weight: parseFloat(latestWeight.weight), date: latestWeight.date } : { weight: 0, date: '' }}
           filterSlot={
-          
-          <div className="flex items-center justify-between gap-2">
-            { /* Target badge (left) */ }
-            {hasTargetRange && weightTarget && status &&(
-                <Badge variant="outline" className={`text-xs ${getTargetStatusColor(status)}`}>
-                {status === 'within' ? 'Within Target' : status === 'above' ? 'Above Target' : 'Below Target'}
-              </Badge>
-              )}
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                { /* Target badge (left) */ }
+                  {hasTargetRange && weightTarget && status &&(
+                    <Badge variant="outline" className={`text-2xs ${getTargetStatusColor(status)}`}>
+                      {status === 'within' ? 'On Target' : status === 'above' ? 'Above Target' : 'Below Target'}
+                    </Badge>
+                  )}
 
 
-            {/* Time range filter (right) */}
-            <div className="flex items-center gap-1">
-              {(['3M', '6M', '1Y', '2Y', 'ALL'] as TimeRange[]).map((range) => (
-                <Button
-                  key={range}
-                  variant={timeRange === range ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-7 px-2 text-2xs"
-                  onClick={() => setTimeRange(range)}
-                >
-                  {range}
-                </Button>
-              ))}
-            </div>
-            </div>
+                  {/* Time range filter (right) */}
+                  <div className="flex items-center gap-1 sm:ml-auto">
+                    {(['3M', '6M', '1Y', '2Y', 'ALL'] as TimeRange[]).map((range) => (
+                      <Button
+                        key={range}
+                        variant={timeRange === range ? 'default' : 'outline'}
+                        size="sm"
+                        className="h-7 px-2 text-2xs"
+                        onClick={() => setTimeRange(range)}
+                      >
+                      {range}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             }
-            />
-          </CardContent>
+          />
+        </CardContent>
         </Card>
-
-        {/* Target Range + Time Filter Row */}
-        <div className="flex items-center justify-between gap-2">
-          
-        </div>
 
         {/* Educational Banner (when no target + has entries + not dismissed) */}
         {!hasTargetRange && weightEntries.length > 0  && (

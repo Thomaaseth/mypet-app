@@ -51,10 +51,10 @@ function FoodTrackerContent() {
       <CardContent>
         {/* Food Status Summary */}
         {activeFoodEntries.length > 0 && !isLoading && (
-          <div className="space-y-3 mb-6">
+          <div className="mb-4">
             {activeFoodEntries.length === 1 && hasCalculatedFields(activeFoodEntries[0]) ? (
               // Single food entry
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="rounded-lg bg-muted/50">
 
                 <div className="text-center">
                 <MetricLabel>{FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply</MetricLabel>
@@ -71,7 +71,7 @@ function FoodTrackerContent() {
               </div>
             ) : (
               // Multiple food entries - side by side
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
               {activeFoodEntries
                 .filter(hasCalculatedFields)
                 .sort((a) => a.foodType === 'dry' ? -1 : 1)
@@ -97,16 +97,16 @@ function FoodTrackerContent() {
       )}
 
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'dry' | 'wet')}>
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 mt-2">
             <TabsTrigger value="dry">Dry Food</TabsTrigger>
             <TabsTrigger value="wet">Wet Food</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="dry" className="mt-6">
+          <TabsContent value="dry" className="mt-4">
             <DryFoodTracker />
           </TabsContent>
           
-          <TabsContent value="wet" className="mt-6">
+          <TabsContent value="wet" className="mt-4">
             <WetFoodTracker />
           </TabsContent>
         </Tabs>

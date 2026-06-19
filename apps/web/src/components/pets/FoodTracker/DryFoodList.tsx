@@ -220,13 +220,16 @@ export function DryFoodList({
   
       {/* History Section - Always show if there are finished entries */}
       {finishedEntries.length > 0 && (
+        <div className="mt-2">
         <FoodHistorySection 
           entries={finishedEntries}
           foodType="dry"
           onEditFinishDate={onUpdateFinishDate}
           onDelete={onDelete}
         />
+        </div>
       )}
+      
   
       {/* Edit Dialog */}
       <ResponsiveDialog

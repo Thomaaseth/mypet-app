@@ -218,8 +218,8 @@ if (!hasActiveEntries) {
 
 // Normal state - HAS active entries (button always disabled here)
 return (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
+  <div>
+    <div className="flex justify-between items-center mb-6">
       <SectionTitle>{labels.entriesTitle}</SectionTitle>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -247,7 +247,7 @@ return (
 
     {/* Error Display */}
     {error && (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>

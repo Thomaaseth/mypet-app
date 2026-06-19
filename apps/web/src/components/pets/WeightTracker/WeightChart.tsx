@@ -121,10 +121,10 @@ export default function WeightChart({
                       accessibilityLayer
                       data={chartData}
                       margin={{
-                        top: 10,
+                        top: 5,
                         left: 0,
                         right: 8,
-                        bottom: 8,
+                        bottom: 5,
                     }}
                   >
                   <CartesianGrid vertical={false} />
@@ -143,7 +143,7 @@ export default function WeightChart({
                         }}
                     />
                     <YAxis
-                        width={38}
+                        width={36}
                         tickLine={false}
                         axisLine={false}
                         tickMargin={4}

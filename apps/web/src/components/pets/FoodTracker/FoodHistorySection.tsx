@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   ChevronDown, 
-  ChevronUp, 
+  ChevronRight,
   History, 
   RotateCcw, 
   Pencil, 
@@ -24,6 +24,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/validations/food';
 import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDays } from '@/lib/utils/food-formatting';
@@ -65,6 +70,11 @@ export function FoodHistorySection({
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) resetPage();
+    setIsExpanded(open);
+  };
+
   const { currentPage, totalPages, paginatedItems: paginatedEntries, goToNextPage, goToPreviousPage, resetPage } =
   usePagination(entries, PAGE_SIZE);
 
@@ -72,34 +82,32 @@ export function FoodHistorySection({
 
   return (
     <>
-      <Card className="mt-6 border-dashed">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <MutedText className="font-display flex items-center gap-2">
-            <History className="h-4 w-4" />
-              Recent {foodType === 'dry' ? 'Dry' : 'Wet'} Food History ({entries.length})
-            </MutedText>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setIsExpanded(prev => {
-                  if (prev) resetPage();
-                  return !prev;
-                });
-              }}
-                className="h-8 w-8 p-0"
-            >
-              {isExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        
-        {isExpanded && (
+      <Card>
+        <Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  <MutedText className="font-display">
+                    {foodType === 'dry' ? 'Dry' : 'Wet'} Food History
+                  </MutedText>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+                  </span>
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent>
           <CardContent className="pt-0">
             <div className="space-y-3">
               {paginatedEntries.map((entry) => (
@@ -214,7 +222,8 @@ export function FoodHistorySection({
               />
             </div>
           </CardContent>
-        )}
+        </CollapsibleContent>
+      </Collapsible>
       </Card>
 
       {/* Edit Finish Date Dialog */}

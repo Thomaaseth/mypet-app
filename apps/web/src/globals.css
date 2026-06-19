@@ -33,7 +33,7 @@
     --font-sans: var(--font-body);
     --font-display: var(--font-heading);
 
-    --text-2xs: 0.625rem;
+    --text-2xs: 0.6875rem; /* Only used for weight badge and timerange */
 
  /* Brand colors — exposed as Tailwind utilities */
   --color-background: var(--background);
