@@ -18,14 +18,16 @@ import { EmptyStateTitle,
   HelperText,
 } from '@/components/ui/typography';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { useState } from 'react';
+import { ReactNode } from 'react';
 
 interface WeightChartProps {
-  data: WeightChartData[];
+  data: WeightChartData[]; // pre-filtered by parent based on selected time range
   weightUnit: WeightUnit;
   targetWeightMin?: number;
   targetWeightMax?: number;
   onAddEntry?: () => void;
+  latestWeight: { weight: number; date: string }; // always the true latest, not affected by filtering
+  filterSlot?: ReactNode;
 }
 
 
@@ -35,8 +37,9 @@ export default function WeightChart({
   weightUnit,
   targetWeightMin,
   targetWeightMax, 
-  // className, 
-  onAddEntry
+  onAddEntry,
+  latestWeight,
+  filterSlot,
  }: WeightChartProps) {
 
   if (data.length === 0) {
@@ -61,44 +64,9 @@ export default function WeightChart({
 
   const isMobile = useIsMobile();
   
-  type TimeRange = '3M' | '6M' | '1Y' | '2Y' | 'ALL';
-
-  const [timeRange, setTimeRange] = useState<TimeRange>('1Y');
-
-  const TIME_RANGE_MONTHS: Record<Exclude<TimeRange, 'ALL'>, number> = {
-    '3M': 3,
-    '6M': 6,
-    '1Y': 12,
-    '2Y': 24,
-  };
-  
-  const cutoffDate = (() => {
-    if (timeRange === 'ALL') return null;
-    const d = new Date();
-    // const months = timeRange === '3M' ? 3 : timeRange === '6M' ? 6 : 12;
-    d.setMonth(d.getMonth() - TIME_RANGE_MONTHS[timeRange]);
-    return d;
-  })();
-  
-  const filteredData = cutoffDate
-    ? data.filter(point => point.timestamp >= cutoffDate.getTime())
-    : data;
-
-    const weights = filteredData.map(d => d.weight);
-    const minWeight = weights.length > 0 ? Math.min(...weights) : 0;
-    const maxWeight = weights.length > 0 ? Math.max(...weights) : 0;
-
-  // Calculate weight trend
-  const getWeightTrend = () => {
-    if (data.length < 2) return null;
-    
-    const secondToLastWeight = data[data.length - 2].weight;
-    const lastWeight = data[data.length - 1].weight;
-    const difference = lastWeight - secondToLastWeight;
-
-    if (Math.abs(difference) < 0.1) return 'stable';
-    return difference > 0 ? 'increasing' : 'decreasing';
-  };
+  const weights = data.map(d => d.weight);
+  const minWeight = weights.length > 0 ? Math.min(...weights) : 0;
+  const maxWeight = weights.length > 0 ? Math.max(...weights) : 0;
 
   const yMin = (() => {
     const minValue = targetWeightMin ? Math.min(minWeight, targetWeightMin) : minWeight;
@@ -113,12 +81,8 @@ export default function WeightChart({
     const pad = Math.max(range * 0.15, 0.1);
     return Math.ceil((maxValue + pad) * 10) / 10;
   })();
-
-  const trend = getWeightTrend();
-
-  const latestWeight = data[data.length - 1]; // always latest regardless of filter
   
-  const chartData = filteredData.map(point => ({
+  const chartData = data.map(point => ({
     date: point.date,           // tooltip
     timestamp: point.timestamp, // X axis
     weight: point.weight,
@@ -135,27 +99,16 @@ export default function WeightChart({
 
   return (
         <div className="space-y-4">
-          {/* Latest Weight Display */}
+        {/* Latest Weight Display */}
           <div className="text-center p-4 bg-muted/50 rounded-lg">
             <MetricLabel>Current Weight</MetricLabel>
             <MetricValue>{latestWeight.weight} {weightUnit}</MetricValue>
             <MetricLabel className="text-xs">as of {latestWeight.date}</MetricLabel>
           </div>
 
-        {/* Time Range Filter */}
-        <div className="flex items-center gap-1 justify-end">
-          {(['3M', '6M', '1Y', '2Y', 'ALL'] as TimeRange[]).map((range) => (
-            <Button
-              key={range}
-              variant={timeRange === range ? 'default' : 'outline'}
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={() => setTimeRange(range)}
-            >
-              {range}
-            </Button>
-          ))}
-        </div>
+
+        {filterSlot}
+
 
         {/* Chart */}
         {chartData.length === 0 ? (
@@ -165,16 +118,16 @@ export default function WeightChart({
         ) : (
           <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] w-full">
                   <LineChart
-                    accessibilityLayer
-                    data={chartData}
-                    margin={{
-                      top: 10,
-                      left: 0,
-                      right: 8,
-                      bottom: 8,
+                      accessibilityLayer
+                      data={chartData}
+                      margin={{
+                        top: 10,
+                        left: 0,
+                        right: 8,
+                        bottom: 8,
                     }}
                   >
-                      <CartesianGrid vertical={false} />
+                  <CartesianGrid vertical={false} />
                       <XAxis
                         dataKey="timestamp"
                         type="number"
@@ -188,26 +141,13 @@ export default function WeightChart({
                           const d = new Date(value);
                           return `${d.toLocaleString('default', { month: 'short' })} '${String(d.getFullYear()).slice(-2)}`;
                         }}
-                      />
-                      <YAxis
+                    />
+                    <YAxis
                         width={38}
                         tickLine={false}
                         axisLine={false}
                         tickMargin={4}
-                        domain={[
-                          (dataMin: number) => {
-                            const minValue = targetWeightMin ? Math.min(dataMin, targetWeightMin) : dataMin;
-                            const range = maxWeight - minWeight;
-                            const pad = Math.max(range * 0.15, 0.1);
-                            return Math.floor((minValue - pad) * 10) / 10; // round to 1dp
-                          },
-                          (dataMax: number) => {
-                            const maxValue = targetWeightMax ? Math.max(dataMax, targetWeightMax) : dataMax;
-                            const range = maxWeight - minWeight;
-                            const pad = Math.max(range * 0.15, 0.1);
-                            return Math.ceil((maxValue + pad) * 10) / 10; // round to 1dp
-                          }
-                        ]}              
+                        domain={[yMin, yMax]}          
                         tickFormatter={(value) => `${value}`}
                       />
                       
@@ -236,7 +176,7 @@ export default function WeightChart({
                                 {/* Target Range (if exists) */}
                                 {targetWeightMin && targetWeightMax && (
                                   <div className="flex items-center gap-2 pt-1 border-t border-border/50">
-                                    <div className="w-3 h-2 bg-success/20 border border-success border-dashed rounded-sm" />
+                                    <div className="w-3 h-2 bg-secondary/20 border border-secondary border-dashed rounded-sm" />
                                     <span className="text-xs text-muted-foreground">
                                       Target: <span className="font-display">{targetWeightMin}-{targetWeightMax} {weightUnit}</span>
                                     </span>
@@ -251,9 +191,9 @@ export default function WeightChart({
                         <ReferenceArea
                           y1={targetWeightMin}
                           y2={targetWeightMax}
-                          fill="hsl(var(--success))"
+                          fill="var(--secondary)"
                           fillOpacity={0.15}
-                          stroke="hsl(var(--success))"
+                          stroke="var(--secondary)"
                           strokeOpacity={0.4}
                           strokeWidth={1}
                           strokeDasharray="3 3"
@@ -280,11 +220,11 @@ export default function WeightChart({
 
 
           {/* Chart Stats */}
-          {filteredData.length > 1 && (
+          {data.length > 1 && (
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <StatLabel>Entries</StatLabel>
-                <StatValue className='text-sm sm:text-lg'>{filteredData.length}</StatValue>
+                <StatValue className='text-sm sm:text-lg'>{data.length}</StatValue>
               </div>
               <div>
                 <StatLabel>Min</StatLabel>

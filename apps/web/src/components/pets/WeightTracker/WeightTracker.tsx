@@ -6,6 +6,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Equal, ArrowUp, ArrowDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Tooltip,
@@ -27,7 +29,6 @@ import {
   useDeleteWeightEntry 
 } from '@/queries/weights';
 import { useWeightTarget, useUpsertWeightTarget, useDeleteWeightTarget } from '@/queries/weight-targets';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
 import TargetRangeForm from './TargetRangeForm';
 import type { WeightTargetFormData } from '@/types/weight-targets';
 import { MutedText, SectionTitle, HelperText, BodyText } from '@/components/ui/typography';
@@ -36,6 +37,17 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 interface WeightTrackerProps {
   petId: string;
   animalType: 'cat' | 'dog';
+}
+
+function getTargetStatusColor(status: 'within' | 'above' | 'below'): string {
+  switch (status) {
+    case 'above':
+      return 'bg-primary/10 text-primary border-primary/20';
+    case 'below':
+      return 'bg-accent/20 text-accent-foreground border-accent/30';
+    case 'within':
+      return 'bg-secondary/10 text-secondary border-secondary/20';
+  }
 }
 
 export default function WeightTracker({ petId, animalType }: WeightTrackerProps) {
@@ -52,10 +64,35 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   
   const { data: weightTarget } = useWeightTarget(petId);
 
+  type TimeRange = '3M' | '6M' | '1Y' | '2Y' | 'ALL';
+
+
+  const TIME_RANGE_MONTHS: Record<Exclude<TimeRange, 'ALL'>, number> = {
+    '3M': 3,
+    '6M': 6,
+    '1Y': 12,
+    '2Y': 24,
+  };
+
+  const [timeRange, setTimeRange] = useState<TimeRange>('1Y');
+  
+  const cutoffDate = (() => {
+    if (timeRange === 'ALL') return null;
+    const d = new Date();
+    d.setMonth(d.getMonth() - TIME_RANGE_MONTHS[timeRange]);
+    return d;
+  })();
+  
+
+
   // Extract data (with defaults for undefined)
   const weightEntries = data?.weightEntries ?? [];
   const chartData = data?.chartData ?? [];
   const latestWeight = data?.latestWeight ?? null;
+
+  const filteredChartData = cutoffDate
+  ? chartData.filter(point => point.timestamp >= cutoffDate.getTime())
+  : chartData;
 
   const weightUnit = data?.latestWeight?.weightUnit || 'kg';
   const hasTargetRange = Boolean(weightTarget?.minWeight && weightTarget?.maxWeight);
@@ -96,8 +133,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   const isActionLoading = createWeightMutation.isPending || 
                           updateWeightMutation.isPending || 
                           deleteWeightMutation.isPending;
-
-
 
   // Handlers
   const handleCreateEntry = async (weightData: WeightFormData): Promise<WeightEntry | null> => {
@@ -254,48 +289,47 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           </CardHeader>
           <CardContent>
         <WeightChart 
-          data={chartData} 
+          data={filteredChartData} 
           weightUnit={weightUnit}
           targetWeightMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
           targetWeightMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
           onAddEntry={() => setIsAddDialogOpen(true)}
-          />
-        </CardContent>
+          latestWeight={latestWeight ? { weight: parseFloat(latestWeight.weight), date: latestWeight.date } : { weight: 0, date: '' }}
+          filterSlot={
+          
+          <div className="flex items-center justify-between gap-2">
+            { /* Target badge (left) */ }
+            {hasTargetRange && weightTarget && status &&(
+                <Badge variant="outline" className={`text-xs ${getTargetStatusColor(status)}`}>
+                {status === 'within' ? 'Within Target' : status === 'above' ? 'Above Target' : 'Below Target'}
+              </Badge>
+              )}
+
+
+            {/* Time range filter (right) */}
+            <div className="flex items-center gap-1">
+              {(['3M', '6M', '1Y', '2Y', 'ALL'] as TimeRange[]).map((range) => (
+                <Button
+                  key={range}
+                  variant={timeRange === range ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-7 px-2 text-2xs"
+                  onClick={() => setTimeRange(range)}
+                >
+                  {range}
+                </Button>
+              ))}
+            </div>
+            </div>
+            }
+            />
+          </CardContent>
         </Card>
 
-        {/* Target Range Display Badge (when exists) */}
-        {hasTargetRange && weightTarget && (
-          <div className="flex items-center justify-center">
-            <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg border ${
-              status === 'within' 
-                ? 'bg-success/10 border-success/20' 
-                : 'bg-warning/10 border-warning/20'
-            }`}>
-              <Target className={`h-4 w-4 ${
-                status === 'within' ? 'text-success' : 'text-warning'
-              }`} />
-              <div className="flex items-center gap-1.5 text-sm">
-                <span className="text-muted-foreground">Target:</span>
-                <span className="font-semibold font-display">
-                  {weightTarget.minWeight}-{weightTarget.maxWeight} {weightUnit}
-                </span>
-                {status && status !== 'within' && (
-                  <span className="text-xs text-warning">
-                    ({status === 'below' ? '↓ Below' : '↑ Above'})
-                  </span>
-                )}
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-auto px-2 py-1 text-xs hover:bg-success/20"
-                onClick={() => setIsTargetRangeDialogOpen(true)}
-              >
-                Edit
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Target Range + Time Filter Row */}
+        <div className="flex items-center justify-between gap-2">
+          
+        </div>
 
         {/* Educational Banner (when no target + has entries + not dismissed) */}
         {!hasTargetRange && weightEntries.length > 0  && (

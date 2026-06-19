@@ -49,12 +49,12 @@ function FoodTrackerContent() {
       </div>
       </CardHeader>
       <CardContent>
-        {/* Food Status Summary - Restored! */}
+        {/* Food Status Summary */}
         {activeFoodEntries.length > 0 && !isLoading && (
           <div className="space-y-3 mb-6">
             {activeFoodEntries.length === 1 && hasCalculatedFields(activeFoodEntries[0]) ? (
               // Single food entry
-              <div className="p-4 rounded-lg border bg-muted">
+              <div className="p-4 rounded-lg bg-muted/50">
 
                 <div className="text-center">
                 <MetricLabel>{FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply</MetricLabel>
@@ -76,7 +76,7 @@ function FoodTrackerContent() {
                 .filter(hasCalculatedFields)
                 .sort((a) => a.foodType === 'dry' ? -1 : 1)
                 .map((entry) => (
-                <div className="p-4 rounded-lg border bg-muted">
+                <div className="p-4 rounded-lg bg-muted/50">
                     <div className="text-center">
                     <MetricLabel>{FOOD_TYPE_LABELS[entry.foodType]} Supply</MetricLabel>
                       <MetricValue>
