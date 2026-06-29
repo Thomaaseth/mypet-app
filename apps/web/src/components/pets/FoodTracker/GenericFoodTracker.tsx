@@ -223,6 +223,7 @@ return (
       <SectionTitle>{labels.entriesTitle}</SectionTitle>
       <Tooltip>
         <TooltipTrigger asChild>
+        <span>
           <Button
             size="sm"
             disabled={disableAddButton}
@@ -232,8 +233,11 @@ return (
             <Plus className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">{labels.addButton}</span>
           </Button>
+          </span>
         </TooltipTrigger>
-        <TooltipContent>...</TooltipContent>
+        <TooltipContent className="max-w-xs">
+          <p>{tooltipText}</p>
+        </TooltipContent>
       </Tooltip>
       <ResponsiveDialog
         open={isAddDialogOpen}

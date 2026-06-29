@@ -80,14 +80,13 @@ export class PetsService {
       throw new BadRequestError('Notes must be 1000 characters or less');
     }
 
-    // DO NOT USE MICROCHIP # => likely GDPR concerns!
     // Microchip number format validation (if provided)
-    // if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
-    //   // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)
-    //   if (!/^[a-zA-Z0-9]{8,20}$/.test(petData.microchipNumber.trim())) {
-    //     throw new BadRequestError('Microchip number must be 8-20 alphanumeric characters');
-    //   }
-    // }
+    if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
+      // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)
+      if (!/^[a-zA-Z0-9]{8,20}$/.test(petData.microchipNumber.trim())) {
+        throw new BadRequestError('Microchip number must be 8-20 alphanumeric characters');
+      }
+    }
   }
 
   private static validateWeightFields(weight: string, weightUnit: WeightUnit, animalType: string): void {
@@ -225,7 +224,7 @@ export class PetsService {
         gender: petData.gender,
         birthDate: petData.birthDate || null,
         isNeutered: petData.isNeutered,
-        microchipNumber: null, // Not collected, GDPR data
+        microchipNumber: petData.microchipNumber || null, 
         imageUrl: petData.imageUrl,
         notes: petData.notes || null,
         isActive: petData.isActive,
@@ -293,7 +292,7 @@ export class PetsService {
         ...updateData,
         species: updateData.species === '' ? null : updateData.species,
         birthDate: updateData.birthDate === '' ? null : updateData.birthDate,
-        // microchipNumber: not collected
+        microchipNumber: updateData.microchipNumber === '' ? null : updateData.microchipNumber,
         notes: updateData.notes === '' ? null : updateData.notes,
         imageUrl: updateData.imageUrl === '' ? null : updateData.imageUrl,
       };

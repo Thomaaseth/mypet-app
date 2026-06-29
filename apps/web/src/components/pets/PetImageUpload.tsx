@@ -103,6 +103,8 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
 
     setClientError(null);
 
+    console.log(file.type, file.name) // DEBUG IOS UPLOAD ISSUE
+
     // Client-side validation MIME type
     if (!ALLOWED_MIME_TYPES.includes(file.type as typeof ALLOWED_MIME_TYPES[number])) {
       setClientError('Invalid file type. Please upload a JPEG, PNG, or WebP image.');

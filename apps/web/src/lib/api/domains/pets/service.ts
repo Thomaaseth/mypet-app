@@ -172,9 +172,9 @@ export class PetService {
     } else if (message.includes('birth') || message.includes('date')) {
       field = 'birthDate';
       code = 'INVALID_DATE';
-    // } else if (message.includes('microchip')) {
-    //   field = 'microchipNumber';
-    //   code = 'INVALID_MICROCHIP';
+    } else if (message.includes('microchip')) {
+      field = 'microchipNumber';
+      code = 'INVALID_MICROCHIP';
     } else if (message.includes('image') || message.includes('upload')) {
       code = 'IMAGE_UPLOAD_ERROR'
     } else if (message.includes('not found')) {

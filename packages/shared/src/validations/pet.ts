@@ -55,13 +55,12 @@ export const basePetFormSchema = z.object({
   
   isNeutered: z.boolean(),
   
-  // Don't collect
-  // microchipNumber: z
-  //   .string()
-  //   .regex(/^[A-Za-z0-9]*$/, 'Microchip number can only contain letters and numbers')
-  //   .max(50, 'Microchip number must be less than 50 characters')
-  //   .optional()
-  //   .or(z.literal('')),
+  microchipNumber: z
+    .string()
+    .regex(/^[A-Za-z0-9]*$/, 'Microchip number can only contain letters and numbers')
+    .max(50, 'Microchip number must be less than 50 characters')
+    .optional()
+    .or(z.literal('')),
   
   notes: z
     .string()

@@ -6,11 +6,12 @@ import {
   Trash2, 
   Calendar,
   Weight,
-  Heart,
+  Quote,
   HeartOff,
   Venus,
   Mars,
   CircleHelp,
+  Cpu
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -166,29 +167,27 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                   {latestWeight ? `${latestWeight.weight} ${latestWeight.weightUnit}` : 'No weight'}
                 </EntryTitle>
               </div>
-            </div>
-
-            {/* Notes handled in widget */}
-            {/* {pet.notes && (
+              
+              {/* Microchip */}
+              {pet.microchipNumber && (
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <EntryTitle className="truncate">{pet.microchipNumber}</EntryTitle>
+                </div>
+              )}
+              
+              {pet.notes && (
               <div className="flex items-start gap-2">
-                <NotebookPen className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <Quote className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <MutedText className="line-clamp-2 text-xs">
                   {pet.notes}
                 </MutedText>
               </div>
-            )} */}
+            )}
+            </div>      
           </div>
-
         </div>
       </CardContent>
     </Card>
   );
 }
-
-          {/* Microchip */}
-          {/* {pet.microchipNumber && (
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Chip: {pet.microchipNumber}</span>
-            </div>
-          )} */}
