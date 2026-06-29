@@ -6,7 +6,7 @@ export interface Pet {
   userId: string;
   name: string;
   animalType: 'cat' | 'dog';
-  species: string | null; // Optional: user can enter any text like "Golden Retriever", "Persian Cat", etc.
+  species: string | null;
   gender: PetGender;
   birthDate: string | null; // ISO date string
   isNeutered: boolean;

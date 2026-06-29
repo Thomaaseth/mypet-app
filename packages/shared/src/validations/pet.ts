@@ -57,8 +57,8 @@ export const basePetFormSchema = z.object({
   
   microchipNumber: z
     .string()
-    .regex(/^[A-Za-z0-9]*$/, 'Microchip number can only contain letters and numbers')
-    .max(50, 'Microchip number must be less than 50 characters')
+    .regex(/^[A-Za-z0-9\s-]*$/, 'Microchip number can only contain letters, numbers, spaces, and hyphens')
+    .max(20, 'Microchip number must be less than 20 characters')
     .optional()
     .or(z.literal('')),
   

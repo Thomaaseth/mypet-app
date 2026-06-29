@@ -90,11 +90,13 @@ export class PetValidator {
   private validateMicrochip(microchipNumber?: string): void {
     if (!microchipNumber || microchipNumber.trim() === '') return; // Microchip is optional
 
-    // Remove spaces and dashes for validation
+    if (microchipNumber.length > 20) {
+      throw new ValidationError('Microchip number must be less than 20 characters', 'microchipNumber');
+    }
+  
     const cleaned = microchipNumber.replace(/[\s-]/g, '');
-
-    if (!/^\d{10,15}$/.test(cleaned)) {
-      throw new ValidationError('Microchip number should be 10-15 digits', 'microchipNumber');
+    if (!/^[A-Za-z0-9]+$/.test(cleaned)) {
+      throw new ValidationError('Microchip number can only contain letters and numbers', 'microchipNumber');
     }
   }
 
