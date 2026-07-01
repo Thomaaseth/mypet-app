@@ -189,6 +189,7 @@ describe('Pets Queries', () => {
         weight: '25.5',
         weightUnit: 'kg',
         isNeutered: false,
+        microchipNumber: '0123456789ERT',
         notes: '',
       };
   
@@ -243,6 +244,7 @@ describe('Pets Queries', () => {
         weight: '',
         weightUnit: 'kg',
         isNeutered: false,
+        microchipNumber: '',
         notes: '',
       };
 

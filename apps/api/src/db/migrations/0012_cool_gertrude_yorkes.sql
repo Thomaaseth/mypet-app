@@ -1,0 +1,1 @@
+ALTER TABLE "weight_entries" ALTER COLUMN "weight" SET DATA TYPE numeric(6, 3);

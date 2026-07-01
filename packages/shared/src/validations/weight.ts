@@ -26,6 +26,17 @@ export const weightEntryFormSchema = z.object({
     }, 'Date cannot be in the future'),
 });
 
+  // Schema for partial updates — enforces weightUnit must accompany weight if weight is being changed
+  export const updateWeightEntrySchema = weightEntryFormSchema.partial().superRefine((data, ctx) => {
+    if (data.weight !== undefined && data.weightUnit === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Weight unit is required when updating weight',
+        path: ['weightUnit'],
+      });
+    }
+  });
+
 export const weightTargetSchema = z.object({
   minWeight: z.string()
     .min(1, 'Minimum weight is required')
@@ -107,9 +118,39 @@ export const createWeightEntrySchema = (
   });
 };
 
+export const createWeightTargetSchema = (animalType: 'cat' | 'dog') => {
+  const limits = {
+    cat: { min: 0.05, max: 15 },
+    dog: { min: 0.5, max: 90 },
+  };
+
+  const animalLimits = limits[animalType];
+
+  return weightTargetSchema.refine((data) => {
+    const minInKg = data.weightUnit === 'kg'
+      ? parseFloat(data.minWeight)
+      : parseFloat(data.minWeight) / 2.20462;
+    const maxInKg = data.weightUnit === 'kg'
+      ? parseFloat(data.maxWeight)
+      : parseFloat(data.maxWeight) / 2.20462;
+
+    return minInKg >= animalLimits.min && maxInKg <= animalLimits.max;
+  }, (data) => {
+    const displayLimits = data.weightUnit === 'kg'
+      ? `${animalLimits.min}-${animalLimits.max}kg`
+      : `${(animalLimits.min * 2.20462).toFixed(1)}-${(animalLimits.max * 2.20462).toFixed(1)}lbs`;
+
+    return {
+      message: `Target weight range must be between ${displayLimits} for ${animalType}s`,
+      path: ['maxWeight'],
+    };
+  });
+};
+
 // Export types
 export type WeightFormData = z.infer<typeof weightEntryFormSchema>;
 export type WeightTargetFormData = z.infer<typeof weightTargetSchema>;
+export type UpdateWeightEntryData = z.infer<typeof updateWeightEntrySchema>;
 
 // Validate functions
 export const validateWeightEntry = (

@@ -6,13 +6,14 @@ import { healthCheck, readinessCheck } from "./handlers/health";
 import cors from 'cors';
 import { config } from "./config";
 import { authRateLimit, healthRateLimit, generalRateLimit } from "./middleware/rate-limit";
+import helmet from "helmet";
 
 import petRoutes from '@/routes/pets.routes';
 import foodRoutes from '@/routes/food.routes';
 import adminRoutes from '@/routes/admin.routes';
 import vetRoutes from '@/routes/veterinarians.routes';
 import appointmentRoutes from '@/routes/appointments.routes';
-import helmet from "helmet";
+import userPreferencesRoutes from '@/routes/user-preferences.routes'
 
 export const app = express();
 
@@ -61,6 +62,9 @@ app.use('/api/vets', vetRoutes)
 
 // APPOINTMENT ROUTES
 app.use('/api/appointments', appointmentRoutes)
+
+// USER PREFERENCES
+app.use('/api/users/preferences', userPreferencesRoutes)
 
 // APP HEALTH   
 app.get('/api/health', healthRateLimit, (req, res, next) => {

@@ -2,32 +2,36 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createWeightEntrySchema, getTodayDateString, type WeightFormData } from '@/lib/validations/weight';
 import type { WeightEntry } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
+import { convertWeight } from '@/lib/validations/pet';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface UseWeightFormOptions {
   animalType: 'cat' | 'dog';
-  weightUnit: WeightUnit;
   weightEntry?: WeightEntry;
   defaultValues?: Partial<WeightFormData>;
 }
 
 export function useWeightForm(options: UseWeightFormOptions) {
-  const { animalType,weightUnit, weightEntry, defaultValues } = options;
+  const { animalType, weightEntry, defaultValues } = options;
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
 
   const schema = createWeightEntrySchema(weightUnit, animalType);
 
   const getInitialValues = (): WeightFormData => {
     if (weightEntry) {
+      // Convert stored kg value to display unit for editing
+      const displayWeight = convertWeight(parseFloat(weightEntry.weight), 'kg', weightUnit);
       return {
-        weight: weightEntry.weight,
-        weightUnit: weightEntry.weightUnit,
+        weight: parseFloat(displayWeight.toFixed(2)).toString(),
+        weightUnit,
         date: weightEntry.date,
       };
     }
 
     return {
       weight: '',
-      weightUnit: weightUnit || 'kg',
+      weightUnit,
       date: getTodayDateString(),
       ...defaultValues,
     };
@@ -40,13 +44,12 @@ export function useWeightForm(options: UseWeightFormOptions) {
   });
 
   const resetWithWeightEntry = (newWeightEntry: WeightEntry) => {
-    const formData: WeightFormData = {
-      weight: newWeightEntry.weight,
-      weightUnit: newWeightEntry.weightUnit,
+    const displayWeight = convertWeight(parseFloat(newWeightEntry.weight), 'kg', weightUnit);
+    form.reset({
+      weight: parseFloat(displayWeight.toFixed(2)).toString(),
+      weightUnit,
       date: newWeightEntry.date,
-    };
-    
-    form.reset(formData);
+    });
   };
 
   const resetToEmpty = () => {

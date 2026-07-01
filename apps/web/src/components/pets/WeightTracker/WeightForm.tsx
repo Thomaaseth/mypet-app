@@ -4,19 +4,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+// import { 
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select';
 import { ErrorText, HelperText } from '@/components/ui/typography';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
-  weightUnit: WeightUnit;
   weightEntry?: WeightEntry; // If provided, we're editing
   onSubmit: (data: WeightFormData) => Promise<WeightEntry | null>;
   onCancel?: () => void;
@@ -26,23 +25,24 @@ interface WeightFormProps {
 
 export default function WeightForm({ 
   animalType,
-  weightUnit,
   weightEntry, 
   onSubmit, 
   onCancel, 
   isLoading = false,
   error 
 }: WeightFormProps) {
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
+    // watch,
+    // setValue,
     resetToEmpty,
-  } = useWeightForm({ animalType, weightUnit, weightEntry });
+  } = useWeightForm({ animalType, weightEntry });
 
-  const currentWeightUnit = watch('weightUnit');
+  // const currentWeightUnit = watch('weightUnit');
 
   const isEditing = !!weightEntry;
 
@@ -71,7 +71,7 @@ export default function WeightForm({
       {/* Weight */}
       <div className="space-y-2">
         {/* <Label htmlFor="weight">Weight ({weightUnit}) *</Label> */}
-        <Label htmlFor="weight">Weight *</Label>
+        {/* <Label htmlFor="weight">Weight *</Label> */}
         <Input
           id="weight"
           type="number"
@@ -85,14 +85,16 @@ export default function WeightForm({
         {errors.weight && (
           <ErrorText>{errors.weight.message}</ErrorText>
         )}
-        <HelperText>Maximum: {currentWeightUnit === 'kg' 
+        {/* <HelperText>Maximum: {currentWeightUnit === 'kg' 
           ? (animalType === 'cat' ? '15kg' : '90kg')
           : (animalType === 'cat' ? '33lbs' : '198lbs')
-        }</HelperText>
+        }</HelperText> */}
       </div>
-
+      
       {/* Weight Unit */}
-      <div className="space-y-2">
+      <input type="hidden" {...register('weightUnit')} />
+
+      {/* <div className="space-y-2">
         <Label htmlFor="weightUnit">Unit *</Label>
         <Select 
           value={watch('weightUnit')} 
@@ -109,7 +111,7 @@ export default function WeightForm({
         {errors.weightUnit && (
           <ErrorText>{errors.weightUnit.message}</ErrorText>
         )}
-      </div>
+      </div> */}
 
       {/* Date */}
       <div className="space-y-2">

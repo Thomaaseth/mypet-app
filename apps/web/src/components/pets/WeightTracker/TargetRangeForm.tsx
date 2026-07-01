@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,14 +21,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, ChevronRight } from 'lucide-react';
-import type { WeightUnit } from '@/types/pet';
+// import type { WeightUnit } from '@/types/pet';
 import type { WeightTargetFormData } from '@/types/weight-targets';
+import { createWeightTargetSchema } from '@/lib/validations/weight';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { convertWeight } from '@/lib/validations/pet';
 
 interface TargetRangeFormProps {
   petName: string;
-  weightUnit: WeightUnit;
-  currentMin?: number;
-  currentMax?: number;
+  animalType: 'cat' | 'dog';
+  // weightUnit: WeightUnit;
+  currentMin?: number; // kg from API
+  currentMax?: number; // kg from API
   onSubmit: (data: WeightTargetFormData) => Promise<void>;
   onCancel: () => void;
   onDelete?: () => Promise<void>;
@@ -37,49 +40,10 @@ interface TargetRangeFormProps {
   error?: string;
 }
 
-// Validation schema
-const createTargetRangeSchema = (weightUnit: WeightUnit) => {
-  const maxWeight = weightUnit === 'kg' ? 200 : 440;
-  
-  return z.object({
-    minWeight: z
-      .string()
-      .min(1, 'Minimum weight is required')
-      .refine((val) => {
-        const num = parseFloat(val);
-        return !isNaN(num) && num > 0;
-      }, 'Minimum weight must be a positive number')
-      .refine((val) => {
-        const num = parseFloat(val);
-        return num <= maxWeight;
-      }, `Minimum weight must not exceed ${maxWeight} ${weightUnit}`),
-    maxWeight: z
-      .string()
-      .min(1, 'Maximum weight is required')
-      .refine((val) => {
-        const num = parseFloat(val);
-        return !isNaN(num) && num > 0;
-      }, 'Maximum weight must be a positive number')
-      .refine((val) => {
-        const num = parseFloat(val);
-        return num <= maxWeight;
-      }, `Maximum weight must not exceed ${maxWeight} ${weightUnit}`),
-    weightUnit: z.enum(['kg', 'lbs']),
-  }).refine((data) => {
-    const min = parseFloat(data.minWeight);
-    const max = parseFloat(data.maxWeight);
-    return max > min;
-  }, {
-    message: 'Maximum weight must be greater than minimum weight',
-    path: ['maxWeight'],
-  });
-};
-
-type TargetRangeFormData = z.infer<ReturnType<typeof createTargetRangeSchema>>;
-
 export default function TargetRangeForm({
   petName,
-  weightUnit,
+  animalType,
+  // weightUnit,
   currentMin,
   currentMax,
   onSubmit,
@@ -88,26 +52,36 @@ export default function TargetRangeForm({
   isLoading = false,
   error,
 }: TargetRangeFormProps) {
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const isEditing = currentMin !== undefined && currentMax !== undefined;
 
+  // Convert kg values from API to display unit for form pre-fill
+  const displayMin = currentMin !== undefined
+    ? parseFloat(convertWeight(currentMin, 'kg', weightUnit).toFixed(3)).toString()
+    : '';
+  const displayMax = currentMax !== undefined
+    ? parseFloat(convertWeight(currentMax, 'kg', weightUnit).toFixed(3)).toString()
+    : '';
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TargetRangeFormData>({
-    resolver: zodResolver(createTargetRangeSchema(weightUnit)),
+  } = useForm<WeightTargetFormData>({
+    resolver: zodResolver(createWeightTargetSchema(animalType)),
     shouldFocusError: false,
     defaultValues: {
-      minWeight: currentMin?.toString() || '',
-      maxWeight: currentMax?.toString() || '',
+      minWeight: displayMin,
+      maxWeight: displayMax,
       weightUnit,
     },
   });
 
-  const onFormSubmit = async (formData: TargetRangeFormData) => {
+  const onFormSubmit = async (formData: WeightTargetFormData) => {
     await onSubmit({
       minWeight: formData.minWeight,
       maxWeight: formData.maxWeight,
@@ -141,8 +115,8 @@ export default function TargetRangeForm({
 
         {/* Minimum Weight */}
         <div className="space-y-2">
-          <Label htmlFor="minWeight">Minimum Weight *</Label>
-          <Input
+        <Label htmlFor="minWeight">Minimum Weight ({weightUnit})</Label>
+        <Input
             id="minWeight"
             type="number"
             step="0.01"
@@ -158,8 +132,8 @@ export default function TargetRangeForm({
 
         {/* Maximum Weight */}
         <div className="space-y-2">
-          <Label htmlFor="maxWeight">Maximum Weight *</Label>
-          <Input
+        <Label htmlFor="maxWeight">Maximum Weight ({weightUnit})</Label>
+        <Input
             id="maxWeight"
             type="number"
             step="0.01"
@@ -174,7 +148,7 @@ export default function TargetRangeForm({
         </div>
 
         {/* Weight Unit (Read-only) */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="weightUnit">Weight Unit</Label>
           <Input
             id="weightUnit"
@@ -186,7 +160,7 @@ export default function TargetRangeForm({
           <p className="text-xs text-muted-foreground">
             Unit is determined by your weight entries
           </p>
-        </div>
+        </div> */}
 
         {/* Educational Accordion */}
         <Accordion type="single" collapsible className="w-full">

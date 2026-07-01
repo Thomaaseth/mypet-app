@@ -11,14 +11,20 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toastService } from '@/lib/toast';
-import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
 import { 
   AccountInfoSkeleton, 
   EmailFormSkeleton, 
-  PasswordFormSkeleton 
+  PasswordFormSkeleton,
+  PreferencesCardSkeleton
 } from '@/components/ui/skeletons/ProfileSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { useUpsertUserPreferences } from '@/queries/user-preferences';
+import { LOCALE_OPTIONS } from '@/lib/constants/locale-options';
+import type { Locale } from '@/shared/validations/locale';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
@@ -31,7 +37,8 @@ type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
 export default function MyProfilePage() {
   // user session context
   const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
-
+  const { locale: currentLocale, isLoading: isLoadingPreferences } = usePreferencesContext();
+  const { mutate: upsertPreferences, isPending: isSavingPreferences } = useUpsertUserPreferences();
 
   // UI-specific state remains as separate useState
   const [passwordVisibility, setPasswordVisibility] = useState({
@@ -140,6 +147,7 @@ export default function MyProfilePage() {
           <AccountInfoSkeleton />
           <EmailFormSkeleton />
           <PasswordFormSkeleton />
+          <PreferencesCardSkeleton />
         </div>
       </div>
     );
@@ -199,6 +207,52 @@ export default function MyProfilePage() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Units & Date Format */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Units & Date Format
+            </CardTitle>
+            <CardDescription>
+              Choose your preferred measurement system and date format.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoadingPreferences ? (
+              <div className="flex gap-3">
+                <Skeleton className="h-16 flex-1" />
+                <Skeleton className="h-16 flex-1" />
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                {LOCALE_OPTIONS.map(({ locale, label, description }) => {
+                  const isActive = currentLocale === locale;
+                  return (
+                    <Button
+                      key={locale}
+                      variant={isActive ? 'default' : 'outline'}
+                      disabled={isSavingPreferences || isActive}
+                      onClick={() => {
+                        if (!isActive) upsertPreferences({ locale });
+                      }}
+                      className="flex flex-col h-auto py-3 px-4 flex-1"
+                    >
+                      {isSavingPreferences && !isActive && (
+                        <Loader2 className="h-4 w-4 animate-spin mb-1" />
+                      )}
+                      <span className="font-semibold text-sm">{label}</span>
+                      <span className={`text-xs font-normal ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                        {description}
+                      </span>
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -361,7 +415,6 @@ export default function MyProfilePage() {
                   )}
                 </div>
               </div>
-
               <Button 
                 type="submit" 
                 disabled={passwordChangeState.isLoading}

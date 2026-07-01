@@ -106,3 +106,22 @@ export function PasswordFormSkeleton() {
     </Card>
   );
 }
+
+export function PreferencesCardSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Units & Date Format</CardTitle>
+        <CardDescription>
+          Choose your preferred measurement system and date format.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex gap-3">
+          <Skeleton className="h-16 flex-1" />
+          <Skeleton className="h-16 flex-1" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -1,14 +1,16 @@
 import { db } from '../db';
 import { weightTargets } from '../db/schema/weight-targets';
 import { eq } from 'drizzle-orm';
-import type { WeightTarget, NewWeightTarget, WeightTargetFormData } from '../db/schema/weight-targets';
-import type { WeightUnit } from '../db/schema/weight-entries';
+import type { WeightTarget, NewWeightTarget } from '../db/schema/weight-targets';
 import { 
   BadRequestError, 
   NotFoundError,
 } from '../middleware/errors';
 import { PetsService } from './pets.service';
 import { dbLogger } from '../lib/logger';
+import { convertWeight } from '@/shared/utils/units';
+import type { WeightTargetFormData } from '@/shared/validations/weight';
+
 
 export class WeightTargetsService {
   // Verify pet ownership (reuse pattern from WeightEntriesService)
@@ -30,45 +32,28 @@ export class WeightTargetsService {
       throw new BadRequestError('Both minimum and maximum target weight are required');
     }
 
-    if (!targetData.weightUnit) {
-      throw new BadRequestError('Weight unit is required');
-    }
-
-    // Parse values
     const minWeight = parseFloat(targetData.minWeight.toString());
     const maxWeight = parseFloat(targetData.maxWeight.toString());
 
-    // Check if values are valid numbers
     if (isNaN(minWeight) || isNaN(maxWeight)) {
       throw new BadRequestError('Target weight values must be valid numbers');
     }
 
-    // Must be positive
     if (minWeight <= 0 || maxWeight <= 0) {
       throw new BadRequestError('Target weight values must be positive');
     }
 
-    // Max must be greater than min
     if (minWeight >= maxWeight) {
       throw new BadRequestError('Maximum target weight must be greater than minimum');
     }
   }
 
   // Business rules validation - ensure target is realistic for pet type
-  private static validateBusinessRules(targetData: WeightTargetFormData, pet: { animalType: string }): void {
-    const minWeight = parseFloat(targetData.minWeight.toString());
-    const maxWeight = parseFloat(targetData.maxWeight.toString());
-    
-    // Convert to kg for consistent validation
-    let minWeightInKg = minWeight;
-    let maxWeightInKg = maxWeight;
-    
-    if (targetData.weightUnit === 'lbs') {
-      minWeightInKg = minWeight / 2.20462;
-      maxWeightInKg = maxWeight / 2.20462;
-    }
-
-    // Define realistic weight ranges per animal type (in kg)
+  private static validateBusinessRules(
+    minWeightInKg: number,
+    maxWeightInKg: number,
+    pet: { animalType: string }
+  ): void {
     const weightLimits = {
       cat: { min: 0.05, max: 15 },
       dog: { min: 0.5, max: 90 },
@@ -77,9 +62,8 @@ export class WeightTargetsService {
     const limits = weightLimits[pet.animalType as keyof typeof weightLimits];
 
     if (minWeightInKg < limits.min || maxWeightInKg > limits.max) {
-      const displayUnit = targetData.weightUnit;
       throw new BadRequestError(
-        `Target weight range ${minWeight}-${maxWeight}${displayUnit} is outside realistic range for ${pet.animalType}`
+        `Target weight range is outside realistic range for ${pet.animalType} (${limits.min}-${limits.max}kg)`
       );
     }
   }
@@ -117,9 +101,13 @@ export class WeightTargetsService {
       
       // Authorization check
       const pet = await PetsService.getPetById(petId, userId);
-      
+
+      // Convert to canonical kg before validation and storage
+      const minWeightInKg = convertWeight(parseFloat(targetData.minWeight.toString()), targetData.weightUnit, 'kg');
+      const maxWeightInKg = convertWeight(parseFloat(targetData.maxWeight.toString()), targetData.weightUnit, 'kg');
+     
       // Business rules validation
-      this.validateBusinessRules(targetData, pet);
+      this.validateBusinessRules(minWeightInKg, maxWeightInKg, pet);
 
       // Check if target already exists
       const existingTarget = await this.getWeightTarget(petId, userId);
@@ -129,9 +117,8 @@ export class WeightTargetsService {
         const [updatedTarget] = await db
           .update(weightTargets)
           .set({
-            minWeight: targetData.minWeight.toString(),
-            maxWeight: targetData.maxWeight.toString(),
-            weightUnit: targetData.weightUnit,
+            minWeight: minWeightInKg.toFixed(2),
+            maxWeight: maxWeightInKg.toFixed(2),
             updatedAt: new Date(),
           })
           .where(eq(weightTargets.petId, petId))
@@ -144,9 +131,8 @@ export class WeightTargetsService {
           .insert(weightTargets)
           .values({
             petId,
-            minWeight: targetData.minWeight.toString(),
-            maxWeight: targetData.maxWeight.toString(),
-            weightUnit: targetData.weightUnit,
+            minWeight: minWeightInKg.toFixed(2),
+            maxWeight: maxWeightInKg.toFixed(2),
           })
           .returning();
 

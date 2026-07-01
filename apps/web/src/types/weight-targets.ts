@@ -3,18 +3,17 @@ import type { WeightUnit } from './pet';
 export interface WeightTarget {
   id: string;
   petId: string;
-  minWeight: string; // Decimal as string (consistent with weight entries)
-  maxWeight: string; // Decimal as string
-  weightUnit: WeightUnit;
+  minWeight: string; // always kg
+  maxWeight: string; // always kg
   createdAt: string;
   updatedAt: string;
 }
 
 // Form data types for weight target
 export interface WeightTargetFormData {
-  minWeight: string; // String for form input
-  maxWeight: string; // String for form input
-  weightUnit: WeightUnit;
+  minWeight: string;
+  maxWeight: string;
+  weightUnit: WeightUnit; // Still sent in requests for server-side conversion
 }
 
 // Error types

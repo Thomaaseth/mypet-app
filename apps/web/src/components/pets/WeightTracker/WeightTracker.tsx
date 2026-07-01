@@ -33,6 +33,9 @@ import TargetRangeForm from './TargetRangeForm';
 import type { WeightTargetFormData } from '@/types/weight-targets';
 import { MutedText, SectionTitle, HelperText, BodyText } from '@/components/ui/typography';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { convertWeight } from '@/lib/validations/pet';
+import { formatDateForDisplay } from '@/lib/validations/weight';
 
 interface WeightTrackerProps {
   petId: string;
@@ -84,18 +87,38 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   })();
   
 
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
 
   // Extract data (with defaults for undefined)
   const weightEntries = data?.weightEntries ?? [];
-  const chartData = data?.chartData ?? [];
+
+  // Converted chart data in display unit
+  const chartData = (data?.chartData ?? []).map(d => ({
+    ...d,
+    weight: convertWeight(d.weight, 'kg', weightUnit),
+  }));
   const latestWeight = data?.latestWeight ?? null;
 
   const filteredChartData = cutoffDate
   ? chartData.filter(point => point.timestamp >= cutoffDate.getTime())
   : chartData;
 
-  const weightUnit = data?.latestWeight?.weightUnit || 'kg';
   const hasTargetRange = Boolean(weightTarget?.minWeight && weightTarget?.maxWeight);
+
+  // Latest weight converted for display
+  const latestWeightForChart = data?.latestWeight ? {
+    weight: convertWeight(parseFloat(data.latestWeight.weight), 'kg', weightUnit),
+    date: formatDateForDisplay(data.latestWeight.date),
+  } : null;
+
+  // Target range converted for chart (must match chart's display unit)
+  const targetWeightMinDisplay = weightTarget?.minWeight
+  ? convertWeight(parseFloat(weightTarget.minWeight), 'kg', weightUnit)
+  : undefined;
+  const targetWeightMaxDisplay = weightTarget?.maxWeight
+  ? convertWeight(parseFloat(weightTarget.maxWeight), 'kg', weightUnit)
+  : undefined;
 
   const getWeightStatus = () => {
     if (!hasTargetRange || !weightTarget || !latestWeight) return null;
@@ -290,10 +313,10 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         <WeightChart 
           data={filteredChartData} 
           weightUnit={weightUnit}
-          targetWeightMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
-          targetWeightMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
+          targetWeightMin={targetWeightMinDisplay}
+          targetWeightMax={targetWeightMaxDisplay}
           onAddEntry={() => setIsAddDialogOpen(true)}
-          latestWeight={latestWeight ? { weight: parseFloat(latestWeight.weight), date: latestWeight.date } : { weight: 0, date: '' }}
+          latestWeight={latestWeightForChart ?? { weight: 0, date: '' }}
           filterSlot={
                 <div className="flex items-center justify-center sm:justify-start gap-2">
                 { /* Target badge (left) */ }
@@ -302,7 +325,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                       {status === 'within' ? 'On Target' : status === 'above' ? 'Above Target' : 'Below Target'}
                     </Badge>
                   )}
-
 
                   {/* Time range filter (right) */}
                   <div className="flex items-center gap-1 sm:ml-auto">
@@ -324,7 +346,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         </CardContent>
         </Card>
 
-        {/* Educational Banner (when no target + has entries + not dismissed) */}
+        {/* Educational Banner (when no target + has entries) */}
         {!hasTargetRange && weightEntries.length > 0  && (
          <Alert>
           <AlertDescription className="flex items-center justify-between gap-3 text-xs sm:text-sm">
@@ -361,7 +383,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         >
           <WeightForm
             animalType={animalType}
-            weightUnit={weightUnit}
+            // weightUnit={weightUnit}
             onSubmit={handleCreateEntry}
             onCancel={() => setIsAddDialogOpen(false)}
             isLoading={isActionLoading}
@@ -378,7 +400,8 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
             <TargetRangeForm
               key={`target-form-${isTargetRangeDialogOpen}`}
               petName="your pet"
-              weightUnit={weightUnit}
+              animalType={animalType}
+              // weightUnit={weightUnit}
               currentMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
               currentMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
               onSubmit={handleUpsertTargetRange}
@@ -461,7 +484,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   <WeightList
                     animalType={animalType}
                     weightEntries={weightEntries}
-                    weightUnit={weightUnit}
+                    // weightUnit={weightUnit}
                     onUpdateEntry={handleUpdateEntry}
                     onDeleteEntry={handleDeleteEntry}
                     isLoading={isActionLoading}

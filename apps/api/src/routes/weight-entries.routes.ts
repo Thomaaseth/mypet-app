@@ -5,7 +5,7 @@ import { userRateLimit } from '../middleware/rate-limit';
 import { BadRequestError } from '../middleware/errors';
 import { respondWithSuccess } from '../lib/json';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
-import { weightEntryFormSchema } from '@/shared/validations/weight'
+import { weightEntryFormSchema, updateWeightEntrySchema  } from '@/shared/validations/weight'
 
 const router = Router({ mergeParams: true }); // mergeParams to access petId from parent route
 
@@ -32,7 +32,6 @@ router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
     respondWithSuccess(res, {
         weightEntries: result.weightEntries,
         total: result.weightEntries.length,
-        weightUnit: result.weightUnit
     }, `Retrieved ${result.weightEntries.length} weight entries`)
   } catch (error) {
     next(error);

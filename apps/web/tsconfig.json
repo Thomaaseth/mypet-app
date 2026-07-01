@@ -18,6 +18,17 @@
       "@/shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "../../packages/shared/src/validations/appointments.ts", "../../packages/shared/src/validations/food.ts", "../../packages/shared/src/validations/password.ts", "../../packages/shared/src/validations/pet-notes.ts", "../../packages/shared/src/validations/pet.ts", "../../packages/shared/src/validations/veterinarians.ts", "../../packages/shared/src/validations/weight.ts"],
+  "include": [
+    "src/**/*.ts", "src/**/*.tsx", 
+    "../../packages/shared/src/validations/appointments.ts", 
+    "../../packages/shared/src/validations/food.ts", 
+    "../../packages/shared/src/validations/password.ts", 
+    "../../packages/shared/src/validations/pet-notes.ts", 
+    "../../packages/shared/src/validations/pet.ts", 
+    "../../packages/shared/src/validations/veterinarians.ts", 
+    "../../packages/shared/src/validations/weight.ts",
+    "../../packages/shared/src/validations/locale.ts",
+    "../../packages/shared/src/utils/units.ts"
+],
   "exclude": ["node_modules"]
 }

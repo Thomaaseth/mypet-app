@@ -9,3 +9,4 @@ export * from './pet-veterinarians';
 export * from './appointments';
 export * from './pet-notes';
 export * from './rate-limit';
+export * from './user-preferences';

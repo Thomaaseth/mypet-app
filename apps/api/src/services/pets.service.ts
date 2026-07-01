@@ -2,14 +2,15 @@ import { db } from '../db';
 import { pets } from '../db/schema/pets';
 import { eq, and, desc } from 'drizzle-orm';
 import type { Pet, NewPet, PetGender } from '../db/schema/pets';
-import { weightEntries, WeightUnit } from '../db/schema/weight-entries';
+import { weightEntries } from '../db/schema/weight-entries';
 import { 
   BadRequestError, 
-  NotFoundError, 
-  UserForbiddenError 
+  NotFoundError 
 } from '../middleware/errors';
 import { dbLogger } from '@/lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
+import type { WeightUnit } from '@/shared/validations/pet';
+import { convertWeight } from '@/shared/utils/units';
 
 export class PetsService {
   // input validation helpers
@@ -89,7 +90,7 @@ export class PetsService {
     }
   }
 
-  private static validateWeightFields(weight: string, weightUnit: WeightUnit, animalType: string): void {
+  private static validateWeightFields(weight: string, weightUnit: WeightUnit): void {
     const weightValue = parseFloat(weight);
     if (isNaN(weightValue) || weightValue <= 0) {
       throw new BadRequestError('Weight must be a positive number');
@@ -99,44 +100,25 @@ export class PetsService {
     if (!validWeightUnits.includes(weightUnit)) {
       throw new BadRequestError('Weight unit must be kg or lbs');
     }
-    
-    this.validateWeightLimits(weightValue, animalType, weightUnit);
   }
 
   // Weight validation with business logic
-  private static validateWeightLimits(weight: number, animalType: string, weightUnit: string = 'kg'): void {
-    // Convert weight to kg for consistent validation
-    let weightInKg = weight;
-    if (weightUnit === 'lbs') {
-      weightInKg = weight / 2.20462; // Convert lbs to kg
-    }
-
-    // Weight ranges per animal type (in kg)
+  private static validateWeightLimits(weightInKg: number, animalType: string): void {
     const weightLimits = {
-      cat: { min: 0.05, max: 15 }, // 0.05-15kg
-      dog: { min: 0.5, max: 90 }, // 0.5-90kg
+      cat: { min: 0.05, max: 15 },
+      dog: { min: 0.5, max: 90 },
     };
-
-    // Get limits for this animal type
+  
     const limits = weightLimits[animalType as keyof typeof weightLimits];
-
+  
     if (weightInKg < limits.min || weightInKg > limits.max) {
-      const displayWeight = weightUnit === 'kg' ? `${weight}kg` : `${weight}lbs`;
-      const displayLimits = weightUnit === 'kg' 
-        ? `${limits.min}-${limits.max}kg`
-        : `${(limits.min * 2.20462).toFixed(1)}-${(limits.max * 2.20462).toFixed(1)}lbs`;
-      
       throw new BadRequestError(
-        `Weight ${displayWeight} is outside realistic range for ${animalType} (${displayLimits})`
+        `Weight is outside realistic range for ${animalType} (${limits.min}-${limits.max}kg)`
       );
     }
-
-    // Absolute maximum of 200kg regardless of animal type
-    const absoluteMaxKg = 200;
-    const absoluteMaxDisplay = weightUnit === 'kg' ? '200kg' : '440lbs';
-    
-    if (weightInKg > absoluteMaxKg) {
-      throw new BadRequestError(`Weight exceeds maximum allowed (${absoluteMaxDisplay})`);
+  
+    if (weightInKg > 200) {
+      throw new BadRequestError(`Weight exceeds maximum allowed (200kg)`);
     }
   }
 
@@ -211,8 +193,10 @@ export class PetsService {
       this.validatePetInputs(petData, false);
       
       // Validate weight separately if provided
-      if (weight) {
-        this.validateWeightFields(weight, weightUnit || 'kg', petData.animalType);
+      if (weight && weightUnit) {
+        this.validateWeightFields(weight, weightUnit);
+        const weightInKg = convertWeight(parseFloat(weight), weightUnit, 'kg');
+        this.validateWeightLimits(weightInKg, petData.animalType);
       }
 
       // Clean and prepare data
@@ -239,13 +223,13 @@ export class PetsService {
 
       // If weight is provided, create initial weight entry
       if (weight && weightUnit && newPet.createdAt) {
-        try {       
+        try {      
+          const weightInKg = convertWeight(parseFloat(weight), weightUnit, 'kg'); 
           const entryDate = new Date(newPet.createdAt).toISOString().split('T')[0];
           
           await db.insert(weightEntries).values({
             petId: newPet.id,
-            weight: weight,
-            weightUnit: weightUnit,
+            weight: weightInKg.toFixed(2),
             date: entryDate,
           });
           

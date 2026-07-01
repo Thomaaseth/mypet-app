@@ -1,16 +1,17 @@
 import { db } from '../db';
 import { weightEntries } from '../db/schema/weight-entries';
 import { Pet } from '../db/schema/pets';
-import { eq, and, desc, asc } from 'drizzle-orm';
-import type { WeightEntry, NewWeightEntry, WeightEntryFormData, WeightUnit } from '../db/schema/weight-entries';
+import { eq, and, asc } from 'drizzle-orm';
+import type { WeightEntry, NewWeightEntry } from '../db/schema/weight-entries';
 import { 
   BadRequestError, 
   NotFoundError, 
-  UserForbiddenError 
 } from '../middleware/errors';
 import { PetsService } from './pets.service';
 import { dbLogger } from '../lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
+import { convertWeight } from '@/shared/utils/units';
+import type { WeightFormData, UpdateWeightEntryData } from '@/shared/validations/weight';
 
 export class WeightEntriesService {
   // Verify pet ownership (helper method)
@@ -26,7 +27,7 @@ export class WeightEntriesService {
   }
 
   // Input validation helper
-  private static validateInputs(entryData: Partial<WeightEntryFormData>, isUpdate = false): void {
+  private static validateInputs(entryData: Partial<WeightFormData>, isUpdate = false): void {
     // Required fields validation (only for create)
     if (!isUpdate) {
       if (!entryData.weight || !entryData.date) {
@@ -60,45 +61,28 @@ export class WeightEntriesService {
   }
 
   // business rules validation helper
-  private static validateBusinessRules(entryData: WeightEntryFormData, pet: Pet): void {
-    const weightValue = parseFloat(entryData.weight.toString());
-    this.validateWeightLimits(weightValue, pet.animalType, entryData.weightUnit);
+  private static validateBusinessRules(weightInKg: number, pet: Pet): void {
+    this.validateWeightLimits(weightInKg, pet.animalType);
   }
 
-  // Validate weight based on animal type and unit
-  private static validateWeightLimits(weight: number, animalType: string, weightUnit: WeightUnit): void {
-    // Convert weight to kg for consistent validation
-    let weightInKg = weight;
-    if (weightUnit === 'lbs') {
-      weightInKg = weight / 2.20462; // Convert lbs to kg
-    }
-
-    // Define realistic weight ranges per animal type (in kg)
+  // Validate weight (already in kg) against animal-specific realistic ranges
+  private static validateWeightLimits(weightInKg: number, animalType: string): void {
     const weightLimits = {
-      cat: { min: 0.05, max: 15 }, // 0.05-15kg
-      dog: { min: 0.5, max: 90 }, // 0.5-90kg
+      cat: { min: 0.05, max: 15 },
+      dog: { min: 0.5, max: 90 },
     };
 
-    // Get limits for this animal type, fallback to 'other'
     const limits = weightLimits[animalType as keyof typeof weightLimits];
 
     if (weightInKg < limits.min || weightInKg > limits.max) {
-      const displayWeight = weightUnit === 'kg' ? `${weight}kg` : `${weight}lbs`;
-      const displayLimits = weightUnit === 'kg' 
-        ? `${limits.min}-${limits.max}kg`
-        : `${(limits.min * 2.20462).toFixed(1)}-${(limits.max * 2.20462).toFixed(1)}lbs`;
-      
       throw new BadRequestError(
-        `Weight ${displayWeight} is outside realistic range for ${animalType} (${displayLimits})`
+        `Weight is outside realistic range for ${animalType} (${limits.min}-${limits.max}kg)`
       );
     }
 
-    // enforce absolute maximum of 200kg regardless of animal type
     const absoluteMaxKg = 200;
-    const absoluteMaxDisplay = weightUnit === 'kg' ? '200kg' : '440lbs';
-    
     if (weightInKg > absoluteMaxKg) {
-      throw new BadRequestError(`Weight exceeds maximum allowed (${absoluteMaxDisplay})`);
+      throw new BadRequestError(`Weight exceeds maximum allowed (${absoluteMaxKg}kg)`);
     }
   }
 
@@ -121,7 +105,7 @@ export class WeightEntriesService {
   }
 
   // Get all weight entries for a pet (with ownership check)
-  static async getWeightEntries(petId: string, userId: string): Promise<{ weightEntries: WeightEntry[], weightUnit: WeightUnit }> {
+  static async getWeightEntries(petId: string, userId: string): Promise<{ weightEntries: WeightEntry[] }> {
     try {
       // Verify pet ownership first
       const pet = await PetsService.getPetById(petId, userId);
@@ -132,11 +116,9 @@ export class WeightEntriesService {
         .where(eq(weightEntries.petId, petId))
         .orderBy(asc(weightEntries.date)); // Order by date for chart display
       
-      const weightUnit = entries.length > 0 ? entries[entries.length - 1].weightUnit : 'kg';
 
       return {
         weightEntries: entries,
-        weightUnit: weightUnit
       };
     } catch (error) {
       if (error instanceof NotFoundError) {
@@ -177,16 +159,19 @@ export class WeightEntriesService {
   }
 
   // Create a new weight entry 
-  static async createWeightEntry(petId: string, userId: string, entryData: WeightEntryFormData): Promise<WeightEntry> {
+  static async createWeightEntry(petId: string, userId: string, entryData: WeightFormData): Promise<WeightEntry> {
     try {
       // Input validation
       this.validateInputs(entryData, false);
       
       // Authorization check
       const pet = await PetsService.getPetById(petId, userId);
+
+      // Convert to kg before validation and storage
+      const weightInKg = convertWeight(parseFloat(entryData.weight), entryData.weightUnit, 'kg');
       
       // Business logic validation
-      this.validateBusinessRules(entryData, pet);
+      this.validateBusinessRules(weightInKg, pet);
       
       //  Database operations
       await this.checkDuplicateDate(petId, entryData.date);
@@ -194,8 +179,7 @@ export class WeightEntriesService {
       // Execute transaction
       const newEntryData: NewWeightEntry = {
         petId,
-        weight: entryData.weight,
-        weightUnit: entryData.weightUnit,
+        weight: weightInKg.toFixed(3),
         date: entryData.date,
       };
 
@@ -219,7 +203,7 @@ export class WeightEntriesService {
     petId: string, 
     weightId: string, 
     userId: string, 
-    updateData: Partial<WeightEntryFormData>
+    updateData: UpdateWeightEntryData
   ): Promise<WeightEntry> {
     try {
       // Input validation
@@ -234,11 +218,18 @@ export class WeightEntriesService {
       const existingEntry = await this.getWeightEntryById(petId, weightId, userId);
       const pet = await PetsService.getPetById(petId, userId);
 
-      // Business logic validation for weight
-      if (updateData.weight !== undefined) {
-        const weightValue = parseFloat(updateData.weight.toString());
-        // Use the weight unit from the existing entry
-        this.validateWeightLimits(weightValue, pet.animalType, existingEntry.weightUnit);
+      // set the DB payload explicitly — weightUnit is never a DB column
+      const dbUpdateData: Partial<Pick<NewWeightEntry, 'weight' | 'date'>> = {};
+
+      // updateWeightEntrySchema guarantees weightUnit is present whenever weight is
+      if (updateData.weight !== undefined && updateData.weightUnit !== undefined) {
+        const weightInKg = convertWeight(parseFloat(updateData.weight), updateData.weightUnit, 'kg');
+        this.validateWeightLimits(weightInKg, pet.animalType);
+        dbUpdateData.weight = weightInKg.toFixed(3);
+      }
+
+      if (updateData.date !== undefined) {
+        dbUpdateData.date = updateData.date;
       }
 
       // Database operations (duplicate check)
