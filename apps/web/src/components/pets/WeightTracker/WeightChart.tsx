@@ -19,6 +19,10 @@ import { EmptyStateTitle,
 } from '@/components/ui/typography';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ReactNode } from 'react';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
+import { formatDateForDisplay } from '@/lib/validations/weight';
+import { formatWeight } from '@/lib/validations/pet';
 
 interface WeightChartProps {
   data: WeightChartData[]; // pre-filtered by parent based on selected time range
@@ -29,8 +33,6 @@ interface WeightChartProps {
   latestWeight: { weight: number; date: string }; // always the true latest, not affected by filtering
   filterSlot?: ReactNode;
 }
-
-
 
 export default function WeightChart({ 
   data, 
@@ -63,6 +65,8 @@ export default function WeightChart({
   }
 
   const isMobile = useIsMobile();
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
   
   const weights = data.map(d => d.weight);
   const minWeight = weights.length > 0 ? Math.min(...weights) : 0;
@@ -102,13 +106,11 @@ export default function WeightChart({
         {/* Latest Weight Display */}
           <div className="text-center p-4 bg-muted/50 rounded-lg">
             <MetricLabel>Current Weight</MetricLabel>
-            <MetricValue>{latestWeight.weight} {weightUnit}</MetricValue>
+            <MetricValue>{formatWeight(latestWeight.weight)} {weightUnit}</MetricValue>
             <MetricLabel className="text-xs">as of {latestWeight.date}</MetricLabel>
           </div>
 
-
         {filterSlot}
-
 
         {/* Chart */}
         {chartData.length === 0 ? (
@@ -162,14 +164,15 @@ export default function WeightChart({
                             return (
                               <div className="bg-background border border-border rounded-lg shadow-lg p-3 space-y-1.5">
                                 {/* Date */}
-                                <BodyText className="font-medium text-foreground">{data.date}</BodyText>
-                                
+                                <BodyText className="font-medium text-foreground">
+                                  {formatDateForDisplay(data.date, displayLocale)}
+                                </BodyText>                                
                                 {/* Weight */}
                                 <div className="flex items-center gap-2">
                                   <div className="w-3 h-3 rounded-full bg-chart-2" />
                                   <span className="text-sm">
                                     <span className="text-muted-foreground">Weight: </span>
-                                    <span className="font-semibold font-display">{weight} {weightUnit}</span>
+                                    <span className="font-semibold font-display">{formatWeight(weight)} {weightUnit}</span>
                                   </span>
                                 </div>
                                 
@@ -178,7 +181,7 @@ export default function WeightChart({
                                   <div className="flex items-center gap-2 pt-1 border-t border-border/50">
                                     <div className="w-3 h-2 bg-secondary/20 border border-secondary border-dashed rounded-sm" />
                                     <span className="text-xs text-muted-foreground">
-                                      Target: <span className="font-display">{targetWeightMin}-{targetWeightMax} {weightUnit}</span>
+                                      Target: <span className="font-display">{formatWeight(targetWeightMin)}-{formatWeight(targetWeightMax)} {weightUnit}</span>
                                     </span>
                                   </div>
                                 )}
@@ -228,11 +231,11 @@ export default function WeightChart({
               </div>
               <div>
                 <StatLabel>Min</StatLabel>
-                <StatValue className='text-sm sm:text-lg'>{minWeight.toFixed(2)} {weightUnit}</StatValue>
+                <StatValue className='text-sm sm:text-lg'>{formatWeight(minWeight)} {weightUnit}</StatValue>
               </div>
               <div>
                 <StatLabel>Max</StatLabel>
-                <StatValue className='text-sm sm:text-lg'>{maxWeight.toFixed(2)} {weightUnit}</StatValue>
+                <StatValue className='text-sm sm:text-lg'>{formatWeight(maxWeight)} {weightUnit}</StatValue>
               </div>
             </div>
           )}

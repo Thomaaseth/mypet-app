@@ -70,52 +70,39 @@ export default function WeightForm({
 
       {/* Weight */}
       <div className="space-y-2">
-        {/* <Label htmlFor="weight">Weight ({weightUnit}) *</Label> */}
-        {/* <Label htmlFor="weight">Weight *</Label> */}
+      <Label htmlFor="weight">Weight</Label>
+      <div className="relative">
         <Input
           id="weight"
           type="number"
-          step="0.0001"
+          step="0.01"
           min="0"
-          // placeholder={`Enter weight in ${weightUnit}`}
           placeholder="Enter weight"
+          className="pr-12"
           {...register('weight')}
           aria-invalid={!!errors.weight}
         />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+          {weightUnit}
+        </span>
+        </div>
+
         {errors.weight && (
           <ErrorText>{errors.weight.message}</ErrorText>
         )}
-        {/* <HelperText>Maximum: {currentWeightUnit === 'kg' 
-          ? (animalType === 'cat' ? '15kg' : '90kg')
-          : (animalType === 'cat' ? '33lbs' : '198lbs')
-        }</HelperText> */}
+          {/* <HelperText>
+            Maximum: {weightUnit === 'kg'
+              ? (animalType === 'cat' ? '15kg' : '90kg')
+              : (animalType === 'cat' ? '33lbs' : '198lbs')}
+          </HelperText> */}
       </div>
       
       {/* Weight Unit */}
       <input type="hidden" {...register('weightUnit')} />
 
-      {/* <div className="space-y-2">
-        <Label htmlFor="weightUnit">Unit *</Label>
-        <Select 
-          value={watch('weightUnit')} 
-          onValueChange={(value: 'kg' | 'lbs') => setValue('weightUnit', value)}
-        >
-          <SelectTrigger id="weightUnit">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="kg">kg</SelectItem>
-            <SelectItem value="lbs">lbs</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.weightUnit && (
-          <ErrorText>{errors.weightUnit.message}</ErrorText>
-        )}
-      </div> */}
-
       {/* Date */}
       <div className="space-y-2">
-        <Label htmlFor="date">Date *</Label>
+        <Label htmlFor="date">Date</Label>
         <Input
           id="date"
           type="date"

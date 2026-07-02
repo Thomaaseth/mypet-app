@@ -59,7 +59,6 @@ export const mockWeightEntries: WeightEntry[] = [
     id: 'weight-1',
     petId: 'pet-1',
     weight: '4.50',
-    weightUnit: 'kg',
     date: '2024-01-15',
     createdAt: '2024-01-15T00:00:00.000Z',
     updatedAt: '2024-01-15T00:00:00.000Z',
@@ -68,7 +67,6 @@ export const mockWeightEntries: WeightEntry[] = [
     id: 'weight-2',
     petId: 'pet-1',
     weight: '4.60',
-    weightUnit: 'kg',
     date: '2024-02-15',
     createdAt: '2024-02-15T00:00:00.000Z',
     updatedAt: '2024-02-15T00:00:00.000Z',
@@ -80,7 +78,6 @@ export const mockWeightTarget: WeightTarget = {
   petId: 'pet-1',
   minWeight: '4.0',
   maxWeight: '5.0',
-  weightUnit: 'kg',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };

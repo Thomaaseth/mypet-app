@@ -45,7 +45,7 @@ export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
 
       // Convert to chart data format
       const chartData: WeightChartData[] = sortedEntries.map(entry => ({
-        date: formatDateForDisplay(entry.date),
+        date: entry.date,
         timestamp: new Date(entry.date).getTime(),
         weight: parseFloat(entry.weight),
         originalDate: entry.date,

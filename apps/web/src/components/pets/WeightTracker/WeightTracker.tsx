@@ -6,7 +6,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Equal, ArrowUp, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
@@ -36,6 +35,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight } from '@/lib/validations/pet';
 import { formatDateForDisplay } from '@/lib/validations/weight';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 interface WeightTrackerProps {
   petId: string;
@@ -87,8 +87,9 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   })();
   
 
-  const { units } = usePreferencesContext();
+  const { units, locale } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
+  const displayLocale = locale ?? getFallbackLocale();
 
   // Extract data (with defaults for undefined)
   const weightEntries = data?.weightEntries ?? [];
@@ -109,7 +110,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   // Latest weight converted for display
   const latestWeightForChart = data?.latestWeight ? {
     weight: convertWeight(parseFloat(data.latestWeight.weight), 'kg', weightUnit),
-    date: formatDateForDisplay(data.latestWeight.date),
+    date: formatDateForDisplay(data.latestWeight.date, displayLocale),
   } : null;
 
   // Target range converted for chart (must match chart's display unit)
@@ -383,7 +384,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         >
           <WeightForm
             animalType={animalType}
-            // weightUnit={weightUnit}
             onSubmit={handleCreateEntry}
             onCancel={() => setIsAddDialogOpen(false)}
             isLoading={isActionLoading}
@@ -401,7 +401,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               key={`target-form-${isTargetRangeDialogOpen}`}
               petName="your pet"
               animalType={animalType}
-              // weightUnit={weightUnit}
               currentMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
               currentMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
               onSubmit={handleUpsertTargetRange}
@@ -484,7 +483,6 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   <WeightList
                     animalType={animalType}
                     weightEntries={weightEntries}
-                    // weightUnit={weightUnit}
                     onUpdateEntry={handleUpdateEntry}
                     onDeleteEntry={handleDeleteEntry}
                     isLoading={isActionLoading}

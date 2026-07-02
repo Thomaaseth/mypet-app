@@ -1,15 +1,16 @@
 export * from '@/shared/validations/appointments';
+import type { Locale } from '@/shared/validations/locale';
 
 // Date formatting utilities
-export const formatDateForDisplay = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long',
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
+export const formatDateForDisplay = (dateString: string, locale: Locale): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
   
   export const formatDateForInput = (dateString: string): string => {
     const date = new Date(dateString);
@@ -17,9 +18,15 @@ export const formatDateForDisplay = (dateString: string): string => {
   };
   
   // Time formatting utilities
-  export const formatTimeForDisplay = (timeString: string): string => {
-    // timeString is already in HH:MM format (24h)
-    return timeString.slice(0, 5); // Remove seconds if present (HH:MM:SS -> HH:MM)
+  export const formatTimeForDisplay = (timeString: string, locale: Locale): string => {
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+  
+    return date.toLocaleTimeString(locale, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
   
   export const formatTimeForInput = (timeString: string): string => {

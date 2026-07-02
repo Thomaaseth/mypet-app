@@ -29,7 +29,8 @@ import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-formatting';
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
 import { FoodUnitLabel } from './FoodUnitLabel'
-
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
@@ -66,6 +67,9 @@ export function WetFoodList({
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
  const [markingFinishedEntry, setMarkingFinishedEntry] = useState<WetFoodEntry | null>(null);
+
+ const { locale } = usePreferencesContext();
+ const displayLocale = locale ?? getFallbackLocale();
 
  const handleUpdate = async (data: WetFoodFormData) => { // Receive WetFoodFormData (strings)
   if (!editingEntry) return null;
@@ -183,7 +187,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                       </span>
                     <span className="flex items-center gap-1 shrink-0">
                       <Calendar className="h-4 w-4" />
-                      {formatDateForDisplay(entry.dateStarted)}
+                      {formatDateForDisplay(entry.dateStarted, displayLocale)}
                     </span>
                   </div>
                 </CardHeader>
@@ -199,7 +203,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                    </div>
                    <div>
                     <StatLabel>~Runs out</StatLabel>
-                    <StatValue>{formatDateForDisplay(entry.depletionDate)}</StatValue>
+                    <StatValue>{formatDateForDisplay(entry.depletionDate, displayLocale)}</StatValue>
                    </div>
                  </div>
                  

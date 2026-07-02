@@ -30,6 +30,8 @@ import type { AppointmentWithRelations, AppointmentType } from '@/types/appointm
 import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
 import { useState } from 'react';
 import { MutedText, BodyText, SectionTitle } from '@/components/ui/typography';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
@@ -64,9 +66,12 @@ export default function AppointmentCard({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
+
   const typeBadge = getAppointmentTypeBadge(appointment.appointmentType);
-  const displayDate = formatDateForDisplay(appointment.appointmentDate);
-  const displayTime = formatTimeForDisplay(appointment.appointmentTime);
+  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale);
+  const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
   
   // Check if appointment time has passed
   const hasAppointmentTimePassed = (() => {

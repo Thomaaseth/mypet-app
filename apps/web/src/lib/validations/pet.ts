@@ -1,39 +1,24 @@
 export * from '@/shared/validations/pet';
+export * from '@/shared/utils/units';
 import type { WeightUnit } from '@/shared/validations/pet';
+import { convertWeight } from '@/shared/utils/units';
 
-// Weight conversion utilities
-export const convertWeight = (weight: number, fromUnit: WeightUnit, toUnit: WeightUnit): number => {
-    if (fromUnit === toUnit) return weight;
-    
-    if (fromUnit === 'kg' && toUnit === 'lbs') {
-      return weight * 2.20462;
-    } else if (fromUnit === 'lbs' && toUnit === 'kg') {
-      return weight / 2.20462;
-    }
-    
-    return weight;
-  };
   
-  export const formatWeight = (weight: string | null, unit: WeightUnit): string => {
-    if (!weight) return 'Unknown';
-    return `${weight} ${unit}`;
-  };
-  
-  export const getWeightInKg = (weight: string | null, unit: WeightUnit): number | null => {
-    if (!weight) return null;
-    const weightNum = parseFloat(weight);
-    if (isNaN(weightNum)) return null;
+  // export const getWeightInKg = (weight: string | null, unit: WeightUnit): number | null => {
+  //   if (!weight) return null;
+  //   const weightNum = parseFloat(weight);
+  //   if (isNaN(weightNum)) return null;
     
-    return unit === 'kg' ? weightNum : convertWeight(weightNum, 'lbs', 'kg');
-  };
+  //   return unit === 'kg' ? weightNum : convertWeight(weightNum, 'lbs', 'kg');
+  // };
   
-  export const getWeightInLbs = (weight: string | null, unit: WeightUnit): number | null => {
-    if (!weight) return null;
-    const weightNum = parseFloat(weight);
-    if (isNaN(weightNum)) return null;
+  // export const getWeightInLbs = (weight: string | null, unit: WeightUnit): number | null => {
+  //   if (!weight) return null;
+  //   const weightNum = parseFloat(weight);
+  //   if (isNaN(weightNum)) return null;
     
-    return unit === 'lbs' ? weightNum : convertWeight(weightNum, 'kg', 'lbs');
-  };
+  //   return unit === 'lbs' ? weightNum : convertWeight(weightNum, 'kg', 'lbs');
+  // };
   
   // Age calculation utility
   export const calculatePetAge = (birthDate: string | null): string => {

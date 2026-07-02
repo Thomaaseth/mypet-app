@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createWeightEntrySchema, getTodayDateString, type WeightFormData } from '@/lib/validations/weight';
 import type { WeightEntry } from '@/types/weights';
-import { convertWeight } from '@/lib/validations/pet';
+import { convertWeight, formatWeight } from '@/lib/validations/pet';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface UseWeightFormOptions {
@@ -21,9 +21,9 @@ export function useWeightForm(options: UseWeightFormOptions) {
   const getInitialValues = (): WeightFormData => {
     if (weightEntry) {
       // Convert stored kg value to display unit for editing
-      const displayWeight = convertWeight(parseFloat(weightEntry.weight), 'kg', weightUnit);
+      // const displayWeight = convertWeight(parseFloat(weightEntry.weight), 'kg', weightUnit);
       return {
-        weight: parseFloat(displayWeight.toFixed(2)).toString(),
+        weight: formatWeight(convertWeight(parseFloat(weightEntry.weight), 'kg', weightUnit)),
         weightUnit,
         date: weightEntry.date,
       };
@@ -44,9 +44,9 @@ export function useWeightForm(options: UseWeightFormOptions) {
   });
 
   const resetWithWeightEntry = (newWeightEntry: WeightEntry) => {
-    const displayWeight = convertWeight(parseFloat(newWeightEntry.weight), 'kg', weightUnit);
+    // const displayWeight = convertWeight(parseFloat(newWeightEntry.weight), 'kg', weightUnit);
     form.reset({
-      weight: parseFloat(displayWeight.toFixed(2)).toString(),
+      weight: formatWeight(convertWeight(parseFloat(newWeightEntry.weight), 'kg', weightUnit)),
       weightUnit,
       date: newWeightEntry.date,
     });

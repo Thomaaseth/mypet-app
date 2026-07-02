@@ -1,5 +1,3 @@
-'use client';
-
 import { WetFoodForm } from './WetFoodForm';
 import { WetFoodList } from './WetFoodList';
 import { GenericFoodTracker } from './GenericFoodTracker';

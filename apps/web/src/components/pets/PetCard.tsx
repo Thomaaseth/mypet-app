@@ -26,6 +26,8 @@ import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
 import { usePetSignedUrl } from '@/queries/pets';
 import { MutedText, SectionTitle, EntryTitle } from '@/components/ui/typography';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { convertWeight, formatWeight } from '@/lib/validations/pet';
 
 interface PetCardProps {
   pet: Pet;
@@ -39,6 +41,9 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
   const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
 
   const age = calculatePetAge(pet.birthDate);
+
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
 
   // Query latest weight from weight_entries
   const { data: weightData } = useWeightEntries({ 
@@ -164,7 +169,9 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
               <div className="flex items-center gap-2">
                 <Weight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <EntryTitle className="truncate">
-                  {latestWeight ? `${latestWeight.weight} ${latestWeight.weightUnit}` : 'No weight'}
+                {latestWeight
+                  ? `${formatWeight(convertWeight(parseFloat(latestWeight.weight), 'kg', weightUnit))} ${weightUnit}`
+                  : 'No weight'}
                 </EntryTitle>
               </div>
               

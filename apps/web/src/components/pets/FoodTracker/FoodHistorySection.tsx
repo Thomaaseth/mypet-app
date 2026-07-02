@@ -37,6 +37,8 @@ import { DeleteFoodEntryDialog } from './DeleteFoodEntryDialog';
 import { MutedText, EntryTitle } from '@/components/ui/typography';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -60,6 +62,9 @@ export function FoodHistorySection({
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
+
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
 
   const handleDelete = async () => {
     if (!deletingEntry) return;
@@ -170,12 +175,12 @@ export function FoodHistorySection({
                     )}
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      Started {formatDateForDisplay(entry.dateStarted)}
+                      Started {formatDateForDisplay(entry.dateStarted, displayLocale)}
                     </span>
                     {entry.dateFinished && (
                       <span className="flex items-center gap-1">
                         <CheckCircle className="h-3 w-3" />
-                        Finished {formatDateForDisplay(entry.dateFinished)}
+                        Finished {formatDateForDisplay(entry.dateFinished, displayLocale)}
                       </span>
                     )}
                   </div>

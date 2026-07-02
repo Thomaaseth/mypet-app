@@ -20,10 +20,13 @@ import { usePets } from '@/queries/pets';
 import { useVeterinarians } from '@/queries/vets';
 import { usePetVets } from '@/queries/vets';
 import { useLastVetForPet } from '@/queries/appointments';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
+import { formatTimeForDisplay } from '@/lib/validations/appointments';
 
 interface AppointmentFormProps {
   appointment?: AppointmentWithRelations;
-  prefilledPetId?: string; // For "Book Appointment" from pet profile
+  prefilledPetId?: string; // For "Book Appointment" from pet profile NOT USED YET
   onSubmit: (data: AppointmentFormData) => Promise<AppointmentWithRelations | null>;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -63,6 +66,9 @@ export default function AppointmentForm({
 
   const selectedPetId = watch('petId');
   const selectedVetId = watch('veterinarianId');
+  
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
 
   // Fetch vets assigned to selected pet
   const { data: availableVetsData } = usePetVets(selectedPetId || '');
@@ -198,7 +204,7 @@ export default function AppointmentForm({
             <SelectContent className="max-h-[200px]">
               {timeOptions.map((time) => (
                 <SelectItem key={time} value={time}>
-                  {time}
+                  {formatTimeForDisplay(time, displayLocale)}
                 </SelectItem>
               ))}
             </SelectContent>

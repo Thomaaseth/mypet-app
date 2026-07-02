@@ -19,7 +19,7 @@ export interface LocaleUnits {
   weightUnit: 'kg' | 'lbs';
   bagWeightUnit: 'kg' | 'pounds';
   wetFoodUnit: 'grams' | 'oz';
-  dryDailyAmountUnit: 'grams'; // always grams, kept explicit for clarity
+  dryDailyAmountUnit: 'grams'; // always grams, kept for clarity
   dateFormat: 'dd/MM/yyyy' | 'MM/dd/yyyy';
 }
 

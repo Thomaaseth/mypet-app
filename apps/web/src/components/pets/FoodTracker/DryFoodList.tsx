@@ -29,6 +29,8 @@ import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-formatting';
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
 import { FoodUnitLabel } from './FoodUnitLabel'
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
@@ -67,6 +69,9 @@ export function DryFoodList({
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
   // const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
   const [markingFinishedEntry, setMarkingFinishedEntry] = useState<DryFoodEntry | null>(null);
+
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
 
   const handleUpdate = async (data: DryFoodFormData) => {
     if (!editingEntry) return null;
@@ -178,7 +183,7 @@ export function DryFoodList({
                       </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Calendar className="h-4 w-4" />
-                        {formatDateForDisplay(entry.dateStarted)}
+                        {formatDateForDisplay(entry.dateStarted, displayLocale)}
                       </span>
                     </div>
                 </CardHeader>
@@ -194,7 +199,7 @@ export function DryFoodList({
                     </div>
                     <div>
                       <StatLabel>~Runs out</StatLabel>
-                      <StatValue>{formatDateForDisplay(entry.depletionDate)}</StatValue>
+                      <StatValue>{formatDateForDisplay(entry.depletionDate, displayLocale)}</StatValue>
                     </div>
                   </div>
                   

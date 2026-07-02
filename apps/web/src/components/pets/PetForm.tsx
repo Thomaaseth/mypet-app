@@ -19,6 +19,7 @@ import type { Pet, PetFormData } from '@/types/pet';
 import { commonSpeciesSuggestions, petFormSchema } from '@/lib/validations/pet';
 import { PetImageUpload } from '@/components/pets/PetImageUpload';
 import { MutedText, ErrorText, HelperText } from '../ui/typography';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface PetFormProps {
   pet?: Pet; // if provided, we're editing
@@ -50,7 +51,9 @@ export default function PetForm({
 
   const isEditing = !!pet;
   const watchedSpecies = watch('species');
-  const watchedWeightUnit = watch('weightUnit');
+
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
 
   // Handle form submission
  const onFormSubmit = async (formData: z.infer<typeof petFormSchema>) => {
@@ -229,37 +232,27 @@ export default function PetForm({
       {!isEditing && (
       <div className="space-y-2">
         <Label>Weight</Label>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              placeholder="Enter weight"
-              {...register('weight')}
-              aria-invalid={!!errors.weight}
-            />
-          </div>
-          <div className="w-24">
-            <Select 
-              value={watchedWeightUnit} 
-              onValueChange={(value: 'kg' | 'lbs') => setValue('weightUnit', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="kg">kg</SelectItem>
-                <SelectItem value="lbs">lbs</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="relative">
+          <Input
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="Enter your pet's current weight"
+            className="pr-12"
+            {...register('weight')}
+            aria-invalid={!!errors.weight}
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+            {weightUnit}
+          </span>
         </div>
-        {errors.weight && (
-          <ErrorText>{errors.weight.message}</ErrorText>
-        )}
+        <input type="hidden" {...register('weightUnit')} />
+        {errors.weight && <ErrorText>{errors.weight.message}</ErrorText>}
         <HelperText>
-          Optional: Current weight (max 200kg / 440lbs)
+          Optional: Current weight (max {weightUnit === 'kg' ? '200kg' : '440lbs'})
         </HelperText>
       </div>
-      )}
+    )}
 
       {/* Message for EDIT mode */}
       {isEditing && (

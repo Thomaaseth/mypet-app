@@ -1,9 +1,10 @@
 export * from '@/shared/validations/weight';
+import type { Locale } from '@/shared/validations/locale';
 
 // Date formatting utilities for weight tracking
-export const formatDateForDisplay = (dateString: string): string => {
+export const formatDateForDisplay = (dateString: string, locale: Locale): string => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString(locale, { 
       year: 'numeric', 
       month: 'short', 
       day: 'numeric' 

@@ -8,6 +8,8 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppointmentWithRelations } from '@/types/appointments';
 import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
 import { HelperText, BodyText } from '@/components/ui/typography';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 interface EditNotesDialogProps {
   appointment: AppointmentWithRelations | null;
@@ -27,6 +29,9 @@ export default function EditNotesDialog({
   const [visitNotes, setVisitNotes] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
+
   // Update visitNotes when appointment changes
   useEffect(() => {
     if (appointment) {
@@ -36,8 +41,8 @@ export default function EditNotesDialog({
 
   if (!appointment) return null;
 
-  const displayDate = formatDateForDisplay(appointment.appointmentDate);
-  const displayTime = formatTimeForDisplay(appointment.appointmentTime);
+  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale);
+  const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

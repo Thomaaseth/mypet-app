@@ -11,7 +11,9 @@ import {
   import { Loader2 } from 'lucide-react';
   import type { AppointmentWithRelations } from '@/types/appointments';
   import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
-  
+  import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+  import { getFallbackLocale } from '@/lib/utils/locale';
+
   interface DeleteAppointmentDialogProps {
     appointment: AppointmentWithRelations | null;
     isUpcoming: boolean;
@@ -28,9 +30,12 @@ import {
     onCancel,
   }: DeleteAppointmentDialogProps) {
     if (!appointment) return null;
+
+    const { locale } = usePreferencesContext();
+    const displayLocale = locale ?? getFallbackLocale();
   
-    const displayDate = formatDateForDisplay(appointment.appointmentDate);
-    const displayTime = formatTimeForDisplay(appointment.appointmentTime);
+    const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale);
+    const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
   
     return (
       <AlertDialog open={!!appointment} onOpenChange={(open) => !open && onCancel()}>

@@ -20,17 +20,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronRight } from 'lucide-react';
-// import type { WeightUnit } from '@/types/pet';
+import { Loader2 } from 'lucide-react';
 import type { WeightTargetFormData } from '@/types/weight-targets';
 import { createWeightTargetSchema } from '@/lib/validations/weight';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { convertWeight } from '@/lib/validations/pet';
+import { convertWeight, formatWeight } from '@/lib/validations/pet';
 
 interface TargetRangeFormProps {
   petName: string;
   animalType: 'cat' | 'dog';
-  // weightUnit: WeightUnit;
   currentMin?: number; // kg from API
   currentMax?: number; // kg from API
   onSubmit: (data: WeightTargetFormData) => Promise<void>;
@@ -43,7 +41,6 @@ interface TargetRangeFormProps {
 export default function TargetRangeForm({
   petName,
   animalType,
-  // weightUnit,
   currentMin,
   currentMax,
   onSubmit,
@@ -54,6 +51,7 @@ export default function TargetRangeForm({
 }: TargetRangeFormProps) {
   const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -61,10 +59,11 @@ export default function TargetRangeForm({
 
   // Convert kg values from API to display unit for form pre-fill
   const displayMin = currentMin !== undefined
-    ? parseFloat(convertWeight(currentMin, 'kg', weightUnit).toFixed(3)).toString()
+    ? formatWeight(convertWeight(currentMin, 'kg', weightUnit), 2)
+
     : '';
   const displayMax = currentMax !== undefined
-    ? parseFloat(convertWeight(currentMax, 'kg', weightUnit).toFixed(3)).toString()
+    ? formatWeight(convertWeight(currentMax, 'kg', weightUnit), 2)
     : '';
 
   const {
@@ -115,52 +114,49 @@ export default function TargetRangeForm({
 
         {/* Minimum Weight */}
         <div className="space-y-2">
-        <Label htmlFor="minWeight">Minimum Weight ({weightUnit})</Label>
-        <Input
-            id="minWeight"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder={`Enter minimum weight`}
-            {...register('minWeight')}
-            aria-invalid={!!errors.minWeight}
-          />
-          {errors.minWeight && (
-            <p className="text-sm text-destructive">{errors.minWeight.message}</p>
-          )}
+        <Label htmlFor="minWeight">Minimum Weight</Label>
+          <div className="relative">
+            <Input
+                id="minWeight"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder={`Enter minimum weight`}
+                className="pr-12"
+                {...register('minWeight')}
+                aria-invalid={!!errors.minWeight}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+                {weightUnit}
+              </span>
+              </div>
+              {errors.minWeight && (
+                <p className="text-sm text-destructive">{errors.minWeight.message}</p>
+              )}
         </div>
 
         {/* Maximum Weight */}
         <div className="space-y-2">
-        <Label htmlFor="maxWeight">Maximum Weight ({weightUnit})</Label>
-        <Input
-            id="maxWeight"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder={`Enter maximum weight`}
-            {...register('maxWeight')}
-            aria-invalid={!!errors.maxWeight}
-          />
-          {errors.maxWeight && (
-            <p className="text-sm text-destructive">{errors.maxWeight.message}</p>
-          )}
-        </div>
-
-        {/* Weight Unit (Read-only) */}
-        {/* <div className="space-y-2">
-          <Label htmlFor="weightUnit">Weight Unit</Label>
-          <Input
-            id="weightUnit"
-            type="text"
-            value={weightUnit}
-            disabled
-            className="bg-muted"
-          />
-          <p className="text-xs text-muted-foreground">
-            Unit is determined by your weight entries
-          </p>
-        </div> */}
+          <Label htmlFor="maxWeight">Maximum Weight ({weightUnit})</Label>
+          <div className='relative'>
+            <Input
+                id="maxWeight"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder={`Enter maximum weight`}
+                className="pr-12"
+                {...register('maxWeight')}
+                aria-invalid={!!errors.maxWeight}
+              />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+                  {weightUnit}
+                </span>
+              </div>
+              {errors.maxWeight && (
+                <p className="text-sm text-destructive">{errors.maxWeight.message}</p>
+              )}
+          </div>
 
         {/* Educational Accordion */}
         <Accordion type="single" collapsible className="w-full">

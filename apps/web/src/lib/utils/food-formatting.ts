@@ -67,19 +67,9 @@ export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): 
       : entry.actualDailyConsumption.toFixed(1);
     
     const shortUnit = unit === 'grams' ? 'g' : unit; // 'oz' stays 'oz'
-
     return `${statusLabel} • ${avg}${shortUnit}/day`;
   }
-
   return statusLabel;
-
-  // if (entry.feedingStatus === 'overfeeding' || entry.feedingStatus === 'slightly-over') {
-  //   return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
-  // } else if (entry.feedingStatus === 'underfeeding' || entry.feedingStatus === 'slightly-under') {
-  //   return `${statusLabel} by ~${daysDifference} day${daysDifference !== 1 ? 's' : ''}`;
-  // } else {
-  //   return statusLabel;
-  // }
 }
 
 /**

@@ -30,18 +30,17 @@ import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
 import { formatDateForDisplay } from '@/lib/validations/weight';
 import WeightForm from './WeightForm';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
-// import type { WeightUnit } from '@/types/pet';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { convertWeight } from '@/lib/validations/pet';
+import { convertWeight, formatWeight } from '@/lib/validations/pet';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 const PAGE_SIZE = 5;
 
 interface WeightListProps {
   animalType: 'cat' | 'dog';
   weightEntries: WeightEntry[];
-  // weightUnit: WeightUnit;
   onUpdateEntry: (weightId: string, data: Partial<WeightFormData>) => Promise<WeightEntry | null>;
   onDeleteEntry: (weightId: string) => Promise<boolean>;
   isLoading?: boolean;
@@ -51,7 +50,6 @@ interface WeightListProps {
 export default function WeightList({ 
   animalType,
   weightEntries, 
-  // weightUnit, 
   onUpdateEntry, 
   onDeleteEntry,
   isLoading = false,
@@ -61,8 +59,9 @@ export default function WeightList({
   const [deletingEntry, setDeletingEntry] = useState<WeightEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const { units } = usePreferencesContext();
+  const { units, locale } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
+  const displayLocale = locale ?? getFallbackLocale();
 
   // Sort entries by date (newest first for the table)
   const sortedEntries = [...weightEntries].sort((a, b) => 
@@ -124,11 +123,11 @@ export default function WeightList({
         </TableHeader>
         <TableBody>
           {paginatedItems.map((entry) => {
-            const displayWeight = convertWeight(parseFloat(entry.weight), 'kg', weightUnit).toFixed(2);
+            const displayWeight = formatWeight(convertWeight(parseFloat(entry.weight), 'kg', weightUnit));
             return (
             <TableRow key={entry.id}>
               <TableCell className="font-medium">
-                {formatDateForDisplay(entry.date)}
+                {formatDateForDisplay(entry.date, displayLocale)}
               </TableCell>
               <TableCell className='font-display'>
                 {displayWeight} {weightUnit}
@@ -179,7 +178,6 @@ export default function WeightList({
         {editingEntry && (
           <WeightForm
             animalType={animalType}
-            // weightUnit={weightUnit}
             weightEntry={editingEntry}
             onSubmit={handleEditSubmit}
             onCancel={handleEditCancel}
@@ -195,7 +193,7 @@ export default function WeightList({
             <AlertDialogTitle>Delete Weight Entry</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete this weight entry from{' '}
-              {deletingEntry && formatDateForDisplay(deletingEntry.date)}? This action cannot be undone.
+              {deletingEntry && formatDateForDisplay(deletingEntry.date, displayLocale)}? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

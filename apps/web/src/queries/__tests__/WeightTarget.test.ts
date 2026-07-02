@@ -48,7 +48,6 @@ describe('Weight Targets Queries', () => {
       expect(result.current.data?.petId).toBe(TEST_PET_ID);
       expect(result.current.data?.minWeight).toBe('4.0');
       expect(result.current.data?.maxWeight).toBe('5.0');
-      expect(result.current.data?.weightUnit).toBe('kg');
     });
 
     it('should return null when no target exists', async () => {

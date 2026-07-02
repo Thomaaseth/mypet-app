@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { petFormSchema, type PetFormData } from '@/lib/validations/pet';
 import type { Pet } from '@/types/pet';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface UsePetFormOptions {
   defaultValues?: Partial<PetFormData>;
@@ -10,6 +11,8 @@ interface UsePetFormOptions {
 
 export function usePetForm(options: UsePetFormOptions = {}) {
   const { defaultValues, pet } = options;
+  const { units } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? 'kg';
 
   // Convert Pet data to form data if editing
   const getInitialValues = (): PetFormData => {
@@ -21,7 +24,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
         gender: pet.gender,
         birthDate: pet.birthDate || '',
         weight: '',
-        weightUnit: 'kg',
+        weightUnit,
         isNeutered: pet.isNeutered,
         microchipNumber: pet.microchipNumber || '',
         notes: pet.notes || '',
@@ -35,7 +38,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
       gender: 'unknown',
       birthDate: '',
       weight: '',
-      weightUnit: 'kg',
+      weightUnit,
       isNeutered: false,
       microchipNumber: '',
       notes: '',
@@ -58,7 +61,7 @@ export function usePetForm(options: UsePetFormOptions = {}) {
       gender: newPet.gender,
       birthDate: newPet.birthDate || '',
       weight: '',
-      weightUnit: 'kg',
+      weightUnit,
       isNeutered: newPet.isNeutered,
       microchipNumber: newPet.microchipNumber || '',
       notes: newPet.notes || '',

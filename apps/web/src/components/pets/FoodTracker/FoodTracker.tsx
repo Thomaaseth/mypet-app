@@ -8,7 +8,8 @@ import { FoodTrackerProvider, useFoodTrackerContext } from './FoodTrackerContext
 import { formatDateForDisplay } from '@/lib/validations/food';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
-
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getFallbackLocale } from '@/lib/utils/locale';
 
 interface FoodTrackerProps {
   petId: string;
@@ -37,6 +38,9 @@ function FoodTrackerContent() {
   const [activeTab, setActiveTab] = useState<'dry' | 'wet'>('dry');
   const { activeFoodEntries, isLoading } = useFoodTrackerContext();
 
+  const { locale } = usePreferencesContext();
+  const displayLocale = locale ?? getFallbackLocale();
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -63,7 +67,7 @@ function FoodTrackerContent() {
                   </MetricValue>
                   <MutedText>
                     {activeFoodEntries[0].remainingDays > 0 
-                      ? `Runs out ${formatDateForDisplay(activeFoodEntries[0].depletionDate)}`
+                      ? `Runs out ${formatDateForDisplay(activeFoodEntries[0].depletionDate, displayLocale)}`
                       : 'Needs restocking'
                     }
                   </MutedText>
@@ -84,7 +88,7 @@ function FoodTrackerContent() {
                       </MetricValue>
                       <MutedText>
                         {entry.remainingDays > 0 
-                          ? `Runs out ${formatDateForDisplay(entry.depletionDate)}`
+                          ? `Runs out ${formatDateForDisplay(entry.depletionDate, displayLocale)}`
                           : 'Needs restocking'
                         }
                       </MutedText>
