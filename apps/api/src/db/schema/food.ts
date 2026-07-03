@@ -109,7 +109,7 @@ export type DryFoodEntry = BaseFoodEntry & {
   // Calculated fields for active entries
   remainingDays?: number;
   remainingWeight?: number;
-  depletionDate?: Date;
+  depletionDate?: string;
 
   // Calculated fields for finished entries
   actualDaysElapsed?: number;
@@ -133,7 +133,7 @@ export type WetFoodEntry = BaseFoodEntry & {
   // Calculated fields for active entries
   remainingDays?: number;
   remainingWeight?: number;
-  depletionDate?: Date;
+  depletionDate?: string;
   
   // Calculated fields for finished entries
   actualDaysElapsed?: number;

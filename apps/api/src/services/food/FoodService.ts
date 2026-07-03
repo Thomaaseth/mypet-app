@@ -41,11 +41,11 @@ export class FoodService {
 
   // Export calculations methods
   static calculateDryFoodRemaining(entry: DryFoodEntry) {
-    return FoodCalculations.calculateDryFoodRemaining(entry);
+    return FoodCalculations.calculateDryFoodRemaining(entry, this.toDateString(new Date()));
   }
   
   static calculateWetFoodRemaining(entry: WetFoodEntry) {
-    return FoodCalculations.calculateWetFoodRemaining(entry);
+    return FoodCalculations.calculateWetFoodRemaining(entry, this.toDateString(new Date()));
   }
 
   // DRY FOOD METHODS //
@@ -120,7 +120,7 @@ export class FoodService {
   
       // calculations only, don't update database
       return result.map(entry => {
-        const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry);
+        const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, this.toDateString(new Date()));
         return { ...entry, ...calculations };
       }) as DryFoodEntry[];
     } catch (error) {
@@ -175,7 +175,7 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Dry food entry not found');
       }
-      const calculations = FoodCalculations.calculateDryFoodRemaining(updatedEntry as DryFoodEntry);
+      const calculations = FoodCalculations.calculateDryFoodRemaining(updatedEntry as DryFoodEntry, this.toDateString(new Date()));
       return { ...updatedEntry, ...calculations } as DryFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
@@ -204,7 +204,7 @@ export class FoodService {
       if (!entry) {
         throw new NotFoundError('Dry food entry not found');
       }
-      const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry);
+      const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, this.toDateString(new Date()));
       return { ...entry, ...calculations } as DryFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
@@ -287,7 +287,7 @@ export class FoodService {
   
       // CHANGED: Just add calculations, don't update database
       return result.map(entry => {
-        const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry);
+        const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, this.toDateString(new Date()));
         return { ...entry, ...calculations };
       }) as WetFoodEntry[];
     } catch (error) {
@@ -342,7 +342,7 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Wet food entry not found');
       }
-      const calculations = FoodCalculations.calculateWetFoodRemaining(updatedEntry as WetFoodEntry);
+      const calculations = FoodCalculations.calculateWetFoodRemaining(updatedEntry as WetFoodEntry, this.toDateString(new Date()));
       return { ...updatedEntry, ...calculations } as WetFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
@@ -372,7 +372,7 @@ export class FoodService {
         throw new NotFoundError('Wet food entry not found');
       }
 
-      const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry);
+      const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, this.toDateString(new Date()));
       return { ...entry, ...calculations } as WetFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
@@ -396,10 +396,11 @@ export class FoodService {
   
       return result.map(entry => {
         let calculations;
+        const today = this.toDateString(new Date());
         if (entry.foodType === 'dry') {
-          calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry);
+          calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, today);
         } else {
-          calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry);
+          calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, today);
         }
         return { ...entry, ...calculations };
       }) as AnyFoodEntry[];

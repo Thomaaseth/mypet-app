@@ -1,5 +1,7 @@
 import { BadRequestError } from '@/middleware/errors';
 import type { DryFoodEntry, WetFoodEntry } from '../../db/schema/food';
+import { diffCalendarDays, addCalendarDays } from '@/shared/utils/dates';
+
 
 // Tolerance threshold for feeding status (±5%)
 const FEEDING_TOLERANCE_PERCENTAGE = 5;
@@ -7,24 +9,18 @@ const TOLERANCE_BUFFER = 0.5;
 const WARNING_THRESHOLD = 7;
 
 // Unit conversion constants
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const GRAMS_PER_KG = 1000;
 const GRAMS_PER_LB = 453.592;
 const GRAMS_PER_OZ = 28.3495;
 
 export class FoodCalculations {
-  static calculateDryFoodRemaining(entry: DryFoodEntry): { 
+  static calculateDryFoodRemaining(entry: DryFoodEntry, today: string): { 
     remainingDays: number; 
-    depletionDate: Date; 
+    depletionDate: string; 
     remainingWeight: number;
   } {
-    const today = new Date();
-    const startDate = new Date(entry.dateStarted);
-    
     // Day 1 logic: dateStarted = first day of consumption
-    const daysElapsed = Math.floor(
-      (today.getTime() - startDate.getTime()) / MS_PER_DAY
-    ) + 1;
+    const daysElapsed = diffCalendarDays(entry.dateStarted, today) + 1;
     
     // Convert bag weight to grams for calculation
     let bagWeightInGrams = parseFloat(entry.bagWeight);
@@ -52,35 +48,28 @@ export class FoodCalculations {
       : 0;    
 
     // Calculate depletion date
-    let depletionDate: Date;
+    let depletionDate: string;
     if (remainingDays > 0) {
-      // Active item: today + remaining days
-      depletionDate = new Date();
-      depletionDate.setDate(depletionDate.getDate() + remainingDays);
+      depletionDate = addCalendarDays(today, remainingDays);
     } else {
-      // Finished item: start date + total consumption days
       const totalConsumptionDays = dailyAmountInGrams > 0 
         ? Math.ceil(bagWeightInGrams / dailyAmountInGrams) 
         : 0;
-      depletionDate = new Date(startDate);
-      depletionDate.setDate(depletionDate.getDate() + totalConsumptionDays);
+      depletionDate = addCalendarDays(entry.dateStarted, totalConsumptionDays);
     }
 
     return { remainingDays, depletionDate, remainingWeight };
   }
 
-  static calculateWetFoodRemaining(entry: WetFoodEntry): { 
+  static calculateWetFoodRemaining(entry: WetFoodEntry, today: string): { 
     remainingDays: number; 
-    depletionDate: Date; 
+    depletionDate: string; 
     remainingWeight: number;
   } {
-    const today = new Date();
-    const startDate = new Date(entry.dateStarted);
     
     // Day 1 logic: dateStarted counts as first day of consumption
-    const daysElapsed = Math.floor(
-      (today.getTime() - startDate.getTime()) / MS_PER_DAY
-    ) + 1;
+    const daysElapsed = diffCalendarDays(entry.dateStarted, today) + 1;
+
 
     // Convert total weight to grams for calculation
     let totalWeightInGrams = entry.numberOfUnits * parseFloat(entry.weightPerUnit);
@@ -108,18 +97,14 @@ export class FoodCalculations {
     : 0;
 
     // Calculate depletion date
-    let depletionDate: Date;
+    let depletionDate: string;
     if (remainingDays > 0) {
-      // Active item: today + remaining days
-      depletionDate = new Date();
-      depletionDate.setDate(depletionDate.getDate() + remainingDays);
+      depletionDate = addCalendarDays(today, remainingDays);
     } else {
-      // Finished item: start date + total consumption days
       const totalConsumptionDays = dailyAmountInGrams > 0 
         ? Math.ceil(totalWeightInGrams / dailyAmountInGrams) 
         : 0;
-      depletionDate = new Date(startDate);
-      depletionDate.setDate(depletionDate.getDate() + totalConsumptionDays);
+      depletionDate = addCalendarDays(entry.dateStarted, totalConsumptionDays);
     }
 
     return { remainingDays, depletionDate, remainingWeight };
@@ -145,13 +130,8 @@ export class FoodCalculations {
       );
     }
     
-    const finishDate = new Date(entry.dateFinished);
-    const startDate = new Date(entry.dateStarted);
-    
     // Both start and end dates are INCLUSIVE (day 1 = dateStarted, last day = dateFinished)
-    const actualDaysElapsed = Math.floor(
-      (finishDate.getTime() - startDate.getTime()) / MS_PER_DAY
-    ) + 1;
+    const actualDaysElapsed = diffCalendarDays(entry.dateStarted, entry.dateFinished) + 1;
 
     // Calculate total weight in grams based on food type
     let totalWeightInGrams: number;
