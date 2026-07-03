@@ -86,7 +86,7 @@ router.post('/:petId/food/dry', async (req: AuthenticatedRequest, res: Response,
 
     const newDryFoodEntry = await FoodService.createDryFoodEntry(petId, userId, dryFoodData);
     // Create method returns raw entry, so we need to add calculations
-    const calculations = FoodService.calculateDryFoodRemaining(newDryFoodEntry);
+    const calculations = await FoodService.calculateDryFoodRemaining(newDryFoodEntry, userId);
 
     const enrichedEntry = {
       ...newDryFoodEntry,
@@ -196,7 +196,7 @@ router.post('/:petId/food/wet', async (req: AuthenticatedRequest, res: Response,
    const wetFoodData: WetFoodFormData = validation.data;
    const newWetFoodEntry = await FoodService.createWetFoodEntry(petId, userId, wetFoodData);
    // Create method returns raw entry, so we need to add calculations
-   const calculations = FoodService.calculateWetFoodRemaining(newWetFoodEntry);
+   const calculations = await FoodService.calculateWetFoodRemaining(newWetFoodEntry, userId);
 
    const enrichedEntry = {
      ...newWetFoodEntry,

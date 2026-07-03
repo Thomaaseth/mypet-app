@@ -1,0 +1,1 @@
+ALTER TABLE "user_preferences" ADD COLUMN "timezone" text DEFAULT 'UTC' NOT NULL;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { timezoneSchema } from './timezone';
 
 // Supported locales — add new entries here, no DB migration required
 export const SUPPORTED_LOCALES = ['fr-FR', 'en-US'] as const;
@@ -9,6 +10,7 @@ export const localeSchema = z.enum(SUPPORTED_LOCALES, {
 
 export const userPreferencesFormSchema = z.object({
     locale: localeSchema,
+    timezone: timezoneSchema,
 });
 
 export type Locale = z.infer<typeof localeSchema>;

@@ -25,6 +25,7 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { useUpsertUserPreferences } from '@/queries/user-preferences';
 import { LOCALE_OPTIONS } from '@/lib/constants/locale-options';
 import type { Locale } from '@/shared/validations/locale';
+import { detectBrowserTimezone } from '@/lib/utils/timezone';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
@@ -237,7 +238,7 @@ export default function MyProfilePage() {
                       variant={isActive ? 'default' : 'outline'}
                       disabled={isSavingPreferences || isActive}
                       onClick={() => {
-                        if (!isActive) upsertPreferences({ locale });
+                        if (!isActive) upsertPreferences({ locale, timezone: detectBrowserTimezone() });
                       }}
                       className="flex flex-col h-auto py-3 px-4 flex-1"
                     >

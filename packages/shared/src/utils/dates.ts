@@ -23,3 +23,8 @@ export function addCalendarDays(dateString: string, days: number): string {
   const day = String(d.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+/** Converts a Date instant to a "YYYY-MM-DD" string, anchored to UTC. Server-side default/fallback only — for a user's local date, use their stored IANA timezone instead. */
+export function toDateString(date: Date): string {
+    return date.toISOString().split('T')[0];
+}

@@ -5,6 +5,10 @@ import { makeDryFoodEntry, makeWetFoodEntry, makeDryFoodData } from './helpers/f
 import { db } from '../../../db';
 import { eq } from 'drizzle-orm';
 import * as schema from '../../../db/schema';
+import { randomUUID } from 'crypto';
+import { UserPreferencesService } from '../../user-preferences.service';
+import { toDateString } from '@/shared/utils/dates';
+import { addCalendarDays } from '@/shared/utils/dates';
 
 describe('Business Logic Calculations', () => {
   describe('calculateDryFoodRemaining', () => {
@@ -21,7 +25,7 @@ describe('Business Logic Calculations', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       // After 5 days at 100g/day, daysElapsed=6 (day 1 counts), 600g consumed, 1400g remaining
       // 1400g / 100g per day = 14 days remaining
@@ -42,7 +46,7 @@ describe('Business Logic Calculations', () => {
         isActive: false,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(0);
       expect(result.remainingWeight).toBe(0);
@@ -64,7 +68,7 @@ describe('Business Logic Calculations', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
 
       // Total: 12 × 85g = 1020g
       // daysElapsed=4 (day 1 counts), 4 × 170g = 680g consumed, 340g remaining
@@ -87,7 +91,7 @@ describe('Business Logic Calculations', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
       // Total: 6 × 3oz = 18oz
       // daysElapsed=2 (day 1 counts), 2 × 6oz = 12oz consumed, 6oz remaining
       // 6oz / 6oz per day = 1 day remaining
@@ -109,7 +113,7 @@ describe('Business Logic Calculations', () => {
         isActive: true,
       });
   
-      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
   
       // 10 units × 100g = 1000g total
       // 10oz daily = 283.495g daily
@@ -133,7 +137,7 @@ describe('Business Logic Calculations', () => {
         isActive: true,
       });
   
-      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
   
       // 10 units × 1oz = 10oz = 283.495g total
       // 50g daily
@@ -194,7 +198,7 @@ describe('Business Logic Calculations', () => {
       expect(created.isActive).toBe(true);
   
       // Calculate remaining food
-      const calculations = FoodService.calculateDryFoodRemaining(created);
+      const calculations = await FoodService.calculateDryFoodRemaining(created, primary.id);
       expect(calculations.remainingDays).toBeGreaterThan(0);
       expect(calculations.remainingWeight).toBeCloseTo(4.9, 1);
   
@@ -219,13 +223,13 @@ describe('Business Logic Calculations', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       const expectedDepletionDate = new Date();
       expectedDepletionDate.setDate(today.getDate() + 14);
 
       expect(result.remainingDays).toBe(14);
-      expect(result.depletionDate.toDateString()).toBe(expectedDepletionDate.toDateString());
+      expect(result.depletionDate).toBe(toDateString(expectedDepletionDate));
     });
 
     it('should calculate correct depletion date for finished food', async () => {
@@ -242,13 +246,53 @@ describe('Business Logic Calculations', () => {
         isActive: false,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       const expectedDepletionDate = new Date(purchaseDate);
       expectedDepletionDate.setDate(purchaseDate.getDate() + 20);
 
       expect(result.remainingDays).toBe(0);
-      expect(result.depletionDate.toDateString()).toBe(expectedDepletionDate.toDateString());
+      expect(result.depletionDate).toBe(toDateString(expectedDepletionDate));
+    });
+  });
+
+  describe('Timezone-aware "today"', () => {
+    it('uses the stored user timezone, not server UTC, for depletion calculations', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+  
+      // UTC+14 — the furthest-ahead real IANA zone, chosen so a UTC-fallback bug
+      // reliably produces a different, detectably wrong "today" (won't coincide with UTC's date)
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        locale: 'en-US',
+        timezone: 'Pacific/Kiritimati',
+      });
+  
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '1.00',
+        bagWeightUnit: 'kg',
+        dailyAmount: '100',
+        dryDailyAmountUnit: 'grams',
+        dateStarted: toDateString(new Date()),
+      });
+  
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+  
+      const expectedToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+  
+      const calculations = await FoodService.calculateDryFoodRemaining(created, primary.id);
+  
+      // Depletion date is anchored to the user's local "today" + remainingDays
+      expect(calculations.depletionDate).toBe(addCalendarDays(expectedToday, calculations.remainingDays));
+  
+      // Guard against a false-pass: if this ever coincides with server UTC's date
+      // (e.g. test runs right at a UTC boundary), the assertion above wouldn't
+      // actually prove timezone-awareness — fail loudly instead of silently passing
+      if (expectedToday === serverUtcToday) {
+        throw new Error(
+          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+        );
+      }
     });
   });
 });

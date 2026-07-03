@@ -21,7 +21,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(0);
       expect(result.remainingWeight).toBe(2.0);
@@ -40,7 +40,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: false,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingWeight).toBeGreaterThanOrEqual(0);
       expect(result.remainingDays).toBe(0);
@@ -59,7 +59,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(9);
       expect(result.remainingWeight).toBeCloseTo(0.009, 3);
@@ -83,7 +83,7 @@ describe('Edge Cases and Error Scenarios', () => {
 
       const result = await FoodService.createDryFoodEntry(testPet.id, primary.id, largeBagData);
 
-      const calculations = FoodService.calculateDryFoodRemaining(result);
+      const calculations = await FoodService.calculateDryFoodRemaining(result, primary.id);
 
       expect(calculations.remainingDays).toBe(249);
       expect(calculations.remainingWeight).toBeCloseTo(49.8, 3);
@@ -102,7 +102,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(19);
       expect(result.remainingWeight).toBeCloseTo(2.42655, 2);
@@ -125,7 +125,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(19);
       expect(result.remainingWeight).toBeCloseTo(1.9, 1);
@@ -147,7 +147,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingWeight).toBeCloseTo(1.9, 1);
       expect(result.remainingDays).toBe(19);
@@ -236,7 +236,7 @@ describe('Edge Cases and Error Scenarios', () => {
       }));
   
       // Test concurrent calculations (these are pure functions, no database operations)
-      const promises = Array.from({ length: 3 }, () => FoodService.calculateDryFoodRemaining(created));
+      const promises = Array.from({ length: 3 }, () => FoodService.calculateDryFoodRemaining(created, primary.id));
   
       const results = await Promise.all(promises);
   
@@ -347,7 +347,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateWetFoodRemaining(wetFoodEntry);
+      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(1);
       expect(result.remainingWeight).toBeCloseTo(0.005, 3);
@@ -366,7 +366,7 @@ describe('Edge Cases and Error Scenarios', () => {
         isActive: true,
       });
 
-      const result = FoodService.calculateDryFoodRemaining(dryFoodEntry);
+      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(8);
       expect(result.remainingWeight).toBeCloseTo(0.89, 2);

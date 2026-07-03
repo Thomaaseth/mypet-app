@@ -5,6 +5,7 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { useUpsertUserPreferences } from '@/queries/user-preferences';
 import type { Locale } from '@/shared/validations/locale';
 import { LOCALE_OPTIONS } from '@/lib/constants/locale-options';
+import { detectBrowserTimezone } from '@/lib/utils/timezone';
 
 
 function PreferenceBannerSkeleton() {
@@ -29,7 +30,7 @@ export function PreferenceBanner() {
   if (hasPreferences) return null;
 
   const handleSelect = (locale: Locale) => {
-    upsertPreferences({ locale });
+    upsertPreferences({ locale, timezone: detectBrowserTimezone() });
   };
 
   return (

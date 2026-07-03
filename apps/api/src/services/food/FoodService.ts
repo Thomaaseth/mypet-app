@@ -17,6 +17,8 @@ import { FoodCalculations } from './calculations';
 import type { DryFoodFormData, WetFoodFormData } from './types';
 import { dbLogger } from '../../lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
+import { toDateString } from '@/shared/utils/dates';
+import { UserPreferencesService } from '../user-preferences.service';
 
 
 export class FoodService {
@@ -34,18 +36,15 @@ export class FoodService {
       throw new NotFoundError('Pet not found');
     }
   }
-
-  private static toDateString(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
   // Export calculations methods
-  static calculateDryFoodRemaining(entry: DryFoodEntry) {
-    return FoodCalculations.calculateDryFoodRemaining(entry, this.toDateString(new Date()));
+  static async calculateDryFoodRemaining(entry: DryFoodEntry, userId: string) {
+    const today = await UserPreferencesService.getTodayForUser(userId);
+    return FoodCalculations.calculateDryFoodRemaining(entry, today);
   }
   
-  static calculateWetFoodRemaining(entry: WetFoodEntry) {
-    return FoodCalculations.calculateWetFoodRemaining(entry, this.toDateString(new Date()));
+  static async calculateWetFoodRemaining(entry: WetFoodEntry, userId: string) {
+    const today = await UserPreferencesService.getTodayForUser(userId);
+    return FoodCalculations.calculateWetFoodRemaining(entry, today);
   }
 
   // DRY FOOD METHODS //
@@ -119,8 +118,9 @@ export class FoodService {
         .orderBy(desc(foodEntries.createdAt));
   
       // calculations only, don't update database
+      const today = await UserPreferencesService.getTodayForUser(userId);
       return result.map(entry => {
-        const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, this.toDateString(new Date()));
+        const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, today);
         return { ...entry, ...calculations };
       }) as DryFoodEntry[];
     } catch (error) {
@@ -175,7 +175,8 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Dry food entry not found');
       }
-      const calculations = FoodCalculations.calculateDryFoodRemaining(updatedEntry as DryFoodEntry, this.toDateString(new Date()));
+      const today = await UserPreferencesService.getTodayForUser(userId);
+      const calculations = FoodCalculations.calculateDryFoodRemaining(updatedEntry as DryFoodEntry, today);
       return { ...updatedEntry, ...calculations } as DryFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
@@ -204,7 +205,8 @@ export class FoodService {
       if (!entry) {
         throw new NotFoundError('Dry food entry not found');
       }
-      const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, this.toDateString(new Date()));
+      const today = await UserPreferencesService.getTodayForUser(userId);
+      const calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, today);
       return { ...entry, ...calculations } as DryFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
@@ -286,8 +288,9 @@ export class FoodService {
         .orderBy(desc(foodEntries.createdAt));
   
       // CHANGED: Just add calculations, don't update database
+      const today = await UserPreferencesService.getTodayForUser(userId);
       return result.map(entry => {
-        const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, this.toDateString(new Date()));
+        const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, today);
         return { ...entry, ...calculations };
       }) as WetFoodEntry[];
     } catch (error) {
@@ -342,7 +345,8 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Wet food entry not found');
       }
-      const calculations = FoodCalculations.calculateWetFoodRemaining(updatedEntry as WetFoodEntry, this.toDateString(new Date()));
+      const today = await UserPreferencesService.getTodayForUser(userId);
+      const calculations = FoodCalculations.calculateWetFoodRemaining(updatedEntry as WetFoodEntry, today);
       return { ...updatedEntry, ...calculations } as WetFoodEntry;
     } catch (error) {
       if (error instanceof BadRequestError || error instanceof NotFoundError) {
@@ -371,8 +375,8 @@ export class FoodService {
       if (!entry) {
         throw new NotFoundError('Wet food entry not found');
       }
-
-      const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, this.toDateString(new Date()));
+      const today = await UserPreferencesService.getTodayForUser(userId);
+      const calculations = FoodCalculations.calculateWetFoodRemaining(entry as WetFoodEntry, today);
       return { ...entry, ...calculations } as WetFoodEntry;
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof BadRequestError) {
@@ -393,10 +397,10 @@ export class FoodService {
         .from(foodEntries)
         .where(eq(foodEntries.petId, petId))
         .orderBy(desc(foodEntries.createdAt));
-  
+
+      const today = await UserPreferencesService.getTodayForUser(userId);
       return result.map(entry => {
         let calculations;
-        const today = this.toDateString(new Date());
         if (entry.foodType === 'dry') {
           calculations = FoodCalculations.calculateDryFoodRemaining(entry as DryFoodEntry, today);
         } else {
@@ -508,7 +512,7 @@ export class FoodService {
         .update(foodEntries)
         .set({ 
           isActive: false,
-          dateFinished: this.toDateString(new Date()),
+          dateFinished: await UserPreferencesService.getTodayForUser(userId),
           updatedAt: new Date()
         })
         .where(and(
@@ -572,7 +576,7 @@ export class FoodService {
       }
 
       // Compute once, reuse for both the lower-bound check and the DB write
-      const dateFinishedString = this.toDateString(newDate);
+      const dateFinishedString = toDateString(newDate);
 
       // Lower bound: plain string comparison, both values are "YYYY-MM-DD" —
       if (dateFinishedString < entry.dateStarted) {

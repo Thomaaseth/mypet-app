@@ -5,6 +5,7 @@ import type { UserPreferences, NewUserPreferences } from '../db/schema/user-pref
 import type { UserPreferencesFormData } from '@/shared/validations/locale';
 import { BadRequestError } from '../middleware/errors';
 import { dbLogger } from '../lib/logger';
+import { toDateString } from '@/shared/utils/dates';
 
 export class UserPreferencesService {
   // Get preferences for a user (returns null if not yet set)
@@ -31,11 +32,13 @@ export class UserPreferencesService {
       const existing = await this.getUserPreferences(userId);
 
       // NEED REWORK DOWN THE LINE WITH TRUE SQL UPSERT .onConflictDoUpdate()
+      // APPLIES ELSWHERE IN THE CODE BASE
       if (existing) {
         const [updated] = await db
           .update(userPreferences)
           .set({
             locale: data.locale,
+            timezone: data.timezone,
             updatedAt: new Date(),
           })
           .where(eq(userPreferences.userId, userId))
@@ -47,6 +50,7 @@ export class UserPreferencesService {
       const newPreferences: NewUserPreferences = {
         userId,
         locale: data.locale,
+        timezone: data.timezone,
       };
 
       const [created] = await db
@@ -63,4 +67,23 @@ export class UserPreferencesService {
       throw new BadRequestError('Failed to save user preferences');
     }
   }
+
+  // Server-authoritative "today" for a user, anchored to their stored IANA timezone.
+  // Falls back to server-UTC-today only when the user has no preferences row yet
+  // (never persisted, see schema comment on why the DB column default is migration-only).
+  static async getTodayForUser(userId: string): Promise<string> {
+    const preferences = await this.getUserPreferences(userId);
+
+    if (!preferences) {
+      return toDateString(new Date());
+    }
+
+    // en-CA locale formats as YYYY-MM-DD
+    return new Intl.DateTimeFormat('en-CA', { timeZone: preferences.timezone }).format(new Date());
+  }
 }
+
+
+// NOTE: THERE ARE NO RESYNC MECHANISM IN PLACE RIGHT NOW. TIMEZONE IS SET AND FORGET
+// USER ISN'T ABLE TO CHANGE MANUALLY 
+
