@@ -12,6 +12,7 @@ import { dbLogger } from '../lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
 import { convertWeight } from '@/shared/utils/units';
 import type { WeightFormData, UpdateWeightEntryData } from '@/shared/validations/weight';
+import { UserPreferencesService } from './user-preferences.service';
 
 export class WeightEntriesService {
   // Verify pet ownership (helper method)
@@ -27,7 +28,7 @@ export class WeightEntriesService {
   }
 
   // Input validation helper
-  private static validateInputs(entryData: Partial<WeightFormData>, isUpdate = false): void {
+  private static validateInputs(entryData: Partial<WeightFormData>, today: string, isUpdate = false): void {
     // Required fields validation (only for create)
     if (!isUpdate) {
       if (!entryData.weight || !entryData.date) {
@@ -45,16 +46,11 @@ export class WeightEntriesService {
 
     // Date validation (if provided)
     if (entryData.date !== undefined) {
-      const entryDate = new Date(entryData.date);
-      if (isNaN(entryDate.getTime())) {
+      if (isNaN(new Date(entryData.date).getTime())) {
         throw new BadRequestError('Invalid date format');
       }
-
-      // Future date validation
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
       
-      if (entryDate > today) {
+      if (entryData.date > today) {
         throw new BadRequestError('Date cannot be in the future');
       }
     }
@@ -161,11 +157,13 @@ export class WeightEntriesService {
   // Create a new weight entry 
   static async createWeightEntry(petId: string, userId: string, entryData: WeightFormData): Promise<WeightEntry> {
     try {
-      // Input validation
-      this.validateInputs(entryData, false);
       
       // Authorization check
       const pet = await PetsService.getPetById(petId, userId);
+      const today = await UserPreferencesService.getTodayForUser(userId);
+      
+      // Input validation
+      this.validateInputs(entryData, today, false);
 
       // Convert to kg before validation and storage
       const weightInKg = convertWeight(parseFloat(entryData.weight), entryData.weightUnit, 'kg');
@@ -206,9 +204,6 @@ export class WeightEntriesService {
     updateData: UpdateWeightEntryData
   ): Promise<WeightEntry> {
     try {
-      // Input validation
-      this.validateInputs(updateData, true);
-
       // Check if at least one field is provided
       if (Object.keys(updateData).length === 0) {
         throw new BadRequestError('At least one field must be provided for update');
@@ -217,6 +212,11 @@ export class WeightEntriesService {
       // Authorization & existence check
       const existingEntry = await this.getWeightEntryById(petId, weightId, userId);
       const pet = await PetsService.getPetById(petId, userId);
+
+      const today = await UserPreferencesService.getTodayForUser(userId);
+
+      // Input validation
+      this.validateInputs(updateData, today, true);
 
       // set the DB payload explicitly — weightUnit is never a DB column
       const dbUpdateData: Partial<Pick<NewWeightEntry, 'weight' | 'date'>> = {};

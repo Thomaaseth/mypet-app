@@ -11,10 +11,11 @@ import { dbLogger } from '@/lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
 import type { WeightUnit } from '@/shared/validations/pet';
 import { convertWeight } from '@/shared/utils/units';
+import { UserPreferencesService } from './user-preferences.service';
 
 export class PetsService {
   // input validation helpers
-  private static validatePetInputs(petData: Partial<NewPet>, isUpdate = false): void {
+  private static validatePetInputs(petData: Partial<NewPet>, today: string, isUpdate = false): void {
     // Required fields validation (only for create)
     if (!isUpdate) {
       if (!petData.name || !petData.userId || !petData.animalType) {
@@ -50,22 +51,20 @@ export class PetsService {
 
     // Birth date validation
     if (petData.birthDate !== undefined && petData.birthDate !== null && petData.birthDate !== '') {
-      const birthDate = new Date(petData.birthDate);
-      if (isNaN(birthDate.getTime())) {
+      if (isNaN(new Date(petData.birthDate).getTime())) {
         throw new BadRequestError('Invalid birth date format');
       }
 
       // Birth date cannot be in the future
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      if (birthDate > today) {
+      if (petData.birthDate > today) {
         throw new BadRequestError('Birth date cannot be in the future');
       }
 
       // Reasonable age limits (pets can't be older than 50 years)
       const fiftyYearsAgo = new Date();
-      fiftyYearsAgo.setFullYear(fiftyYearsAgo.getFullYear() - 50);
-      if (birthDate < fiftyYearsAgo) {
+      fiftyYearsAgo.setUTCFullYear(fiftyYearsAgo.getUTCFullYear() - 50);
+      const fiftyYearsAgoString = fiftyYearsAgo.toISOString().split('T')[0];
+      if (petData.birthDate < fiftyYearsAgoString) {
         throw new BadRequestError('Birth date cannot be more than 50 years ago');
       }
     }
@@ -189,8 +188,10 @@ export class PetsService {
       // Extract and separate weight fields from pet data
       const { weight, weightUnit } = petData;
 
+      const today = await UserPreferencesService.getTodayForUser(petData.userId);
+
       // Input validation
-      this.validatePetInputs(petData, false);
+      this.validatePetInputs(petData, today, false);
       
       // Validate weight separately if provided
       if (weight && weightUnit) {
@@ -225,12 +226,11 @@ export class PetsService {
       if (weight && weightUnit && newPet.createdAt) {
         try {      
           const weightInKg = convertWeight(parseFloat(weight), weightUnit, 'kg'); 
-          const entryDate = new Date(newPet.createdAt).toISOString().split('T')[0];
           
           await db.insert(weightEntries).values({
             petId: newPet.id,
-            weight: weightInKg.toFixed(2),
-            date: entryDate,
+            weight: weightInKg.toFixed(3),
+            date: today,
           });
           
           dbLogger.info({ petId: newPet.id }, 'Initial weight entry created');
@@ -265,8 +265,10 @@ export class PetsService {
       if (Object.keys(updateData).length === 0) {
         throw new BadRequestError('At least one field must be provided for update');
       }
-      
-      this.validatePetInputs(updateData, true);
+
+      const today = await UserPreferencesService.getTodayForUser(userId);
+
+      this.validatePetInputs(updateData, today, true);
       
       // Authorization check
       const existingPet = await this.getPetById(petId, userId);

@@ -10,6 +10,7 @@ import { dbLogger } from '../lib/logger';
 import { PetsService } from './pets.service';
 import { VeterinariansService } from './veterinarians.service';
 import { validateUUID } from '@/lib/validateUUID';
+import { UserPreferencesService } from './user-preferences.service';
 
 // Type for appointment form data (matches validation schema)
 export interface AppointmentFormData {
@@ -64,6 +65,7 @@ export class AppointmentsService {
   // Input validation helper
   private static validateAppointmentInputs(
     appointmentData: Partial<AppointmentFormData>, 
+    today: string,
     isUpdate = false
   ): void {
     // Required fields for creation
@@ -87,22 +89,15 @@ export class AppointmentsService {
 
     // Date validation (if provided)
     if (appointmentData.appointmentDate !== undefined) {
-      const appointmentDate = new Date(appointmentData.appointmentDate);
-      if (isNaN(appointmentDate.getTime())) {
+      if (isNaN(new Date(appointmentData.appointmentDate).getTime())) {
         throw new BadRequestError('Invalid date format');
       }
 
-      // For new appointments only, check if date is not in the past
-      if (!isUpdate) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        appointmentDate.setHours(0, 0, 0, 0);
-        
-        if (appointmentDate < today) {
-          throw new BadRequestError('Appointment date cannot be in the past');
-        }
-      }
+    // For new appointments only, check if date is not in the past — per-user local "today"
+    if (!isUpdate && appointmentData.appointmentDate < today) {
+      throw new BadRequestError('Appointment date cannot be in the past');
     }
+  }
 
     // Time validation (if provided)
     if (appointmentData.appointmentTime !== undefined) {
@@ -142,6 +137,7 @@ export class AppointmentsService {
       }
     }
   }
+
 
   // Check for duplicate appointments
   private static async checkDuplicateAppointment(
@@ -186,7 +182,7 @@ export class AppointmentsService {
         throw new BadRequestError('Valid user ID is required');
       }
 
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const today = await UserPreferencesService.getTodayForUser(userId);
 
       let appointmentsList: Appointment[];
 
@@ -311,8 +307,10 @@ export class AppointmentsService {
         throw new BadRequestError('Valid user ID is required');
       }
 
+      const today = await UserPreferencesService.getTodayForUser(userId);
+
       // Validate appointment inputs
-      this.validateAppointmentInputs(appointmentData, false);
+      this.validateAppointmentInputs(appointmentData, today, false);
 
       // Verify pet ownership
       await this.verifyPetOwnership(appointmentData.petId, userId);
@@ -379,13 +377,13 @@ export class AppointmentsService {
       validateUUID(appointmentId, 'appointment ID');
 
       // Validate update data
-      this.validateAppointmentInputs(updateData, true);
+      const today = await UserPreferencesService.getTodayForUser(userId); 
+      this.validateAppointmentInputs(updateData, today, true);
 
       // Fetch existing appointment
       const existingAppointment = await this.getAppointmentById(appointmentId, userId);
 
       // Check if appointment is in the past
-      const today = new Date().toISOString().split('T')[0];
       const isPastAppointment = existingAppointment.appointmentDate < today;
 
       // If past appointment, only allow visitNotes update

@@ -319,9 +319,8 @@ router.put('/:petId/food/:foodId/finish-date',
         throw new BadRequestError('dateFinished is required');
       }
 
-      // Parse and validate date
-      const newDate = new Date(dateFinished);
-      if (isNaN(newDate.getTime())) {
+      // Validity check only (calendar-valid
+      if (isNaN(new Date(dateFinished).getTime())) {
         throw new BadRequestError('Invalid date format');
       }
 
@@ -329,7 +328,7 @@ router.put('/:petId/food/:foodId/finish-date',
         petId,
         foodId,
         userId,
-        newDate
+        dateFinished
       );
 
       respondWithSuccess(

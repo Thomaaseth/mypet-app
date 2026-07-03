@@ -17,7 +17,6 @@ import { FoodCalculations } from './calculations';
 import type { DryFoodFormData, WetFoodFormData } from './types';
 import { dbLogger } from '../../lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
-import { toDateString } from '@/shared/utils/dates';
 import { UserPreferencesService } from '../user-preferences.service';
 
 
@@ -546,15 +545,11 @@ export class FoodService {
     petId: string,
     foodId: string,
     userId: string,
-    newDate: Date
+    newDate: string
   ): Promise<DryFoodEntry | WetFoodEntry> {
     try {
       // Validations
       validateUUID(foodId, 'food entry ID');
-      
-      if (!(newDate instanceof Date) || isNaN(newDate.getTime())) {
-        throw new BadRequestError('Invalid date provided');
-      }
       
       await this.verifyPetOwnership(petId, userId);
       
@@ -575,8 +570,7 @@ export class FoodService {
         throw new BadRequestError('Cannot update finish date of active entry');
       }
 
-      // Compute once, reuse for both the lower-bound check and the DB write
-      const dateFinishedString = toDateString(newDate);
+      const dateFinishedString = newDate;
 
       // Lower bound: plain string comparison, both values are "YYYY-MM-DD" —
       if (dateFinishedString < entry.dateStarted) {
@@ -584,16 +578,10 @@ export class FoodService {
           `Finish date cannot be before start date (${entry.dateStarted})`
         );
       }
+      
+      const todayForUser = await UserPreferencesService.getTodayForUser(userId);
 
-      // UTC Boundary : the +1 day ceiling covers every legitimate user's local "today" without
-      // trusting any client-supplied value
-      // maxDate on editDialogFinishDate blocks theoratically the client from sending date from the future
-      // this boundary is intentional until better system is implemented
-      const upperBound = new Date();
-      upperBound.setUTCDate(upperBound.getUTCDate() + 1);
-      upperBound.setUTCHours(23, 59, 59, 999);
-
-      if (newDate > upperBound) {
+      if (dateFinishedString > todayForUser) {
         throw new BadRequestError('Finish date cannot be in the future');
       }
       
