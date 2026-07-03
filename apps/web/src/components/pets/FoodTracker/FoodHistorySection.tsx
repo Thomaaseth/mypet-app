@@ -30,7 +30,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
-import { formatDateForDisplay } from '@/lib/validations/food';
+import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDays } from '@/lib/utils/food-formatting';
 import { EditFinishDateDialog } from './EditFinishDateDialog';
 import { DeleteFoodEntryDialog } from './DeleteFoodEntryDialog';

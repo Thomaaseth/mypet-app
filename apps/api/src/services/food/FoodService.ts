@@ -569,19 +569,26 @@ export class FoodService {
       if (entry.isActive) {
         throw new BadRequestError('Cannot update finish date of active entry');
       }
-      
-      // Validate date range: must be between dateStarted and today
-      const startDate = new Date(entry.dateStarted);
-      const today = new Date();
-      today.setHours(23, 59, 59, 999); // End of today
-      
-      if (newDate < startDate) {
+
+      // Compute once, reuse for both the lower-bound check and the DB write
+      const dateFinishedString = this.toDateString(newDate);
+
+      // Lower bound: plain string comparison, both values are "YYYY-MM-DD" —
+      if (dateFinishedString < entry.dateStarted) {
         throw new BadRequestError(
-          `Finish date cannot be before start date (${startDate.toISOString().split('T')[0]})`
+          `Finish date cannot be before start date (${entry.dateStarted})`
         );
       }
-      
-      if (newDate > today) {
+
+      // UTC Boundary : the +1 day ceiling covers every legitimate user's local "today" without
+      // trusting any client-supplied value
+      // maxDate on editDialogFinishDate blocks theoratically the client from sending date from the future
+      // this boundary is intentional until better system is implemented
+      const upperBound = new Date();
+      upperBound.setUTCDate(upperBound.getUTCDate() + 1);
+      upperBound.setUTCHours(23, 59, 59, 999);
+
+      if (newDate > upperBound) {
         throw new BadRequestError('Finish date cannot be in the future');
       }
       
@@ -589,7 +596,7 @@ export class FoodService {
       const [updatedEntry] = await db
         .update(foodEntries)
         .set({ 
-          dateFinished: this.toDateString(newDate),
+          dateFinished: dateFinishedString,
           updatedAt: new Date()
         })
         .where(and(

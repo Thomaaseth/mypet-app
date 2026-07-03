@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface EditFinishDateDialogProps {
   entry: DryFoodEntry | WetFoodEntry;
@@ -20,7 +21,7 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
   const [error, setError] = useState<string | null>(null);
 
   const minDate = entry.dateStarted;
-  const maxDate = new Date().toISOString().split('T')[0];
+  const maxDate = getTodayDateString();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

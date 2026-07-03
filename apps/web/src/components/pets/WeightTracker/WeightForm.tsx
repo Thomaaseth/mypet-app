@@ -4,15 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
-// import { 
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '@/components/ui/select';
 import { ErrorText, HelperText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
@@ -37,12 +31,9 @@ export default function WeightForm({
     register,
     handleSubmit,
     formState: { errors },
-    // watch,
-    // setValue,
     resetToEmpty,
   } = useWeightForm({ animalType, weightEntry });
 
-  // const currentWeightUnit = watch('weightUnit');
 
   const isEditing = !!weightEntry;
 
@@ -106,7 +97,7 @@ export default function WeightForm({
         <Input
           id="date"
           type="date"
-          max={new Date().toISOString().split('T')[0]} // Prevent future dates
+          max={getTodayDateString()} // Prevent future dates
           {...register('date')}
           aria-invalid={!!errors.date}
         />

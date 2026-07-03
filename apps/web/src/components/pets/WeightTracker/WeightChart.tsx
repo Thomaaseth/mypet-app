@@ -21,7 +21,7 @@ import { useIsMobile } from '@/hooks/useIsMobile';
 import { ReactNode } from 'react';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackLocale } from '@/lib/utils/locale';
-import { formatDateForDisplay } from '@/lib/validations/weight';
+import { formatDateForDisplay, formatChartTickMonthYear } from '@/lib/utils/date-formatting';
 import { formatWeight } from '@/lib/validations/pet';
 
 interface WeightChartProps {
@@ -139,10 +139,7 @@ export default function WeightChart({
                         axisLine={false}
                         tickMargin={8}
                         tickCount={3}
-                        tickFormatter={(value: number) => {
-                          const d = new Date(value);
-                          return `${d.toLocaleString('default', { month: 'short' })} '${String(d.getFullYear()).slice(-2)}`;
-                        }}
+                        tickFormatter={formatChartTickMonthYear}
                     />
                     <YAxis
                         width={36}

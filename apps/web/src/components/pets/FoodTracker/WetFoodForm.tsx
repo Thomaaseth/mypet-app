@@ -16,6 +16,7 @@ import type { WetFoodFormData } from '@/types/food';
 import { WET_FOOD_UNITS, WetFoodEntry } from '@/types/food';
 import { wetFoodSchema } from '@/lib/validations/food';
 import { ErrorText } from '@/components/ui/typography';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface WetFoodFormProps {
   initialData?: Partial<WetFoodFormData>;
@@ -50,7 +51,7 @@ export function WetFoodForm({
       wetWeightUnit: initialData?.wetWeightUnit ?? 'grams',
       dailyAmount: initialData?.dailyAmount ?? '',
       wetDailyAmountUnit: initialData?.wetDailyAmountUnit ?? 'grams',
-      dateStarted: initialData?.dateStarted ?? new Date().toISOString().split('T')[0],
+      dateStarted: initialData?.dateStarted ?? getTodayDateString(),
     },
   });
 
@@ -195,7 +196,7 @@ export function WetFoodForm({
         <Input
           id="dateStarted"
           type="date"
-          max={new Date().toISOString().split('T')[0]}
+          max={getTodayDateString()}
           {...register('dateStarted')}
           aria-invalid={!!errors.dateStarted}
         />

@@ -2,10 +2,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   appointmentFormSchema, 
-  getTodayDateString,
   type AppointmentFormData 
 } from '@/lib/validations/appointments';
 import type { AppointmentWithRelations } from '@/types/appointments';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface UseAppointmentFormOptions {
   defaultValues?: Partial<AppointmentFormData>;

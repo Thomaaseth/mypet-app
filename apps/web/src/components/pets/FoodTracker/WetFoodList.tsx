@@ -23,7 +23,7 @@ import {
 import { Edit2, Trash2, Calendar, Package, Utensils, MoreHorizontal, CheckSquare } from 'lucide-react';
 import { WetFoodForm } from './WetFoodForm';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
-import { formatDateForDisplay } from '@/lib/validations/food';
+import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import { FoodHistorySection } from './FoodHistorySection';
 import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-formatting';

@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
-import { formatDateForDisplay } from '@/lib/validations/weight';
+import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import WeightForm from './WeightForm';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
 import { usePagination } from '@/hooks/usePagination';

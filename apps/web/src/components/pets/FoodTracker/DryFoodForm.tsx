@@ -16,6 +16,7 @@ import { dryFoodSchema } from '@/lib/validations/food';
 import { DRY_FOOD_BAG_UNITS } from '@/types/food';
 import { ErrorText } from '@/components/ui/typography';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface DryFoodFormProps {
   initialData?: Partial<DryFoodFormData>;
@@ -48,7 +49,7 @@ export function DryFoodForm({
       bagWeightUnit: initialData?.bagWeightUnit ?? 'kg',
       dailyAmount: initialData?.dailyAmount ?? '',
       dryDailyAmountUnit: 'grams',
-      dateStarted: initialData?.dateStarted ?? new Date().toISOString().split('T')[0],
+      dateStarted: initialData?.dateStarted ?? getTodayDateString(),
     },
   });
   
@@ -131,7 +132,7 @@ export function DryFoodForm({
         <Input
           id="dateStarted"
           type="date"
-          max={new Date().toISOString().split('T')[0]}
+          max={getTodayDateString()}
           {...register('dateStarted')}
           aria-invalid={!!errors.dateStarted}
         />

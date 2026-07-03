@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createWeightEntrySchema, getTodayDateString, type WeightFormData } from '@/lib/validations/weight';
+import { createWeightEntrySchema, type WeightFormData } from '@/lib/validations/weight';
 import type { WeightEntry } from '@/types/weights';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface UseWeightFormOptions {
   animalType: 'cat' | 'dog';

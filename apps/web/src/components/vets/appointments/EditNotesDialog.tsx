@@ -6,10 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppointmentWithRelations } from '@/types/appointments';
-import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
+import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { HelperText, BodyText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackLocale } from '@/lib/utils/locale';
+import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 
 interface EditNotesDialogProps {
   appointment: AppointmentWithRelations | null;
@@ -41,7 +42,7 @@ export default function EditNotesDialog({
 
   if (!appointment) return null;
 
-  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale);
+  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
   const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
 
   const handleSubmit = async (e: React.FormEvent) => {

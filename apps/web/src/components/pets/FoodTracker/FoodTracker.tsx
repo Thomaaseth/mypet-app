@@ -5,7 +5,7 @@ import { UtensilsCrossed } from 'lucide-react';
 import { DryFoodTracker } from './DryFoodTracker';
 import { WetFoodTracker } from './WetFoodTracker';
 import { FoodTrackerProvider, useFoodTrackerContext } from './FoodTrackerContext';
-import { formatDateForDisplay } from '@/lib/validations/food';
+import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';

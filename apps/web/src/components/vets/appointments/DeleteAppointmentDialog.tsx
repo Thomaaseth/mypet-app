@@ -10,9 +10,10 @@ import {
   } from '@/components/ui/alert-dialog';
   import { Loader2 } from 'lucide-react';
   import type { AppointmentWithRelations } from '@/types/appointments';
-  import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
+  import { formatTimeForDisplay } from '@/lib/validations/appointments';
   import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
   import { getFallbackLocale } from '@/lib/utils/locale';
+  import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 
   interface DeleteAppointmentDialogProps {
     appointment: AppointmentWithRelations | null;
@@ -34,7 +35,7 @@ import {
     const { locale } = usePreferencesContext();
     const displayLocale = locale ?? getFallbackLocale();
   
-    const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale);
+    const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
     const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
   
     return (

@@ -34,7 +34,7 @@ import { MutedText, SectionTitle, HelperText, BodyText } from '@/components/ui/t
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight } from '@/lib/validations/pet';
-import { formatDateForDisplay } from '@/lib/validations/weight';
+import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import { getFallbackLocale } from '@/lib/utils/locale';
 
 interface WeightTrackerProps {
@@ -85,6 +85,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
     d.setMonth(d.getMonth() - TIME_RANGE_MONTHS[timeRange]);
     return d;
   })();
+  
   
 
   const { units, locale } = usePreferencesContext();

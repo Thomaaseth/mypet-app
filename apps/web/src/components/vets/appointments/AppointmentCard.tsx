@@ -27,11 +27,12 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { AppointmentWithRelations, AppointmentType } from '@/types/appointments';
-import { formatDateForDisplay, formatTimeForDisplay } from '@/lib/validations/appointments';
+import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { useState } from 'react';
 import { MutedText, BodyText, SectionTitle } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackLocale } from '@/lib/utils/locale';
+import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
@@ -70,7 +71,7 @@ export default function AppointmentCard({
   const displayLocale = locale ?? getFallbackLocale();
 
   const typeBadge = getAppointmentTypeBadge(appointment.appointmentType);
-  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale);
+  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
   const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
   
   // Check if appointment time has passed

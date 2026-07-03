@@ -12,6 +12,7 @@ import {
   ForbiddenError,
 } from '../../errors';
 import type { WeightError } from './types';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 export class WeightService {
   constructor(
@@ -62,7 +63,7 @@ export class WeightService {
         const fullData: WeightFormData = {
           weight: weightData.weight || '0', // Will be validated anyway
           weightUnit: weightData.weightUnit || 'kg', // Fallback if not provided
-          date: weightData.date || new Date().toISOString().split('T')[0]
+          date: weightData.date || getTodayDateString()
         };
         this.validator.validateWeightEntry(fullData, fullData.weightUnit, animalType);
       }

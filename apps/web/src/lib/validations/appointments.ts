@@ -1,21 +1,7 @@
 export * from '@/shared/validations/appointments';
 import type { Locale } from '@/shared/validations/locale';
 
-// Date formatting utilities
-export const formatDateForDisplay = (dateString: string, locale: Locale): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString(locale, {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-  
-  export const formatDateForInput = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0]; // YYYY-MM-DD format
-  };
+
   
   // Time formatting utilities
   export const formatTimeForDisplay = (timeString: string, locale: Locale): string => {
@@ -56,7 +42,3 @@ export const formatDateForDisplay = (dateString: string, locale: Locale): string
     return apptDate >= today;
   };
 
-  export const getTodayDateString = (): string => {
-    return new Date().toISOString().split('T')[0];
-  };
-    

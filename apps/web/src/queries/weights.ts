@@ -5,7 +5,7 @@ import type {
   WeightEntry, 
   WeightFormData, 
 } from '@/types/weights'
-import { formatDateForDisplay } from '@/lib/validations/weight'
+import { parseDateOnly } from '@/lib/utils/date-formatting';
 
 // QUERY KEYS - Centralized for cache management
 export const weightKeys = {
@@ -40,13 +40,13 @@ export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
     select: (data) => {
       // Sort entries (oldest to newest for chart)
       const sortedEntries = [...data].sort((a, b) => 
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+        parseDateOnly(a.date).getTime() - parseDateOnly(b.date).getTime()
       )
 
       // Convert to chart data format
       const chartData: WeightChartData[] = sortedEntries.map(entry => ({
         date: entry.date,
-        timestamp: new Date(entry.date).getTime(),
+        timestamp: parseDateOnly(entry.date).getTime(),
         weight: parseFloat(entry.weight),
         originalDate: entry.date,
       }))
