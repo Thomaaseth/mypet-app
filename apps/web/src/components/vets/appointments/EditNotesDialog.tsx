@@ -9,7 +9,7 @@ import type { AppointmentWithRelations } from '@/types/appointments';
 import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { HelperText, BodyText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 
 interface EditNotesDialogProps {
@@ -30,8 +30,8 @@ export default function EditNotesDialog({
   const [visitNotes, setVisitNotes] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { locale } = usePreferencesContext();
-  const displayLocale = locale ?? getFallbackLocale();
+  const { dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   // Update visitNotes when appointment changes
   useEffect(() => {

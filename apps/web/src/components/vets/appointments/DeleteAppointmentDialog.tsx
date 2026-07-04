@@ -12,7 +12,7 @@ import {
   import type { AppointmentWithRelations } from '@/types/appointments';
   import { formatTimeForDisplay } from '@/lib/validations/appointments';
   import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-  import { getFallbackLocale } from '@/lib/utils/locale';
+  import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
   import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 
   interface DeleteAppointmentDialogProps {
@@ -32,8 +32,8 @@ import {
   }: DeleteAppointmentDialogProps) {
     if (!appointment) return null;
 
-    const { locale } = usePreferencesContext();
-    const displayLocale = locale ?? getFallbackLocale();
+    const { dateTimeLocale } = usePreferencesContext();
+    const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
   
     const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
     const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);

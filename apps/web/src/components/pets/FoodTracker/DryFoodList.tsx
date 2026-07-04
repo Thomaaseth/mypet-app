@@ -30,7 +30,7 @@ import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-form
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
 import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
@@ -70,8 +70,8 @@ export function DryFoodList({
   // const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
   const [markingFinishedEntry, setMarkingFinishedEntry] = useState<DryFoodEntry | null>(null);
 
-  const { locale } = usePreferencesContext();
-  const displayLocale = locale ?? getFallbackLocale();
+  const { dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   const handleUpdate = async (data: DryFoodFormData) => {
     if (!editingEntry) return null;

@@ -1,6 +1,12 @@
-import type { Locale } from '@/shared/validations/locale';
+import type { DateTimeLocale } from '@/shared/validations/locale';
+import type { UnitSystem } from '@/shared/validations/units';
 
-export const LOCALE_OPTIONS: { locale: Locale; label: string; description: string }[] = [
-  { locale: 'fr-FR', label: 'Metric', description: 'kg · grams · Date Format: DD/MM/YYYY' },
-  { locale: 'en-US', label: 'Imperial', description: 'lbs · oz · Date Format: MM/DD/YYYY' },
+export const DATE_TIME_LOCALE_OPTIONS: { dateTimeLocale: DateTimeLocale; label: string; description: string }[] = [
+  { dateTimeLocale: 'fr-FR', label: '24-hour', description: 'DD/MM/YYYY · 24h clock' },
+  { dateTimeLocale: 'en-US', label: '12-hour', description: 'MM/DD/YYYY · 12h clock' },
+];
+
+export const UNIT_SYSTEM_OPTIONS: { unitSystem: UnitSystem; label: string; description: string }[] = [
+  { unitSystem: 'metric', label: 'Metric', description: 'kg · grams' },
+  { unitSystem: 'imperial', label: 'Imperial', description: 'lbs · oz' },
 ];

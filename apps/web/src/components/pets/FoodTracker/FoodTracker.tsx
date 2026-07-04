@@ -9,7 +9,7 @@ import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 
 interface FoodTrackerProps {
   petId: string;
@@ -38,8 +38,8 @@ function FoodTrackerContent() {
   const [activeTab, setActiveTab] = useState<'dry' | 'wet'>('dry');
   const { activeFoodEntries, isLoading } = useFoodTrackerContext();
 
-  const { locale } = usePreferencesContext();
-  const displayLocale = locale ?? getFallbackLocale();
+  const { dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   return (
     <Card className="w-full">

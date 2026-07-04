@@ -1,10 +1,10 @@
 export * from '@/shared/validations/appointments';
-import type { Locale } from '@/shared/validations/locale';
+import type { DateTimeLocale  } from '@/shared/validations/locale';
 
 
   
   // Time formatting utilities
-  export const formatTimeForDisplay = (timeString: string, locale: Locale): string => {
+  export const formatTimeForDisplay = (timeString: string, locale: DateTimeLocale ): string => {
     const [hours, minutes] = timeString.split(':');
     const date = new Date();
     date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);

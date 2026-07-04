@@ -30,7 +30,7 @@ import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-form
 import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
 import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
@@ -68,8 +68,8 @@ export function WetFoodList({
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
  const [markingFinishedEntry, setMarkingFinishedEntry] = useState<WetFoodEntry | null>(null);
 
- const { locale } = usePreferencesContext();
- const displayLocale = locale ?? getFallbackLocale();
+ const { dateTimeLocale } = usePreferencesContext();
+ const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
  const handleUpdate = async (data: WetFoodFormData) => { // Receive WetFoodFormData (strings)
   if (!editingEntry) return null;

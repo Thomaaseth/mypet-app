@@ -35,7 +35,8 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight } from '@/lib/validations/pet';
 import { formatDateForDisplay } from '@/lib/utils/date-formatting';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackUnitSystem, getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { getUnitsForSystem } from '@/shared/validations/units';
 
 interface WeightTrackerProps {
   petId: string;
@@ -88,9 +89,9 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
   
   
 
-  const { units, locale } = usePreferencesContext();
-  const weightUnit = units?.weightUnit ?? 'kg';
-  const displayLocale = locale ?? getFallbackLocale();
+  const { units, dateTimeLocale } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? getUnitsForSystem(getFallbackUnitSystem()).weightUnit;
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   // Extract data (with defaults for undefined)
   const weightEntries = data?.weightEntries ?? [];

@@ -2,7 +2,7 @@ import { db } from '../db';
 import { userPreferences } from '../db/schema/user-preferences';
 import { eq } from 'drizzle-orm';
 import type { UserPreferences, NewUserPreferences } from '../db/schema/user-preferences';
-import type { UserPreferencesFormData } from '@/shared/validations/locale';
+import type { UserPreferencesFormData } from '@/shared/validations/user-preferences';
 import { BadRequestError } from '../middleware/errors';
 import { dbLogger } from '../lib/logger';
 import { toDateString } from '@/shared/utils/dates';
@@ -37,7 +37,8 @@ export class UserPreferencesService {
         const [updated] = await db
           .update(userPreferences)
           .set({
-            locale: data.locale,
+            dateTimeLocale: data.dateTimeLocale,
+            unitSystem: data.unitSystem,
             timezone: data.timezone,
             updatedAt: new Date(),
           })
@@ -49,7 +50,8 @@ export class UserPreferencesService {
 
       const newPreferences: NewUserPreferences = {
         userId,
-        locale: data.locale,
+        dateTimeLocale: data.dateTimeLocale,
+        unitSystem: data.unitSystem,
         timezone: data.timezone,
       };
 

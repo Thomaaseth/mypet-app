@@ -20,7 +20,7 @@ import { EmptyStateTitle,
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ReactNode } from 'react';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatDateForDisplay, formatChartTickMonthYear } from '@/lib/utils/date-formatting';
 import { formatWeight } from '@/lib/validations/pet';
 
@@ -65,8 +65,8 @@ export default function WeightChart({
   }
 
   const isMobile = useIsMobile();
-  const { locale } = usePreferencesContext();
-  const displayLocale = locale ?? getFallbackLocale();
+  const { units, dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
   
   const weights = data.map(d => d.weight);
   const minWeight = weights.length > 0 ? Math.min(...weights) : 0;

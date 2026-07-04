@@ -1,15 +1,17 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useUserPreferences } from '@/queries/user-preferences';
-import { getUnitsForLocale, type Locale, type LocaleUnits } from '@/shared/validations/locale';
+import type { DateTimeLocale } from '@/shared/validations/locale';
 import type { UserPreferences } from '@/types/user-preferences';
+import { getUnitsForSystem, type UnitSystem, type SystemUnits } from '@/shared/validations/units';
 import type { AppError } from '@/lib/errors';
 import { useSessionContext } from './SessionContext';
 
 interface UserPreferencesContextValue {
   preferences: UserPreferences | null;
-  locale: Locale | null;
-  units: LocaleUnits | null;  // derived from locale — null => banner hasn't been completed yet
-  hasPreferences: boolean;    // for banner visibility
+  dateTimeLocale: DateTimeLocale | null;
+  unitSystem: UnitSystem | null;  // the user's raw stored preference, null => banner hasn't been completed yet
+  units: SystemUnits | null;      // derived from unitSystem via getUnitsForSystem() ('kg', 'lbs', etc...)
+  hasPreferences: boolean;        // for banner visibility
   isLoading: boolean;
   error: AppError | null;
 }
@@ -24,8 +26,9 @@ export function UserPreferencesProvider({ children }: UserPreferencesProviderPro
   const { user } = useSessionContext();
   const { data: preferences, isPending, error } = useUserPreferences({ enabled: !!user });
 
-  const locale = preferences?.locale ?? null;
-  const units = locale ? getUnitsForLocale(locale) : null;
+  const dateTimeLocale = preferences?.dateTimeLocale ?? null;
+  const unitSystem = preferences?.unitSystem ?? null;
+  const units = unitSystem ? getUnitsForSystem(unitSystem) : null;
 
   const appError: AppError | null = error
     ? { message: error.message, code: 'PREFERENCES_ERROR' }
@@ -33,7 +36,8 @@ export function UserPreferencesProvider({ children }: UserPreferencesProviderPro
 
   const value: UserPreferencesContextValue = {
     preferences: preferences ?? null,
-    locale,
+    dateTimeLocale,
+    unitSystem,
     units,
     hasPreferences: preferences !== null,
     isLoading: isPending,

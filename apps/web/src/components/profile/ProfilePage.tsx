@@ -23,9 +23,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { useUpsertUserPreferences } from '@/queries/user-preferences';
-import { LOCALE_OPTIONS } from '@/lib/constants/locale-options';
-import type { Locale } from '@/shared/validations/locale';
+import { DATE_TIME_LOCALE_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
 import { detectBrowserTimezone } from '@/lib/utils/timezone';
+import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
@@ -38,7 +38,7 @@ type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
 export default function MyProfilePage() {
   // user session context
   const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
-  const { locale: currentLocale, isLoading: isLoadingPreferences } = usePreferencesContext();
+  const { dateTimeLocale: currentDateTimeLocale, unitSystem: currentUnitSystem, isLoading: isLoadingPreferences } = usePreferencesContext();
   const { mutate: upsertPreferences, isPending: isSavingPreferences } = useUpsertUserPreferences();
 
   // UI-specific state remains as separate useState
@@ -211,48 +211,91 @@ export default function MyProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Units & Date Format */}
+        {/* Date/Time Format & Units */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              Units & Date Format
+              Date, Time & Units
             </CardTitle>
             <CardDescription>
-              Choose your preferred measurement system and date format.
+              Choose your preferred date/time format and measurement system.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             {isLoadingPreferences ? (
-              <div className="flex gap-3">
-                <Skeleton className="h-16 flex-1" />
-                <Skeleton className="h-16 flex-1" />
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <Skeleton className="h-16 flex-1" />
+                  <Skeleton className="h-16 flex-1" />
+                </div>
+                <div className="flex gap-3">
+                  <Skeleton className="h-16 flex-1" />
+                  <Skeleton className="h-16 flex-1" />
+                </div>
               </div>
             ) : (
-              <div className="flex gap-3">
-                {LOCALE_OPTIONS.map(({ locale, label, description }) => {
-                  const isActive = currentLocale === locale;
-                  return (
-                    <Button
-                      key={locale}
-                      variant={isActive ? 'default' : 'outline'}
-                      disabled={isSavingPreferences || isActive}
-                      onClick={() => {
-                        if (!isActive) upsertPreferences({ locale, timezone: detectBrowserTimezone() });
-                      }}
-                      className="flex flex-col h-auto py-3 px-4 flex-1"
-                    >
-                      {isSavingPreferences && !isActive && (
-                        <Loader2 className="h-4 w-4 animate-spin mb-1" />
-                      )}
-                      <span className="font-semibold text-sm">{label}</span>
-                      <span className={`text-xs font-normal ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                        {description}
-                      </span>
-                    </Button>
-                  );
-                })}
-              </div>
+              <>
+                {/* Row 1: Date/Time format */}
+                <div className="flex gap-3">
+                  {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale, label, description }) => {
+                    const isActive = currentDateTimeLocale === dateTimeLocale;
+                    return (
+                      <Button
+                        key={dateTimeLocale}
+                        variant={isActive ? 'default' : 'outline'}
+                        disabled={isSavingPreferences || isActive}
+                        onClick={() => {
+                          if (!isActive) upsertPreferences({
+                            dateTimeLocale,
+                            unitSystem: currentUnitSystem ?? getFallbackUnitSystem(),
+                            timezone: detectBrowserTimezone(),
+                          });
+                        }}
+                        className="flex flex-col h-auto py-3 px-4 flex-1"
+                      >
+                        {isSavingPreferences && !isActive && (
+                          <Loader2 className="h-4 w-4 animate-spin mb-1" />
+                        )}
+                        <span className="font-semibold text-sm">{label}</span>
+                        <span className={`text-xs font-normal ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                          {description}
+                        </span>
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                {/* Row 2: Units */}
+                <div className="flex gap-3">
+                  {UNIT_SYSTEM_OPTIONS.map(({ unitSystem, label, description }) => {
+                    const isActive = currentUnitSystem === unitSystem;
+                    return (
+                      <Button
+                        key={unitSystem}
+                        variant={isActive ? 'default' : 'outline'}
+                        disabled={isSavingPreferences || isActive}
+                        onClick={() => {
+                          if (!isActive) upsertPreferences({
+                            dateTimeLocale: currentDateTimeLocale ?? getFallbackDateTimeLocale(),
+                            unitSystem,
+                            timezone: detectBrowserTimezone(),
+                          });
+                        }}
+                        className="flex flex-col h-auto py-3 px-4 flex-1"
+                      >
+                        {isSavingPreferences && !isActive && (
+                          <Loader2 className="h-4 w-4 animate-spin mb-1" />
+                        )}
+                        <span className="font-semibold text-sm">{label}</span>
+                        <span className={`text-xs font-normal ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                          {description}
+                        </span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

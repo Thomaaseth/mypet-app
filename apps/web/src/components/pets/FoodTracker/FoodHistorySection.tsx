@@ -38,7 +38,7 @@ import { MutedText, EntryTitle } from '@/components/ui/typography';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -63,8 +63,8 @@ export function FoodHistorySection({
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
 
-  const { locale } = usePreferencesContext();
-  const displayLocale = locale ?? getFallbackLocale();
+  const { dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   const handleDelete = async () => {
     if (!deletingEntry) return;

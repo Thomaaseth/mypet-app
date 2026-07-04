@@ -1,16 +1,19 @@
-import type { Locale } from '@/shared/validations/locale';
+import type { DateTimeLocale  } from '@/shared/validations/locale';
 import type { Timezone } from '@/shared/validations/timezone';
+import type { UnitSystem } from '@/shared/validations/units';
 
 export interface UserPreferences {
   id: string;
   userId: string;
-  locale: Locale;
+  dateTimeLocale: DateTimeLocale ;
+  unitSystem: UnitSystem;
   timezone: Timezone;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface UserPreferencesFormData {
-  locale: Locale;
+  dateTimeLocale: DateTimeLocale ;
+  unitSystem: UnitSystem;
   timezone: Timezone;
 }

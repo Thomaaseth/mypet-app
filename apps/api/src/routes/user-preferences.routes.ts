@@ -4,7 +4,7 @@ import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth
 import { userRateLimit } from '../middleware/rate-limit';
 import { BadRequestError } from '../middleware/errors';
 import { respondWithSuccess } from '../lib/json';
-import { userPreferencesFormSchema } from '@/shared/validations/locale';
+import { userPreferencesFormSchema } from '@/shared/validations/user-preferences';
 
 const router = Router();
 

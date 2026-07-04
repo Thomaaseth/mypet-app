@@ -1,4 +1,4 @@
-import type { Locale } from '@/shared/validations/locale';
+import type { DateTimeLocale } from '@/shared/validations/locale';
 
 export const parseDateOnly = (dateString: string): Date => {
     const [year, month, day] = dateString.split('-').map(Number);
@@ -20,13 +20,15 @@ export const parseDateOnly = (dateString: string): Date => {
   
   export const formatDateForDisplay = (
     dateString: string,
-    locale: Locale,
+    locale: DateTimeLocale,
     options: Intl.DateTimeFormatOptions = SHORT_DATE_DISPLAY_OPTIONS
   ): string => parseDateOnly(dateString).toLocaleDateString(locale, options);
   
   export const formatDateForInput = (dateString: string): string =>
     new Date(dateString).toISOString().split('T')[0];
   
+
+  // local - browser/system anchored "today"
   export const getTodayDateString = (): string => {
     const now = new Date();
     const year = now.getFullYear();

@@ -21,7 +21,7 @@ import { useVeterinarians } from '@/queries/vets';
 import { usePetVets } from '@/queries/vets';
 import { useLastVetForPet } from '@/queries/appointments';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatTimeForDisplay } from '@/lib/validations/appointments';
 
 interface AppointmentFormProps {
@@ -67,8 +67,8 @@ export default function AppointmentForm({
   const selectedPetId = watch('petId');
   const selectedVetId = watch('veterinarianId');
   
-  const { locale } = usePreferencesContext();
-  const displayLocale = locale ?? getFallbackLocale();
+  const { dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   // Fetch vets assigned to selected pet
   const { data: availableVetsData } = usePetVets(selectedPetId || '');

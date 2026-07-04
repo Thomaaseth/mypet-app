@@ -34,7 +34,8 @@ import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
-import { getFallbackLocale } from '@/lib/utils/locale';
+import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
+import { getUnitsForSystem } from '@/shared/validations/units';
 
 const PAGE_SIZE = 5;
 
@@ -59,9 +60,9 @@ export default function WeightList({
   const [deletingEntry, setDeletingEntry] = useState<WeightEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const { units, locale } = usePreferencesContext();
-  const weightUnit = units?.weightUnit ?? 'kg';
-  const displayLocale = locale ?? getFallbackLocale();
+  const { units, dateTimeLocale } = usePreferencesContext();
+  const weightUnit = units?.weightUnit ?? getUnitsForSystem(getFallbackUnitSystem()).weightUnit;
+  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
   // Sort entries by date (newest first for the table)
   const sortedEntries = [...weightEntries].sort((a, b) => 
