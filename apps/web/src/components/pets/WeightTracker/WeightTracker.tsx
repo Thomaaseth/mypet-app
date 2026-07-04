@@ -498,5 +498,5 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

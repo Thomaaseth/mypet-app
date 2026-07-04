@@ -74,7 +74,7 @@ export default function WeightList({
 
   useEffect(() => {
     if (!isHistoryOpen) {
-      resetPage();
+      resetPage()
     }
   }, [isHistoryOpen, resetPage]);
 
@@ -157,8 +157,8 @@ export default function WeightList({
                 </DropdownMenu>
               </TableCell>
             </TableRow>
-          );
-        })};
+          )
+        })}
         </TableBody>
       </Table>
 

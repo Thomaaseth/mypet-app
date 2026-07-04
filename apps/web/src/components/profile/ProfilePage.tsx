@@ -236,15 +236,15 @@ export default function MyProfilePage() {
               </div>
             ) : (
               <>
-                {/* Row 1: Date/Time format */}
-                <div className="flex gap-3">
+                {/* Date/Time format */}
+                <div className="flex flex-col sm:flex-row gap-3">
                   {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale, label, description }) => {
                     const isActive = currentDateTimeLocale === dateTimeLocale;
                     return (
                       <Button
                         key={dateTimeLocale}
                         variant={isActive ? 'default' : 'outline'}
-                        disabled={isSavingPreferences || isActive}
+                        disabled={isSavingPreferences}
                         onClick={() => {
                           if (!isActive) upsertPreferences({
                             dateTimeLocale,
@@ -266,15 +266,15 @@ export default function MyProfilePage() {
                   })}
                 </div>
 
-                {/* Row 2: Units */}
-                <div className="flex gap-3">
+                {/* Units */}
+                <div className="flex flex-col sm:flex-row gap-3">
                   {UNIT_SYSTEM_OPTIONS.map(({ unitSystem, label, description }) => {
                     const isActive = currentUnitSystem === unitSystem;
                     return (
                       <Button
                         key={unitSystem}
                         variant={isActive ? 'default' : 'outline'}
-                        disabled={isSavingPreferences || isActive}
+                        disabled={isSavingPreferences}
                         onClick={() => {
                           if (!isActive) upsertPreferences({
                             dateTimeLocale: currentDateTimeLocale ?? getFallbackDateTimeLocale(),

@@ -72,7 +72,7 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="dateFinished">Finish Date *</Label>
+          <Label htmlFor="dateFinished">Finish Date</Label>
           <Input
             id="dateFinished"
             type="date"
