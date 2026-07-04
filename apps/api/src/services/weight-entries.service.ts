@@ -241,7 +241,7 @@ export class WeightEntriesService {
       const [updatedEntry] = await db
         .update(weightEntries)
         .set({
-          ...updateData,
+          ...dbUpdateData,
           updatedAt: new Date()
         })
         .where(and(

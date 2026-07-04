@@ -201,7 +201,7 @@ export default function WeightChart({
                       )}
                       <Line
                         dataKey="weight"
-                        type="natural"
+                        type="monotone"
                         stroke="var(--color-weight)"
                         strokeWidth={isMobile ? 2 : 3}
                         dot={{
