@@ -94,7 +94,7 @@ export function FoodHistorySection({
       <Card>
         <Collapsible open={isExpanded} onOpenChange={handleOpenChange}>
           <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+            <CardHeader className="cursor-pointer hover:bg-muted/75 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <History className="h-4 w-4" />

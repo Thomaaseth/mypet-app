@@ -104,7 +104,7 @@ export default function WeightChart({
   return (
         <div className="space-y-4">
         {/* Latest Weight Display */}
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
+          <div className="text-center p-4 bg-muted/75 rounded-lg">
             <MetricLabel>Current Weight</MetricLabel>
             <MetricValue>{formatWeight(latestWeight.weight)} {weightUnit}</MetricValue>
             <MetricLabel className="text-xs">as of {latestWeight.date}</MetricLabel>

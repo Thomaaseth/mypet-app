@@ -237,12 +237,14 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
 
      {/* History Section - Always show if there are finished entries */}
      {finishedEntries.length > 0 && (
+      <div className="mt-2">
        <FoodHistorySection 
          entries={finishedEntries}
          foodType="wet"
          onEditFinishDate={onUpdateFinishDate}
          onDelete={onDelete}
        />
+      </div>
      )}
 
      {/* Edit Dialog */}

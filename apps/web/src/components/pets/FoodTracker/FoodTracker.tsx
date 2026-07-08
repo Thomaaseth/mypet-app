@@ -58,9 +58,7 @@ function FoodTrackerContent() {
           <div className="mb-4">
             {activeFoodEntries.length === 1 && hasCalculatedFields(activeFoodEntries[0]) ? (
               // Single food entry
-              <div className="rounded-lg bg-muted/50">
-
-                <div className="text-center">
+              <div className="text-center p-4 bg-muted/75 rounded-lg">
                 <MetricLabel>{FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply</MetricLabel>
                   <MetricValue>
                     {activeFoodEntries[0].remainingDays > 0 ? `${activeFoodEntries[0].remainingDays} days` : 'Running out'}
@@ -72,7 +70,6 @@ function FoodTrackerContent() {
                     }
                   </MutedText>
                 </div>
-              </div>
             ) : (
               // Multiple food entries - side by side
               <div className="grid grid-cols-2 gap-3">
@@ -80,7 +77,7 @@ function FoodTrackerContent() {
                 .filter(hasCalculatedFields)
                 .sort((a) => a.foodType === 'dry' ? -1 : 1)
                 .map((entry) => (
-                <div className="p-4 rounded-lg bg-muted/50">
+                  <div className="text-center p-4 bg-muted/75 rounded-lg">
                     <div className="text-center">
                     <MetricLabel>{FOOD_TYPE_LABELS[entry.foodType]} Supply</MetricLabel>
                       <MetricValue>

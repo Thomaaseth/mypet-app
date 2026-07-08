@@ -294,7 +294,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
       <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -454,7 +454,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         <Card>
           <Collapsible open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
             <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardHeader className="cursor-pointer hover:bg-muted/75 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
