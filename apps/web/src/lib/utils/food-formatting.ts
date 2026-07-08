@@ -1,4 +1,5 @@
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
+import { convertFoodWeight } from '@/shared/utils/units';
 
 type FeedingStatus = 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 
@@ -38,18 +39,21 @@ export function getFeedingStatusLabel(status: FeedingStatus): string {
 export function calculateExpectedDays(entry: DryFoodEntry | WetFoodEntry): number {
   if (entry.foodType === 'dry') {
     const dryEntry = entry as DryFoodEntry;
-    const totalWeightGrams = parseFloat(dryEntry.bagWeight) * (dryEntry.bagWeightUnit === 'kg' ? 1000 : 453.592);
+    const totalWeightGrams = parseFloat(dryEntry.bagWeight);
     const dailyAmountGrams = parseFloat(dryEntry.dailyAmount);
     return Math.ceil(totalWeightGrams / dailyAmountGrams);
   } else {
     const wetEntry = entry as WetFoodEntry;
-    const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit) * (wetEntry.wetWeightUnit === 'oz' ? 28.3495 : 1);
-    const dailyAmountGrams = parseFloat(wetEntry.dailyAmount) * (wetEntry.wetDailyAmountUnit === 'oz' ? 28.3495 : 1);
+    const totalWeightGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit);
+    const dailyAmountGrams = parseFloat(wetEntry.dailyAmount);
     return Math.ceil(totalWeightGrams / dailyAmountGrams);
   }
 }
 
-export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): string {
+export function formatFeedingStatusMessage(
+  entry: DryFoodEntry | WetFoodEntry,
+  dailyAmountUnit: 'grams' | 'oz'
+): string {
   if (!entry.actualDaysElapsed || !entry.feedingStatus) {
     return '';
   }
@@ -59,14 +63,10 @@ export function formatFeedingStatusMessage(entry: DryFoodEntry | WetFoodEntry): 
   const statusLabel = getFeedingStatusLabel(entry.feedingStatus);
 
   if (entry.actualDailyConsumption) {
-    const unit = entry.foodType === 'dry'
-      ? (entry as DryFoodEntry).dryDailyAmountUnit
-      : (entry as WetFoodEntry).wetDailyAmountUnit;
-    const avg = entry.foodType === 'wet' && (entry as WetFoodEntry).wetDailyAmountUnit === 'oz'
-      ? (entry.actualDailyConsumption / 28.3495).toFixed(2)
-      : entry.actualDailyConsumption.toFixed(1);
-    
-    const shortUnit = unit === 'grams' ? 'g' : unit; // 'oz' stays 'oz'
+    // actualDailyConsumption is canonical grams — convert to the caller's display unit.
+    const avgInDisplayUnit = convertFoodWeight(entry.actualDailyConsumption, 'grams', dailyAmountUnit);
+    const avg = dailyAmountUnit === 'oz' ? avgInDisplayUnit.toFixed(2) : avgInDisplayUnit.toFixed(1);
+    const shortUnit = dailyAmountUnit === 'grams' ? 'g' : dailyAmountUnit;
     return `${statusLabel} • ${avg}${shortUnit}/day`;
   }
   return statusLabel;

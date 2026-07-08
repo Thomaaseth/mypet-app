@@ -6,7 +6,6 @@ import type {
   DryFoodEntry, 
   WetFoodEntry, 
   AnyFoodEntry,
-  FoodType 
 } from '../../db/schema/food';
 import { 
   BadRequestError, 
@@ -18,6 +17,7 @@ import type { DryFoodFormData, WetFoodFormData } from './types';
 import { dbLogger } from '../../lib/logger';
 import { validateUUID } from '@/lib/validateUUID';
 import { UserPreferencesService } from '../user-preferences.service';
+import { convertFoodWeight } from '@/shared/utils/units';
 
 
 export class FoodService {
@@ -70,6 +70,12 @@ export class FoodService {
     if (existingActiveEntry) {
       throw new BadRequestError('You already have an active dry food entry. Please finish or delete the existing entry before adding a new one.');
     }
+
+      const bagWeightInGrams = convertFoodWeight(
+        parseFloat(data.bagWeight),
+        data.bagWeightUnit,
+        'grams'
+      );
       
       // Execute db transaction
       const [newEntry] = await db
@@ -79,16 +85,12 @@ export class FoodService {
           foodType: 'dry',
           brandName: data.brandName || null,
           productName: data.productName || null,
-          bagWeight: data.bagWeight,
-          bagWeightUnit: data.bagWeightUnit,
+          bagWeight: bagWeightInGrams.toFixed(2),
           dailyAmount: data.dailyAmount,
-          dryDailyAmountUnit: data.dryDailyAmountUnit,
           dateStarted: data.dateStarted,
           // Explicitly set wet food fields to null
           numberOfUnits: null,
           weightPerUnit: null,
-          wetWeightUnit: null,
-          wetDailyAmountUnit: null,
         })
         .returning();
 
@@ -148,8 +150,13 @@ export class FoodService {
       const existing = await this.getDryFoodEntryById(petId, foodId, userId);
       
       // Execute update
+      // canonical grams before storage, then discarded from the update payload.
+      const { bagWeightUnit, ...restData } = data;
       const updateData = {
-        ...data,
+        ...restData,
+        ...(data.bagWeight !== undefined && bagWeightUnit !== undefined && {
+          bagWeight: convertFoodWeight(parseFloat(data.bagWeight), bagWeightUnit, 'grams').toFixed(2),
+        }),
         brandName: data.brandName !== undefined ? (data.brandName || null) : undefined,
         productName: data.productName !== undefined ? (data.productName || null) : undefined,
         updatedAt: new Date(),
@@ -240,6 +247,10 @@ export class FoodService {
     if (existingActiveEntry) {
     throw new BadRequestError('You already have an active wet food entry. Please finish or delete the existing entry before adding a new one.');
     }
+
+      const weightPerUnitInGrams = convertFoodWeight(parseFloat(data.weightPerUnit), data.wetFoodUnit, 'grams');
+      const dailyAmountInGrams = convertFoodWeight(parseFloat(data.dailyAmount), data.wetFoodUnit, 'grams');
+
       
       // Execute db transaction
       const [newEntry] = await db
@@ -250,15 +261,11 @@ export class FoodService {
           brandName: data.brandName || null,
           productName: data.productName || null,
           numberOfUnits: parseInt(data.numberOfUnits, 10),
-          weightPerUnit: data.weightPerUnit,
-          wetWeightUnit: data.wetWeightUnit,
-          dailyAmount: data.dailyAmount,
-          wetDailyAmountUnit: data.wetDailyAmountUnit,
+          weightPerUnit: weightPerUnitInGrams.toFixed(2),
+          dailyAmount: dailyAmountInGrams.toFixed(2),
           dateStarted: data.dateStarted,
           // Explicitly set dry food fields to null
           bagWeight: null,
-          bagWeightUnit: null,
-          dryDailyAmountUnit: null,
         })
         .returning();
 
@@ -318,8 +325,16 @@ export class FoodService {
       const existing = await this.getWetFoodEntryById(petId, foodId, userId);
       
       // Execute update
+      // convert to canonical grams before storage, then discarded from the update payload.
+      const { wetFoodUnit, ...restData } = data;
       const updateData = {
-        ...data,
+        ...restData,
+        ...(data.weightPerUnit !== undefined && wetFoodUnit !== undefined && {
+          weightPerUnit: convertFoodWeight(parseFloat(data.weightPerUnit), wetFoodUnit, 'grams').toFixed(2),
+        }),
+        ...(data.dailyAmount !== undefined && wetFoodUnit !== undefined && {
+          dailyAmount: convertFoodWeight(parseFloat(data.dailyAmount), wetFoodUnit, 'grams').toFixed(2),
+        }),
         brandName: data.brandName !== undefined ? (data.brandName || null) : undefined,
         productName: data.productName !== undefined ? (data.productName || null) : undefined,
         updatedAt: new Date(),
@@ -455,7 +470,7 @@ export class FoodService {
     petId: string, 
     userId: string, 
     foodType?: 'dry' | 'wet',
-    limit: number = 10
+    limit: number = 50
   ): Promise<(DryFoodEntry | WetFoodEntry)[]> {
     try {
       // Validate limit parameter

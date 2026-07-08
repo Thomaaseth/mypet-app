@@ -56,6 +56,7 @@ export function useWeightForm(options: UseWeightFormOptions) {
   const resetToEmpty = () => {
     form.reset({
       weight: '',
+      weightUnit,
       date: getTodayDateString(),
       ...defaultValues,
     });

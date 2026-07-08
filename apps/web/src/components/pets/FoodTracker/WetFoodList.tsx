@@ -31,6 +31,7 @@ import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/t
 import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { convertFoodWeight } from '@/lib/validations/pet';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
@@ -68,8 +69,9 @@ export function WetFoodList({
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
  const [markingFinishedEntry, setMarkingFinishedEntry] = useState<WetFoodEntry | null>(null);
 
- const { dateTimeLocale } = usePreferencesContext();
+ const { dateTimeLocale, units } = usePreferencesContext();
  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+ const wetFoodUnit = units?.wetFoodUnit ?? 'grams';
 
  const handleUpdate = async (data: WetFoodFormData) => { // Receive WetFoodFormData (strings)
   if (!editingEntry) return null;
@@ -179,11 +181,15 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                   <div className="flex flex-wrap @min-[240px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1 shrink-0">
                       <Package className="h-4 w-4" />
-                      <span>{entry.numberOfUnits} x {formatFoodQuantity(entry.weightPerUnit)} <FoodUnitLabel unit={entry.wetWeightUnit} /></span>
+                      <span>
+                        {entry.numberOfUnits} x {formatFoodQuantity(convertFoodWeight(parseFloat(entry.weightPerUnit), 'grams', wetFoodUnit).toString())} <FoodUnitLabel unit={wetFoodUnit} />
+                      </span>
                       </span>
                     <span className="flex items-center gap-1 shrink-0">
                       <Utensils className="h-4 w-4" />
-                      <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit={entry.wetDailyAmountUnit} />/day</span>
+                      <span>
+                        {formatFoodQuantity(convertFoodWeight(parseFloat(entry.dailyAmount), 'grams', wetFoodUnit).toString())} <FoodUnitLabel unit={wetFoodUnit} />/day
+                      </span>
                       </span>
                     <span className="flex items-center gap-1 shrink-0">
                       <Calendar className="h-4 w-4" />
@@ -195,7 +201,9 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                <div className="grid grid-cols-2 @min-[320px]:grid-cols-3 gap-6 @min-[320px]:gap-4 mb-4">
                <div>
                     <StatLabel>~Remaining</StatLabel>
-                    <StatValue>{formatRemainingWeight(entry.remainingWeight)} {entry.wetWeightUnit}</StatValue>
+                      <StatValue>
+                        {formatRemainingWeight(convertFoodWeight(entry.remainingWeight, 'grams', wetFoodUnit))} <FoodUnitLabel unit={wetFoodUnit} />
+                      </StatValue>
                     </div>
                    <div>
                     <StatLabel>~Days Left</StatLabel>
@@ -246,16 +254,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
       >
          {editingEntry && (
            <WetFoodForm
-             initialData={{
-               brandName: editingEntry.brandName || '',
-               productName: editingEntry.productName || '',
-               numberOfUnits: editingEntry.numberOfUnits.toString(),
-               weightPerUnit: editingEntry.weightPerUnit,
-               wetWeightUnit: editingEntry.wetWeightUnit,
-               dailyAmount: editingEntry.dailyAmount,
-               wetDailyAmountUnit: editingEntry.wetDailyAmountUnit,
-               dateStarted: editingEntry.dateStarted,
-             }}
+             wetFoodEntry={editingEntry}
              onSubmit={handleUpdate}
              isLoading={isLoading}
              submitLabel="Update Wet Food"

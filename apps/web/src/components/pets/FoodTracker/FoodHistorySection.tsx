@@ -39,6 +39,8 @@ import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { FoodUnitLabel } from './FoodUnitLabel';
+import { convertFoodWeight } from '@/lib/validations/pet';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -63,8 +65,10 @@ export function FoodHistorySection({
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
 
-  const { dateTimeLocale } = usePreferencesContext();
+  const { dateTimeLocale, units } = usePreferencesContext();
   const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const dailyAmountUnit = foodType === 'dry' ? 'grams' : (units?.wetFoodUnit ?? 'grams');
+  const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
 
   const handleDelete = async () => {
     if (!deletingEntry) return;
@@ -134,7 +138,7 @@ export function FoodHistorySection({
                       variant="outline"
                       className={`text-xs mb-1 ${getFeedingStatusColor(entry.feedingStatus)}`}
                     >
-                      {formatFeedingStatusMessage(entry)}
+                      {formatFeedingStatusMessage(entry, dailyAmountUnit)}
                     </Badge>
                   )}
               
@@ -144,22 +148,22 @@ export function FoodHistorySection({
                       <>
                         <span className="flex items-center gap-1">
                           <Package className="h-3 w-3" />
-                          {(entry as DryFoodEntry).bagWeight} {(entry as DryFoodEntry).bagWeightUnit}
+                          {convertFoodWeight(parseFloat((entry as DryFoodEntry).bagWeight), 'grams', bagWeightUnit).toFixed(1)} <FoodUnitLabel unit={bagWeightUnit} />
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
-                          {(entry as DryFoodEntry).dailyAmount} {(entry as DryFoodEntry).dryDailyAmountUnit}/day
+                          {(entry as DryFoodEntry).dailyAmount} <FoodUnitLabel unit="grams" />/day
                         </span>
                       </>
                     ) : (
                       <>
                         <span className="flex items-center gap-1">
                           <Package className="h-3 w-3" />
-                          {(entry as WetFoodEntry).numberOfUnits} × {(entry as WetFoodEntry).weightPerUnit} {(entry as WetFoodEntry).wetWeightUnit}
+                          {(entry as WetFoodEntry).numberOfUnits} × {convertFoodWeight(parseFloat((entry as WetFoodEntry).weightPerUnit), 'grams', dailyAmountUnit).toFixed(1)} <FoodUnitLabel unit={dailyAmountUnit} />
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
-                          {(entry as WetFoodEntry).dailyAmount} {(entry as WetFoodEntry).wetDailyAmountUnit}/day
+                          {convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit).toFixed(1)} <FoodUnitLabel unit={dailyAmountUnit} />/day
                         </span>
                       </>
                     )}

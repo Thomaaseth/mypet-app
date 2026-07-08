@@ -1,6 +1,4 @@
-import { WET_FOOD_UNITS } from '@/types/food';
-
-type FoodUnit = typeof WET_FOOD_UNITS[number] | 'kg' | 'pounds';
+type FoodUnit = 'kg' | 'lbs' | 'grams' | 'oz';
 
 interface FoodUnitLabelProps {
   unit: FoodUnit;
@@ -12,11 +10,11 @@ export function FoodUnitLabel({ unit }: FoodUnitLabelProps) {
       return <>oz</>;
     case 'kg':
       return <>kg</>;
-    case 'pounds':
+    case 'lbs':
       return (
         <>
           <span className="@min-[320px]:hidden">lbs</span>
-          <span className="hidden @min-[320px]:inline">pounds</span>
+          <span className="hidden @min-[320px]:inline">lbs</span>
         </>
       );
     case 'grams':

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-
+import { convertFoodWeight } from '../utils/units';
 
 // Base validation
 const baseFoodValidation = {
@@ -19,6 +19,9 @@ const baseFoodValidation = {
     }, 'Purchase date must be valid and not in the future'),
 };
 
+// bagWeightUnit is not user-selectable, derived from the user's unitSystem preference,
+// travels as a hidden field (same pattern as weightEntryFormSchema.weightUnit).
+// dailyAmount for dry food has no unit field: it's always grams, regardless of unitSystem.
 // DRY FOOD VALIDATION
 export const dryFoodSchema = z.object({
   ...baseFoodValidation,
@@ -28,32 +31,18 @@ export const dryFoodSchema = z.object({
       const num = parseFloat(val.replace(',', '.'));
       return !isNaN(num) && num > 0;
     }, 'Bag weight must be a positive number'),
-  bagWeightUnit: z.enum(['kg', 'pounds'], {
+  bagWeightUnit: z.enum(['kg', 'lbs'], {
     required_error: 'Bag weight unit is required',
     invalid_type_error: 'Invalid bag weight unit for dry food'
   }),
-  dryDailyAmountUnit: z.enum(['grams'], {
-    required_error: 'Daily amount unit is required',
-    invalid_type_error: 'Invalid daily amount unit for dry food'
-  }),
 }).superRefine((data, ctx) => {
-  // Validate daily amount doesn't exceed bag weight (basic sanity check)
   const bagWeight = parseFloat(data.bagWeight.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
-  
-  // Convert bag weight to grams for comparison
-  let bagWeightInGrams = bagWeight;
-  if (data.bagWeightUnit === 'kg') {
-    bagWeightInGrams = bagWeight * 1000; // kg to grams
-  } else if (data.bagWeightUnit === 'pounds') {
-    bagWeightInGrams = bagWeight * 453.592; // pounds to grams
-  }
 
-  // Convert daily amount to grams for comparison
-  const dailyAmountInGrams = dailyAmount;
+  const bagWeightInGrams = convertFoodWeight(bagWeight, data.bagWeightUnit, 'grams');
+  // dailyAmount is always grams for dry food — no conversion needed
 
-  // Check if daily amount exceeds total bag weight
-  if (dailyAmountInGrams >= bagWeightInGrams) {
+  if (dailyAmount >= bagWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Daily amount should be less than total bag weight',
@@ -62,10 +51,13 @@ export const dryFoodSchema = z.object({
   }
 });
 
+// wetFoodUnit is a single unit governing both weightPerUnit and dailyAmount — metric
+// is always grams for both, imperial is always oz for both. Not user-selectable;
+// derived from unitSystem, travels as a hidden field.
 // WET FOOD VALIDATION
 export const wetFoodSchema = z.object({
   ...baseFoodValidation,
-  numberOfUnits: z.string()  // ✅ Expects string (from form)
+  numberOfUnits: z.string()
     .min(1, 'Number of units is required')
     .refine((val) => {
       const num = parseInt(val, 10);
@@ -77,32 +69,18 @@ export const wetFoodSchema = z.object({
       const num = parseFloat(val.replace(',', '.'));
       return !isNaN(num) && num > 0;
     }, 'Weight per unit must be a positive number'),
-  wetWeightUnit: z.enum(['grams', 'oz'], {
+  wetFoodUnit: z.enum(['grams', 'oz'], {
     required_error: 'Weight unit is required',
     invalid_type_error: 'Invalid weight unit for wet food'
   }),
-  wetDailyAmountUnit: z.enum(['grams', 'oz'], {
-    required_error: 'Daily amount unit is required',
-    invalid_type_error: 'Invalid daily amount unit for wet food'
-  }),
 }).superRefine((data, ctx) => {
-  // Calculate total weight for validation
   const numberOfUnits = parseInt(data.numberOfUnits, 10);
   const totalWeight = numberOfUnits * parseFloat(data.weightPerUnit.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
-  
-  // Convert total weight to grams
-  let totalWeightInGrams = totalWeight;
-  if (data.wetWeightUnit === 'oz') {
-    totalWeightInGrams = totalWeight * 28.3495; // oz to grams
-  }
 
-  // Convert daily amount to grams
-  let dailyAmountInGrams = dailyAmount;
-  if (data.wetDailyAmountUnit === 'oz') {
-    dailyAmountInGrams = dailyAmount * 28.3495; // oz to grams
-  }
-  
+  const totalWeightInGrams = convertFoodWeight(totalWeight, data.wetFoodUnit, 'grams');
+  const dailyAmountInGrams = convertFoodWeight(dailyAmount, data.wetFoodUnit, 'grams');
+
   if (dailyAmountInGrams >= totalWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -117,30 +95,37 @@ export const updateDryFoodSchema = z.object({
   brandName: z.string().trim().max(100).optional(),
   productName: z.string().trim().max(150).optional(),
   bagWeight: z.string().refine(val => {
-    if (!val) return true; // Allow empty for partial updates
+    if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Bag weight must be a positive number').optional(),
-  bagWeightUnit: z.enum(['kg', 'pounds']).optional(),
+  bagWeightUnit: z.enum(['kg', 'lbs']).optional(),
   dailyAmount: z.string().refine(val => {
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  dryDailyAmountUnit: z.enum(['grams']).optional(),
   dateStarted: z.string().refine(val => {
     if (!val) return true;
     const date = new Date(val);
     return !isNaN(date.getTime()) && date <= new Date();
   }, 'Invalid date or date cannot be in the future').optional(),
+}).superRefine((data, ctx) => {
+  if (data.bagWeight !== undefined && data.bagWeightUnit === undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Bag weight unit is required when updating bag weight',
+      path: ['bagWeightUnit'],
+    });
+  }
 });
 
 export const updateWetFoodSchema = z.object({
   brandName: z.string().trim().max(100).optional(),
   productName: z.string().trim().max(150).optional(),
   numberOfUnits: z.string()
-    .min(1, 'Number of units is required')
     .refine((val) => {
+      if (!val) return true;
       const num = parseInt(val, 10);
       return !isNaN(num) && Number.isInteger(num) && num > 0;
     }, 'Number of units must be a positive whole number')
@@ -150,18 +135,26 @@ export const updateWetFoodSchema = z.object({
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Weight per unit must be a positive number').optional(),
-  wetWeightUnit: z.enum(['grams', 'oz']).optional(),
+  wetFoodUnit: z.enum(['grams', 'oz']).optional(),
   dailyAmount: z.string().refine(val => {
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  wetDailyAmountUnit: z.enum(['grams', 'oz']).optional(),
   dateStarted: z.string().refine(val => {
     if (!val) return true;
     const date = new Date(val);
     return !isNaN(date.getTime()) && date <= new Date();
   }, 'Invalid date or date cannot be in the future').optional(),
+}).superRefine((data, ctx) => {
+  // wetFoodUnit governs both weightPerUnit and dailyAmount; required if either changes
+  if ((data.weightPerUnit !== undefined || data.dailyAmount !== undefined) && data.wetFoodUnit === undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Weight unit is required when updating weight per unit or daily amount',
+      path: ['wetFoodUnit'],
+    });
+  }
 });
 
 // Validate functions
@@ -200,3 +193,9 @@ export function validateUpdateWetFoodData(data: unknown) {
   }
   return result.data;
 }
+
+// Export types
+export type DryFoodFormData = z.infer<typeof dryFoodSchema>;
+export type WetFoodFormData = z.infer<typeof wetFoodSchema>;
+export type UpdateDryFoodData = z.infer<typeof updateDryFoodSchema>;
+export type UpdateWetFoodData = z.infer<typeof updateWetFoodSchema>;

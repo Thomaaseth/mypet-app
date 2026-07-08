@@ -1,59 +1,36 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useDryFoodForm } from '@/hooks/useDryFoodForm';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import { dryFoodSchema } from '@/lib/validations/food';
-import { DRY_FOOD_BAG_UNITS } from '@/types/food';
 import { ErrorText } from '@/components/ui/typography';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface DryFoodFormProps {
-  initialData?: Partial<DryFoodFormData>;
+  dryFoodEntry?: DryFoodEntry;
   onSubmit: (data: DryFoodFormData) => Promise<DryFoodEntry | null>;
   isLoading?: boolean;
   submitLabel?: string;
 }
 
-type DryFoodFormValues = z.infer<typeof dryFoodSchema>;
-
 export function DryFoodForm({ 
-  initialData, 
+  dryFoodEntry,
   onSubmit, 
   isLoading = false,
   submitLabel = 'Add Dry Food'
 }: DryFoodFormProps) {
+  const { units } = usePreferencesContext();
+  const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
-  } = useForm<DryFoodFormValues>({
-    resolver: zodResolver(dryFoodSchema),
-    shouldFocusError: false,
-    defaultValues: {
-      brandName: initialData?.brandName ?? '',
-      productName: initialData?.productName ?? '',
-      bagWeight: initialData?.bagWeight ?? '',
-      bagWeightUnit: initialData?.bagWeightUnit ?? 'kg',
-      dailyAmount: initialData?.dailyAmount ?? '',
-      dryDailyAmountUnit: 'grams',
-      dateStarted: initialData?.dateStarted ?? getTodayDateString(),
-    },
-  });
+  } = useDryFoodForm({ dryFoodEntry });
   
-  const onFormSubmit = async (data: DryFoodFormValues) => {
+  const onFormSubmit = async (data: DryFoodFormData) => {
     await onSubmit(data);
   };
 
@@ -81,50 +58,45 @@ export function DryFoodForm({
         {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="bagWeight">Bag Weight *</Label>
+      {/* <div className="grid grid-cols-2 gap-4"> */}
+      <div className="space-y-2">
+        <Label htmlFor="bagWeight">Bag Weight</Label>
+        <div className="relative">
           <Input
             id="bagWeight"
             type="number"
-            step="0.01"
+            step="1"
             placeholder="e.g., 5.5"
+            className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             {...register('bagWeight')}
             aria-invalid={!!errors.bagWeight}
           />
-          {errors.bagWeight && <ErrorText>{errors.bagWeight.message}</ErrorText>}
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+            {bagWeightUnit}
+          </span>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="bagWeightUnit">Unit</Label>
-          <Select
-            value={watch('bagWeightUnit')}
-            onValueChange={(value) => setValue('bagWeightUnit', value as 'kg' | 'pounds')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DRY_FOOD_BAG_UNITS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {errors.bagWeight && <ErrorText>{errors.bagWeight.message}</ErrorText>}
       </div>
+
+      <input type="hidden" {...register('bagWeightUnit')} />
 
       <div className="space-y-2">
         <Label htmlFor="dailyAmount">Daily Amount (grams)</Label>
+        <div className="relative">
         <Input
           id="dailyAmount"
           type="number"
-          step="0.01"
+          step="1"
           placeholder="e.g., 120"
+          className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('dailyAmount')}
           aria-invalid={!!errors.dailyAmount}
         />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+            grams
+          </span>
         {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
+      </div>
       </div>
 
       <div className="space-y-2">

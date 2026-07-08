@@ -23,5 +23,24 @@ export const formatWeight = (value: number, decimals: number = 2): string => {
   return value.toFixed(decimals).replace(/\.?0+$/, '');
 };
 
-// Future: food unit conversions (oz/grams, pounds)
-// export const convertFoodWeight = (amount: number, fromUnit: FoodWeightUnit, toUnit: FoodWeightUnit): number => { ... }
+// Food weight conversion (kg/lbs for dry food bags, grams/oz for wet food + dry daily amount)
+// Converts through grams as a common anchor
+export type FoodWeightUnit = 'kg' | 'lbs' | 'grams' | 'oz';
+
+const GRAMS_PER_UNIT: Record<FoodWeightUnit, number> = {
+  grams: 1,
+  kg: 1000,
+  lbs: 453.592,
+  oz: 28.3495,
+};
+
+export const convertFoodWeight = (
+  amount: number,
+  fromUnit: FoodWeightUnit,
+  toUnit: FoodWeightUnit
+): number => {
+  if (fromUnit === toUnit) return amount;
+
+  const amountInGrams = amount * GRAMS_PER_UNIT[fromUnit];
+  return amountInGrams / GRAMS_PER_UNIT[toUnit];
+};

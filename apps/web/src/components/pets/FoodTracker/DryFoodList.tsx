@@ -31,6 +31,7 @@ import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/t
 import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { convertFoodWeight } from '@/lib/validations/pet';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
@@ -70,8 +71,9 @@ export function DryFoodList({
   // const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
   const [markingFinishedEntry, setMarkingFinishedEntry] = useState<DryFoodEntry | null>(null);
 
-  const { dateTimeLocale } = usePreferencesContext();
+  const { dateTimeLocale, units } = usePreferencesContext();
   const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
 
   const handleUpdate = async (data: DryFoodFormData) => {
     if (!editingEntry) return null;
@@ -173,13 +175,16 @@ export function DryFoodList({
                     </div>
                   </div>
                   <div className="flex flex-wrap @min-[280px]:flex-nowrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-muted-foreground min-w-0">
-                      <span className="flex items-center gap-1 shrink-0">
+                  <span className="flex items-center gap-1 shrink-0">
                         <Weight className="h-4 w-4" />
-                        <span>{entry.bagWeight} <FoodUnitLabel unit={entry.bagWeightUnit}/></span>
+                        <span>
+                          {formatFoodQuantity(convertFoodWeight(parseFloat(entry.bagWeight), 'grams', bagWeightUnit).toString())}{' '} 
+                          <FoodUnitLabel unit={bagWeightUnit} />
+                        </span>
                       </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Utensils className="h-4 w-4" />
-                        <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit={entry.dryDailyAmountUnit} />/day </span>
+                        <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit="grams" />/day </span>
                       </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Calendar className="h-4 w-4" />
@@ -190,9 +195,11 @@ export function DryFoodList({
                 <CardContent>
                 <div className="grid grid-cols-2 @min-[320px]:grid-cols-3 gap-6 @min-[480px]:gap-4 mb-4">
                 <div>
-                      <StatLabel>~Remaining</StatLabel>
-                      <StatValue>{formatRemainingWeight(entry.remainingWeight)} {entry.bagWeightUnit}</StatValue>
-                    </div>
+                  <StatLabel>~Remaining</StatLabel>
+                      <StatValue>
+                        {formatRemainingWeight(convertFoodWeight(entry.remainingWeight, 'grams', bagWeightUnit))} <FoodUnitLabel unit={bagWeightUnit} />
+                      </StatValue>
+                     </div>
                     <div>
                       <StatLabel>~Days Left</StatLabel>
                       <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>
@@ -245,15 +252,7 @@ export function DryFoodList({
       >
         {editingEntry && (
           <DryFoodForm
-            initialData={{
-              brandName: editingEntry.brandName || '',
-              productName: editingEntry.productName || '',
-              bagWeight: editingEntry.bagWeight,
-              bagWeightUnit: editingEntry.bagWeightUnit,
-              dailyAmount: editingEntry.dailyAmount,
-              dryDailyAmountUnit: editingEntry.dryDailyAmountUnit,
-              dateStarted: editingEntry.dateStarted,
-            }}
+            dryFoodEntry={editingEntry}
             onSubmit={handleUpdate}
             isLoading={isLoading}
             submitLabel="Update Dry Food"

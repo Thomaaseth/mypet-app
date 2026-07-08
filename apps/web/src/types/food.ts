@@ -1,16 +1,18 @@
+// DryFoodFormData/WetFoodFormData are the single source of truth from the shared Zod schema
+export type { DryFoodFormData, WetFoodFormData } from '@/shared/validations/food';
+
+
 export type FoodType = 'dry' | 'wet';
 
-// Separate, clean types
+// Separate, clean types mirrors the API's DryFoodEntry/WetFoodEntry
 export type DryFoodEntry = {
   id: string;
   petId: string;
   foodType: 'dry';
   brandName: string | null;
   productName: string | null;
-  bagWeight: string;
-  bagWeightUnit: 'kg' | 'pounds';
-  dailyAmount: string;
-  dryDailyAmountUnit: 'grams';
+  bagWeight: string; // canonical grams
+  dailyAmount: string; // canonical grams
   dateStarted: string;
   dateFinished: string | null;
   isActive: boolean;
@@ -20,8 +22,6 @@ export type DryFoodEntry = {
   // Wet food fields (null for dry)
   numberOfUnits: null;
   weightPerUnit: null;
-  wetWeightUnit: null;
-  wetDailyAmountUnit: null;
   
   // Calculated fields for active entries
   remainingDays?: number;
@@ -43,10 +43,8 @@ export type WetFoodEntry = {
   brandName: string | null;
   productName: string | null;
   numberOfUnits: number;
-  weightPerUnit: string;
-  wetWeightUnit: 'grams' | 'oz';
-  dailyAmount: string;
-  wetDailyAmountUnit: 'grams' | 'oz';
+  weightPerUnit: string; // canonical grams
+  dailyAmount: string; // canonical grams
   dateStarted: string;
   dateFinished: string | null;
   isActive: boolean;
@@ -55,9 +53,7 @@ export type WetFoodEntry = {
   
   // Dry food fields (null for wet)
   bagWeight: null;
-  bagWeightUnit: null;
-  dryDailyAmountUnit: null;
-  
+
   // Calculated fields for active entries
   remainingDays?: number;
   remainingWeight?: number;
@@ -71,28 +67,3 @@ export type WetFoodEntry = {
   feedingStatus?: 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 };
 
-export type DryFoodFormData = {
-  brandName?: string;
-  productName?: string;
-  bagWeight: string;
-  bagWeightUnit: 'kg' | 'pounds';
-  dailyAmount: string;
-  dryDailyAmountUnit: 'grams';
-  dateStarted: string;
-};
-
-export type WetFoodFormData = {
-  brandName?: string;
-  productName?: string;
-  numberOfUnits: string; // String for form input
-  weightPerUnit: string;
-  wetWeightUnit: 'grams' | 'oz';
-  dailyAmount: string;
-  wetDailyAmountUnit: 'grams' | 'oz';
-  dateStarted: string;
-};
-
-// Unit labels
-export const DRY_FOOD_BAG_UNITS = ['kg', 'pounds'] as const;
-export const DRY_FOOD_DAILY_UNITS = ['grams'] as const;
-export const WET_FOOD_UNITS = ['grams', 'oz'] as const;

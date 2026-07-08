@@ -8,11 +8,6 @@ const FEEDING_TOLERANCE_PERCENTAGE = 5;
 const TOLERANCE_BUFFER = 0.5;
 const WARNING_THRESHOLD = 7;
 
-// Unit conversion constants
-const GRAMS_PER_KG = 1000;
-const GRAMS_PER_LB = 453.592;
-const GRAMS_PER_OZ = 28.3495;
-
 export class FoodCalculations {
   static calculateDryFoodRemaining(entry: DryFoodEntry, today: string): { 
     remainingDays: number; 
@@ -22,27 +17,14 @@ export class FoodCalculations {
     // Day 1 logic: dateStarted = first day of consumption
     const daysElapsed = diffCalendarDays(entry.dateStarted, today) + 1;
     
-    // Convert bag weight to grams for calculation
-    let bagWeightInGrams = parseFloat(entry.bagWeight);
-    if (entry.bagWeightUnit === 'kg') {
-      bagWeightInGrams *= GRAMS_PER_KG;
-    } else if (entry.bagWeightUnit === 'pounds') {
-      bagWeightInGrams *= GRAMS_PER_LB;
-    }
-    
+    const bagWeightInGrams = parseFloat(entry.bagWeight);
     const dailyAmountInGrams = parseFloat(entry.dailyAmount);
-    
+        
     const foodConsumedInGrams = Math.max(0, daysElapsed * dailyAmountInGrams);
     const remainingWeightInGrams = Math.max(0, bagWeightInGrams - foodConsumedInGrams);
     
-    // Convert back to original bag weight unit for display
-    let remainingWeight = remainingWeightInGrams;
-    if (entry.bagWeightUnit === 'kg') {
-      remainingWeight = remainingWeightInGrams / GRAMS_PER_KG;
-    } else if (entry.bagWeightUnit === 'pounds') {
-      remainingWeight = remainingWeightInGrams / GRAMS_PER_LB;
-    }
-    
+    const remainingWeight = remainingWeightInGrams;
+
     const remainingDays = dailyAmountInGrams > 0 
       ? Math.floor(remainingWeightInGrams / dailyAmountInGrams) 
       : 0;    
@@ -70,27 +52,13 @@ export class FoodCalculations {
     // Day 1 logic: dateStarted counts as first day of consumption
     const daysElapsed = diffCalendarDays(entry.dateStarted, today) + 1;
 
-
-    // Convert total weight to grams for calculation
-    let totalWeightInGrams = entry.numberOfUnits * parseFloat(entry.weightPerUnit);
-    if (entry.wetWeightUnit === 'oz') {
-      totalWeightInGrams *= GRAMS_PER_OZ;
-    }
-
-    // Convert daily amount to grams for calculation
-    let dailyAmountInGrams = parseFloat(entry.dailyAmount);
-    if (entry.wetDailyAmountUnit === 'oz') {
-      dailyAmountInGrams *= GRAMS_PER_OZ;
-    }
+    const totalWeightInGrams = entry.numberOfUnits * parseFloat(entry.weightPerUnit);
+    const dailyAmountInGrams = parseFloat(entry.dailyAmount);
     
     const foodConsumedInGrams = Math.max(0, daysElapsed * dailyAmountInGrams);
     const remainingWeightInGrams = Math.max(0, totalWeightInGrams - foodConsumedInGrams);
     
-    // Convert back to original weight unit for display
-    let remainingWeight = remainingWeightInGrams;
-    if (entry.wetWeightUnit === 'oz') {
-      remainingWeight = remainingWeightInGrams / GRAMS_PER_OZ;
-    }
+    const remainingWeight = remainingWeightInGrams;
     
     const remainingDays = dailyAmountInGrams > 0 
     ? Math.floor(remainingWeightInGrams / dailyAmountInGrams) 
@@ -133,25 +101,14 @@ export class FoodCalculations {
     // Both start and end dates are INCLUSIVE (day 1 = dateStarted, last day = dateFinished)
     const actualDaysElapsed = diffCalendarDays(entry.dateStarted, entry.dateFinished) + 1;
 
-    // Calculate total weight in grams based on food type
     let totalWeightInGrams: number;
-    
+
     if (entry.foodType === 'dry') {
       const dryEntry = entry as DryFoodEntry;
       totalWeightInGrams = parseFloat(dryEntry.bagWeight);
-      
-      if (dryEntry.bagWeightUnit === 'kg') {
-        totalWeightInGrams *= GRAMS_PER_KG;
-      } else if (dryEntry.bagWeightUnit === 'pounds') {
-        totalWeightInGrams *= GRAMS_PER_LB;
-      }
     } else {
       const wetEntry = entry as WetFoodEntry;
       totalWeightInGrams = wetEntry.numberOfUnits * parseFloat(wetEntry.weightPerUnit);
-      
-      if (wetEntry.wetWeightUnit === 'oz') {
-        totalWeightInGrams *= GRAMS_PER_OZ;
-      }
     }
     
     // Calculate actual daily consumption in grams
@@ -159,14 +116,6 @@ export class FoodCalculations {
     
     // Get expected daily consumption and convert to grams
     let expectedDailyInGrams = parseFloat(entry.dailyAmount);
-    
-    // Only wet food needs conversion from oz to grams
-    if (entry.foodType === 'wet') {
-      const wetEntry = entry as WetFoodEntry;
-      if (wetEntry.wetDailyAmountUnit === 'oz') {
-        expectedDailyInGrams *= GRAMS_PER_OZ;
-      }
-    }
     
     // Calculate variance percentage
     const variancePercentage = 

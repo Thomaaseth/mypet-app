@@ -71,7 +71,7 @@ export class FoodService {
       }
     }
 
-  async getFinishedDryFoodEntries(petId: string, limit: number = 10): Promise<DryFoodEntry[]> {
+  async getFinishedDryFoodEntries(petId: string, limit: number = 50): Promise<DryFoodEntry[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getFinishedDryFoodEntries(petId, limit);
@@ -125,7 +125,7 @@ export class FoodService {
     }
   }
 
-  async getFinishedWetFoodEntries(petId: string, limit: number = 10): Promise<WetFoodEntry[]> {
+  async getFinishedWetFoodEntries(petId: string, limit: number = 50): Promise<WetFoodEntry[]> {
     try {
       this.validator.validatePetId(petId);
       return await this.repository.getFinishedWetFoodEntries(petId, limit);

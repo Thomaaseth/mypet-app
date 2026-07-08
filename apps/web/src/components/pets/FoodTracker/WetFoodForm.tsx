@@ -1,61 +1,37 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { z } from 'zod';
+import { useWetFoodForm } from '@/hooks/useWetFoodForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import type { WetFoodFormData } from '@/types/food';
-import { WET_FOOD_UNITS, WetFoodEntry } from '@/types/food';
+import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { wetFoodSchema } from '@/lib/validations/food';
 import { ErrorText } from '@/components/ui/typography';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
+import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 
 interface WetFoodFormProps {
-  initialData?: Partial<WetFoodFormData>;
+  wetFoodEntry?: WetFoodEntry; // If provided, we're editing
   onSubmit: (data: WetFoodFormData) => Promise<WetFoodEntry | null>;
   isLoading?: boolean;
   submitLabel?: string;
 }
 
-type WetFoodFormValues = z.infer<typeof wetFoodSchema>;
-
-
 export function WetFoodForm({ 
-  initialData, 
+  wetFoodEntry,
   onSubmit, 
   isLoading = false,
   submitLabel = 'Add Wet Food'
 }: WetFoodFormProps) {
+  const { units } = usePreferencesContext();
+  const wetFoodUnit = units?.wetFoodUnit ?? 'grams';
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     formState: { errors },
-  } = useForm<WetFoodFormValues>({
-    resolver: zodResolver(wetFoodSchema),
-    shouldFocusError: false,
-    defaultValues: {
-      brandName: initialData?.brandName ?? '',
-      productName: initialData?.productName ?? '',
-      numberOfUnits: initialData?.numberOfUnits ?? '',
-      weightPerUnit: initialData?.weightPerUnit ?? '',
-      wetWeightUnit: initialData?.wetWeightUnit ?? 'grams',
-      dailyAmount: initialData?.dailyAmount ?? '',
-      wetDailyAmountUnit: initialData?.wetDailyAmountUnit ?? 'grams',
-      dateStarted: initialData?.dateStarted ?? getTodayDateString(),
-    },
-  });
+  } = useWetFoodForm({ wetFoodEntry });
 
-  const onFormSubmit = async (data: WetFoodFormValues) => {
+  const onFormSubmit = async (data: WetFoodFormData) => {
     await onSubmit(data);
   };
   
@@ -66,11 +42,6 @@ export function WetFoodForm({
     watchedUnits && watchedWeightPerUnit
       ? parseInt(watchedUnits) * parseFloat(watchedWeightPerUnit)
       : 0;
-
-  // Calculate total weight for display
-  // const totalWeight = formData.numberOfUnits && formData.weightPerUnit 
-  //   ? parseInt(formData.numberOfUnits) * parseFloat(formData.weightPerUnit)
-  //   : 0;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
@@ -107,88 +78,63 @@ export function WetFoodForm({
           min="1"
           step="1"
           placeholder="e.g., 12"
+          className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('numberOfUnits')}
         />
         {errors.numberOfUnits && <ErrorText>{errors.numberOfUnits.message}</ErrorText>}
       </div>
 
       {/* Weight Per Unit */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="weightPerUnit">Weight Per Unit</Label>
+      <div className="space-y-2">
+        <Label htmlFor="weightPerUnit">Weight Per Unit</Label>
+        <div className="relative">
           <Input
             id="weightPerUnit"
             type="number"
-            step="0.1"
+            step="1"
             placeholder="e.g., 85"
+            className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             {...register('weightPerUnit')}
             aria-invalid={!!errors.weightPerUnit}
           />
-          {errors.weightPerUnit && <ErrorText>{errors.weightPerUnit.message}</ErrorText>}
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+            {wetFoodUnit}
+          </span>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="wetWeightUnit">Unit</Label>
-          <Select
-            value={watch('wetWeightUnit')}
-            onValueChange={(value) => setValue('wetWeightUnit', value as 'grams' | 'oz')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {WET_FOOD_UNITS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {errors.weightPerUnit && <ErrorText>{errors.weightPerUnit.message}</ErrorText>}
       </div>
-
 
       {/* Total Weight Display */}
       {totalWeight > 0 && (
         <div className="bg-blue-50 p-3 rounded-md">
           <p className="text-sm text-blue-800">
-            Total Weight: {totalWeight.toFixed(1)} {watch('wetWeightUnit')}
+            Total Weight: {totalWeight.toFixed(1)} {wetFoodUnit}
           </p>
         </div>
       )}
 
       {/* Daily Amount */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="dailyAmount">Daily Amount</Label>
-          <Input
-            id="dailyAmount"
-            type="number"
-            step="0.1"
-            placeholder="e.g., 85"
-            {...register('dailyAmount')}
-            aria-invalid={!!errors.dailyAmount}
-          />
+      <div className="space-y-2">
+        <Label htmlFor="dailyAmount">Daily Amount</Label>
+          <div className="relative">
+            <Input
+              id="dailyAmount"
+              type="number"
+              step="1"
+              placeholder="e.g., 85"
+              className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              {...register('dailyAmount')}
+              aria-invalid={!!errors.dailyAmount}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
+              {wetFoodUnit}
+            </span>
+          </div>
           {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="wetDailyAmountUnit">Unit</Label>
-          <Select
-            value={watch('wetDailyAmountUnit')}
-            onValueChange={(value) => setValue('wetDailyAmountUnit', value as 'grams' | 'oz')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {WET_FOOD_UNITS.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {unit}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      
+      {/* Wet food unit, hidden, derived from user preferences*/}
+      <input type="hidden" {...register('wetFoodUnit')} />
 
       {/* Date Started */}
       <div className="space-y-2">
