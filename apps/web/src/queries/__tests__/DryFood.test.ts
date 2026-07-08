@@ -83,10 +83,8 @@ describe('Dry Food Queries', () => {
                   foodType: 'dry',
                   brandName: 'Brand A',
                   productName: 'Product A',
-                  bagWeight: '2.0',
-                  bagWeightUnit: 'kg',
+                  bagWeight: '2000.00', // 2.0 kg
                   dailyAmount: '100',
-                  dryDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: null,
                   isActive: true,
@@ -96,8 +94,6 @@ describe('Dry Food Queries', () => {
                   updatedAt: '2024-01-01T00:00:00.000Z',
                   numberOfUnits: null,
                   weightPerUnit: null,
-                  wetWeightUnit: null,
-                  wetDailyAmountUnit: null,
                 },
                 {
                   id: 'dry-2',
@@ -105,10 +101,8 @@ describe('Dry Food Queries', () => {
                   foodType: 'dry',
                   brandName: 'Brand B',
                   productName: 'Product B',
-                  bagWeight: '3.0',
-                  bagWeightUnit: 'kg',
+                  bagWeight: '3000.00',
                   dailyAmount: '100',
-                  dryDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-15',
                   dateFinished: null,
                   isActive: true,
@@ -118,8 +112,6 @@ describe('Dry Food Queries', () => {
                   updatedAt: '2024-01-15T00:00:00.000Z',
                   numberOfUnits: null,
                   weightPerUnit: null,
-                  wetWeightUnit: null,
-                  wetDailyAmountUnit: null,
                 },
               ],
               total: 2,
@@ -158,10 +150,8 @@ describe('Dry Food Queries', () => {
                   foodType: 'dry',
                   brandName: 'Brand A',
                   productName: 'Product A',
-                  bagWeight: '2.0',
-                  bagWeightUnit: 'kg',
+                  bagWeight: '2000.00',
                   dailyAmount: '100',
-                  dryDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: null,
                   isActive: true,
@@ -171,8 +161,6 @@ describe('Dry Food Queries', () => {
                   updatedAt: '2024-01-01T00:00:00.000Z',
                   numberOfUnits: null,
                   weightPerUnit: null,
-                  wetWeightUnit: null,
-                  wetDailyAmountUnit: null,
                 },
               ],
               total: 1,
@@ -206,10 +194,8 @@ describe('Dry Food Queries', () => {
                   foodType: 'dry',
                   brandName: 'Brand A',
                   productName: 'Product A',
-                  bagWeight: '2.0',
-                  bagWeightUnit: 'kg',
+                  bagWeight: '2000.00',
                   dailyAmount: '100',
-                  dryDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: null,
                   isActive: true,
@@ -219,8 +205,6 @@ describe('Dry Food Queries', () => {
                   updatedAt: '2024-01-01T00:00:00.000Z',
                   numberOfUnits: null,
                   weightPerUnit: null,
-                  wetWeightUnit: null,
-                  wetDailyAmountUnit: null,
                 },
               ],
               total: 1,
@@ -328,10 +312,8 @@ describe('Dry Food Queries', () => {
                   foodType: 'dry',
                   brandName: 'Brand A',
                   productName: 'Product A',
-                  bagWeight: '2.0',
-                  bagWeightUnit: 'kg',
+                  bagWeight: '2000.00',
                   dailyAmount: '100',
-                  dryDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: '2024-01-15', // Older
                   isActive: false,
@@ -339,8 +321,6 @@ describe('Dry Food Queries', () => {
                   updatedAt: '2024-01-15T00:00:00.000Z',
                   numberOfUnits: null,
                   weightPerUnit: null,
-                  wetWeightUnit: null,
-                  wetDailyAmountUnit: null,
                 },
                 {
                   id: 'dry-2',
@@ -348,10 +328,8 @@ describe('Dry Food Queries', () => {
                   foodType: 'dry',
                   brandName: 'Brand B',
                   productName: 'Product B',
-                  bagWeight: '3.0',
-                  bagWeightUnit: 'kg',
+                  bagWeight: '3000.00',
                   dailyAmount: '100',
-                  dryDailyAmountUnit: 'grams',
                   dateStarted: '2024-02-01',
                   dateFinished: '2024-02-25', // More recent
                   isActive: false,
@@ -359,8 +337,6 @@ describe('Dry Food Queries', () => {
                   updatedAt: '2024-02-25T00:00:00.000Z',
                   numberOfUnits: null,
                   weightPerUnit: null,
-                  wetWeightUnit: null,
-                  wetDailyAmountUnit: null,
                 },
               ],
               total: 2,
@@ -472,7 +448,6 @@ describe('Dry Food Queries', () => {
         bagWeight: '2.5',
         bagWeightUnit: 'kg',
         dailyAmount: '120',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -496,7 +471,6 @@ describe('Dry Food Queries', () => {
         bagWeight: '2.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -507,7 +481,7 @@ describe('Dry Food Queries', () => {
       });
     });
 
-    it('should accept pounds as bagWeightUnit', async () => {
+    it('should accept lbs as bagWeightUnit', async () => {
       const { result } = renderHookWithQuery(() => 
         useCreateDryFood(TEST_PET_ID)
       );
@@ -516,9 +490,8 @@ describe('Dry Food Queries', () => {
         brandName: 'Brand',
         productName: 'Product',
         bagWeight: '5.0',
-        bagWeightUnit: 'pounds',
+        bagWeightUnit: 'lbs',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -550,7 +523,6 @@ describe('Dry Food Queries', () => {
         bagWeight: '-1',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -580,7 +552,6 @@ describe('Dry Food Queries', () => {
         bagWeight: '2.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -935,7 +906,6 @@ describe('Dry Food Queries', () => {
         bagWeight: '2.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -999,7 +969,6 @@ describe('Dry Food Queries', () => {
         bagWeight: '2.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 

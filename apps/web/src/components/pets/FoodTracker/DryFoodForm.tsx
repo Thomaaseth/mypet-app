@@ -81,7 +81,7 @@ export function DryFoodForm({
       <input type="hidden" {...register('bagWeightUnit')} />
 
       <div className="space-y-2">
-        <Label htmlFor="dailyAmount">Daily Amount (grams)</Label>
+        <Label htmlFor="dailyAmount">Daily Amount in grams</Label>
         <div className="relative">
         <Input
           id="dailyAmount"

@@ -182,7 +182,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                     <span className="flex items-center gap-1 shrink-0">
                       <Package className="h-4 w-4" />
                       <span>
-                        {entry.numberOfUnits} x {formatFoodQuantity(convertFoodWeight(parseFloat(entry.weightPerUnit), 'grams', wetFoodUnit).toString())} <FoodUnitLabel unit={wetFoodUnit} />
+                        {entry.numberOfUnits}x{formatFoodQuantity(convertFoodWeight(parseFloat(entry.weightPerUnit), 'grams', wetFoodUnit).toString())} <FoodUnitLabel unit={wetFoodUnit} />
                       </span>
                       </span>
                     <span className="flex items-center gap-1 shrink-0">

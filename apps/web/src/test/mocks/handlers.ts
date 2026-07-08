@@ -2,12 +2,12 @@
 import { http, HttpResponse } from 'msw';
 import type { Pet } from '@/types/pet';
 import type { WeightEntry } from '@/types/weights';
-import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
+import type { DryFoodEntry, WetFoodEntry, DryFoodFormData, WetFoodFormData } from '@/types/food';
 import { getApiUrl } from '@/lib/env';
 import type { WeightTarget } from '@/types/weight-targets';
 import type { Veterinarian } from '@/types/veterinarian';
 import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
-import PetList from '@/components/pets/PetList';
+import { convertFoodWeight } from '@/shared/utils/units';
 
 
 
@@ -215,10 +215,8 @@ export const mockActiveDryFood: DryFoodEntry[] = [
     foodType: 'dry',
     brandName: 'Royal Canin',
     productName: 'Persian Adult',
-    bagWeight: '2.0',
-    bagWeightUnit: 'kg',
+    bagWeight: '2000.00', // 2kg
     dailyAmount: '100',
-    dryDailyAmountUnit: 'grams',
     dateStarted: '2024-01-01',
     dateFinished: null,
     isActive: true,
@@ -229,8 +227,6 @@ export const mockActiveDryFood: DryFoodEntry[] = [
     updatedAt: '2024-01-01T00:00:00.000Z',
     numberOfUnits: null,
     weightPerUnit: null,
-    wetWeightUnit: null,
-    wetDailyAmountUnit: null,
   },
   {
     id: 'dry-2',
@@ -238,10 +234,8 @@ export const mockActiveDryFood: DryFoodEntry[] = [
     foodType: 'dry',
     brandName: 'Hills',
     productName: 'Science Diet',
-    bagWeight: '3.0',
-    bagWeightUnit: 'kg',
+    bagWeight: '3000.0', // 3kg
     dailyAmount: '120',
-    dryDailyAmountUnit: 'grams',
     dateStarted: '2024-01-15',
     dateFinished: null,
     isActive: true,
@@ -252,8 +246,6 @@ export const mockActiveDryFood: DryFoodEntry[] = [
     updatedAt: '2024-01-15T00:00:00.000Z',
     numberOfUnits: null,
     weightPerUnit: null,
-    wetWeightUnit: null,
-    wetDailyAmountUnit: null,
   },
 ];
 
@@ -264,10 +256,8 @@ export const mockFinishedDryFood: DryFoodEntry[] = [
     foodType: 'dry',
     brandName: 'Purina',
     productName: 'Pro Plan',
-    bagWeight: '2.5',
-    bagWeightUnit: 'kg',
+    bagWeight: '2500.00', // 2.5kg
     dailyAmount: '123',
-    dryDailyAmountUnit: 'grams',
     dateStarted: '2024-01-01',
     dateFinished: '2024-01-23',
     isActive: false,
@@ -280,8 +270,6 @@ export const mockFinishedDryFood: DryFoodEntry[] = [
     updatedAt: '2023-12-23T00:00:00.000Z',
     numberOfUnits: null,
     weightPerUnit: null,
-    wetWeightUnit: null,
-    wetDailyAmountUnit: null,
   },
 ];
 
@@ -302,9 +290,7 @@ export const mockActiveWetFood: WetFoodEntry[] = [
     productName: 'Classic Pate',
     numberOfUnits: 12,
     weightPerUnit: '85',
-    wetWeightUnit: 'grams',
     dailyAmount: '170',
-    wetDailyAmountUnit: 'grams',
     dateStarted: '2024-01-01',
     dateFinished: null,
     isActive: true,
@@ -314,8 +300,6 @@ export const mockActiveWetFood: WetFoodEntry[] = [
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     bagWeight: null,
-    bagWeightUnit: null,
-    dryDailyAmountUnit: null,
   },
   {
     id: 'wet-2',
@@ -325,9 +309,7 @@ export const mockActiveWetFood: WetFoodEntry[] = [
     productName: 'Perfect Portions',
     numberOfUnits: 24,
     weightPerUnit: '37.5',
-    wetWeightUnit: 'grams',
     dailyAmount: '150',
-    wetDailyAmountUnit: 'grams',
     dateStarted: '2024-01-15',
     dateFinished: null,
     isActive: true,
@@ -337,8 +319,6 @@ export const mockActiveWetFood: WetFoodEntry[] = [
     createdAt: '2024-01-15T00:00:00.000Z',
     updatedAt: '2024-01-15T00:00:00.000Z',
     bagWeight: null,
-    bagWeightUnit: null,
-    dryDailyAmountUnit: null,
   },
 ];
 
@@ -351,9 +331,7 @@ export const mockFinishedWetFood: WetFoodEntry[] = [
     productName: 'Pouch',
     numberOfUnits: 12,
     weightPerUnit: '85',
-    wetWeightUnit: 'grams',
     dailyAmount: '50', // Adjusted: 1020g / 19 days = 53.68 g/day, variance = 7.36% → slightly-over
-    wetDailyAmountUnit: 'grams',
     dateStarted: '2024-01-01',
     dateFinished: '2024-01-23',
     isActive: false,
@@ -365,10 +343,9 @@ export const mockFinishedWetFood: WetFoodEntry[] = [
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-23T00:00:00.000Z',
     bagWeight: null,
-    bagWeightUnit: null,
-    dryDailyAmountUnit: null,
   },
 ];
+
 
 let activeWetFoodList = [...mockActiveWetFood];
 let finishedWetFoodList = [...mockFinishedWetFood];
@@ -745,10 +722,25 @@ const dryFoodHandlers = [
     
     console.log('🔵 MSW: Intercepted POST /pets/:petId/food/dry', { petId, body });
 
+    const formData = body as DryFoodFormData;
+    // bagWeight arrives in display units (kg/lbs) + bagWeightUnit — convert to
+    // canonical grams before storing, matching what the real FoodService does.
+    // bagWeightUnit itself is never stored.
+    const bagWeightGrams = convertFoodWeight(
+      parseFloat(formData.bagWeight),
+      formData.bagWeightUnit,
+      'grams'
+    );
+
     const newEntry: DryFoodEntry = {
       id: `dry-${Date.now()}`,
       petId: petId as string,
       foodType: 'dry',
+      brandName: formData.brandName || null,
+      productName: formData.productName || null,
+      bagWeight: bagWeightGrams.toFixed(2),
+      dailyAmount: formData.dailyAmount,
+      dateStarted: formData.dateStarted,
       dateFinished: null,
       isActive: true,
       remainingDays: 20,
@@ -758,10 +750,7 @@ const dryFoodHandlers = [
       updatedAt: new Date().toISOString(),
       numberOfUnits: null,
       weightPerUnit: null,
-      wetWeightUnit: null,
-      wetDailyAmountUnit: null,
-      ...(body as Partial<DryFoodEntry>),
-    } as DryFoodEntry;
+    };
 
     activeDryFoodList.push(newEntry);
 
@@ -950,7 +939,7 @@ const dryFoodHandlers = [
       const finishDate = new Date(newDateFinished);
       const actualDaysElapsed = Math.ceil((finishDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
       
-      const bagWeightGrams = parseFloat(entry.bagWeight) * (entry.bagWeightUnit === 'kg' ? 1000 : 453.592);
+      const bagWeightGrams = parseFloat(entry.bagWeight); // already canonical grams
       const expectedDailyConsumption = parseFloat(entry.dailyAmount);
       const actualDailyConsumption = bagWeightGrams / actualDaysElapsed;
       const variancePercentage = ((actualDailyConsumption - expectedDailyConsumption) / expectedDailyConsumption) * 100;
@@ -1087,10 +1076,30 @@ const wetFoodHandlers = [
     
     console.log('🔵 MSW: Intercepted POST /pets/:petId/food/wet', { petId, body });
 
+    const formData = body as WetFoodFormData;
+    // weightPerUnit and dailyAmount arrive in display units (grams/oz) + wetFoodUnit —
+    // convert both to canonical grams before storing. wetFoodUnit itself is never stored.
+    const weightPerUnitGrams = convertFoodWeight(
+      parseFloat(formData.weightPerUnit),
+      formData.wetFoodUnit,
+      'grams'
+    );
+    const dailyAmountGrams = convertFoodWeight(
+      parseFloat(formData.dailyAmount),
+      formData.wetFoodUnit,
+      'grams'
+    );
+
     const newEntry: WetFoodEntry = {
       id: `wet-${Date.now()}`,
       petId: petId as string,
       foodType: 'wet',
+      brandName: formData.brandName || null,
+      productName: formData.productName || null,
+      numberOfUnits: parseInt(formData.numberOfUnits, 10),
+      weightPerUnit: weightPerUnitGrams.toFixed(2),
+      dailyAmount: dailyAmountGrams.toFixed(2),
+      dateStarted: formData.dateStarted,
       dateFinished: null,
       isActive: true,
       remainingDays: 6,
@@ -1099,10 +1108,7 @@ const wetFoodHandlers = [
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       bagWeight: null,
-      bagWeightUnit: null,
-      dryDailyAmountUnit: null,
-      ...(body as Partial<WetFoodEntry>),
-    } as WetFoodEntry;
+    };
 
     activeWetFoodList.push(newEntry);
 

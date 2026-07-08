@@ -81,9 +81,7 @@ describe('Wet Food Queries', () => {
                   productName: 'Product A',
                   numberOfUnits: 12,
                   weightPerUnit: '85',
-                  wetWeightUnit: 'grams',
                   dailyAmount: '170',
-                  wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: null,
                   isActive: true,
@@ -92,8 +90,6 @@ describe('Wet Food Queries', () => {
                   createdAt: '2024-01-01T00:00:00.000Z',
                   updatedAt: '2024-01-01T00:00:00.000Z',
                   bagWeight: null,
-                  bagWeightUnit: null,
-                  dryDailyAmountUnit: null,
                 },
                 {
                   id: 'wet-2',
@@ -103,9 +99,7 @@ describe('Wet Food Queries', () => {
                   productName: 'Product B',
                   numberOfUnits: 24,
                   weightPerUnit: '85',
-                  wetWeightUnit: 'grams',
                   dailyAmount: '170',
-                  wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-15',
                   dateFinished: null,
                   isActive: true,
@@ -114,8 +108,6 @@ describe('Wet Food Queries', () => {
                   createdAt: '2024-01-15T00:00:00.000Z',
                   updatedAt: '2024-01-15T00:00:00.000Z',
                   bagWeight: null,
-                  bagWeightUnit: null,
-                  dryDailyAmountUnit: null,
                 },
               ],
               total: 2,
@@ -156,9 +148,7 @@ describe('Wet Food Queries', () => {
                   productName: 'Product A',
                   numberOfUnits: 12,
                   weightPerUnit: '85',
-                  wetWeightUnit: 'grams',
                   dailyAmount: '170',
-                  wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: null,
                   isActive: true,
@@ -167,8 +157,6 @@ describe('Wet Food Queries', () => {
                   createdAt: '2024-01-01T00:00:00.000Z',
                   updatedAt: '2024-01-01T00:00:00.000Z',
                   bagWeight: null,
-                  bagWeightUnit: null,
-                  dryDailyAmountUnit: null,
                 },
               ],
               total: 1,
@@ -204,7 +192,6 @@ describe('Wet Food Queries', () => {
                   productName: 'Product A',
                   numberOfUnits: 12,
                   weightPerUnit: '85',
-                  wetWeightUnit: 'grams',
                   dailyAmount: '170',
                   wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
@@ -215,8 +202,6 @@ describe('Wet Food Queries', () => {
                   createdAt: '2024-01-01T00:00:00.000Z',
                   updatedAt: '2024-01-01T00:00:00.000Z',
                   bagWeight: null,
-                  bagWeightUnit: null,
-                  dryDailyAmountUnit: null,
                 },
               ],
               total: 1,
@@ -325,17 +310,13 @@ describe('Wet Food Queries', () => {
                   productName: 'Product A',
                   numberOfUnits: 12,
                   weightPerUnit: '85',
-                  wetWeightUnit: 'grams',
                   dailyAmount: '170',
-                  wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: '2024-01-15',
                   isActive: false,
                   createdAt: '2024-01-01T00:00:00.000Z',
                   updatedAt: '2024-01-15T00:00:00.000Z',
                   bagWeight: null,
-                  bagWeightUnit: null,
-                  dryDailyAmountUnit: null,
                 },
                 {
                   id: 'wet-2',
@@ -345,17 +326,13 @@ describe('Wet Food Queries', () => {
                   productName: 'Product B',
                   numberOfUnits: 24,
                   weightPerUnit: '85',
-                  wetWeightUnit: 'grams',
                   dailyAmount: '170',
-                  wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-02-01',
                   dateFinished: '2024-02-25',
                   isActive: false,
                   createdAt: '2024-02-01T00:00:00.000Z',
                   updatedAt: '2024-02-25T00:00:00.000Z',
                   bagWeight: null,
-                  bagWeightUnit: null,
-                  dryDailyAmountUnit: null,
                 },
               ],
               total: 2,
@@ -460,9 +437,8 @@ describe('Wet Food Queries', () => {
         productName: 'New Product',
         numberOfUnits: '12',
         weightPerUnit: '100',
-        wetWeightUnit: 'grams',
         dailyAmount: '200',
-        wetDailyAmountUnit: 'grams',
+        wetFoodUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -484,9 +460,8 @@ describe('Wet Food Queries', () => {
       const dataWithoutBrand: WetFoodFormData = {
         numberOfUnits: '12',
         weightPerUnit: '85',
-        wetWeightUnit: 'grams',
         dailyAmount: '170',
-        wetDailyAmountUnit: 'grams',
+        wetFoodUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -497,7 +472,7 @@ describe('Wet Food Queries', () => {
       });
     });
 
-    it('should accept oz as wetWeightUnit', async () => {
+    it('should accept oz as wetFoodUnit', async () => {
       const { result } = renderHookWithQuery(() => 
         useCreateWetFood(TEST_PET_ID)
       );
@@ -507,9 +482,8 @@ describe('Wet Food Queries', () => {
         productName: 'Product',
         numberOfUnits: '24',
         weightPerUnit: '3',
-        wetWeightUnit: 'oz',
         dailyAmount: '6',
-        wetDailyAmountUnit: 'oz',
+        wetFoodUnit: 'oz',
         dateStarted: '2024-03-01',
       };
 
@@ -540,9 +514,8 @@ describe('Wet Food Queries', () => {
       const invalidData: WetFoodFormData = {
         numberOfUnits: '-1',
         weightPerUnit: '85',
-        wetWeightUnit: 'grams',
         dailyAmount: '170',
-        wetDailyAmountUnit: 'grams',
+        wetFoodUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -571,9 +544,8 @@ describe('Wet Food Queries', () => {
       const validData: WetFoodFormData = {
         numberOfUnits: '12',
         weightPerUnit: '85',
-        wetWeightUnit: 'grams',
         dailyAmount: '170',
-        wetDailyAmountUnit: 'grams',
+        wetFoodUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -602,6 +574,7 @@ describe('Wet Food Queries', () => {
 
       const updateData: Partial<WetFoodFormData> = {
         dailyAmount: '200',
+        wetFoodUnit: 'grams',
       };
 
       await mutationResult.current.mutateAsync({ foodId, foodData: updateData });
@@ -653,7 +626,7 @@ describe('Wet Food Queries', () => {
       await expect(
         result.current.mutateAsync({ 
           foodId: 'non-existent', 
-          foodData: { dailyAmount: '170' } 
+          foodData: { dailyAmount: '170', wetFoodUnit: 'grams' } 
         })
       ).rejects.toThrow();
     });
@@ -908,9 +881,8 @@ describe('Wet Food Queries', () => {
       const newFoodData: WetFoodFormData = {
         numberOfUnits: '12',
         weightPerUnit: '85',
-        wetWeightUnit: 'grams',
         dailyAmount: '170',
-        wetDailyAmountUnit: 'grams',
+        wetFoodUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 
@@ -969,9 +941,8 @@ describe('Wet Food Queries', () => {
       const newFoodData: WetFoodFormData = {
         numberOfUnits: '12',
         weightPerUnit: '85',
-        wetWeightUnit: 'grams',
         dailyAmount: '170',
-        wetDailyAmountUnit: 'grams',
+        wetFoodUnit: 'grams',
         dateStarted: '2024-03-01',
       };
 

@@ -65,7 +65,9 @@ export function formatFeedingStatusMessage(
   if (entry.actualDailyConsumption) {
     // actualDailyConsumption is canonical grams — convert to the caller's display unit.
     const avgInDisplayUnit = convertFoodWeight(entry.actualDailyConsumption, 'grams', dailyAmountUnit);
-    const avg = dailyAmountUnit === 'oz' ? avgInDisplayUnit.toFixed(2) : avgInDisplayUnit.toFixed(1);
+    // const avg = dailyAmountUnit === 'oz' ? avgInDisplayUnit.toFixed(2) : avgInDisplayUnit.toFixed(1);
+    const avg = formatRemainingWeight(avgInDisplayUnit);
+
     const shortUnit = dailyAmountUnit === 'grams' ? 'g' : dailyAmountUnit;
     return `${statusLabel} • ${avg}${shortUnit}/day`;
   }

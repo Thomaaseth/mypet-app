@@ -41,6 +41,7 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { FoodUnitLabel } from './FoodUnitLabel';
 import { convertFoodWeight } from '@/lib/validations/pet';
+import { formatRemainingWeight } from '@/lib/utils/food-formatting';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -148,7 +149,7 @@ export function FoodHistorySection({
                       <>
                         <span className="flex items-center gap-1">
                           <Package className="h-3 w-3" />
-                          {convertFoodWeight(parseFloat((entry as DryFoodEntry).bagWeight), 'grams', bagWeightUnit).toFixed(1)} <FoodUnitLabel unit={bagWeightUnit} />
+                          {formatRemainingWeight(convertFoodWeight(parseFloat((entry as DryFoodEntry).bagWeight), 'grams', bagWeightUnit))} <FoodUnitLabel unit={bagWeightUnit} />
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
@@ -159,11 +160,11 @@ export function FoodHistorySection({
                       <>
                         <span className="flex items-center gap-1">
                           <Package className="h-3 w-3" />
-                          {(entry as WetFoodEntry).numberOfUnits} × {convertFoodWeight(parseFloat((entry as WetFoodEntry).weightPerUnit), 'grams', dailyAmountUnit).toFixed(1)} <FoodUnitLabel unit={dailyAmountUnit} />
+                          {(entry as WetFoodEntry).numberOfUnits}×{formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).weightPerUnit), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
-                          {convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit).toFixed(1)} <FoodUnitLabel unit={dailyAmountUnit} />/day
+                          {formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />/day
                         </span>
                       </>
                     )}
