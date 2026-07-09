@@ -49,10 +49,16 @@ async function getCroppedImageAsFile(imageSrc: string, croppedAreaPixels: Area, 
         reject(new Error('Canvas to blob failed'));
         return;
       }
-      // Output in WebP
-      resolve(new File([blob], `${fileName}.webp`, { type: 'image/webp'}))
+      // Note: we request 'image/jpeg' below, but some browsers can still
+      // fall back to a different type if the requested one isn't supported
+      // (see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob).
+      // Trust blob.type — the format actually produced — rather than assuming
+      // the request succeeded. The backend converts to WebP server-side, so
+      // any browser-supported raster type reaching it is fine.
+      const extension = blob.type.split('/')[1] ?? 'jpg';
+      resolve(new File([blob], `${fileName}.${extension}`, { type: blob.type }));
     },
-    'image/webp',
+    'image/jpeg',
     0.92, // 92% quality
     );
   });
