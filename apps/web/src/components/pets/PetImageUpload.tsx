@@ -51,7 +51,6 @@ async function getCroppedImageAsFile(imageSrc: string, croppedAreaPixels: Area, 
       }
       // Note: we request 'image/jpeg' below, but some browsers can still
       // fall back to a different type if the requested one isn't supported
-      // (see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob).
       // Trust blob.type — the format actually produced — rather than assuming
       // the request succeeded. The backend converts to WebP server-side, so
       // any browser-supported raster type reaching it is fine.
@@ -119,8 +118,8 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
 
     // validate size
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      const maxMB = MAX_FILE_SIZE_BYTES / (1024 * 1024);
-      setClientError(`File is too large. Maximum size is ${maxMB}MB.`);
+      // const maxMB = MAX_FILE_SIZE_BYTES / (1024 * 1024);
+      setClientError('Your photo is too large for upload, please try a smaller image, or take a screenshot of it first and retry.');
       return;
     }
 

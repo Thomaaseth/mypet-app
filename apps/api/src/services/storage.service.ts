@@ -87,8 +87,8 @@ import {
 
         // Validate size
         if (file.byteLength > MAX_FILE_SIZE_BYTES) {
-            const maxMB = MAX_FILE_SIZE_BYTES / (1024 * 1024);
-            throw new BadRequestError(`File size exceeds the ${maxMB}MB limit`);
+            // const maxMB = MAX_FILE_SIZE_BYTES / (1024 * 1024);
+            throw new BadRequestError('Your photo is too large for upload, please try a smaller image, or take a screenshot of it first and retry.');
         }
 
         // Validate Magic bytes
