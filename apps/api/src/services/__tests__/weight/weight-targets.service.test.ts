@@ -5,8 +5,8 @@ import { db } from '../../../db';
 import * as schema from '../../../db/schema'
 import { eq } from 'drizzle-orm';
 import { BadRequestError, NotFoundError } from '../../../middleware/errors';
-import type { WeightTargetFormData } from '../../../db/schema/weight-targets';
 import { DatabaseTestUtils } from '../../../test/database-test-utils';
+import type { WeightTargetFormData } from '@/shared/validations/weight';
 
 describe('WeightTargetsService', () => {
     let testUserId: string;
@@ -59,7 +59,6 @@ describe('WeightTargetsService', () => {
             petId: testPetId,
             minWeight: '4.0',
             maxWeight: '6.0',
-            weightUnit: 'kg',
           })
           .returning();
   
@@ -74,7 +73,6 @@ describe('WeightTargetsService', () => {
         expect(result.petId).toBe(testPetId);
         expect(parseFloat(result.minWeight)).toBe(4.0);
         expect(parseFloat(result.maxWeight)).toBe(6.0);
-        expect(result?.weightUnit).toBe('kg');
       });
   
       it('should return null when target does not exist', async () => {
@@ -91,7 +89,6 @@ describe('WeightTargetsService', () => {
           petId: otherPetId,
           minWeight: '10.0',
           maxWeight: '15.0',
-          weightUnit: 'kg',
         });
   
         // Act & Assert
@@ -130,7 +127,6 @@ describe('WeightTargetsService', () => {
           expect(result.petId).toBe(testPetId);
           expect(parseFloat(result.minWeight)).toBe(4.0);
           expect(parseFloat(result.maxWeight)).toBe(6.0);
-          expect(result.weightUnit).toBe('kg');
           expect(result.createdAt).toBeDefined();
           expect(result.updatedAt).toBeDefined();
   
@@ -157,11 +153,13 @@ describe('WeightTargetsService', () => {
             testUserId,
             targetData
           );
+
+          expect(result).toBeDefined();
   
           // Assert
-          expect(result.weightUnit).toBe('lbs');
-          expect(parseFloat(result.minWeight)).toBe(10.0);
-          expect(parseFloat(result.maxWeight)).toBe(15.0);
+          expect(result.minWeight).toBe('4.54'); // 10.0 lbs → 4.54 kg
+          expect(result.maxWeight).toBe('6.80'); // 15.0 lbs → 6.80 kg
+        
         });
   
         it('should accept decimal values', async () => {
@@ -192,7 +190,6 @@ describe('WeightTargetsService', () => {
             petId: testPetId,
             minWeight: '4.0',
             maxWeight: '6.0',
-            weightUnit: 'kg',
           });
   
           const updatedData: WeightTargetFormData = {
@@ -228,7 +225,6 @@ describe('WeightTargetsService', () => {
               petId: testPetId,
               minWeight: '4.0',
               maxWeight: '6.0',
-              weightUnit: 'kg',
             })
             .returning();
         
@@ -268,33 +264,30 @@ describe('WeightTargetsService', () => {
           expect(parseFloat(dbRecord.maxWeight)).toBe(6.5);
         });
   
-        it('should allow changing weight unit', async () => {
-          // Arrange: Create target in kg
+        it('should convert to canonical kg when updating with different unit', async () => {
+          // Arrange: Create target in kg (direct insert, no conversion)
           await db.insert(schema.weightTargets).values({
             petId: testPetId,
             minWeight: '4.0',
             maxWeight: '6.0',
-            weightUnit: 'kg',
           });
-  
-          // Update to lbs
+        
+          // Update with lbs values
           const updatedData: WeightTargetFormData = {
             minWeight: '10.0',
             maxWeight: '15.0',
             weightUnit: 'lbs',
           };
-  
-          // Act
+        
           const result = await WeightTargetsService.upsertWeightTarget(
             testPetId,
             testUserId,
             updatedData
           );
-  
-          // Assert
-          expect(result.weightUnit).toBe('lbs');
-          expect(parseFloat(result.minWeight)).toBe(10.0);
-          expect(parseFloat(result.maxWeight)).toBe(15.0);
+        
+          // Stored as canonical kg
+          expect(result.minWeight).toBe('4.54'); // 10.0 lbs → 4.54 kg
+          expect(result.maxWeight).toBe('6.80'); // 15.0 lbs → 6.80 kg
         });
       });
   
@@ -357,20 +350,6 @@ describe('WeightTargetsService', () => {
           ).rejects.toThrow(BadRequestError);
         });
   
-        it('should throw BadRequestError when weightUnit is missing', async () => {
-          // Arrange
-          const targetData = {
-            minWeight: '4.0',
-            maxWeight: '6.0',
-            weightUnit: '',
-          } as unknown as WeightTargetFormData;
-  
-          // Act & Assert
-          await expect(
-            WeightTargetsService.upsertWeightTarget(testPetId, testUserId, targetData)
-          ).rejects.toThrow(BadRequestError);
-        });
-  
         it('should throw BadRequestError when min >= max', async () => {
           // Arrange
           const targetData: WeightTargetFormData = {
@@ -389,7 +368,6 @@ describe('WeightTargetsService', () => {
         });
   
         it('should throw BadRequestError when min equals max', async () => {
-          // Arrange
           const targetData: WeightTargetFormData = {
             minWeight: '5.0',
             maxWeight: '5.0',
@@ -591,7 +569,6 @@ describe('WeightTargetsService', () => {
           petId: testPetId,
           minWeight: '4.0',
           maxWeight: '6.0',
-          weightUnit: 'kg',
         });
   
         // Verify target exists
@@ -628,7 +605,6 @@ describe('WeightTargetsService', () => {
           petId: otherPetId,
           minWeight: '10.0',
           maxWeight: '15.0',
-          weightUnit: 'kg',
         });
   
         // Act & Assert

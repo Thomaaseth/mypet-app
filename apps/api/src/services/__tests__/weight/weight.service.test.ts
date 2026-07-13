@@ -6,8 +6,8 @@ import { BadRequestError, NotFoundError } from '../../../middleware/errors';
 import { WeightEntriesService } from '../../weight-entries.service';
 import { db } from '../../../db';
 import { setupUserAndPet } from './helpers/setup';
-import { makeWeightEntryData, makeMultipleWeightEntries, makeInvalidWeightData } from './helpers/factories';
-import type { WeightEntry, NewWeightEntry, WeightEntryFormData } from '../../../db/schema/weight-entries';
+import { makeWeightEntryData, makeMultipleWeightEntries, makeInvalidWeightData, makeWeightEntryDbValues } from './helpers/factories';
+import type { WeightFormData } from '@/shared/validations/weight';
 
 describe('WeightEntriesService', () => {
     describe('getWeightEntries', () => {
@@ -21,7 +21,6 @@ describe('WeightEntriesService', () => {
         const result = await WeightEntriesService.getWeightEntries(testPet.id, primary.id);
   
         expect(result.weightEntries).toHaveLength(2);
-        expect(result.weightUnit).toBe('kg');
         expect(result.weightEntries[0].date).toBe('2024-01-15');
         expect(result.weightEntries[1].date).toBe('2024-01-16');
       });
@@ -32,7 +31,6 @@ describe('WeightEntriesService', () => {
         const result = await WeightEntriesService.getWeightEntries(testPet.id, primary.id);
   
         expect(result.weightEntries).toEqual([]);
-        expect(result.weightUnit).toBe('kg');
       });
   
       it('should throw NotFoundError when pet belongs to different user', async () => {
@@ -54,16 +52,14 @@ describe('WeightEntriesService', () => {
       it('should return specific weight entry when found', async () => {
         const { primary, testPet } = await setupUserAndPet();
         
-        const [entry] = await db.insert(schema.weightEntries).values({
-          ...makeWeightEntryData(),
-          petId: testPet.id,
-        }).returning();
+        const [entry] = await db.insert(schema.weightEntries).values(
+          makeWeightEntryDbValues(testPet.id)
+        ).returning();
   
         const result = await WeightEntriesService.getWeightEntryById(testPet.id, entry.id, primary.id);
   
         expect(result.id).toBe(entry.id);
-        expect(result.weight).toBe('5.50');
-        expect(result.weightUnit).toBe('kg');
+        expect(result.weight).toBe('5.500');
         expect(result.date).toBe('2024-01-15');
         expect(result.petId).toBe(testPet.id);
       });
@@ -86,10 +82,9 @@ describe('WeightEntriesService', () => {
           isActive: true,
         }).returning();
         
-        const [entry] = await db.insert(schema.weightEntries).values({
-          ...makeWeightEntryData(),
-          petId: otherUserPet.id,
-        }).returning();
+        const [entry] = await db.insert(schema.weightEntries).values(
+          makeWeightEntryDbValues(otherUserPet.id)
+        ).returning();
   
         await expect(
           WeightEntriesService.getWeightEntryById(otherUserPet.id, entry.id, primary.id)
@@ -107,8 +102,7 @@ describe('WeightEntriesService', () => {
           makeWeightEntryData()
         );
   
-        expect(result.weight).toBe('5.50');
-        expect(result.weightUnit).toBe('kg');
+        expect(result.weight).toBe('5.500');
         expect(result.date).toBe('2024-01-15');
         expect(result.petId).toBe(testPet.id);
         expect(result.id).toBeDefined();
@@ -122,8 +116,8 @@ describe('WeightEntriesService', () => {
       it('should throw BadRequestError when required fields are missing', async () => {
         const { primary, testPet } = await setupUserAndPet();
         
-        const missingWeight = { date: '2024-01-15' } as WeightEntryFormData;
-        const missingDate = { weight: '5.50' } as WeightEntryFormData;
+        const missingWeight = { date: '2024-01-15', weightUnit: 'kg' as const } as WeightFormData;
+        const missingDate = { weight: '5.50', weightUnit: 'kg' as const } as WeightFormData;
   
         await expect(
           WeightEntriesService.createWeightEntry(testPet.id, primary.id, missingWeight)
@@ -219,6 +213,7 @@ describe('WeightEntriesService', () => {
   
         const updateData = {
           weight: '6.00',
+          weightUnit: 'kg' as const,
           date: '2024-01-20',
         };
   
@@ -226,7 +221,7 @@ describe('WeightEntriesService', () => {
           testPet.id, created.id, primary.id, updateData
         );
   
-        expect(result.weight).toBe('6.00');
+        expect(result.weight).toBe('6.000');
         expect(result.date).toBe('2024-01-20');
       });
   
@@ -239,14 +234,14 @@ describe('WeightEntriesService', () => {
           makeWeightEntryData()
         );
   
-        const updateData = { weight: '6.25' };
+        const updateData = { weight: '6.25', weightUnit: 'kg' as const };
   
         const result = await WeightEntriesService.updateWeightEntry(
           testPet.id, created.id, primary.id, updateData
         );
   
-        expect(result.weight).toBe('6.25');
-        expect(result.date).toBe('2024-01-15'); // Unchanged
+        expect(result.weight).toBe('6.250');
+        expect(result.date).toBe('2024-01-15');
       });
   
       it('should throw BadRequestError for invalid weight values', async () => {
@@ -258,10 +253,11 @@ describe('WeightEntriesService', () => {
           makeWeightEntryData()
         );
   
+        // "should throw BadRequestError for invalid weight values"
         const invalidUpdates = [
-          { weight: 'invalid' },
-          { weight: '0' },
-          { weight: '-1.5' },
+          { weight: 'invalid', weightUnit: 'kg' as const },
+          { weight: '0', weightUnit: 'kg' as const },
+          { weight: '-1.5', weightUnit: 'kg' as const },
         ];
   
         for (const updateData of invalidUpdates) {
@@ -294,10 +290,10 @@ describe('WeightEntriesService', () => {
           isActive: true,
         }).returning();
         
-        const [entry] = await db.insert(schema.weightEntries).values({
-          ...makeWeightEntryData(),
-          petId: otherUserPet.id,
-        }).returning();
+        const [entry] = await db.insert(schema.weightEntries).values(
+          makeWeightEntryDbValues(otherUserPet.id)
+        ).returning();
+        
   
         const updateData = { weight: '6.00' };
   
@@ -369,10 +365,9 @@ describe('WeightEntriesService', () => {
           isActive: true,
         }).returning();
         
-        const [entry] = await db.insert(schema.weightEntries).values({
-          ...makeWeightEntryData(),
-          petId: otherUserPet.id,
-        }).returning();
+        const [entry] = await db.insert(schema.weightEntries).values(
+          makeWeightEntryDbValues(otherUserPet.id)
+        ).returning();
   
         await expect(
           WeightEntriesService.deleteWeightEntry(otherUserPet.id, entry.id, primary.id)
@@ -450,9 +445,13 @@ describe('WeightEntriesService', () => {
   
         const result = await WeightEntriesService.getWeightEntries(testPet.id, primary.id);
   
-        expect(result.weightUnit).toBe('lbs');
-        expect(result.weightEntries[0].weightUnit).toBe('kg');
-        expect(result.weightEntries[1].weightUnit).toBe('lbs');
+        expect(result.weightEntries).toHaveLength(2);
+        // Both stored in canonical kg regardless of input unit
+        expect(result.weightEntries[0].weight).toBe('5.500'); // 5.50kg → stored as-is
+        expect(parseFloat(result.weightEntries[1].weight)).toBeCloseTo(5.556, 2); // 12.25lbs → ~5.556kg
+        // No weightUnit on entries
+        expect(result.weightEntries[0]).not.toHaveProperty('weightUnit');
+        expect(result.weightEntries[1]).not.toHaveProperty('weightUnit');
       });
     });
   
@@ -488,11 +487,11 @@ describe('WeightEntriesService', () => {
         // Unrealistic weights should fail
         await expect(
           WeightEntriesService.createWeightEntry(cat.id, primary.id, makeWeightEntryData({ weight: '50.0', date: '2024-01-16' }))
-        ).rejects.toThrow('Weight 50kg is outside realistic range for cat');
+        ).rejects.toThrow('Weight is outside realistic range for cat (0.05-15kg)');
           
         await expect(
           WeightEntriesService.createWeightEntry(dog.id, primary.id, makeWeightEntryData({ weight: '150.0', date: '2024-01-16' }))
-        ).rejects.toThrow('Weight 150kg is outside realistic range for dog');
+        ).rejects.toThrow('Weight is outside realistic range for dog (0.5-90kg)');
       });
   
       it('should prevent duplicate entries for same date', async () => {
@@ -519,11 +518,11 @@ describe('WeightEntriesService', () => {
         // 35 lbs is about 16kg exceeds cat limit of 15kg
         await expect(
           WeightEntriesService.createWeightEntry(
-            lbsPet.id, 
-            primary.id, 
+            lbsPet.id,
+            primary.id,
             makeWeightEntryData({ weight: '35', weightUnit: 'lbs' })
           )
-        ).rejects.toThrow('Weight 35lbs is outside realistic range for cat');
+        ).rejects.toThrow('Weight is outside realistic range for cat (0.05-15kg)');
       });
     });
   
@@ -541,7 +540,7 @@ describe('WeightEntriesService', () => {
             testPet.id, 
             'invalid-id', 
             primary.id, 
-            { weight: '6.00' }
+            { weight: '6.00', weightUnit: 'kg' as const }
           )
         ).rejects.toThrow('Invalid weight entry ID format');
   

@@ -1,23 +1,46 @@
 import { randomUUID } from 'crypto';
-import type { WeightEntryFormData } from '../../../../db/schema/weight-entries';
+import type { WeightFormData } from '@/shared/validations/weight';
+import type { NewWeightEntry } from '../../../../db/schema/weight-entries';
 
+
+// service calls, includes weightUnit for server side conversion
 export function makeWeightEntryData(
-  overrides: Partial<WeightEntryFormData> = {}
-): WeightEntryFormData {
+  overrides: Partial<WeightFormData> = {}
+): WeightFormData {
   return {
     weight: '5.50',
-    weightUnit: 'kg' as const,
+    weightUnit: 'kg',
     date: '2024-01-15',
     ...overrides,
   };
 }
 
-export function makeWeightEntry(overrides: Partial<any> = {}) {
+// direct DB inserts, no weightUnit, canonical kg values only
+export function makeWeightEntryDbValues(
+  petId: string,
+  overrides: Partial<Omit<NewWeightEntry, 'id' | 'petId' | 'createdAt' | 'updatedAt'>> = {}
+): Omit<NewWeightEntry, 'id' | 'createdAt' | 'updatedAt'> {
+  return {
+    petId,
+    weight: '5.500',
+    date: '2024-01-15',
+    ...overrides,
+  };
+}
+
+// mock WeightEntry object for unit tests
+export function makeWeightEntry(overrides: Partial<{
+  id: string;
+  petId: string;
+  weight: string;
+  date: string;
+  createdAt: Date;
+  updatedAt: Date;
+}> = {}) {
   return {
     id: randomUUID(),
     petId: randomUUID(),
-    weight: '5.50',
-    weightUnit: 'kg',
+    weight: '5.500',
     date: '2024-01-15',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -36,16 +59,16 @@ export function makeInvalidWeightData(
   };  
 }
 
+// direct DB inserts of multiple entries
 export function makeMultipleWeightEntries(
   petId: string,
   count: number = 2,
-  baseOverrides: Partial<any> = {}
+  baseOverrides: Partial<Omit<NewWeightEntry, 'id' | 'petId' | 'createdAt' | 'updatedAt'>> = {}
 ) {
   return Array.from({ length: count }, (_, index) => ({
     petId,
-    weight: `${5.50 + (index * 0.25)}`, // 5.50, 5.75, 6.00, etc.
-    weightUnit: 'kg' as const,
-    date: `2024-01-${15 + index}`, // Sequential dates
+    weight: (5.50 + index * 0.25).toFixed(3), // '5.500', '5.750', etc.
+    date: `2024-01-${String(15 + index).padStart(2, '0')}`,
     ...baseOverrides,
   }));
 }

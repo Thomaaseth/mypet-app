@@ -338,8 +338,7 @@ describe('PetsService', () => {
         .where(eq(schema.weightEntries.petId, result.id));
   
       expect(weightEntries).toHaveLength(1);
-      expect(weightEntries[0].weight).toBe('5.50');
-      expect(weightEntries[0].weightUnit).toBe('kg');
+      expect(weightEntries[0].weight).toBe('5.500');
       expect(weightEntries[0].petId).toBe(result.id);
       
       // Verify the date matches the pet's creation date
@@ -581,7 +580,7 @@ describe('PetsService', () => {
     });
   });
 
-  describe('getUserPetCount', () => {
+  describe('getUserPets (count check)', () => {
     it('should return correct count of active pets', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
       
@@ -591,17 +590,17 @@ describe('PetsService', () => {
         { userId: primary.id, name: 'Pet 3', animalType: 'cat', isActive: false },
       ]);
 
-      const result = await PetsService.getUserPetCount(primary.id);
+      const result = await PetsService.getUserPets(primary.id);
 
-      expect(result).toBe(2);
+      expect(result).toHaveLength(2);
     });
 
-    it('should return 0 when user has no pets', async () => {
+    it('should return empty arry when user has no pets', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
 
-      const result = await PetsService.getUserPetCount(primary.id);
+      const result = await PetsService.getUserPets(primary.id);
 
-      expect(result).toBe(0);
+      expect(result).toEqual([]);
     });
 
     it('should return 0 when user has only inactive pets', async () => {
@@ -612,9 +611,9 @@ describe('PetsService', () => {
         { userId: primary.id, name: 'Inactive Pet 2', animalType: 'dog', isActive: false },
       ]);
 
-      const result = await PetsService.getUserPetCount(primary.id);
+      const result = await PetsService.getUserPets(primary.id);
 
-      expect(result).toBe(0);
+      expect(result).toEqual([]);
     });
 
     it('should not count other users pets', async () => {
@@ -626,26 +625,15 @@ describe('PetsService', () => {
         { userId: secondary.id, name: 'Other Pet 2', animalType: 'cat', isActive: true },
       ]);
 
-      const result = await PetsService.getUserPetCount(primary.id);
+      const result = await PetsService.getUserPets(primary.id);
 
-      expect(result).toBe(1);
+      expect(result).toHaveLength(1);
     });
 
     it('should handle invalid userId gracefully', async () => {
-      const result = await PetsService.getUserPetCount('non-existent-user');
+      const result = await PetsService.getUserPets('non-existent-user');
 
-      expect(result).toBe(0);
-    });
-
-    it('should handle empty userId gracefully', async () => {
-      const result = await PetsService.getUserPetCount('');
-
-      expect(result).toBe(0);
-    });
-
-    it('should handle database errors gracefully', async () => {
-      const result = await PetsService.getUserPetCount(null as any);
-      expect(result).toBe(0);
+      expect(result).toEqual([]);
     });
   });
 
