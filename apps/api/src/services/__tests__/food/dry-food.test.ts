@@ -13,7 +13,7 @@ describe('Dry Food Operations', () => {
     it('should create dry food entry with valid data', async () => {
       const { primary, testPet } = await setupUserAndPet();
       const result = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
-      expect(result.bagWeight).toBe('2.00');
+      expect(result.bagWeight).toBe('2000.00');
       expect(result.isActive).toBe(true);
     });
 
@@ -78,3 +78,31 @@ describe('Dry Food Operations', () => {
     });
   });
 });
+
+describe('createDryFoodEntry - unit conversion', () => {
+    it('should convert bagWeight from lbs to canonical grams on write', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      const result = await FoodService.createDryFoodEntry(
+        testPet.id,
+        primary.id,
+        makeDryFoodData({ bagWeight: '5', bagWeightUnit: 'lbs' })
+      );
+
+      // 5 lbs × 453.592 = 2267.96g
+      expect(result.bagWeight).toBe('2267.96');
+    });
+
+    it('should convert bagWeight from kg to canonical grams on write', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      const result = await FoodService.createDryFoodEntry(
+        testPet.id,
+        primary.id,
+        makeDryFoodData({ bagWeight: '3', bagWeightUnit: 'kg' })
+      );
+
+      // 3 kg × 1000 = 3000g
+      expect(result.bagWeight).toBe('3000.00');
+    });
+  });

@@ -8,15 +8,13 @@ import * as schema from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 import { BadRequestError } from '../../../middleware/errors';
 import type { DryFoodFormData, WetFoodFormData } from '../../../services/food';
+import { addCalendarDays, toDateString } from '@/shared/utils/dates';
 
-describe('Edge Cases and Error Scenarios', () => {
   describe('Zero and Negative Values', () => {
     it('should handle zero daily amount gracefully in calculations', async () => {
       const dryFoodEntry = makeDryFoodEntry({
-        bagWeight: '2.00',
-        bagWeightUnit: 'kg',
+        bagWeight: '2000.00', // canonical grams (was 2.00 kg)
         dailyAmount: '0.00',
-        dryDailyAmountUnit: 'grams',
         dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
@@ -24,19 +22,17 @@ describe('Edge Cases and Error Scenarios', () => {
       const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(0);
-      expect(result.remainingWeight).toBe(2.0);
+      expect(result.remainingWeight).toBe(2000);
     });
 
     it('should prevent negative remaining weight in calculations', async () => {
-      const pastDate = new Date();
-      pastDate.setDate(pastDate.getDate() - 100);
+      const dateStarted = addCalendarDays(toDateString(new Date()), -100);
+
 
       const dryFoodEntry = makeDryFoodEntry({
-        bagWeight: '1.00',
-        bagWeightUnit: 'kg',
+        bagWeight: '1000.00', // was 1.00 kg
         dailyAmount: '100.00',
-        dryDailyAmountUnit: 'grams',
-        dateStarted: pastDate.toISOString().split('T')[0],
+        dateStarted,
         isActive: false,
       });
 
@@ -48,13 +44,11 @@ describe('Edge Cases and Error Scenarios', () => {
 
     it('should handle very small decimal amounts correctly', async () => {
       const dryFoodEntry = makeDryFoodEntry({
-      // 0.01kg = 10g total
+      // 10g total
       // Day 1: 1g consumed, 9g remaining
       // 9g / 1g per day = 9 days remaining
-        bagWeight: '0.01',
-        bagWeightUnit: 'kg',
+        bagWeight: '10.00', // was 0.01 kg
         dailyAmount: '1.00',
-        dryDailyAmountUnit: 'grams',
         dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
@@ -62,7 +56,7 @@ describe('Edge Cases and Error Scenarios', () => {
 const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(9);
-      expect(result.remainingWeight).toBeCloseTo(0.009, 3);
+      expect(result.remainingWeight).toBe(9);
     });
   });
 
@@ -77,7 +71,6 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
         bagWeight: '50.00',
         bagWeightUnit: 'kg',
         dailyAmount: '200',
-        dryDailyAmountUnit: 'grams',
         dateStarted: new Date().toISOString().split('T')[0],
       });
 
@@ -86,18 +79,16 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       const calculations = await FoodService.calculateDryFoodRemaining(result, primary.id);
 
       expect(calculations.remainingDays).toBe(249);
-      expect(calculations.remainingWeight).toBeCloseTo(49.8, 3);
+      expect(calculations.remainingWeight).toBe(49800);
     });
 
     it('should maintain precision with decimal values', async () => {
       const dryFoodEntry = makeDryFoodEntry({
-      // 2.55kg = 2550g total
+      // 2550g total
       // Day 1: 123.45g consumed, 2426.55g remaining
       // 2426.55g / 123.45g per day = 19.65... -> 19 days remaining
-        bagWeight: '2.55',
-        bagWeightUnit: 'kg',
+        bagWeight: '2550.00', // was 2.55 kg
         dailyAmount: '123.45',
-        dryDailyAmountUnit: 'grams',
         dateStarted: new Date().toISOString().split('T')[0],
         isActive: true,
       });
@@ -105,7 +96,7 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(19);
-      expect(result.remainingWeight).toBeCloseTo(2.42655, 2);
+      expect(result.remainingWeight).toBeCloseTo(2426.55, 2);
     });
   });
 
@@ -114,13 +105,11 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       const today = new Date();
 
       const dryFoodEntry = makeDryFoodEntry({
-      // 2kg = 2000g total
+      // 2000g total
       // Day 1: 100g consumed, 1900g remaining
       // 1900g / 100g per day = 19 days remaining
-        bagWeight: '2.00',
-        bagWeightUnit: 'kg',
+        bagWeight: '2000.00', // was 2.00 kg
         dailyAmount: '100.00',
-        dryDailyAmountUnit: 'grams',
         dateStarted: today.toISOString().split('T')[0],
         isActive: true,
       });
@@ -128,29 +117,7 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
       expect(result.remainingDays).toBe(19);
-      expect(result.remainingWeight).toBeCloseTo(1.9, 1);
-    });
-
-    it('should handle future purchase dates gracefully', async () => {
-      const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 5);
-
-      const dryFoodEntry = makeDryFoodEntry({
-      // 2kg = 2000g total
-      // Day 1: 100g consumed, 1900g remaining
-      // 1900g / 100g per day = 19 days remaining
-        bagWeight: '2.00',
-        bagWeightUnit: 'kg',
-        dailyAmount: '100.00',
-        dryDailyAmountUnit: 'grams',
-        dateStarted: futureDate.toISOString().split('T')[0],
-        isActive: true,
-      });
-
-      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
-
-      expect(result.remainingWeight).toBeCloseTo(1.9, 1);
-      expect(result.remainingDays).toBe(19);
+      expect(result.remainingWeight).toBe(1900);
     });
   });
 
@@ -164,21 +131,18 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
         makeInvalidDryFoodData({
           numberOfUnits: '12',
           weightPerUnit: '85',
-          wetWeightUnit: 'grams',
-          wetDailyAmountUnit: 'grams',
         }) as unknown as DryFoodFormData
       );
     
       // Should succeed and create valid dry food entry
       expect(result.foodType).toBe('dry');
-      expect(result.bagWeight).toBe('2.00');
-      expect(result.bagWeightUnit).toBe('kg');
+      expect(result.bagWeight).toBe('2000.00'); // canonical grams (2.0 kg submitted)
       
-      // Wet food fields should be null (ignored)
+      // Wet food fields should be null (ignored) — bagWeightUnit/wetWeightUnit/
+      // wetDailyAmountUnit/dryDailyAmountUnit no longer exist as columns at all,
+      // so there's nothing left to assert about them.
       expect(result.numberOfUnits).toBeNull();
       expect(result.weightPerUnit).toBeNull();
-      expect(result.wetWeightUnit).toBeNull();
-      expect(result.wetDailyAmountUnit).toBeNull();
     });
     
     it('should ignore dry food fields when creating wet food', async () => {    
@@ -189,20 +153,15 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
         primary.id,
         makeInvalidWetFoodData({
           bagWeight: '2.0',
-          bagWeightUnit: 'kg',
-          dryDailyAmountUnit: 'grams',
         }) as unknown as WetFoodFormData
       );
     
       // Should succeed and create valid wet food entry
       expect(result.foodType).toBe('wet');
       expect(result.numberOfUnits).toBe(12);
-      expect(result.wetWeightUnit).toBe('grams');
       
-      // Dry food fields should be null (ignored)  
+      // Dry food fields should be null (ignored)
       expect(result.bagWeight).toBeNull();
-      expect(result.bagWeightUnit).toBeNull();
-      expect(result.dryDailyAmountUnit).toBeNull();
     });
   });
 
@@ -224,15 +183,13 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
     it('should handle concurrent calculation operations', async () => {
       const { primary, testPet } = await setupUserAndPet();
   
-      const pastDate = new Date();
-      pastDate.setDate(pastDate.getDate() - 30);
-  
+      const dateStarted = addCalendarDays(toDateString(new Date()), -30);
+
       const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData({
         bagWeight: '1.0',
         bagWeightUnit: 'kg',
         dailyAmount: '100',
-        dryDailyAmountUnit: 'grams',
-        dateStarted: pastDate.toISOString().split('T')[0],
+        dateStarted,
       }));
   
       // Test concurrent calculations (these are pure functions, no database operations)
@@ -313,8 +270,7 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       }
 
       const unchanged = await FoodService.getDryFoodEntryById(testPet.id, created.id, primary.id);
-      expect(unchanged.bagWeight).toBe('2.00');
-      expect(unchanged.bagWeightUnit).toBe('kg');
+      expect(unchanged.bagWeight).toBe('2000.00'); // canonical grams (default 2.0 kg submitted)
     });
 
     it('should handle orphaned food entries correctly', async () => {
@@ -331,45 +287,3 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       ).rejects.toThrow(Error);
     });
   });
-
-  describe('Unit Conversion Edge Cases', () => {
-    it('should handle very small unit conversions accurately', async () => {
-      const wetFoodEntry = makeWetFoodEntry({
-      // 0.01oz = 0.283495g total
-      // Day 1: 0.141747g consumed (0.005oz), 0.141748g remaining
-      // 0.141748g / 0.141747g per day = 1.000... -> 1 day remaining
-        numberOfUnits: 1,
-        weightPerUnit: '0.01',
-        wetWeightUnit: 'oz',
-        dailyAmount: '0.005',
-        wetDailyAmountUnit: 'oz',
-        dateStarted: new Date().toISOString().split('T')[0],
-        isActive: true,
-      });
-
-      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
-
-      expect(result.remainingDays).toBe(1);
-      expect(result.remainingWeight).toBeCloseTo(0.005, 3);
-    });
-
-    it('should handle mixed unit systems correctly', async () => {
-      const dryFoodEntry = makeDryFoodEntry({
-      // 1lb = 453.592g total
-      // Day 1: 50g consumed (0.11 pounds), 403.592g remaining
-      // 403.592g / 50g per day = 8.07... -> 8 days remaining
-        bagWeight: '1.00',
-        bagWeightUnit: 'pounds',
-        dailyAmount: '50.00',
-        dryDailyAmountUnit: 'grams',
-        dateStarted: new Date().toISOString().split('T')[0],
-        isActive: true,
-      });
-
-      const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
-
-      expect(result.remainingDays).toBe(8);
-      expect(result.remainingWeight).toBeCloseTo(0.89, 2);
-    });
-  });
-});

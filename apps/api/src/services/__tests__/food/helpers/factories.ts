@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import type { DryFoodFormData, WetFoodFormData } from '../../../food';
+import type { DryFoodEntry, WetFoodEntry } from '../../../../db/schema/food';
 
 export function makeDryFoodData(
     overrides: Partial<DryFoodFormData> = {}
@@ -10,7 +11,6 @@ export function makeDryFoodData(
     bagWeight: '2.0',
     bagWeightUnit: 'kg',
     dailyAmount: '100',
-    dryDailyAmountUnit: 'grams',
     dateStarted: '2024-01-01',
     ...overrides,
   };
@@ -25,7 +25,6 @@ export function makeInvalidDryFoodData(
       bagWeight: '2.0',
       bagWeightUnit: 'kg',
       dailyAmount: '100',
-      dryDailyAmountUnit: 'grams',
       dateStarted: '2024-01-01',
       ...overrides,
     };
@@ -39,9 +38,8 @@ export function makeWetFoodData(
     productName: 'Wet Food',
     numberOfUnits: '12',
     weightPerUnit: '85',
-    wetWeightUnit: 'grams',
+    wetFoodUnit: 'grams',
     dailyAmount: '170',
-    wetDailyAmountUnit: 'grams',
     dateStarted: '2024-01-01',
     ...overrides,
   };
@@ -55,7 +53,7 @@ export function makeInvalidWetFoodData(
       productName: 'Test Food', 
       numberOfUnits: '12',
       weightPerUnit: '85',
-      wetWeightUnit: 'grams',
+      wetFoodUnit: 'grams',
       dailyAmount: '170',
       wetDailyAmountUnit: 'grams',
       dateStarted: '2024-01-01',
@@ -64,16 +62,14 @@ export function makeInvalidWetFoodData(
   }
 
 export function makeDryFoodEntry(
-    overrides: Partial<any> = {}
-) {
+    overrides: Partial<DryFoodEntry> = {}
+): DryFoodEntry {
   return {
     id: randomUUID(),
     petId: randomUUID(),
-    foodType: 'dry' as const,
-    bagWeight: '2.00',
-    bagWeightUnit: 'kg' as const,
+    foodType: 'dry',
+    bagWeight: '2000.00',
     dailyAmount: '100.00',
-    dryDailyAmountUnit: 'grams' as const,
     dateStarted: new Date().toISOString().split('T')[0],
     dateFinished: null,
     isActive: true,
@@ -83,24 +79,20 @@ export function makeDryFoodEntry(
     productName: null,
     numberOfUnits: null,
     weightPerUnit: null,
-    wetWeightUnit: null,
-    wetDailyAmountUnit: null,
     ...overrides,
   };
 }
 
 export function makeWetFoodEntry(
-    overrides: Partial<any> = {}
-) {
+    overrides: Partial<WetFoodEntry> = {}
+): WetFoodEntry {
   return {
     id: randomUUID(),
     petId: randomUUID(),
-    foodType: 'wet' as const,
+    foodType: 'wet',
     numberOfUnits: 12,
     weightPerUnit: '85.00',
-    wetWeightUnit: 'grams' as const,
     dailyAmount: '170.00',
-    wetDailyAmountUnit: 'grams' as const,
     dateStarted: new Date().toISOString().split('T')[0],
     dateFinished: null,
     isActive: true,
@@ -109,8 +101,6 @@ export function makeWetFoodEntry(
     brandName: null,
     productName: null,
     bagWeight: null,
-    bagWeightUnit: null,
-    dryDailyAmountUnit: null,
     ...overrides,
   };
 }

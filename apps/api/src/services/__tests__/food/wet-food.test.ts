@@ -76,3 +76,33 @@ describe('Wet Food Operations', () => {
     });
   });
 });
+
+describe('createWetFoodEntry - unit conversion', () => {
+    it('should convert weightPerUnit and dailyAmount from oz to canonical grams on write', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      const result = await FoodService.createWetFoodEntry(
+        testPet.id,
+        primary.id,
+        makeWetFoodData({ weightPerUnit: '3', dailyAmount: '6', wetFoodUnit: 'oz' })
+      );
+
+      // 3oz × 28.3495 = 85.0485g
+      expect(result.weightPerUnit).toBe('85.05');
+      // 6oz × 28.3495 = 170.097g
+      expect(result.dailyAmount).toBe('170.10');
+    });
+
+    it('should keep weightPerUnit and dailyAmount unchanged when already grams', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      const result = await FoodService.createWetFoodEntry(
+        testPet.id,
+        primary.id,
+        makeWetFoodData({ weightPerUnit: '100', dailyAmount: '200', wetFoodUnit: 'grams' })
+      );
+
+      expect(result.weightPerUnit).toBe('100.00');
+      expect(result.dailyAmount).toBe('200.00');
+    });
+  });

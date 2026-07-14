@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';
+import { addCalendarDays, toDateString } from '@/shared/utils/dates';
 
 describe('getAllFoodEntries', () => {
   it('should return both dry and wet food entries', async () => {
@@ -58,15 +59,11 @@ describe('getAllFoodEntries', () => {
   it('should include both active and inactive entries', async () => {
     const { primary, testPet } = await setupUserAndPet();
   
-    const pastDate = new Date();
-    pastDate.setDate(pastDate.getDate() - 30);
-  
     const dryFood = await FoodService.createDryFoodEntry(testPet.id, primary.id, {
       bagWeight: '0.5',
       bagWeightUnit: 'kg',
       dailyAmount: '50',
-      dryDailyAmountUnit: 'grams',
-      dateStarted: pastDate.toISOString().split('T')[0],
+      dateStarted: addCalendarDays(toDateString(new Date()), -30),
     });
   
     // Explicitly mark the finished food as inactive
@@ -75,10 +72,9 @@ describe('getAllFoodEntries', () => {
     await FoodService.createWetFoodEntry(testPet.id, primary.id, {
       numberOfUnits: '12',
       weightPerUnit: '85',
-      wetWeightUnit: 'grams',
+      wetFoodUnit: 'grams',
       dailyAmount: '50',
-      wetDailyAmountUnit: 'grams',
-      dateStarted: new Date().toISOString().split('T')[0],
+      dateStarted: toDateString(new Date()),
     });
   
     const result = await FoodService.getAllFoodEntries(testPet.id, primary.id);

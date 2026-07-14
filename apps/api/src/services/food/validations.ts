@@ -36,10 +36,18 @@ export class FoodValidations {
       }
     }
 
-    if (data.bagWeight !== undefined && data.bagWeightUnit !== undefined) {
+    if (data.bagWeightUnit !== undefined && !['kg', 'lbs'].includes(data.bagWeightUnit)) {
+      throw new BadRequestError('Invalid bag weight unit for dry food. Must be kg or lbs');
+    }
+
+     if (data.bagWeight !== undefined) {
       const bagWeight = parseFloat(data.bagWeight);
       if (isNaN(bagWeight) || bagWeight <= 0) {
         throw new BadRequestError('Bag weight must be a positive number');
+      }
+
+      if (data.bagWeightUnit === undefined) {
+        throw new BadRequestError('Bag weight unit is required when updating bag weight');
       }
 
       const bagWeightInGrams = convertFoodWeight(bagWeight, data.bagWeightUnit, 'grams');
@@ -85,21 +93,26 @@ export class FoodValidations {
       }
     }
 
-    if (data.weightPerUnit !== undefined && data.wetFoodUnit !== undefined) {
+    if (data.weightPerUnit !== undefined) {
       const weightPerUnit = parseFloat(data.weightPerUnit);
       if (isNaN(weightPerUnit) || weightPerUnit <= 0) {
         throw new BadRequestError('Weight per unit must be a positive number');
+      }
+      if (data.wetFoodUnit === undefined) {
+        throw new BadRequestError('Weight unit is required when updating weight per unit');
       }
       const weightPerUnitInGrams = convertFoodWeight(weightPerUnit, data.wetFoodUnit, 'grams');
       if (weightPerUnitInGrams > 5000) {
         throw new BadRequestError('Weight per unit seems unreasonably large (max 5000 grams / 176.4oz)');
       }
     }
-
-    if (data.dailyAmount !== undefined && data.wetFoodUnit !== undefined) {
+    if (data.dailyAmount !== undefined) {
       const dailyAmount = parseFloat(data.dailyAmount);
       if (isNaN(dailyAmount) || dailyAmount <= 0) {
         throw new BadRequestError('Daily amount must be a positive number');
+      }
+      if (data.wetFoodUnit === undefined) {
+        throw new BadRequestError('Weight unit is required when updating daily amount');
       }
       const dailyAmountInGrams = convertFoodWeight(dailyAmount, data.wetFoodUnit, 'grams');
       if (dailyAmountInGrams > 2000) {
