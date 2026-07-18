@@ -3,6 +3,7 @@ import { FoodService, FoodCalculations } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';
 import { addCalendarDays, toDateString } from '@/shared/utils/dates';
+import { UserPreferencesService } from '../../user-preferences.service';
 
 describe('Feeding Status & Actual Consumption Calculations', () => {
   
@@ -373,5 +374,38 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
       expect(finished.variancePercentage).toBeLessThan(-7.5);
       expect(finished.feedingStatus).toBe('underfeeding');
     });
+  });
+});
+
+describe('Timezone-aware finish date', () => {
+  it('uses the stored user timezone, not server time, for dateFinished', async () => {
+    const { primary, testPet } = await setupUserAndPet();
+
+    await UserPreferencesService.upsertUserPreferences(primary.id, {
+      dateTimeLocale: 'en-US',
+      unitSystem: 'imperial',
+      timezone: 'Pacific/Kiritimati',
+    });
+
+    const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+    const serverUtcToday = toDateString(new Date());
+
+    if (usersToday === serverUtcToday) {
+      throw new Error(
+        'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+      );
+    }
+
+    const dryFoodData = makeDryFoodData({
+      bagWeight: '2.0',
+      bagWeightUnit: 'kg',
+      dailyAmount: '100',
+      dateStarted: addCalendarDays(usersToday, -19),
+    });
+
+    const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+    const finished = await FoodService.markFoodAsFinished(testPet.id, created.id, primary.id);
+
+    expect(finished.dateFinished).toBe(usersToday);
   });
 });

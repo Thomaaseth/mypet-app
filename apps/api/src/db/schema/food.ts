@@ -42,8 +42,8 @@ export const foodEntries = pgTable('food_entries', {
   dateFinished: date('date_finished'), 
 
   // TIMESTAMPS
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   // Database constraints
 dryFoodConstraint: check('dry_food_check', sql`

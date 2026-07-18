@@ -152,7 +152,7 @@ describe('VeterinariansService', () => {
 
     it('should throw BadRequestError when userId is invalid type', async () => {
       await expect(
-        VeterinariansService.getUserVeterinarians(null as any)
+        VeterinariansService.getUserVeterinarians(null as unknown as string)
       ).rejects.toThrow(BadRequestError);
     });
   });

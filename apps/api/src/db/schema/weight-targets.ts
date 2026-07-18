@@ -11,8 +11,8 @@ import {
     petId: uuid('pet_id').references(() => pets.id, { onDelete: 'cascade' }).notNull().unique(), // One target per pet
     minWeight: decimal('min_weight', { precision: 6, scale: 2 }).notNull(),
     maxWeight: decimal('max_weight', { precision: 6, scale: 2 }).notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   });
   
   // Types

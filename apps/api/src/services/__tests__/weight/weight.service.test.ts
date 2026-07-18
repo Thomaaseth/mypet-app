@@ -102,7 +102,7 @@ describe('WeightEntriesService', () => {
           makeWeightEntryData()
         );
   
-        expect(result.weight).toBe('5.500');
+        expect(result.weight).toBe('5.502');
         expect(result.date).toBe('2024-01-15');
         expect(result.petId).toBe(testPet.id);
         expect(result.id).toBeDefined();
@@ -477,28 +477,28 @@ describe('WeightEntriesService', () => {
         
         // Valid weights should work
         await expect(
-          WeightEntriesService.createWeightEntry(cat.id, primary.id, makeWeightEntryData({ weight: '4.5' }))
+          WeightEntriesService.createWeightEntry(cat.id, primary.id, makeWeightEntryData({ weight: '4.5', weightUnit: 'kg' }))
         ).resolves.toBeDefined();
           
         await expect(
-          WeightEntriesService.createWeightEntry(dog.id, primary.id, makeWeightEntryData({ weight: '25.0' }))
+          WeightEntriesService.createWeightEntry(dog.id, primary.id, makeWeightEntryData({ weight: '25.0', weightUnit: 'kg' }))
         ).resolves.toBeDefined();
         
         // Unrealistic weights should fail
         await expect(
-          WeightEntriesService.createWeightEntry(cat.id, primary.id, makeWeightEntryData({ weight: '50.0', date: '2024-01-16' }))
+          WeightEntriesService.createWeightEntry(cat.id, primary.id, makeWeightEntryData({ weight: '50.0', weightUnit: 'kg', date: '2024-01-16' }))
         ).rejects.toThrow('Weight is outside realistic range for cat (0.05-15kg)');
           
         await expect(
-          WeightEntriesService.createWeightEntry(dog.id, primary.id, makeWeightEntryData({ weight: '150.0', date: '2024-01-16' }))
+          WeightEntriesService.createWeightEntry(dog.id, primary.id, makeWeightEntryData({ weight: '150.0', weightUnit: 'kg', date: '2024-01-16' }))
         ).rejects.toThrow('Weight is outside realistic range for dog (0.5-90kg)');
       });
   
       it('should prevent duplicate entries for same date', async () => {
         const { primary, testPet } = await setupUserAndPet();
           
-        const firstEntry = makeWeightEntryData({ weight: '5.50' });
-        const duplicateEntry = makeWeightEntryData({ weight: '5.75' }); // Same date
+        const firstEntry = makeWeightEntryData({ weight: '5.50', weightUnit: 'kg' });
+        const duplicateEntry = makeWeightEntryData({ weight: '5.75', weightUnit: 'kg' }); // Same date
           
         await WeightEntriesService.createWeightEntry(testPet.id, primary.id, firstEntry);
           

@@ -13,8 +13,8 @@ export const petNotes = pgTable('pet_notes', {
     userId: text('user_id').references(() => user.id, { onDelete: 'cascade'}).notNull(),
     petId: uuid('pet_id').references(() => pets.id, { onDelete: 'cascade'}).notNull(),
     content: varchar('content', { length: 200 }).notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // types

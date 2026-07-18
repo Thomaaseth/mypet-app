@@ -65,7 +65,7 @@ export function DryFoodForm({
           <Input
             id="bagWeight"
             type="number"
-            step="1"
+            step="0.01"
             placeholder="e.g., 5.5"
             className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             {...register('bagWeight')}
@@ -86,7 +86,7 @@ export function DryFoodForm({
         <Input
           id="dailyAmount"
           type="number"
-          step="1"
+          step="0.01"
           placeholder="e.g., 120"
           className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('dailyAmount')}

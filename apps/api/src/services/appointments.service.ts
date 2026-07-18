@@ -65,7 +65,7 @@ export class AppointmentsService {
   // Input validation helper
   private static validateAppointmentInputs(
     appointmentData: Partial<AppointmentFormData>, 
-    today: string,
+    // today: string,
     isUpdate = false
   ): void {
     // Required fields for creation
@@ -93,10 +93,11 @@ export class AppointmentsService {
         throw new BadRequestError('Invalid date format');
       }
 
+    // REMOVED: LET USER FREE TO ENTER APPOINTMENTS IN THE PAST ON CREATE
     // For new appointments only, check if date is not in the past — per-user local "today"
-    if (!isUpdate && appointmentData.appointmentDate < today) {
-      throw new BadRequestError('Appointment date cannot be in the past');
-    }
+    // if (!isUpdate && appointmentData.appointmentDate < today) {
+    //   throw new BadRequestError('Appointment date cannot be in the past');
+    // }
   }
 
     // Time validation (if provided)
@@ -139,37 +140,37 @@ export class AppointmentsService {
   }
 
 
-  // Check for duplicate appointments
-  private static async checkDuplicateAppointment(
+  // Check for a duplicate (same pet+vet+date+time) or a double-booking
+  private static async checkAppointmentConflicts(
     petId: string,
     veterinarianId: string,
     appointmentDate: string,
     appointmentTime: string,
     excludeAppointmentId?: string
   ): Promise<void> {
-    const conditions = [
-      eq(appointments.petId, petId),
-      eq(appointments.veterinarianId, veterinarianId),
-      eq(appointments.appointmentDate, appointmentDate),
-      eq(appointments.appointmentTime, `${appointmentTime}:00`) // Add seconds
-    ];
+    const existing = await db.query.appointments.findFirst({
+      where: and(
+        eq(appointments.petId, petId),
+        eq(appointments.appointmentDate, appointmentDate),
+        eq(appointments.appointmentTime, `${appointmentTime}:00`)
+      ),
+    });
 
-    // Exclude current appointment when updating
-    if (excludeAppointmentId) {
-      // We'll check this in the update method instead
+    if (!existing || existing.id === excludeAppointmentId) {
       return;
     }
 
-    const existingAppointment = await db.query.appointments.findFirst({
-      where: and(...conditions),
-    });
-
-    if (existingAppointment) {
+    if (existing.veterinarianId === veterinarianId) {
       throw new BadRequestError(
         'An appointment already exists for this pet with this veterinarian at this date and time'
       );
     }
+
+    throw new BadRequestError(
+      'This pet already has an appointment at this date and time with another veterinarian'
+    );
   }
+
 
   // GET all appointments for a user (with filter)
   static async getAppointments(
@@ -307,10 +308,11 @@ export class AppointmentsService {
         throw new BadRequestError('Valid user ID is required');
       }
 
-      const today = await UserPreferencesService.getTodayForUser(userId);
+      // REMOVED
+      // const today = await UserPreferencesService.getTodayForUser(userId);
 
       // Validate appointment inputs
-      this.validateAppointmentInputs(appointmentData, today, false);
+      this.validateAppointmentInputs(appointmentData, false);
 
       // Verify pet ownership
       await this.verifyPetOwnership(appointmentData.petId, userId);
@@ -323,7 +325,7 @@ export class AppointmentsService {
       );
 
       // Check for duplicate appointments
-      await this.checkDuplicateAppointment(
+      await this.checkAppointmentConflicts(
         appointmentData.petId,
         appointmentData.veterinarianId,
         appointmentData.appointmentDate,
@@ -378,7 +380,7 @@ export class AppointmentsService {
 
       // Validate update data
       const today = await UserPreferencesService.getTodayForUser(userId); 
-      this.validateAppointmentInputs(updateData, today, true);
+      this.validateAppointmentInputs(updateData, true);
 
       // Fetch existing appointment
       const existingAppointment = await this.getAppointmentById(appointmentId, userId);
@@ -410,7 +412,7 @@ export class AppointmentsService {
       // Check for duplicate if date/time/pet/vet changed
       if (updateData.appointmentDate || updateData.appointmentTime || 
           updateData.petId || updateData.veterinarianId) {
-        await this.checkDuplicateAppointment(
+        await this.checkAppointmentConflicts(
           updateData.petId || existingAppointment.petId,
           updateData.veterinarianId || existingAppointment.veterinarianId,
           updateData.appointmentDate || existingAppointment.appointmentDate,

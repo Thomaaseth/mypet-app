@@ -8,8 +8,8 @@ export function makeDryFoodData(
   return {
     brandName: 'Test Brand',
     productName: 'Test Food',
-    bagWeight: '2.0',
-    bagWeightUnit: 'kg',
+    bagWeight: '4.4',
+    bagWeightUnit: 'lbs',
     dailyAmount: '100',
     dateStarted: '2024-01-01',
     ...overrides,
@@ -22,8 +22,8 @@ export function makeInvalidDryFoodData(
     return {
       brandName: 'Test Brand',
       productName: 'Test Food',
-      bagWeight: '2.0',
-      bagWeightUnit: 'kg',
+      bagWeight: '4.4',
+      bagWeightUnit: 'lbs',
       dailyAmount: '100',
       dateStarted: '2024-01-01',
       ...overrides,
@@ -37,9 +37,9 @@ export function makeWetFoodData(
     brandName: 'Wet Brand',
     productName: 'Wet Food',
     numberOfUnits: '12',
-    weightPerUnit: '85',
-    wetFoodUnit: 'grams',
-    dailyAmount: '170',
+    weightPerUnit: '3',
+    wetFoodUnit: 'oz',
+    dailyAmount: '6',
     dateStarted: '2024-01-01',
     ...overrides,
   };
@@ -52,15 +52,15 @@ export function makeInvalidWetFoodData(
       brandName: 'Test Brand',
       productName: 'Test Food', 
       numberOfUnits: '12',
-      weightPerUnit: '85',
-      wetFoodUnit: 'grams',
-      dailyAmount: '170',
-      wetDailyAmountUnit: 'grams',
+      weightPerUnit: '3',
+      wetFoodUnit: 'oz',
+      dailyAmount: '6',
       dateStarted: '2024-01-01',
       ...overrides,
     };
   }
 
+// Raw db factories, no unit field, canonical grams
 export function makeDryFoodEntry(
     overrides: Partial<DryFoodEntry> = {}
 ): DryFoodEntry {
@@ -83,6 +83,7 @@ export function makeDryFoodEntry(
   };
 }
 
+// Raw db factories, no unit field, canonical grams
 export function makeWetFoodEntry(
     overrides: Partial<WetFoodEntry> = {}
 ): WetFoodEntry {

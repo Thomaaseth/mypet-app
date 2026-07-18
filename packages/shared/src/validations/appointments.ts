@@ -66,19 +66,10 @@ export const appointmentFormSchema = z.object({
     .or(z.literal('')),
 });
 
-// Schema for creating a new appointment (validates date is not in the past)
-export const createAppointmentSchema = appointmentFormSchema.refine(
-  (data) => {
-    const appointmentDate = new Date(data.appointmentDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return appointmentDate >= today;
-  },
-  {
-    message: 'Appointment date cannot be in the past',
-    path: ['appointmentDate'],
-  }
-);
+// Schema for creating a new appointment.
+// NOTE: previously refined to reject past dates; that restriction was
+// removed deliberately and past-dated appointments are now allowed on create
+export const createAppointmentSchema = appointmentFormSchema;
 
 // Schema for updating an appointment (full edit for upcoming, notes only for past)
 export const updateAppointmentSchema = appointmentFormSchema.extend({

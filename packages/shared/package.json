@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -12,5 +13,9 @@
   "dependencies": {
     "better-auth": "^1.2.9",
     "zod": "^3.25.67"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run"
   }
 }

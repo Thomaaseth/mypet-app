@@ -4,6 +4,8 @@ import { FoodService } from '../../food';
 import { BadRequestError, NotFoundError } from '../../../middleware/errors';
 import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';
+import { UserPreferencesService } from '../../user-preferences.service';
+import { addCalendarDays, toDateString } from '@/shared/utils/dates';
 
 describe('Update Operations', () => {
   describe('updateDryFoodEntry', () => {
@@ -79,5 +81,51 @@ describe('Update Operations', () => {
         FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { dateStarted: 'invalid-date' })
       ).rejects.toThrow(BadRequestError);
     });
+  });
+});
+
+describe('Timezone-aware dateStarted validation on update', () => {
+  it('rejects updating dateStarted to one day past the stored-timezone user\'s own "today"', async () => {
+    const { primary, testPet } = await setupUserAndPet();
+
+    await UserPreferencesService.upsertUserPreferences(primary.id, {
+      dateTimeLocale: 'en-US',
+      unitSystem: 'imperial',
+      timezone: 'Pacific/Kiritimati',
+    });
+
+    const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
+
+    const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+    const oneDayPastUsersToday = addCalendarDays(usersToday, 1);
+
+    await expect(
+      FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { dateStarted: oneDayPastUsersToday })
+    ).rejects.toThrow('Purchase date cannot be in the future');
+  });
+
+  it('accepts updating dateStarted to the stored-timezone user\'s own "today"', async () => {
+    const { primary, testPet } = await setupUserAndPet();
+
+    await UserPreferencesService.upsertUserPreferences(primary.id, {
+      dateTimeLocale: 'en-US',
+      unitSystem: 'imperial',
+      timezone: 'Pacific/Kiritimati',
+    });
+
+    const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
+
+    const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+    const serverUtcToday = toDateString(new Date());
+
+    if (usersToday === serverUtcToday) {
+      throw new Error(
+        'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+      );
+    }
+
+    const updated = await FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { dateStarted: usersToday });
+
+    expect(updated.dateStarted).toBe(usersToday);
   });
 });

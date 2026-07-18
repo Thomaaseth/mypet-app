@@ -7,6 +7,8 @@ import { db } from '../../../db';
 import { eq } from 'drizzle-orm';
 import * as schema from '../../../db/schema';
 import type { WetFoodFormData } from '../../../services/food';
+import { UserPreferencesService } from '../../user-preferences.service';
+import { addCalendarDays, toDateString } from '@/shared/utils/dates';
 
 describe('Wet Food Operations', () => {
   describe('createWetFoodEntry', () => {
@@ -26,6 +28,54 @@ describe('Wet Food Operations', () => {
           makeInvalidWetFoodData({ numberOfUnits: 'invalid' }) as unknown as WetFoodFormData
         )
       ).rejects.toThrow(BadRequestError);
+    });
+
+    it('uses the stored user timezone, not server time, when validating purchase date', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+
+      if (usersToday === serverUtcToday) {
+        throw new Error(
+          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+        );
+      }
+
+      const result = await FoodService.createWetFoodEntry(
+        testPet.id,
+        primary.id,
+        makeWetFoodData({ dateStarted: usersToday })
+      );
+
+      expect(result.dateStarted).toBe(usersToday);
+    });
+
+    it('rejects a purchase date one day past the stored-timezone user\'s own "today"', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const oneDayPastUsersToday = addCalendarDays(usersToday, 1);
+
+      await expect(
+        FoodService.createWetFoodEntry(
+          testPet.id,
+          primary.id,
+          makeWetFoodData({ dateStarted: oneDayPastUsersToday })
+        )
+      ).rejects.toThrow('Purchase date cannot be in the future');
     });
   });
 

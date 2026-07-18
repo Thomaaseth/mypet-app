@@ -27,8 +27,8 @@ export const pets = pgTable('pets', {
   imageUrl: text('image_url'),
   notes: text('notes'),
   isActive: boolean('is_active').default(true), // Soft delete flag
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Types 

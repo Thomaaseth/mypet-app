@@ -13,7 +13,7 @@ import {
     petId: uuid('pet_id').references(() => pets.id, { onDelete: 'cascade' }).notNull(),
     veterinarianId: uuid('veterinarian_id').references(() => veterinarians.id, { onDelete: 'cascade' }).notNull(),
     
-    assignedAt: timestamp('assigned_at').defaultNow().notNull(),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }).defaultNow().notNull(),
   });
   
   // Types

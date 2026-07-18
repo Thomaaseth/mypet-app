@@ -76,7 +76,7 @@ export function WetFoodForm({
           id="numberOfUnits"
           type="number"
           min="1"
-          step="1"
+          step="0.01"
           placeholder="e.g., 12"
           className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('numberOfUnits')}
@@ -91,7 +91,7 @@ export function WetFoodForm({
           <Input
             id="weightPerUnit"
             type="number"
-            step="1"
+            step="0.01"
             placeholder="e.g., 85"
             className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             {...register('weightPerUnit')}
@@ -120,7 +120,7 @@ export function WetFoodForm({
             <Input
               id="dailyAmount"
               type="number"
-              step="1"
+              step="0.01"
               placeholder="e.g., 85"
               className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               {...register('dailyAmount')}

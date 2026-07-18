@@ -50,12 +50,14 @@ export class FoodService {
   // Create DRY food entry
   static async createDryFoodEntry(petId: string, userId: string, data: DryFoodFormData): Promise<DryFoodEntry> {
     try {
-      // Input validation 
-      FoodValidations.validateDryFoodInputs(data, false);
-      
       // Authorization check
       await this.verifyPetOwnership(petId, userId);
 
+      const today = await UserPreferencesService.getTodayForUser(userId);
+
+      // Input validation 
+      FoodValidations.validateDryFoodInputs(data, today, false);
+      
       // Check if there's already an active dry food entry
       const [existingActiveEntry] = await db
         .select()
@@ -142,13 +144,14 @@ export class FoodService {
       if (Object.keys(data).length === 0) {
         throw new BadRequestError('At least one field must be provided for update');
       }
-      
-      FoodValidations.validateDryFoodInputs(data, true);
-      
+
       // Authorization & existence check
       await this.verifyPetOwnership(petId, userId);
       const existing = await this.getDryFoodEntryById(petId, foodId, userId);
-      
+      const today = await UserPreferencesService.getTodayForUser(userId);
+
+      FoodValidations.validateDryFoodInputs(data, today, true);
+         
       // Execute update
       // canonical grams before storage, then discarded from the update payload.
       const { bagWeightUnit, ...restData } = data;
@@ -181,7 +184,6 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Dry food entry not found');
       }
-      const today = await UserPreferencesService.getTodayForUser(userId);
       const calculations = FoodCalculations.calculateDryFoodRemaining(updatedEntry as DryFoodEntry, today);
       return { ...updatedEntry, ...calculations } as DryFoodEntry;
     } catch (error) {
@@ -227,13 +229,15 @@ export class FoodService {
   // Create WET food entry
   static async createWetFoodEntry(petId: string, userId: string, data: WetFoodFormData): Promise<WetFoodEntry> {
     try {
-      // Input validation
-      FoodValidations.validateWetFoodInputs(data, false);
-      
-      // uthorization check
-      await this.verifyPetOwnership(petId, userId);
+    // uthorization check
+    await this.verifyPetOwnership(petId, userId);
 
-      // Check if there's already an active wet food entry
+    const today = await UserPreferencesService.getTodayForUser(userId);
+
+    // Input validation
+    FoodValidations.validateWetFoodInputs(data, today, false);
+      
+    // Check if there's already an active wet food entry
     const [existingActiveEntry] = await db
       .select()
       .from(foodEntries)
@@ -311,18 +315,19 @@ export class FoodService {
   // Update WET food entry
   static async updateWetFoodEntry(petId: string, foodId: string, userId: string, data: Partial<WetFoodFormData>): Promise<WetFoodEntry> {
     try {
-      // 🔒 STEP 1: Input validation (fail fast)
+      // Input validation
       validateUUID(foodId, 'food entry ID');
       
       if (Object.keys(data).length === 0) {
         throw new BadRequestError('At least one field must be provided for update');
       }
-      
-      FoodValidations.validateWetFoodInputs(data, true);
-      
+
       // Authorization check
       await this.verifyPetOwnership(petId, userId);
       const existing = await this.getWetFoodEntryById(petId, foodId, userId);
+      const today = await UserPreferencesService.getTodayForUser(userId);
+
+      FoodValidations.validateWetFoodInputs(data, today, true);    
       
       // Execute update
       // convert to canonical grams before storage, then discarded from the update payload.
@@ -359,7 +364,6 @@ export class FoodService {
       if (!updatedEntry) {
         throw new NotFoundError('Wet food entry not found');
       }
-      const today = await UserPreferencesService.getTodayForUser(userId);
       const calculations = FoodCalculations.calculateWetFoodRemaining(updatedEntry as WetFoodEntry, today);
       return { ...updatedEntry, ...calculations } as WetFoodEntry;
     } catch (error) {

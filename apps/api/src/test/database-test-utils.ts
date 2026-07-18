@@ -20,6 +20,7 @@ export class DatabaseTestUtils {
       await db.delete(schema.weightEntries);
       await db.delete(schema.weightTargets);
       await db.delete(schema.veterinarians);
+      await db.delete(schema.userPreferences);
       await db.delete(schema.pets);
       await db.delete(schema.user);
     } catch (error) {
@@ -91,83 +92,6 @@ export class DatabaseTestUtils {
     }));
 
     return await db.insert(schema.pets).values(petsData).returning();
-  }
-
-  /**
-   * Create test weight entries for a pet
-   */
-  static async createTestWeightEntries(
-    petId: string,
-    count: number = 2,
-    weightUnit: 'kg' | 'lbs' = 'kg'
-  ): Promise<Array<typeof schema.weightEntries.$inferSelect>> {
-    const baseDate = new Date('2024-01-15');
-    const entriesData = Array.from({ length: count }, (_, index) => {
-      const date = new Date(baseDate);
-      date.setDate(date.getDate() + index * 5); // 5 days apart
-      
-      return {
-        petId,
-        weight: (5.0 + index * 0.25).toFixed(2), // 5.00, 5.25, 5.50...,
-        weightUnit,
-        date: date.toISOString().split('T')[0], // YYYY-MM-DD format
-      };
-    });
-
-    return await db.insert(schema.weightEntries).values(entriesData).returning();
-  }
-
-  /**
-   * Create test food entries for a pet
-   */
-  static async createTestFoodEntries(
-    petId: string,
-    foodType: 'dry' | 'wet' = 'dry',
-    count: number = 1
-  ): Promise<Array<typeof schema.foodEntries.$inferSelect>> {
-    const baseDate = new Date('2024-01-10');
-    const entriesData = Array.from({ length: count }, (_, index) => {
-      const date = new Date(baseDate);
-      date.setDate(date.getDate() + index * 10); // 10 days apart
-      
-      if (foodType === 'dry') {
-        return {
-          petId,
-          foodType: 'dry' as const,
-          brandName: `Test Brand ${index + 1}`,
-          productName: `Test Dry Food ${index + 1}`,
-          dailyAmount: '120.00', // grams
-          dateStarted: date.toISOString().split('T')[0],
-          bagWeight: '2.00', // kg
-          bagWeightUnit: 'kg' as const,
-          dryDailyAmountUnit: 'grams' as const,
-          // Wet food fields are null for dry food
-          numberOfUnits: null,
-          weightPerUnit: null,
-          wetWeightUnit: null,
-          wetDailyAmountUnit: null,
-        };
-      } else {
-        return {
-          petId,
-          foodType: 'wet' as const,
-          brandName: `Test Brand ${index + 1}`,
-          productName: `Test Wet Food ${index + 1}`,
-          dailyAmount: '85.00', // grams
-          dateStarted: date.toISOString().split('T')[0],
-          numberOfUnits: 12,
-          weightPerUnit: '85.00', // grams per can
-          wetWeightUnit: 'grams' as const,
-          wetDailyAmountUnit: 'grams' as const,
-          // Dry food fields are null for wet food
-          bagWeight: null,
-          bagWeightUnit: null,
-          dryDailyAmountUnit: null,
-        };
-      }
-    });
-
-    return await db.insert(schema.foodEntries).values(entriesData).returning();
   }
 }
 

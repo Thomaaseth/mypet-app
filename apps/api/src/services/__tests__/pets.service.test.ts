@@ -7,6 +7,8 @@ import { BadRequestError, NotFoundError } from '../../middleware/errors';
 import { PetsService } from '../pets.service';
 import { db } from '../../db';
 import { DatabaseTestUtils } from '../../test/database-test-utils';
+import { UserPreferencesService } from '../user-preferences.service';
+import { toDateString } from '@/shared/utils/dates';
 
 describe('PetsService', () => {
   describe('getUserPets', () => {
@@ -345,6 +347,41 @@ describe('PetsService', () => {
       const entryDate = weightEntries[0].date;
       const petCreatedDate = new Date(result.createdAt).toISOString().split('T')[0];
       expect(entryDate).toBe(petCreatedDate);
+    });
+
+    it('uses the stored user timezone, not server UTC, for the auto-created weight entry date', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+
+      if (usersToday === serverUtcToday) {
+        throw new Error(
+          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+        );
+      }
+
+      const newPetData: NewPet & { weight?: string; weightUnit?: 'kg' | 'lbs' } = {
+        name: 'Weighted Pet',
+        userId: primary.id,
+        animalType: 'cat',
+        weight: '5.50',
+        weightUnit: 'kg',
+      };
+
+      const result = await PetsService.createPet(newPetData);
+
+      const [weightEntry] = await db.select()
+        .from(schema.weightEntries)
+        .where(eq(schema.weightEntries.petId, result.id));
+
+      expect(weightEntry.date).toBe(usersToday);
     });
   
     it('should NOT create weight entry when pet is created without weight', async () => {

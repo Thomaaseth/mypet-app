@@ -13,8 +13,8 @@ export const weightEntries = pgTable('weight_entries', {
   petId: uuid('pet_id').references(() => pets.id, { onDelete: 'cascade' }).notNull(),
   weight: decimal('weight', { precision: 6, scale: 3 }).notNull(),
   date: date('date').notNull(), // Date of the weight entry (YYYY-MM-DD)
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export type WeightEntry = typeof weightEntries.$inferSelect;

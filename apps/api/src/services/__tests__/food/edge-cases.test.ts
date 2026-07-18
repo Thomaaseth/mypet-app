@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'crypto';
 import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
-import { makeDryFoodEntry, makeDryFoodData, makeInvalidDryFoodData, makeInvalidWetFoodData, makeWetFoodEntry } from './helpers/factories';
+import { makeDryFoodEntry, makeDryFoodData, makeInvalidDryFoodData, makeInvalidWetFoodData, makeWetFoodEntry, makeWetFoodData } from './helpers/factories';
 import { db } from '../../../db';
 import * as schema from '../../../db/schema';
 import { eq } from 'drizzle-orm';
@@ -129,6 +129,8 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
         testPet.id,
         primary.id,
         makeInvalidDryFoodData({
+          bagWeight: '2.0',
+          bagWeightUnit: 'kg',
           numberOfUnits: '12',
           weightPerUnit: '85',
         }) as unknown as DryFoodFormData
@@ -260,17 +262,21 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
   describe('Data Consistency', () => {
     it('should maintain data integrity during failed operations', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
-      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, makeDryFoodData());
-
+    
+      const created = await FoodService.createDryFoodEntry(
+        testPet.id,
+        primary.id,
+        makeDryFoodData({ bagWeight: '2', bagWeightUnit: 'kg' }) // explicit, self-contained
+      );
+    
       try {
         await FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { bagWeight: 'invalid-number' });
       } catch (error) {
         // expected
       }
-
+    
       const unchanged = await FoodService.getDryFoodEntryById(testPet.id, created.id, primary.id);
-      expect(unchanged.bagWeight).toBe('2000.00'); // canonical grams (default 2.0 kg submitted)
+      expect(unchanged.bagWeight).toBe(created.bagWeight); // unchanged from whatever it was created as
     });
 
     it('should handle orphaned food entries correctly', async () => {
@@ -285,5 +291,55 @@ const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomU
       await expect(
         FoodService.getDryFoodEntries(testPet.id, primary.id)
       ).rejects.toThrow(Error);
+    });
+  });
+
+  describe('Unit Conversion Precision Edge Cases', () => {
+    it('documents toFixed rounding behavior at a .xx5 boundary for oz conversion', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      // 1oz × 28.3495 = 28.3495g exactly real boundary case for .toFixed(2)
+      const result = await FoodService.createWetFoodEntry(testPet.id, primary.id, makeWetFoodData({
+        weightPerUnit: '1',
+        wetFoodUnit: 'oz',
+        dailyAmount: '1',
+        numberOfUnits: '1',
+      }));
+
+      // Documents actual JS toFixed(2) behavior, not an assumption of "correct" rounding
+      expect(result.weightPerUnit).toBe('28.35');
+    });
+
+    it('does not collapse a very small oz value to zero grams on conversion', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      // 0.01oz × 28.3495 = 0.283495g — small but must not round to 0.00
+      const result = await FoodService.createWetFoodEntry(testPet.id, primary.id, makeWetFoodData({
+        weightPerUnit: '10',
+        wetFoodUnit: 'oz',
+        dailyAmount: '0.01',
+        numberOfUnits: '5',
+      }));
+
+      expect(parseFloat(result.dailyAmount)).toBeGreaterThan(0);
+    });
+
+    it('should handle large bag weights correctly when submitted in lbs', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      // 110lbs × 453.592 = 49895.12g total
+      // Day 1: 200g consumed, 49695.12g remaining
+      const largeBagData = makeDryFoodData({
+        bagWeight: '110',
+        bagWeightUnit: 'lbs',
+        dailyAmount: '200',
+        dateStarted: new Date().toISOString().split('T')[0],
+      });
+
+      const result = await FoodService.createDryFoodEntry(testPet.id, primary.id, largeBagData);
+      const calculations = await FoodService.calculateDryFoodRemaining(result, primary.id);
+
+      expect(result.bagWeight).toBe('49895.12');
+      expect(calculations.remainingWeight).toBeCloseTo(49695.12, 2);
     });
   });

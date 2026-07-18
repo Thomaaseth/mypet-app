@@ -12,8 +12,8 @@ import {
     dateTimeLocale: text('date_time_locale').notNull(), // Intl locale tag driving date ordering + clock format only
     unitSystem: text('unit_system').notNull().default('metric'), // 'metric' | 'imperial'
     timezone: text('timezone').notNull().default('UTC'), // IANA name, e.g. "Europe/Paris"
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   });
   
   // Types

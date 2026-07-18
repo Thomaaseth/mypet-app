@@ -8,8 +8,8 @@ export function makeWeightEntryData(
   overrides: Partial<WeightFormData> = {}
 ): WeightFormData {
   return {
-    weight: '5.50',
-    weightUnit: 'kg',
+    weight: '12.13', // ≈ 5.50 kg
+    weightUnit: 'lbs',
     date: '2024-01-15',
     ...overrides,
   };
@@ -52,8 +52,8 @@ export function makeInvalidWeightData(
   overrides: Record<string, unknown>
 ): Record<string, unknown> {
   return {
-    weight: '5.50',
-    weightUnit: 'kg',
+    weight: '12.13',
+    weightUnit: 'lbs',
     date: '2024-01-15',
     ...overrides,
   };  

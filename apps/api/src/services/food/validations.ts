@@ -3,18 +3,21 @@ import type { DryFoodFormData, WetFoodFormData } from './types';
 import { convertFoodWeight } from '@/shared/utils/units';
 
 export class FoodValidations {
-  static validateCommonInputs(data: { dateStarted?: string; brandName?: string; productName?: string }): void {
+  static validateCommonInputs(
+    data: { dateStarted?: string; brandName?: string; productName?: string },
+    today: string
+  ): void {
     // Date format validation
     if (data.dateStarted !== undefined) {
-      const purchaseDate = new Date(data.dateStarted);
-      if (isNaN(purchaseDate.getTime())) {
+      if (isNaN(new Date(data.dateStarted).getTime())) {
         throw new BadRequestError('Invalid date format for purchase date');
       }
 
-      // Future date validation
-      const today = new Date();
-      today.setHours(23, 59, 59, 999);
-      if (purchaseDate > today) {
+      // Future date validation — plain string comparison against the
+      // user's own "today" (per getTodayForUser), same pattern as
+      // updateFinishDate. No Date object arithmetic, no local-timezone
+      // exposure 
+      if (data.dateStarted > today) {
         throw new BadRequestError('Purchase date cannot be in the future');
       }
     }
@@ -28,7 +31,7 @@ export class FoodValidations {
     }
   }
 
-  static validateDryFoodInputs(data: Partial<DryFoodFormData>, isUpdate = false): void {
+  static validateDryFoodInputs(data: Partial<DryFoodFormData>, today: string, isUpdate = false): void {
     // Required fields validation (only for create)
     if (!isUpdate) {
       if (!data.bagWeight || !data.bagWeightUnit || !data.dailyAmount || !data.dateStarted) {
@@ -70,10 +73,10 @@ export class FoodValidations {
     }
 
     // Validate common fields
-    this.validateCommonInputs(data);
+    this.validateCommonInputs(data, today);
   }
 
-  static validateWetFoodInputs(data: Partial<WetFoodFormData>, isUpdate = false): void {
+  static validateWetFoodInputs(data: Partial<WetFoodFormData>, today: string, isUpdate = false): void {
     if (!isUpdate) {
       if (!data.numberOfUnits || !data.weightPerUnit || !data.wetFoodUnit || !data.dailyAmount || !data.dateStarted) {
         throw new BadRequestError('Number of units, weight per unit, weight unit, daily amount, and purchase date are required for wet food');
@@ -120,6 +123,6 @@ export class FoodValidations {
       }
     }
 
-    this.validateCommonInputs(data);
+    this.validateCommonInputs(data, today);
   }
 }

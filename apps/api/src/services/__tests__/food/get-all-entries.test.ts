@@ -60,8 +60,8 @@ describe('getAllFoodEntries', () => {
     const { primary, testPet } = await setupUserAndPet();
   
     const dryFood = await FoodService.createDryFoodEntry(testPet.id, primary.id, {
-      bagWeight: '0.5',
-      bagWeightUnit: 'kg',
+      bagWeight: '1.1',
+      bagWeightUnit: 'lbs',
       dailyAmount: '50',
       dateStarted: addCalendarDays(toDateString(new Date()), -30),
     });
@@ -71,8 +71,8 @@ describe('getAllFoodEntries', () => {
   
     await FoodService.createWetFoodEntry(testPet.id, primary.id, {
       numberOfUnits: '12',
-      weightPerUnit: '85',
-      wetFoodUnit: 'grams',
+      weightPerUnit: '3',
+      wetFoodUnit: 'oz',
       dailyAmount: '50',
       dateStarted: toDateString(new Date()),
     });

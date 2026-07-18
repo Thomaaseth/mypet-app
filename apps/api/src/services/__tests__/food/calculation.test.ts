@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { FoodService } from '../../food';
 import { setupUserAndPet } from './helpers/setup';
-import { makeDryFoodEntry, makeWetFoodEntry, makeDryFoodData } from './helpers/factories';
+import { makeDryFoodEntry, makeWetFoodEntry, makeDryFoodData, makeWetFoodData } from './helpers/factories';
 import { db } from '../../../db';
 import { eq } from 'drizzle-orm';
 import * as schema from '../../../db/schema';
@@ -10,6 +10,14 @@ import { UserPreferencesService } from '../../user-preferences.service';
 import { toDateString, addCalendarDays } from '@/shared/utils/dates';
 
 describe('Business Logic Calculations', () => {
+  // NOTE: tests in this describe block deliberately pass randomUUID() as the
+  // userId, not a real primary.id with stored preferences. That's intentional:
+  // a nonexistent user has no preferences row, so getTodayForUser() always
+  // falls back to server-UTC-today — the same reference point these tests use
+  // themselves (toDateString(new Date())). This isolates pure day-counting
+  // math (FoodCalculations) from timezone resolution (getTodayForUser), and
+  // does NOT exercise the real per-user timezone branch. See the dedicated
+  // 'Timezone-aware "today"' describe block below for tests that do.
   describe('calculateDryFoodRemaining', () => {
     it('should calculate remaining days correctly for active dry food', async () => {
       const dateStarted = addCalendarDays(toDateString(new Date()), -5); // 5 days ago (days elapsed = 6)
@@ -168,11 +176,14 @@ describe('Business Logic Calculations', () => {
     });
   });
 
+  // Tests below use a real primary.id with a real stored timezone preference,
+  // proving getTodayForUser's actual Intl.DateTimeFormat branch is correctly
+  // wired into each service method, not just its no-preferences fallback
   describe('Timezone-aware "today"', () => {
     it('uses the stored user timezone, not server UTC, for depletion calculations', async () => {
       const { primary, testPet } = await setupUserAndPet();
   
-      // UTC+14 — the furthest-ahead real IANA zone, chosen so a UTC-fallback bug
+      // UTC+14 the furthest-ahead real IANA zone, chosen so a UTC-fallback bug
       // reliably produces a different, detectably wrong "today" (won't coincide with UTC's date)
       await UserPreferencesService.upsertUserPreferences(primary.id, {
         dateTimeLocale: 'en-US',
@@ -181,8 +192,8 @@ describe('Business Logic Calculations', () => {
       });
   
       const dryFoodData = makeDryFoodData({
-        bagWeight: '1.00',
-        bagWeightUnit: 'kg',
+        bagWeight: '2.2',
+        bagWeightUnit: 'lbs',
         dailyAmount: '100',
         dateStarted: toDateString(new Date()),
       });
@@ -199,7 +210,78 @@ describe('Business Logic Calculations', () => {
   
       // Guard against a false-pass: if this ever coincides with server UTC's date
       // (e.g. test runs right at a UTC boundary), the assertion above wouldn't
-      // actually prove timezone-awareness — fail loudly instead of silently passing
+      // actually prove timezone-awareness: fail loudly instead of silently passing
+      if (expectedToday === serverUtcToday) {
+        throw new Error(
+          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+        );
+      }
+    });
+
+    it('uses the stored user timezone, not server UTC, for wet food depletion calculations', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const wetFoodData = makeWetFoodData({
+        numberOfUnits: '12',
+        weightPerUnit: '3',
+        wetFoodUnit: 'oz',
+        dailyAmount: '6',
+        dateStarted: toDateString(new Date()),
+      });
+
+      const created = await FoodService.createWetFoodEntry(testPet.id, primary.id, wetFoodData);
+
+      const expectedToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+
+      const calculations = await FoodService.calculateWetFoodRemaining(created, primary.id);
+
+      expect(calculations.depletionDate).toBe(addCalendarDays(expectedToday, calculations.remainingDays));
+
+      if (expectedToday === serverUtcToday) {
+        throw new Error(
+          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+        );
+      }
+    });
+
+    it('uses the stored user timezone, not server UTC, when listing all food entries', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const dryFoodData = makeDryFoodData({
+        bagWeight: '2.2',
+        bagWeightUnit: 'lbs',
+        dailyAmount: '100',
+        dateStarted: toDateString(new Date()),
+      });
+
+      const created = await FoodService.createDryFoodEntry(testPet.id, primary.id, dryFoodData);
+
+      const expectedToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+      const [entry] = await FoodService.getAllFoodEntries(testPet.id, primary.id);
+
+      expect(entry.id).toBe(created.id);
+      expect(entry.remainingDays).toBeDefined();
+
+      if (entry.remainingDays === undefined) {
+        throw new Error('Expected remainingDays to be populated on a listed food entry');
+      }
+
+      expect(entry.depletionDate).toBe(addCalendarDays(expectedToday, entry.remainingDays));
+
       if (expectedToday === serverUtcToday) {
         throw new Error(
           'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
