@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { vetApi, vetErrorHandler } from '@/lib/api';
 import { toastService } from '@/lib/toast';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
@@ -10,6 +10,20 @@ export const vetKeys = {
   pets: (vetId: string) => ['vets', vetId, 'pets'] as const,
   petVets: (petId: string) => ['pets', petId, 'vets'] as const,
 };
+
+// CACHE HELPERS
+// Invalidates all pet-related caches affected by vet changes:
+// pets list (['pets']), pet details (['pets', id]) and pet→vet
+// assignments (['pets', id, 'vets']) while EXCLUDING signed image
+// URLs (['pets', id, 'signed-url']), which have a deliberate 55min
+// staleTime and stay valid regardless of vet changes.
+// invalidateQueries matches by key prefix AND predicate when both are given:
+function invalidatePetRelatedCaches(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({
+    queryKey: ['pets'],
+    predicate: (query) => !query.queryKey.includes('signed-url'),
+  });
+}
 
 // ============================================
 // QUERIES (READ operations)
@@ -51,6 +65,11 @@ export function usePetVets(petId: string) {
 }
 
 // Get veterinarian from cache (useful for optimistic updates)
+// NON-REACTIVE snapshot: reads the cache once at render time and does
+// NOT subscribe to changes. Safe for one-shot reads (seeding a form,
+// building optimistic updates); do NOT use it to *display* data, as the
+// component won't re-render when the cache updates. For reactive reads,
+// use useVeterinarian() — same key, deduped, no extra fetch.
 export function useVeterinarianFromCache(vetId: string) {
   const queryClient = useQueryClient();
   return queryClient.getQueryData<Veterinarian>(vetKeys.detail(vetId));
@@ -77,9 +96,9 @@ export function useCreateVeterinarian() {
     onSuccess: (newVet) => {
       // Invalidate and refetch veterinarians list and pets assignements
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['pets'] });
+      // Refetch pet-side caches (assignments may have changed via petIds)
+      invalidatePetRelatedCaches(queryClient);
 
-      // Show success toast
       toastService.success(
         'Veterinarian added',
         `${newVet.clinicName || newVet.vetName} has been added!`
@@ -109,10 +128,9 @@ export function useUpdateVeterinarian() {
     onSuccess: (updatedVet) => {
       // Invalidate both list and detail caches
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
-      queryClient.invalidateQueries({ queryKey: vetKeys.detail(updatedVet.id) });
-      queryClient.invalidateQueries({ queryKey: ['pets']});
+      // Pet-side caches embed vet info (names in dropdowns/lists)
+      invalidatePetRelatedCaches(queryClient);
 
-      // Show success toast
       toastService.success(
         'Veterinarian updated',
         `${updatedVet.clinicName || updatedVet.vetName} has been updated!`
@@ -135,10 +153,15 @@ export function useDeleteVeterinarian() {
       // Invalidate list cache
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
       
-      // Remove from detail cache
+      // Drop the deleted vet's detail entry entirely (it no longer exists;
+      // removeQueries frees the cache entry rather than refetching a 404)
       queryClient.removeQueries({ queryKey: vetKeys.detail(vetId) });
 
-      // Show success toast
+      // Backend cascade-unassigns the vet from pets — refetch pet-side
+      // caches so assignment lists & appointment dropdowns drop it too.
+      // (Fixes: deleted vet lingering in dropdowns until page refresh.)
+      invalidatePetRelatedCaches(queryClient);
+
       toastService.success('Veterinarian deleted', 'The veterinarian has been removed.');
     },
     onError: (error) => {
@@ -162,14 +185,12 @@ export function useAssignVetToPets() {
     }) => {
       return vetApi.assignVetToPets(vetId, petIds);
     },
-    onSuccess: (_, { vetId }) => {
+    onSuccess: () => {
       // Invalidate vet details and pets list
-      queryClient.invalidateQueries({ queryKey: vetKeys.detail(vetId) });
-      queryClient.invalidateQueries({ queryKey: vetKeys.pets(vetId) });
+      // vetKeys.all prefix covers detail(vetId) and pets(vetId)
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['pets'] });
+      invalidatePetRelatedCaches(queryClient);
 
-      // Show success toast
       toastService.success('Pets assigned', 'Veterinarian has been assigned to selected pets.');
     },
     onError: (error) => {
@@ -187,14 +208,10 @@ export function useUnassignVetFromPets() {
     mutationFn: ({ vetId, petIds }: { vetId: string; petIds: string[] }) => {
       return vetApi.unassignVetFromPets(vetId, petIds);
     },
-    onSuccess: (_, { vetId }) => {
-      // Invalidate vet details and pets list
-      queryClient.invalidateQueries({ queryKey: vetKeys.detail(vetId) });
-      queryClient.invalidateQueries({ queryKey: vetKeys.pets(vetId) });
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['pets'] });
+      invalidatePetRelatedCaches(queryClient);
 
-      // Show success toast
       toastService.success(
         'Pets unassigned',
         'Veterinarian has been unassigned from selected pets.'

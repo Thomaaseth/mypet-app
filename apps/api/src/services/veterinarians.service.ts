@@ -280,6 +280,13 @@ export class VeterinariansService {
     petIds: string[]
   ): Promise<void> {
     try {
+      // Guard: empty petIds is a no-op, not an error. Prevents Drizzle's
+      // .values([]) throw and inArray-with-empty-array edge cases if any
+      // caller (e.g. createVeterinarian) ever passes an empty list.
+      if (petIds.length === 0) {
+        return;
+      }
+
       // Validate vet exists and belongs to user
       await this.getVeterinarianById(vetId, userId);
 
@@ -320,6 +327,13 @@ export class VeterinariansService {
   // Unassign veterinarian from pets
   static async unassignVetFromPets(vetId: string, userId: string, petIds: string[]): Promise<void> {
     try {
+      // Guard: empty petIds is a no-op, not an error. Prevents Drizzle's
+      // .values([]) throw and inArray-with-empty-array edge cases if any
+      // caller (e.g. createVeterinarian) ever passes an empty list.
+      if (petIds.length === 0) {
+        return;
+      }
+
       // Validate vet exists and belongs to user
       await this.getVeterinarianById(vetId, userId);
 

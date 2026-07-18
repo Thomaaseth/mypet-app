@@ -58,7 +58,7 @@ export default function VetList() {
     try {
       const result = await createVetMutation.mutateAsync({
         vetData,
-        petIds,
+        petIds: petIds && petIds.length > 0 ? petIds : undefined,
       });
       setIsCreateDialogOpen(false);
       return result;

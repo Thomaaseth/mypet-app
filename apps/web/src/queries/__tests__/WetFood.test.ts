@@ -40,8 +40,6 @@ describe('Wet Food Queries', () => {
     resetMockWetFood();
   });
 
-  console.log('🧪 Wet Food Test suite loading');
-
   // ============================================
   // READ OPERATIONS (Queries)
   // ============================================
@@ -193,7 +191,6 @@ describe('Wet Food Queries', () => {
                   numberOfUnits: 12,
                   weightPerUnit: '85',
                   dailyAmount: '170',
-                  wetDailyAmountUnit: 'grams',
                   dateStarted: '2024-01-01',
                   dateFinished: null,
                   isActive: true,

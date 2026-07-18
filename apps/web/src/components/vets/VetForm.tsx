@@ -71,11 +71,15 @@ export default function VetForm({
         notes: formData.notes ?? '',
       };
       
-      // Pass pet assignment data to parent
-      await onSubmit(
-        transformedData,
-        selectedPetIds.length > 0 ? selectedPetIds : undefined,
-      );
+    // UNASSIGN BUG FIX (can't unassign last pet to vet):
+    //   undefined = assignment section wasn't rendered (user has no pets) → parent skips assignment logic
+    //   []        = user deliberately deselected all pets → parent must unassign them
+    // Collapsing [] into undefined previously made it impossible to unassign the last pet.
+    const petIdsToSubmit: string[] | undefined =
+      pets && pets.length > 0 ? selectedPetIds : undefined;
+
+    await onSubmit(transformedData, petIdsToSubmit);
+
     } catch (err) {
       console.error('Form submission error:', err);
     }

@@ -402,10 +402,21 @@ export class AppointmentsService {
         await this.verifyPetOwnership(updateData.petId, userId);
       }
 
-      // Verify vet assignment if vetId or petId is being updated
-      if (updateData.veterinarianId || updateData.petId) {
-        const vetId = updateData.veterinarianId || existingAppointment.veterinarianId;
-        const petId = updateData.petId || existingAppointment.petId;
+      // Verify vet assignment only when the vet or pet ACTUALLY changes.
+      // Re-submitting the existing (unchanged) veterinarianId must not be
+      // re-validated: the vet may have been soft-deleted since the appointment
+      // was created, and that appointment remains legitimate history.
+      // We validate transitions, not pre-existing state.
+      const vetChanged =
+        updateData.veterinarianId !== undefined &&
+        updateData.veterinarianId !== existingAppointment.veterinarianId;
+      const petChanged =
+        updateData.petId !== undefined &&
+        updateData.petId !== existingAppointment.petId;
+
+      if (vetChanged || petChanged) {
+        const vetId = updateData.veterinarianId ?? existingAppointment.veterinarianId;
+        const petId = updateData.petId ?? existingAppointment.petId;
         await this.verifyVetAssignment(vetId, petId, userId);
       }
 

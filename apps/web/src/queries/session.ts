@@ -62,9 +62,16 @@ export function useLogout() {
       authLogger.info('Logout successful');
     },
     onSuccess: () => {
-      // Clear session from cache
+      // BUG FIX COMMENTS:
+      // Notify mounted observers (navbar, etc.) that the session is gone —
+      // they re-render logged-out immediately. This is NOT redundant with
+      // clear() below: setQueryData notifies subscribers, while clear()
+      // removes all queries AND their subscribers WITHOUT notifying, leaving
+      // mounted components rendering stale logged-in data.
       queryClient.setQueryData(sessionKeys.current, null)
-      
+
+      // Then wipe the ENTIRE cache — all remaining data belongs to the
+      // logged-out user and must not survive into a next session.
       queryClient.clear()
     },
     onError: (error) => {
