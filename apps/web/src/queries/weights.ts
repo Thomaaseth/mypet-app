@@ -113,13 +113,14 @@ export function useDeleteWeightEntry(petId: string) {
   return useMutation({
     mutationFn: (weightId: string) => 
       weightApi.deleteWeightEntry(petId, weightId),
+    // Optimistic delete: cancel → snapshot → filter → rollback (onError) → invalidate (onSettled)
     onMutate: async (weightId) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: weightKeys.byPet(petId) })
 
       // Snapshot previous value
-      const previousData = queryClient.getQueryData(weightKeys.byPet(petId))
-
+      const previousData = queryClient.getQueryData<WeightEntry[]>(weightKeys.byPet(petId))
+      
       // Optimistically remove entry from cache
       queryClient.setQueryData<WeightEntry[]>(
         weightKeys.byPet(petId),

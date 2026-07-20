@@ -64,17 +64,6 @@ export function usePetVets(petId: string) {
   });
 }
 
-// Get veterinarian from cache (useful for optimistic updates)
-// NON-REACTIVE snapshot: reads the cache once at render time and does
-// NOT subscribe to changes. Safe for one-shot reads (seeding a form,
-// building optimistic updates); do NOT use it to *display* data, as the
-// component won't re-render when the cache updates. For reactive reads,
-// use useVeterinarian() — same key, deduped, no extra fetch.
-export function useVeterinarianFromCache(vetId: string) {
-  const queryClient = useQueryClient();
-  return queryClient.getQueryData<Veterinarian>(vetKeys.detail(vetId));
-}
-
 // ============================================
 // MUTATIONS (WRITE operations)
 // ============================================

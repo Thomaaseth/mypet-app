@@ -44,6 +44,11 @@ export default function WeightChart({
   filterSlot,
  }: WeightChartProps) {
 
+  
+  const isMobile = useIsMobile();
+  const { units, dateTimeLocale } = usePreferencesContext();
+  const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
+
   if (data.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 px-4">
@@ -63,10 +68,6 @@ export default function WeightChart({
       </div>
     );
   }
-
-  const isMobile = useIsMobile();
-  const { units, dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
   
   const weights = data.map(d => d.weight);
   const minWeight = weights.length > 0 ? Math.min(...weights) : 0;

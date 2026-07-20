@@ -24,7 +24,6 @@ import {
   useVeterinarian,
   useVetPets,
   usePetVets,
-  useVeterinarianFromCache,
   useCreateVeterinarian,
   useUpdateVeterinarian,
   useDeleteVeterinarian,
@@ -229,34 +228,6 @@ describe('Veterinarians Queries', () => {
       expect(result.current.isLoading).toBe(false);
       expect(result.current.data).toBeUndefined();
       expect(result.current.fetchStatus).toBe('idle');
-    });
-  });
-
-  describe('useVeterinarianFromCache', () => {
-    it('should return undefined when veterinarian not in cache', () => {
-      const { result } = renderHookWithQuery(() => useVeterinarianFromCache('vet-1'));
-
-      expect(result.current).toBeUndefined();
-    });
-
-    it('should return veterinarian from cache after fetching', async () => {
-      const vetId = 'vet-1';
-
-      const { result: fetchResult, queryClient } = renderHookWithQuery(() =>
-        useVeterinarian(vetId)
-      );
-
-      await waitFor(() => {
-        expect(fetchResult.current.isSuccess).toBe(true);
-      });
-
-      const { result: cacheResult } = renderHookWithQuery(
-        () => useVeterinarianFromCache(vetId),
-        { queryClient }
-      );
-
-      expect(cacheResult.current?.id).toBe(vetId);
-      expect(cacheResult.current?.vetName).toBe('Dr. Sarah Johnson');
     });
   });
 

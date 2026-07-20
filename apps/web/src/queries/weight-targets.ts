@@ -15,7 +15,7 @@ export function useWeightTarget(petId: string) {
     queryKey: weightTargetKeys.byPet(petId),
     queryFn: () => weightTargetApi.getWeightTarget(petId),
     enabled: !!petId,
-    staleTime: Infinity, // WILL NEED TO TEST CACHE INVALIDATION / REFETCH
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
   });
 }
@@ -27,20 +27,26 @@ export function useUpsertWeightTarget(petId: string) {
   return useMutation({
     mutationFn: (targetData: WeightTargetFormData) =>
       weightTargetApi.upsertWeightTarget(petId, targetData),
-    onSuccess: (data) => {
-      // Invalidate and refetch weight target
-      queryClient.invalidateQueries({ queryKey: weightTargetKeys.byPet(petId) });
-      
-      // Also invalidate weight entries (they may need to show the target on chart)
-      // TEST WITHOUT IT
-      // queryClient.invalidateQueries({ queryKey: ['weights', petId] });
+    onSuccess: (savedTarget) => {
+      // Seed the cache from the mutation response — the PUT returns the
+      // saved target in the same flat shape as the GET (no relations, no
+      // computed fields), so no refetch is needed. setQueryData notifies
+      // mounted observers: the chart's target zone updates synchronously.
+      queryClient.setQueryData<WeightTarget | null>(
+        weightTargetKeys.byPet(petId),
+        savedTarget
+      );
+
+      // Deliberately NOT invalidating ['weights', petId]: WeightChart
+      // receives the target as props from useWeightTarget — weight entries
+      // data doesn't contain the target, so refetching it would re-download
+      // identical data.
 
       toastService.success('Weight target saved successfully');
     },
     onError: (error) => {
       const appError = weightTargetErrorHandler(error);
       toastService.error(appError.message);
-      console.error('Error upserting weight target:', error);
     },
   });
 }
@@ -52,18 +58,20 @@ export function useDeleteWeightTarget(petId: string) {
   return useMutation({
     mutationFn: () => weightTargetApi.deleteWeightTarget(petId),
     onSuccess: () => {
-      // Invalidate and refetch weight target
-      queryClient.invalidateQueries({ queryKey: weightTargetKeys.byPet(petId) });
-      
-      // Also invalidate weight entries (chart needs to update)
-      queryClient.invalidateQueries({ queryKey: ['weights', petId] });
+      // After a successful delete, the target is null BY DEFINITION — no
+      // need to ask the server what we already know. Writing null notifies
+      // observers, so the chart's target zone disappears immediately.
+      queryClient.setQueryData<WeightTarget | null>(
+        weightTargetKeys.byPet(petId),
+        null
+      );
+
 
       toastService.success('Weight target deleted successfully');
     },
     onError: (error) => {
       const appError = weightTargetErrorHandler(error);
       toastService.error(appError.message);
-      console.error('Error deleting weight target:', error);
     },
   });
 }

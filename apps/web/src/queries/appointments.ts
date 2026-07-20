@@ -45,14 +45,6 @@ export function useLastVetForPet(petId: string, options?: { enabled?: boolean })
   });
 }
 
-// Get appointment from cache (useful for optimistic updates)
-export function useAppointmentFromCache(appointmentId: string) {
-  const queryClient = useQueryClient();
-  return queryClient.getQueryData<AppointmentWithRelations>(
-    appointmentKeys.detail(appointmentId)
-  );
-}
-
 // MUTATIONS (WRITE operations)
 
 // CREATE
@@ -162,14 +154,21 @@ export function useDeleteAppointment() {
 
   return useMutation({
     mutationFn: (appointmentId: string) => appointmentApi.deleteAppointment(appointmentId),
+    // Optimistic delete: cancel → snapshot → filter → rollback (onError) → invalidate (onSettled)
     onMutate: async (appointmentId) => {
-      // Cancel outgoing refetches for upcoming and past
-      await queryClient.cancelQueries({ queryKey: appointmentKeys.upcoming() });
-      await queryClient.cancelQueries({ queryKey: appointmentKeys.past() });
+      // Cancel outgoing refetches for upcoming and past (independent, run in parallel)
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: appointmentKeys.upcoming() }),
+        queryClient.cancelQueries({ queryKey: appointmentKeys.past() }),
+      ]);
 
       // Snapshot previous values
-      const previousUpcoming = queryClient.getQueryData(appointmentKeys.upcoming());
-      const previousPast = queryClient.getQueryData(appointmentKeys.past());
+      const previousUpcoming = queryClient.getQueryData<AppointmentWithRelations[]>(
+        appointmentKeys.upcoming()
+      );
+      const previousPast = queryClient.getQueryData<AppointmentWithRelations[]>(
+        appointmentKeys.past()
+      );
 
       // Optimistically remove appointment from both caches
       queryClient.setQueryData<AppointmentWithRelations[]>(

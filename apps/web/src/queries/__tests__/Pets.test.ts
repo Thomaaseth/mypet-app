@@ -33,13 +33,12 @@ import { resetMockPets } from '@/test/mocks/handlers';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
+
 describe('Pets Queries', () => {
 
   beforeEach(() => {
     resetMockPets();
   });
-
-  console.log('🧪 Test suite loading');
 
   // ============================================
   // READ OPERATIONS (Queries)
@@ -260,69 +259,82 @@ describe('Pets Queries', () => {
   });
 
   describe('useUpdatePet', () => {
-    it('should update pet and invalidate both list and detail caches', async () => {
-    const petId = 'pet-1';
-    
-    // STEP 1: Fetch pets list first
-    const { result: petsListResult, queryClient } = renderHookWithQuery(() => usePets());
-    
-    await waitFor(() => {
-      expect(petsListResult.current.isSuccess).toBe(true);
-    });
-    
-    expect(petsListResult.current.data).toHaveLength(2);
-    const originalPet = petsListResult.current.data?.find(p => p.id === petId);
-    expect(originalPet?.name).toBe('Fluffy'); // Original name
-    
-    // STEP 2: Fetch individual pet (so detail cache exists)
-    const { result: petDetailResult } = renderHookWithQuery(
-      () => usePet(petId),
-      { queryClient }
-    );
-    
-    await waitFor(() => {
-      expect(petDetailResult.current.isSuccess).toBe(true);
-    });
-    
-    expect(petDetailResult.current.data?.name).toBe('Fluffy');
-    
-    // STEP 3: Create update mutation with SAME queryClient
-    const { result: mutationResult } = renderHookWithQuery(
-      () => useUpdatePet(),
-      { queryClient }
-    );
+    it('should update pet, seed detail cache from response, and refetch only the list', async () => {
+      const petId = 'pet-1';
 
-    const updateData: Partial<PetFormData> = {
-      name: 'Fluffy Updated',
-      weight: '5.0',
-    };
+      // STEP 1: Mount list observer
+      const { result: petsListResult, queryClient } = renderHookWithQuery(() => usePets());
 
-    // STEP 4: Execute mutation
-    await waitFor(async () => {
+      await waitFor(() => {
+        expect(petsListResult.current.isSuccess).toBe(true);
+      });
+
+      expect(petsListResult.current.data).toHaveLength(2);
+      expect(petsListResult.current.data?.find((p) => p.id === petId)?.name).toBe('Fluffy');
+
+      // STEP 2: Mount detail observer so the detail cache entry exists
+      const { result: petDetailResult } = renderHookWithQuery(
+        () => usePet(petId),
+        { queryClient }
+      );
+
+      await waitFor(() => {
+        expect(petDetailResult.current.isSuccess).toBe(true);
+      });
+      expect(petDetailResult.current.data?.name).toBe('Fluffy');
+
+      // STEP 3: SENTINEL — from this point on, any GET /pets/:id would pull
+      // a poisoned name into the cache. The mutation must NOT trigger a
+      // detail refetch (detail is seeded from the PUT response; only the
+      // list is invalidated, with exact: true). If someone regresses the
+      // invalidation to the ['pets'] prefix, this test fails loudly.
+      server.use(
+        http.get(`${API_BASE_URL}/pets/:id`, () => {
+          return HttpResponse.json({
+            success: true,
+            data: {
+              pet: { ...mockPets[0], name: 'SENTINEL-DETAIL-WAS-REFETCHED' },
+            },
+            message: 'Pet retrieved successfully',
+          });
+        })
+      );
+
+      // STEP 4: Create mutation with SAME queryClient and execute directly
+      // (never inside waitFor — waitFor retries its callback)
+      const { result: mutationResult } = renderHookWithQuery(
+        () => useUpdatePet(),
+        { queryClient }
+      );
+
+      const updateData: Partial<PetFormData> = {
+        name: 'Fluffy Updated',
+        weight: '5.0',
+      };
+
       await mutationResult.current.mutateAsync({ petId, petData: updateData });
-    });
 
-    await waitFor(() => {
-      expect(mutationResult.current.isSuccess).toBe(true);
-    });
+      // STEP 5: List observer refetches with updated data (the one
+      // invalidation that SHOULD happen)
+      await waitFor(() => {
+        expect(petsListResult.current.data?.find((p) => p.id === petId)?.name).toBe(
+          'Fluffy Updated'
+        );
+      });
 
-    // STEP 5: Verify both caches were invalidated and refetched
-    // Both queries should exist
-    const listQueryState = queryClient.getQueryState(['pets']);
-    const detailQueryState = queryClient.getQueryState(['pets', petId]);
-    expect(listQueryState).toBeDefined();
-    expect(detailQueryState).toBeDefined();
-    
-    // STEP 6: Verify the data was updated (auto-refetch happened)
-    await waitFor(() => {
-      // List should reflect the update
-      const updatedPetInList = petsListResult.current.data?.find(p => p.id === petId);
-      expect(updatedPetInList?.name).toBe('Fluffy Updated');
-      
-      // Detail should reflect the update
-      expect(petDetailResult.current.data?.name).toBe('Fluffy Updated');
+      // STEP 6: Detail cache holds the PUT response — seeded, not refetched.
+      // Asserted at the cache layer (getQueryData) rather than via
+      // petDetailResult.current: with multiple renderHook roots under
+      // happy-dom, the 2nd root's rendered output doesn't reliably re-flush
+      // (see the equivalent note in Veterinarians.test.ts).
+      // If the name were 'SENTINEL-DETAIL-WAS-REFETCHED', a forbidden detail
+      // refetch occurred; if it were still 'Fluffy', the seed never happened.
+      const detailCacheData = queryClient.getQueryData<Pet>(['pets', petId]);
+      expect(detailCacheData?.name).toBe('Fluffy Updated');
+
+      // And the seed did not leave the detail entry marked stale-by-invalidation
+      expect(queryClient.getQueryState(['pets', petId])?.isInvalidated).toBe(false);
     });
-  });
 
     it('should handle update errors', async () => {
       server.use(

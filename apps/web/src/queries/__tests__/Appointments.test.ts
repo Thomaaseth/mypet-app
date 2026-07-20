@@ -11,7 +11,6 @@
  * 5. Optimistic updates (delete)
  * 6. Error handling (validation, network, not found)
  * 7. Loading states
- * 8. Cache operations (useAppointmentFromCache)
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -23,7 +22,6 @@ import {
   useAppointments,
   useAppointment,
   useLastVetForPet,
-  useAppointmentFromCache,
   useCreateAppointment,
   useUpdateAppointment,
   useUpdateVisitNotes,
@@ -252,38 +250,6 @@ describe('Appointments Queries', () => {
     });
   });
 
-  describe('useAppointmentFromCache', () => {
-    it('should return undefined when appointment not in cache', () => {
-      const { result } = renderHookWithQuery(() => {
-        return useAppointmentFromCache('appt-1');
-      });
-
-      expect(result.current).toBeUndefined();
-    });
-
-    it('should return appointment from cache after fetching', async () => {
-      const appointmentId = 'appt-1';
-      
-      // First fetch the appointment to populate cache
-      const { result: fetchResult, queryClient } = renderHookWithQuery(() => 
-        useAppointment(appointmentId)
-      );
-
-      await waitFor(() => {
-        expect(fetchResult.current.isSuccess).toBe(true);
-      });
-
-      // Now get from cache
-      const { result: cacheResult } = renderHookWithQuery(
-        () => useAppointmentFromCache(appointmentId),
-        { queryClient }
-      );
-
-      expect(cacheResult.current).toBeDefined();
-      expect(cacheResult.current?.id).toBe(appointmentId);
-      expect(cacheResult.current?.appointmentType).toBe('checkup');
-    });
-  });
 
   // ============================================
   // WRITE OPERATIONS (Mutations)

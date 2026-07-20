@@ -733,52 +733,49 @@ describe('Weight Targets Queries', () => {
       expect(weightTargetKeys.byPet(petId)).toEqual(['weight-targets', petId]);
     });
 
-    it('should invalidate only weight target cache on upsert (not weights)', async () => {
-      const { result: targetQueryResult, queryClient } = renderHookWithQuery(() => 
+    it('should seed only the weight target cache on upsert — weights untouched', async () => {
+      const { result: targetQueryResult, queryClient } = renderHookWithQuery(() =>
         useWeightTarget(TEST_PET_ID)
       );
-      
       await waitFor(() => {
         expect(targetQueryResult.current.isSuccess).toBe(true);
       });
 
-      // Set mock data for weight entries cache
       queryClient.setQueryData(['weights', TEST_PET_ID], []);
-      
+
       const { result: mutationResult } = renderHookWithQuery(
         () => useUpsertWeightTarget(TEST_PET_ID),
         { queryClient }
       );
 
-      const targetData: WeightTargetFormData = {
+      await mutationResult.current.mutateAsync({
         minWeight: '4.0',
         maxWeight: '5.0',
         weightUnit: 'kg',
-      };
+      });
 
-      await mutationResult.current.mutateAsync(targetData);
+      // Target cache seeded with new data
+      expect(
+        queryClient.getQueryData<WeightTarget | null>(weightTargetKeys.byPet(TEST_PET_ID))
+          ?.minWeight
+      ).toBe('4.0');
 
-      // Weight target cache should be invalidated
-      const targetQueryState = queryClient.getQueryState(weightTargetKeys.byPet(TEST_PET_ID));
-      expect(targetQueryState).toBeDefined();
-
-      // Weight entries cache should still exist (not invalidated)
-      const weightsCache = queryClient.getQueryData(['weights', TEST_PET_ID]);
-      expect(weightsCache).toBeDefined();
+      // Weights cache: still present AND not marked stale-by-invalidation —
+      // pins the removal of the ['weights', petId] invalidation
+      expect(queryClient.getQueryData(['weights', TEST_PET_ID])).toEqual([]);
+      expect(queryClient.getQueryState(['weights', TEST_PET_ID])?.isInvalidated).toBe(false);
     });
 
-    it('should invalidate only weight target cache on delete (not weights)', async () => {
-      const { result: targetQueryResult, queryClient } = renderHookWithQuery(() => 
+    it('should touch only the weight target cache on delete — weights untouched', async () => {
+      const { result: targetQueryResult, queryClient } = renderHookWithQuery(() =>
         useWeightTarget(TEST_PET_ID)
       );
-      
       await waitFor(() => {
         expect(targetQueryResult.current.isSuccess).toBe(true);
       });
 
-      // Set mock data for weight entries cache
       queryClient.setQueryData(['weights', TEST_PET_ID], []);
-      
+
       const { result: mutationResult } = renderHookWithQuery(
         () => useDeleteWeightTarget(TEST_PET_ID),
         { queryClient }
@@ -786,15 +783,14 @@ describe('Weight Targets Queries', () => {
 
       await mutationResult.current.mutateAsync();
 
-      // Weight target cache should be invalidated
-      const targetQueryState = queryClient.getQueryState(weightTargetKeys.byPet(TEST_PET_ID));
-      expect(targetQueryState).toBeDefined();
+      expect(
+        queryClient.getQueryData<WeightTarget | null>(weightTargetKeys.byPet(TEST_PET_ID))
+      ).toBeNull();
 
-      // Weight entries cache should still exist (not invalidated)
-      const weightsCache = queryClient.getQueryData(['weights', TEST_PET_ID]);
-      expect(weightsCache).toBeDefined();
+      // Pins the removal of the delete-side ['weights', petId] invalidation
+      expect(queryClient.getQueryData(['weights', TEST_PET_ID])).toEqual([]);
+      expect(queryClient.getQueryState(['weights', TEST_PET_ID])?.isInvalidated).toBe(false);
     });
-
     it('should not invalidate other pets target caches', async () => {
       const otherPetId = 'pet-2';
       

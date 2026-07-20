@@ -82,10 +82,16 @@ export function useUpdatePet() {
         return petApi.updatePet(petId, transformedData)
       },
       onSuccess: (updatedPet) => {
-        // Invalidate both list and detail queries
-        queryClient.invalidateQueries({ queryKey: petKeys.all })
-        queryClient.invalidateQueries({ queryKey: petKeys.detail(updatedPet.id) })
-        
+        // Seed the detail cache directly from the server response — the PUT
+        // returns the same plain Pet row shape as GET /pets/:id, so this is
+        // safe and saves a refetch (see: updates from mutation responses)
+        queryClient.setQueryData<Pet>(petKeys.detail(updatedPet.id), updatedPet)
+
+        // Refetch ONLY the list. exact: true is load-bearing: without it,
+        // the ['pets'] prefix would also invalidate the detail key we just
+        // seeded (undoing the optimization) plus signed-url entries.
+        queryClient.invalidateQueries({ queryKey: petKeys.all, exact: true })
+
         toastService.success('Pet updated', `${updatedPet.name}'s information has been updated!`)
       },
       onError: (error) => {
@@ -101,6 +107,7 @@ export function useDeletePet() {
   
     return useMutation({
       mutationFn: (petId: string) => petApi.deletePet(petId),
+      // Optimistic delete: cancel → snapshot → filter → rollback (onError) → invalidate (onSettled)
       onMutate: async (petId) => {
         // Cancel outgoing refetches
         await queryClient.cancelQueries({ queryKey: petKeys.all })
@@ -119,7 +126,7 @@ export function useDeletePet() {
         // Return context with previous data for rollback
         return { previousPets }
       },
-      onError: (error, petId, context) => {
+      onError: (error, _petId, context) => {
         // Rollback on error
         if (context?.previousPets) {
           queryClient.setQueryData(petKeys.all, context.previousPets)

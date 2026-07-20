@@ -59,6 +59,7 @@ export function useDeletePetNote(petId: string) {
 
     return useMutation({
         mutationFn: (noteId: string) => petNoteApi.deleteNote(petId, noteId),
+        // Optimistic delete: cancel → snapshot → filter → rollback (onError) → invalidate (onSettled)
         onMutate: async (noteId) => {
             // cancel outgoing refetches
             await queryClient.cancelQueries({ queryKey: petNoteKeys.byPet(petId) });

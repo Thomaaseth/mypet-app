@@ -134,7 +134,6 @@ export async function makeAuthenticatedRequest<TResponse = unknown>(
       apiLogger.warn('Unauthenticated API request — session may have expired', { endpoint });
       queryClient.setQueryData(sessionKeys.current, null);
       window.location.href = '/login';
-      return new Promise(() => {}); // never resolves — page is redirecting anyway
     }
     throw error;
   }
