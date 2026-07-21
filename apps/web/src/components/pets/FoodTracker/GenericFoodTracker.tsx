@@ -4,12 +4,12 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Plus, AlertCircle, UtensilsCrossed, Loader2 } from 'lucide-react';
 import { useErrorState } from '@/hooks/useErrorsState';
 import { FoodEntriesSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { foodErrorHandler } from '@/lib/api/domains/food';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { SectionTitle, EmptyStateTitle, EmptyStateDescription } from '@/components/ui/typography';
+import { SectionTitle } from '@/components/ui/typography';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 
 // Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
@@ -64,7 +64,6 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
 
 
 export function GenericFoodTracker<TEntry, TFormData>({
-  foodType,
   hookResult,
   FormComponent,
   ListComponent,
@@ -156,7 +155,7 @@ const hasFinishedEntries = finishedFoodEntries.length > 0;
 if (!hasActiveEntries) {
   // No active entries - show CTA (button is always enabled here)
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <SectionTitle>{labels.entriesTitle}</SectionTitle>
       </div>
@@ -169,36 +168,23 @@ if (!hasActiveEntries) {
         </Alert>
       )}
 
-      {/* Empty State - Match food entry card size */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center">
-            <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
-              <UtensilsCrossed className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <EmptyStateTitle className="mb-2">{labels.emptyTitle}</EmptyStateTitle>
-            <EmptyStateDescription className="mb-4">
-              {labels.emptyDescription}
-            </EmptyStateDescription>
-            
-            <Button className="min-w-[140px]" size="sm" onClick={() => setIsAddDialogOpen(true)}>
-              {isCreating ? (
-                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Adding...</>
-              ) : (
-                <><Plus className="h-4 w-4" />{labels.emptyButtonText}</>
-              )}
-            </Button>
-            <ResponsiveDialog
-              open={isAddDialogOpen}
-              onOpenChange={setIsAddDialogOpen}
-              title={labels.dialogTitle}
-              description={labels.dialogDescription}
-            >
-              <FormComponent onSubmit={handleCreateEntry} isLoading={isCreating} />
-            </ResponsiveDialog>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Empty State CTA */}
+      <EmptyStateCta
+          icon={UtensilsCrossed}
+          title={labels.emptyTitle}
+          description={labels.emptyDescription}
+          buttonLabel={labels.emptyButtonText}
+          onAction={() => setIsAddDialogOpen(true)}
+        />
+      
+      <ResponsiveDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        title={labels.dialogTitle}
+        description={labels.dialogDescription}
+      >
+        <FormComponent onSubmit={handleCreateEntry} isLoading={isCreating} />
+      </ResponsiveDialog>
 
       {/* Show history if exists */}
       {hasFinishedEntries && (

@@ -7,9 +7,7 @@ import {
 } from '@/components/ui/chart';
 import type { WeightChartData } from '@/queries/weights';
 import type { WeightUnit } from '@/types/pet';
-import { Button } from '@/components/ui/button';
-import { EmptyStateTitle, 
-  EmptyStateDescription, 
+import { 
   StatLabel, 
   StatValue, 
   MetricLabel, 
@@ -23,19 +21,22 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatDateForDisplay, formatChartTickMonthYear } from '@/lib/utils/date-formatting';
 import { formatWeight } from '@/lib/validations/pet';
+import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 
 interface WeightChartProps {
   data: WeightChartData[]; // pre-filtered by parent based on selected time range
+  hasAnyEntries: boolean;
   weightUnit: WeightUnit;
   targetWeightMin?: number;
   targetWeightMax?: number;
-  onAddEntry?: () => void;
+  onAddEntry: () => void;
   latestWeight: { weight: number; date: string }; // always the true latest, not affected by filtering
   filterSlot?: ReactNode;
 }
 
 export default function WeightChart({ 
   data, 
+  hasAnyEntries,
   weightUnit,
   targetWeightMin,
   targetWeightMax, 
@@ -49,23 +50,17 @@ export default function WeightChart({
   const { units, dateTimeLocale } = usePreferencesContext();
   const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
 
-  if (data.length === 0) {
+  if (data.length === 0 && !hasAnyEntries) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 px-4">
-        <div className="rounded-full bg-muted p-3 mb-4">
-          <TrendingUp className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <EmptyStateTitle className="mb-2">No weight tracked yet</EmptyStateTitle>
-        <EmptyStateDescription className="text-center mb-6">
-          Add your first weight entry to start tracking your pet&apos;s weight progress.
-        </EmptyStateDescription>
-        {onAddEntry && (
-          <Button size="sm" onClick={onAddEntry}>
-            <Plus className="h-4 w-4" />
-            Add First Entry
-          </Button>
-        )}
-      </div>
+      <div className="mt-6">
+      <EmptyStateCta
+        icon={TrendingUp}
+        title="No weight tracked yet"
+        description="Add your first weight entry to start tracking your pet's weight progress."
+        buttonLabel="Add First Entry"
+        onAction={onAddEntry}
+      />
+     </div>
     );
   }
   
@@ -115,17 +110,17 @@ export default function WeightChart({
 
         {/* Chart */}
         {chartData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[220px] sm:h-[300px]">
+          <div className="flex flex-col items-center justify-center h-[150px] sm:h-[160px]">
             <HelperText>No entries in this period</HelperText>
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] w-full">
+          <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full">
                   <LineChart
                       accessibilityLayer
                       data={chartData}
                       margin={{
                         top: 5,
-                        left: 0,
+                        left: 8,
                         right: 8,
                         bottom: 5,
                     }}

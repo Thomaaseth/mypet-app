@@ -69,7 +69,7 @@ export default function WeightForm({
           step="0.01"
           min="0"
           placeholder="Enter weight"
-          className="pr-12"
+          className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('weight')}
           aria-invalid={!!errors.weight}
         />

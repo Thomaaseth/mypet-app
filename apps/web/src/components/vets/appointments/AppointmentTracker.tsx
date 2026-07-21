@@ -18,6 +18,7 @@ import DeleteAppointmentDialog from './DeleteAppointmentDialog';
 import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
 import { EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 import { AppointmentTrackerSkeleton } from '@/components/ui/skeletons/AppointmentSkeleton';
+import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 
 export default function AppointmentTracker() {
   const { data: upcomingAppointments } = useAppointments('upcoming');
@@ -130,17 +131,13 @@ export default function AppointmentTracker() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8">
-              <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <EmptyStateTitle className="mb-2">No appointments yet</EmptyStateTitle>
-              <EmptyStateDescription className="mb-4">
-                Schedule your first vet appointment
-              </EmptyStateDescription>
-              <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
-                <Plus className="h-4 w-4" />
-                Book Appointment
-              </Button>
-            </div>
+            <EmptyStateCta
+              icon={Calendar}
+              title="No appointments yet"
+              description="Schedule your first vet appointment"
+              buttonLabel="Book Appointment"
+              onAction={() => setIsCreateDialogOpen(true)}
+            />
           </CardContent>
         </Card>
       </>

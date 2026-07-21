@@ -122,7 +122,7 @@ export default function TargetRangeForm({
                 step="0.01"
                 min="0"
                 placeholder={`Enter minimum weight`}
-                className="pr-12"
+                className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 {...register('minWeight')}
                 aria-invalid={!!errors.minWeight}
               />
@@ -145,7 +145,7 @@ export default function TargetRangeForm({
                 step="0.01"
                 min="0"
                 placeholder={`Enter maximum weight`}
-                className="pr-12"
+                className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 {...register('maxWeight')}
                 aria-invalid={!!errors.maxWeight}
               />

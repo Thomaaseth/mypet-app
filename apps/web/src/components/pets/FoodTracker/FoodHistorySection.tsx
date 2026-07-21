@@ -164,7 +164,7 @@ export function FoodHistorySection({
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
-                          {formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />/day
+                          {formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit}/>/day
                         </span>
                       </>
                     )}

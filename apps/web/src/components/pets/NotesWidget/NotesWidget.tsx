@@ -21,6 +21,7 @@ import type { PetNote } from '@/types/pet-notes';
 import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/ui/typography';
 import { Textarea } from '@/components/ui/textarea';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 
 const MAX_CONTENT_LENGTH = 200;
 const MAX_NOTES = 20;
@@ -267,19 +268,13 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
           ))
         ) : (
           !isAdding && (
-            <div className="text-center py-8">
-              <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
-                <NotebookPen className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <EmptyStateTitle className="mb-1">No notes yet</EmptyStateTitle>
-              <EmptyStateDescription className="mb-4">
-                Add things you want to remember about your pet.
-              </EmptyStateDescription>
-              <Button size="sm" onClick={handleStartAdd} disabled={isAdding}>
-                <Plus className="h-4 w-4" />
-                Add note
-              </Button>
-            </div>
+            <EmptyStateCta
+              icon={NotebookPen}
+              title="No notes yet"
+              description="Add things you want to remember about your pet."
+              buttonLabel="Add note"
+              onAction={handleStartAdd}
+            />
           )
         )}
 

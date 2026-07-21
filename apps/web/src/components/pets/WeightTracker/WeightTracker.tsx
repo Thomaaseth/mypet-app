@@ -294,7 +294,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-4">
       <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -315,6 +315,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
           <CardContent>
         <WeightChart 
           data={filteredChartData} 
+          hasAnyEntries={weightEntries.length > 0}
           weightUnit={weightUnit}
           targetWeightMin={targetWeightMinDisplay}
           targetWeightMax={targetWeightMaxDisplay}

@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
-import { wetFoodSchema } from '@/lib/validations/food';
 import { ErrorText } from '@/components/ui/typography';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
@@ -78,7 +77,7 @@ export function WetFoodForm({
           min="1"
           step="0.01"
           placeholder="e.g., 12"
-          className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="pr-12"
           {...register('numberOfUnits')}
         />
         {errors.numberOfUnits && <ErrorText>{errors.numberOfUnits.message}</ErrorText>}

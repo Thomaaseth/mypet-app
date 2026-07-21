@@ -232,7 +232,7 @@ export function DryFoodList({
   
       {/* History Section - Always show if there are finished entries */}
       {finishedEntries.length > 0 && (
-        <div className="mt-2">
+        <div className="mt-4">
         <FoodHistorySection 
           entries={finishedEntries}
           foodType="dry"
