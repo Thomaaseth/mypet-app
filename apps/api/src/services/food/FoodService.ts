@@ -517,6 +517,7 @@ export class FoodService {
       }
   }
 
+  // dateFinished defaults to today; use updateFinishDate to correct it afterward
   static async markFoodAsFinished(
     petId: string, 
     foodId: string, 

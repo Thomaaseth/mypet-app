@@ -75,6 +75,17 @@ export function formatFeedingStatusMessage(
 }
 
 /**
+ * Builds the finish-date success toast message for dry/wet food entries.
+ * Shared by useUpdateDryFoodFinishDate and useUpdateWetFoodFinishDate
+ */
+export function buildFinishDateToastMessage(entry: DryFoodEntry | WetFoodEntry): string {
+  const expectedDays = calculateExpectedDays(entry);
+  const statusLabel = getFeedingStatusLabel(entry.feedingStatus!);
+
+  return `Finished! Consumed in ${entry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`;
+}
+
+/**
  * Format weight with smart decimal precision
  * - < 0.1: 3 decimals (ex 0.009 kg)
  * - < 1: 2 decimals (ex 0.45 kg)

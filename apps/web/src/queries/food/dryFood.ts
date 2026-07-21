@@ -3,7 +3,7 @@ import { dryFoodApi, foodApi, foodErrorHandler } from '@/lib/api/domains/food'
 import { toastService } from '@/lib/toast'
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food'
 import { foodKeys } from './index'
-import { calculateExpectedDays } from '@/lib/utils/food-formatting'
+import { buildFinishDateToastMessage } from '@/lib/utils/food-formatting'
 
 // DRY FOOD QUERIES
 // Fetch active dry food entries
@@ -102,11 +102,15 @@ export function useMarkDryFoodFinished(petId: string) {
   return useMutation({
     mutationFn: (foodId: string) => 
       foodApi.markFoodAsFinished(petId, foodId),
-    onSuccess: () => {
+    onSuccess: (updatedEntry) => {
       queryClient.invalidateQueries({ queryKey: foodKeys.dryActive(petId) })
       queryClient.invalidateQueries({ queryKey: foodKeys.dryFinished(petId) })
-      toastService.success('Dry food marked as finished')
-    },
+      toastService.success(
+        updatedEntry.feedingStatus
+          ? buildFinishDateToastMessage(updatedEntry)
+          : 'Dry food marked as finished'
+      )
+    },   
     onError: (error) => {
       const appError = foodErrorHandler(error)
       toastService.error('Failed to mark as finished', appError.message)
@@ -123,27 +127,14 @@ export function useUpdateDryFoodFinishDate(petId: string) {
       dateFinished: string 
     }) => foodApi.updateFinishDate(petId, foodId, dateFinished),
     onSuccess: (updatedEntry) => {
-      const dryEntry = updatedEntry as DryFoodEntry
-
-      queryClient.invalidateQueries({ queryKey: foodKeys.dryFinished(petId) })
-      
-      // Show detailed toast with feeding status
-      if (dryEntry.feedingStatus) {
-        const expectedDays = calculateExpectedDays(dryEntry)
-        const statusLabel = 
-          dryEntry.feedingStatus === 'overfeeding' ? 'Overfeeding' :
-          dryEntry.feedingStatus === 'slightly-over' ? 'Slightly Over' :
-          dryEntry.feedingStatus === 'underfeeding' ? 'Underfeeding' :
-          dryEntry.feedingStatus === 'slightly-under' ? 'Slightly Under' :
-          'Normal feeding'
-        
+        queryClient.invalidateQueries({ queryKey: foodKeys.dryFinished(petId) })
+  
         toastService.success(
-          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
+          updatedEntry.feedingStatus
+            ? buildFinishDateToastMessage(updatedEntry)
+            : 'Finish date updated successfully'
         )
-      } else {
-        toastService.success('Finish date updated successfully')
-      }
-    },
+      },
     onError: (error) => {
       const appError = foodErrorHandler(error)
       toastService.error('Failed to update finish date', appError.message)

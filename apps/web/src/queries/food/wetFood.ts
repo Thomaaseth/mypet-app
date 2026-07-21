@@ -1,10 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { wetFoodApi, foodApi, foodErrorHandler } from '@/lib/api/domains/food'
 import { toastService } from '@/lib/toast'
-import type { WetFoodEntry, WetFoodFormData } from '@/types/food'
+import type { WetFoodFormData } from '@/types/food'
 import { foodKeys } from './index'
-import { calculateExpectedDays } from '@/lib/utils/food-formatting'
-import { dryFoodSchema } from '@/lib/validations/food'
+import { buildFinishDateToastMessage } from '@/lib/utils/food-formatting'
 
 // WET FOOD QUERIES
 // Fetch active wet food entries
@@ -105,10 +104,14 @@ export function useMarkWetFoodFinished(petId: string) {
   return useMutation({
     mutationFn: (foodId: string) => 
         foodApi.markFoodAsFinished(petId, foodId),
-    onSuccess: () => {
+    onSuccess: (updatedEntry) => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
       queryClient.invalidateQueries({ queryKey: foodKeys.wetFinished(petId) })
-      toastService.success('Wet food marked as finished')
+      toastService.success(
+        updatedEntry.feedingStatus
+          ? buildFinishDateToastMessage(updatedEntry)
+          : 'Dry food marked as finished'
+      )    
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
@@ -126,26 +129,13 @@ export function useUpdateWetFoodFinishDate(petId: string) {
       dateFinished: string 
     }) => foodApi.updateFinishDate(petId, foodId, dateFinished),
     onSuccess: (updatedEntry) => {
-      const wetEntry = updatedEntry as WetFoodEntry
-
       queryClient.invalidateQueries({ queryKey: foodKeys.wetFinished(petId) })
-      
-      // Show detailed toast
-      if (wetEntry.feedingStatus) {
-        const expectedDays = calculateExpectedDays(wetEntry)
-        const statusLabel = 
-          wetEntry.feedingStatus === 'overfeeding' ? 'Overfeeding' :
-          wetEntry.feedingStatus === 'slightly-over' ? 'Slightly Over' :
-          wetEntry.feedingStatus === 'underfeeding' ? 'Underfeeding' :
-          wetEntry.feedingStatus === 'slightly-under' ? 'Slightly Under' :
-          'Normal feeding'
-        
-        toastService.success(
-          `✅ Finished! Consumed in ${updatedEntry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`
-        )
-      } else {
-        toastService.success('Finish date updated successfully')
-      }
+
+      toastService.success(
+        updatedEntry.feedingStatus
+          ? buildFinishDateToastMessage(updatedEntry)
+          : 'Finish date updated successfully'
+      )
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
