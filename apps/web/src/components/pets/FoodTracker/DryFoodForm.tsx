@@ -1,3 +1,4 @@
+import { Controller } from 'react-hook-form';
 import { useDryFoodForm } from '@/hooks/useDryFoodForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { ErrorText } from '@/components/ui/typography';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface DryFoodFormProps {
   dryFoodEntry?: DryFoodEntry;
@@ -27,6 +29,7 @@ export function DryFoodForm({
     register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useDryFoodForm({ dryFoodEntry });
   
   const onFormSubmit = async (data: DryFoodFormData) => {
@@ -99,13 +102,19 @@ export function DryFoodForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="dateStarted">Date Started</Label>
-        <Input
-          id="dateStarted"
-          type="date"
-          max={getTodayDateString()}
-          {...register('dateStarted')}
-          aria-invalid={!!errors.dateStarted}
+      <Label htmlFor="dateStarted">Date Started</Label>
+        <Controller
+          name="dateStarted"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              id="dateStarted"
+              value={field.value}
+              onChange={field.onChange}
+              maxDate={getTodayDateString()}
+              aria-invalid={!!errors.dateStarted}
+            />
+          )}
         />
         {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
       </div>

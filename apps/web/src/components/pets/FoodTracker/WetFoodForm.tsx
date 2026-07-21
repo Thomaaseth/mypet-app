@@ -1,3 +1,4 @@
+import { Controller } from 'react-hook-form';
 import { useWetFoodForm } from '@/hooks/useWetFoodForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { ErrorText } from '@/components/ui/typography';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface WetFoodFormProps {
   wetFoodEntry?: WetFoodEntry; // If provided, we're editing
@@ -28,6 +30,7 @@ export function WetFoodForm({
     handleSubmit,
     watch,
     formState: { errors },
+    control,
   } = useWetFoodForm({ wetFoodEntry });
 
   const onFormSubmit = async (data: WetFoodFormData) => {
@@ -138,12 +141,18 @@ export function WetFoodForm({
       {/* Date Started */}
       <div className="space-y-2">
         <Label htmlFor="dateStarted">Date Started</Label>
-        <Input
-          id="dateStarted"
-          type="date"
-          max={getTodayDateString()}
-          {...register('dateStarted')}
-          aria-invalid={!!errors.dateStarted}
+        <Controller
+          name="dateStarted"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              id="dateStarted"
+              value={field.value}
+              onChange={field.onChange}
+              maxDate={getTodayDateString()}
+              aria-invalid={!!errors.dateStarted}
+            />
+          )}
         />
         {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
       </div>

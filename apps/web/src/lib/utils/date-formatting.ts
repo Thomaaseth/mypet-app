@@ -4,6 +4,16 @@ export const parseDateOnly = (dateString: string): Date => {
     const [year, month, day] = dateString.split('-').map(Number);
     return new Date(year, month - 1, day); // monthIndex is 0-based (Jan = 0)
   };
+
+// Local-safe Date -> "YYYY-MM-DD". Avoids .toISOString(), which converts to UTC
+// first and can shift the date by ±1 day depending on the user's timezone offset.
+export const toLocalDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
   
   export const SHORT_DATE_DISPLAY_OPTIONS: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -24,18 +34,13 @@ export const parseDateOnly = (dateString: string): Date => {
     options: Intl.DateTimeFormatOptions = SHORT_DATE_DISPLAY_OPTIONS
   ): string => parseDateOnly(dateString).toLocaleDateString(locale, options);
   
-  export const formatDateForInput = (dateString: string): string =>
-    new Date(dateString).toISOString().split('T')[0];
+  // UTC 
+  // export const formatDateForInput = (dateString: string): string =>
+  //   new Date(dateString).toISOString().split('T')[0];
   
 
   // local - browser/system anchored "today"
-  export const getTodayDateString = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+  export const getTodayDateString = (): string => toLocalDateString(new Date());
 
   export const formatChartTickMonthYear = (timestampMs: number): string => {
     const date = new Date(timestampMs);

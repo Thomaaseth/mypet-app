@@ -35,7 +35,7 @@ import {
   mockVeterinarians,
   resetMockAppointments 
 } from '@/test/mocks/handlers';
-import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
+import type { AppointmentFormData } from '@/types/appointments';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 

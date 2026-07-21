@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface EditFinishDateDialogProps {
   entry: DryFoodEntry | WetFoodEntry;
@@ -63,24 +64,21 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid gap-2">
           <Label htmlFor="dateStarted">Start Date (Reference)</Label>
-          <Input
+           <DatePicker
             id="dateStarted"
-            type="date"
             value={entry.dateStarted}
+            onChange={() => {}}
             disabled
-            className="bg-muted"
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="dateFinished">Finish Date</Label>
-          <Input
+        <Label htmlFor="dateFinished">Finish Date</Label>
+          <DatePicker
             id="dateFinished"
-            type="date"
             value={dateFinished}
-            onChange={(e) => setDateFinished(e.target.value)}
-            min={minDate}
-            max={maxDate}
-            required
+            onChange={setDateFinished}
+            minDate={minDate}
+            maxDate={maxDate}
           />
           <HelperText>Between {minDate} and {maxDate}</HelperText>
         </div>

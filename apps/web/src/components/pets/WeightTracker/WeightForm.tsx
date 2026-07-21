@@ -1,3 +1,4 @@
+import { Controller } from 'react-hook-form';
 import { useWeightForm } from '@/hooks/useWeightForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import type { WeightEntry, WeightFormData } from '@/types/weights';
 import { ErrorText, HelperText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
@@ -32,6 +34,7 @@ export default function WeightForm({
     handleSubmit,
     formState: { errors },
     resetToEmpty,
+    control,
   } = useWeightForm({ animalType, weightEntry });
 
 
@@ -81,11 +84,6 @@ export default function WeightForm({
         {errors.weight && (
           <ErrorText>{errors.weight.message}</ErrorText>
         )}
-          {/* <HelperText>
-            Maximum: {weightUnit === 'kg'
-              ? (animalType === 'cat' ? '15kg' : '90kg')
-              : (animalType === 'cat' ? '33lbs' : '198lbs')}
-          </HelperText> */}
       </div>
       
       {/* Weight Unit */}
@@ -94,12 +92,18 @@ export default function WeightForm({
       {/* Date */}
       <div className="space-y-2">
         <Label htmlFor="date">Date</Label>
-        <Input
-          id="date"
-          type="date"
-          max={getTodayDateString()} // Prevent future dates
-          {...register('date')}
-          aria-invalid={!!errors.date}
+        <Controller
+          name="date"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              id="date"
+              value={field.value}
+              onChange={field.onChange}
+              maxDate={getTodayDateString()}
+              aria-invalid={!!errors.date}
+            />
+          )}
         />
         {errors.date && (
           <ErrorText>{errors.date.message}</ErrorText>

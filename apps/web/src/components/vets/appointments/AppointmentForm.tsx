@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAppointmentForm } from '@/hooks/useAppointmentForm';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -23,6 +22,8 @@ import { useLastVetForPet } from '@/queries/appointments';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatTimeForDisplay } from '@/lib/validations/appointments';
+import { Controller } from 'react-hook-form';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface AppointmentFormProps {
   appointment?: AppointmentWithRelations;
@@ -62,6 +63,7 @@ export default function AppointmentForm({
     formState: { errors },
     setValue,
     watch,
+    control,
   } = useAppointmentForm({ appointment, defaultValues: prefilledPetId ? { petId: prefilledPetId } : undefined });
 
   const selectedPetId = watch('petId');
@@ -179,12 +181,18 @@ export default function AppointmentForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="appointmentDate">Date</Label>
-          <Input
-            id="appointmentDate"
-            type="date"
-            {...register('appointmentDate')}
-            aria-invalid={!!errors.appointmentDate}
-            disabled={isPastAppointment || isLoading}
+          <Controller
+            name="appointmentDate"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                id="appointmentDate"
+                value={field.value}
+                onChange={field.onChange}
+                disabled={isPastAppointment || isLoading}
+                aria-invalid={!!errors.appointmentDate}
+              />
+            )}
           />
           {errors.appointmentDate && (
             <p className="text-sm text-destructive">{errors.appointmentDate.message}</p>
@@ -214,7 +222,7 @@ export default function AppointmentForm({
           )}
         </div>
       </div>
-
+      
       {/* Appointment Type */}
       <div className="space-y-2">
         <Label htmlFor="appointmentType">Appointment Type</Label>

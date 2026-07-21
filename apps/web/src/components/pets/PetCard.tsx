@@ -113,14 +113,14 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
           </DropdownMenu>
         </div>
         </CardHeader>
-        <CardContent className="pt-1 px-4 pb-4">
 
+        <CardContent className="pt-1 px-4 pb-4">
         {/* Photo left, info right on mobile/tablet — stacked on desktop */}
-        <div className="flex gap-3 lg:flex-col lg:gap-0">
+        <div className="flex flex-col @min-[380px]:flex-row gap-3">
 
           {/* Photo */}
-          <div className="flex-shrink-0 w-[45%] aspect-square lg:w-full lg:aspect-square lg:mb-3">
-            {signedUrl && !imageError ? (
+          <div className="flex-shrink-0 w-full aspect-square @min-[380px]:w-[45%] @min-[380px]:aspect-square">
+          {signedUrl && !imageError ? (
               <img
                 src={signedUrl}
                 alt={`Photo of ${pet.name}`}

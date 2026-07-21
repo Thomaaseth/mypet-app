@@ -1,3 +1,4 @@
+import { Controller } from 'react-hook-form';
 import { z } from 'zod'
 import { usePetForm } from '@/hooks/usePetForm';
 import { Button } from '@/components/ui/button';
@@ -18,8 +19,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { Pet, PetFormData } from '@/types/pet';
 import { commonSpeciesSuggestions, petFormSchema } from '@/lib/validations/pet';
 import { PetImageUpload } from '@/components/pets/PetImageUpload';
-import { MutedText, ErrorText, HelperText } from '../ui/typography';
+import { ErrorText, HelperText } from '../ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
+import { DatePicker } from '@/components/ui/date-picker';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 interface PetFormProps {
   pet?: Pet; // if provided, we're editing
@@ -47,6 +50,7 @@ export default function PetForm({
     setValue,
     watch,
     clearErrors,
+    control,
   } = usePetForm({ pet });
 
   const isEditing = !!pet;
@@ -213,12 +217,19 @@ export default function PetForm({
 
       {/* Birth Date */}
       <div className="space-y-2">
-        <Label htmlFor="birthDate">Birth Date</Label>
-        <Input
-          id="birthDate"
-          type="date"
-          {...register('birthDate')}
-          aria-invalid={!!errors.birthDate}
+      <Label htmlFor="birthDate">Birth Date</Label>
+        <Controller
+          name="birthDate"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              id="birthDate"
+              value={field.value}
+              onChange={field.onChange}
+              maxDate={getTodayDateString()}
+              aria-invalid={!!errors.birthDate}
+            />
+          )}
         />
         {errors.birthDate && (
           <ErrorText>{errors.birthDate.message}</ErrorText>
