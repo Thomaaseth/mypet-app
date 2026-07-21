@@ -31,22 +31,6 @@ export class WeightValidator {
 
     return weightNum;
   }
-
-  validateDate(date: string): Date {
-    const parsedDate = new Date(date);
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    
-    if (isNaN(parsedDate.getTime())) {
-      throw new Error('Invalid date format');
-    }
-    
-    if (parsedDate > today) {
-      throw new Error('Date cannot be in the future');
-    }
-    
-    return parsedDate;
-  }
 }
 
 // Default validator instance

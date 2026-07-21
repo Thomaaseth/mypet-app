@@ -34,15 +34,7 @@ export const basePetFormSchema = z.object({
   
   birthDate: z
     .string()
-    .refine((date) => {
-      if (!date) return true; // Optional field
-      const parsedDate = new Date(date);
-      const today = new Date();
-      const maxAge = new Date();
-      maxAge.setFullYear(today.getFullYear() - 30); // 30 years max age
-      
-      return parsedDate <= today && parsedDate >= maxAge;
-    }, 'Please enter a valid birth date (not in the future, not older than 30 years)')
+    .refine((date) => !date || !isNaN(new Date(date).getTime()), 'Please enter a valid birth date')
     .optional()
     .or(z.literal('')),
   

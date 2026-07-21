@@ -13,10 +13,6 @@ const baseFoodValidation = {
     }, 'Daily amount must be a positive number'),
     dateStarted: z.string()
     .min(1, 'Purchase date is required')
-    .refine((val) => {
-      const date = new Date(val);
-      return !isNaN(date.getTime()) && date <= new Date();
-    }, 'Purchase date must be valid and not in the future'),
 };
 
 // bagWeightUnit is not user-selectable, derived from the user's unitSystem preference,
@@ -105,11 +101,7 @@ export const updateDryFoodSchema = z.object({
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  dateStarted: z.string().refine(val => {
-    if (!val) return true;
-    const date = new Date(val);
-    return !isNaN(date.getTime()) && date <= new Date();
-  }, 'Invalid date or date cannot be in the future').optional(),
+  dateStarted: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.bagWeight !== undefined && data.bagWeightUnit === undefined) {
     ctx.addIssue({
@@ -141,11 +133,7 @@ export const updateWetFoodSchema = z.object({
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  dateStarted: z.string().refine(val => {
-    if (!val) return true;
-    const date = new Date(val);
-    return !isNaN(date.getTime()) && date <= new Date();
-  }, 'Invalid date or date cannot be in the future').optional(),
+  dateStarted: z.string().optional(),
 }).superRefine((data, ctx) => {
   // wetFoodUnit governs both weightPerUnit and dailyAmount; required if either changes
   if ((data.weightPerUnit !== undefined || data.dailyAmount !== undefined) && data.wetFoodUnit === undefined) {

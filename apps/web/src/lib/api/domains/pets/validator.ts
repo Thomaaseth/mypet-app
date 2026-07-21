@@ -64,26 +64,13 @@ export class PetValidator {
     }
   }
 
+  // Structural check only. "Not in the future" / "not older than 30 years"
+  // enforced server-side in PetsService.validatePetInputs.
   private validateBirthDate(birthDate?: string): void {
     if (!birthDate || birthDate.trim() === '') return; // Birth date is optional
 
-    const date = new Date(birthDate);
-    const now = new Date();
-
-    if (isNaN(date.getTime())) {
+    if (isNaN(new Date(birthDate).getTime())) {
       throw new ValidationError('Please enter a valid birth date', 'birthDate');
-    }
-
-    if (date > now) {
-      throw new ValidationError('Birth date cannot be in the future', 'birthDate');
-    }
-
-    // Check for unreasonably old dates (30+ years)
-    const thirtyYearsAgo = new Date();
-    thirtyYearsAgo.setFullYear(now.getFullYear() - 30);
-    
-    if (date < thirtyYearsAgo) {
-      throw new ValidationError('Birth date seems too far in the past', 'birthDate');
     }
   }
 

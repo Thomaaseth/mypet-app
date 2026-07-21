@@ -60,12 +60,12 @@ export class PetsService {
         throw new BadRequestError('Birth date cannot be in the future');
       }
 
-      // Reasonable age limits (pets can't be older than 50 years)
-      const fiftyYearsAgo = new Date();
-      fiftyYearsAgo.setUTCFullYear(fiftyYearsAgo.getUTCFullYear() - 50);
-      const fiftyYearsAgoString = fiftyYearsAgo.toISOString().split('T')[0];
-      if (petData.birthDate < fiftyYearsAgoString) {
-        throw new BadRequestError('Birth date cannot be more than 50 years ago');
+      // Reasonable age limits (cats/dogs only — pets can't be older than 30 years)
+      const thirtyYearsAgo = new Date();
+      thirtyYearsAgo.setUTCFullYear(thirtyYearsAgo.getUTCFullYear() - 30);
+      const thirtyYearsAgoString = thirtyYearsAgo.toISOString().split('T')[0];
+      if (petData.birthDate < thirtyYearsAgoString) {
+        throw new BadRequestError('Birth date cannot be more than 30 years ago');
       }
     }
 
