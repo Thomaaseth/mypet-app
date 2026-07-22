@@ -71,7 +71,7 @@ export const wetFoodSchema = z.object({
     invalid_type_error: 'Invalid weight unit for wet food'
   }),
 }).superRefine((data, ctx) => {
-  const numberOfUnits = parseInt(data.numberOfUnits, 10);
+  const numberOfUnits = Number(data.numberOfUnits);
   const totalWeight = numberOfUnits * parseFloat(data.weightPerUnit.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
 

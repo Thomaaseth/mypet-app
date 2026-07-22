@@ -42,11 +42,11 @@ export function WetFoodForm({
   const watchedWeightPerUnit = watch('weightPerUnit');
   const totalWeight =
     watchedUnits && watchedWeightPerUnit
-      ? parseInt(watchedUnits) * parseFloat(watchedWeightPerUnit)
+      ? Number(watchedUnits) * parseFloat(watchedWeightPerUnit)
       : 0;
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       {/* Brand Name */}
       <div className="space-y-2">
         <Label htmlFor="brandName">Brand Name (Optional)</Label>
@@ -78,7 +78,7 @@ export function WetFoodForm({
           id="numberOfUnits"
           type="number"
           min="1"
-          step="0.01"
+          step="1"
           placeholder="e.g., 12"
           className="pr-12"
           {...register('numberOfUnits')}

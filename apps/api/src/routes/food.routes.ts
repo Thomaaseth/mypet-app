@@ -257,8 +257,8 @@ router.get('/:petId/food/finished', async (req: AuthenticatedRequest, res: Respo
       throw new BadRequestError('foodType query parameter is required and must be either "dry" or "wet"');
     }
 
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 50) : 50;
-
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+    
     const finishedEntries = await FoodService.getFinishedFoodEntries(
       petId, 
       userId, 
