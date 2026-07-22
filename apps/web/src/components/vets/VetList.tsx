@@ -173,7 +173,7 @@ export default function VetList() {
                   open={isCreateDialogOpen}
                   onOpenChange={setIsCreateDialogOpen}
                   title="Add New Veterinarian"
-                  description="Fill out the veterinarian's information below. Fields marked with * are required."
+                  description="Fields marked with * are required."
                 >
                   <VetForm
                     onSubmit={handleCreateVet}
@@ -198,15 +198,11 @@ export default function VetList() {
             <PageTitle>My Veterinarians</PageTitle>
             <MutedText>Manage your pets&apos; vets</MutedText>
           </div>
-          {/* <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Vet
-          </Button> */}
           <ResponsiveDialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
             title="Add New Veterinarian"
-            description="Fill out the veterinarian's information below. Fields marked with * are required."
+            description="Fields marked with * are required."
           >
             <VetForm
               onSubmit={handleCreateVet}
@@ -287,7 +283,7 @@ export default function VetList() {
               <AlertDialogAction
                 onClick={handleDeleteVet}
                 disabled={isActionLoading}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-white hover:bg-destructive/90"
               >
                 {isActionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Delete

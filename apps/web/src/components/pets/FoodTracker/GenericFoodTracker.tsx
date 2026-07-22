@@ -35,6 +35,7 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
   // Component dependencies (injected by specific tracker)
   FormComponent: React.ComponentType<{
     onSubmit: (data: TFormData) => Promise<TEntry | null>;
+    onCancel?: () => void;
     isLoading?: boolean;
   }>;
   ListComponent: React.ComponentType<{
@@ -183,7 +184,7 @@ if (!hasActiveEntries) {
         title={labels.dialogTitle}
         description={labels.dialogDescription}
       >
-        <FormComponent onSubmit={handleCreateEntry} isLoading={isCreating} />
+        <FormComponent onSubmit={handleCreateEntry} onCancel={() => setIsAddDialogOpen(false)} isLoading={isCreating} />
       </ResponsiveDialog>
 
       {/* Show history if exists */}
@@ -231,8 +232,8 @@ return (
         title={labels.dialogTitle}
         description={labels.dialogDescription}
       >
-        <FormComponent onSubmit={handleCreateEntry} isLoading={isCreating} />
-      </ResponsiveDialog>
+        <FormComponent onSubmit={handleCreateEntry} onCancel={() => setIsAddDialogOpen(false)} isLoading={isCreating} />
+        </ResponsiveDialog>
     </div>
 
     {/* Error Display */}

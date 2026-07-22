@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -89,14 +88,7 @@ export default function PetForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-      {/* Error Display */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
 
       {/* Pet Photo — edit mode only, requires existing petId */}
       {isEditing && (
@@ -135,7 +127,7 @@ export default function PetForm({
             setValue('species', '');
             }}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-invalid={!!errors.animalType}>
             <SelectValue placeholder="Select cat or dog" />
           </SelectTrigger>
           <SelectContent>
@@ -150,11 +142,11 @@ export default function PetForm({
 
       {/* Species/Breed */}
       <div className="space-y-2">
-        <Label htmlFor="species">Species/Breed</Label>
+      <Label htmlFor="species">Breed or Nickname</Label>
         <div className="relative">
           <Input
             id="species"
-            placeholder="e.g., Golden Retriever, Persian Cat, Mixed Breed"
+            placeholder="Golden Retriever, Persian Cat or pet's nickname"
             {...register('species')}
             onFocus={() => setShowSpeciesSuggestions(true)}
             onBlur={() => {
@@ -189,8 +181,8 @@ export default function PetForm({
         {errors.species && (
           <ErrorText>{errors.species.message}</ErrorText>
         )}
-        <HelperText>
-          Optional: Enter your pet&apos;s breed or species, or leave blank
+        <HelperText className="text-xs">
+          Optional: Enter a breed, or a nickname if you'd rather — anything goes
         </HelperText>
       </div>
 
@@ -201,7 +193,7 @@ export default function PetForm({
           value={watch('gender')} 
           onValueChange={(value: 'male' | 'female' | 'unknown') => setValue('gender', value)}
         >
-          <SelectTrigger>
+          <SelectTrigger aria-invalid={!!errors.gender}>
             <SelectValue placeholder="Select gender" />
           </SelectTrigger>
           <SelectContent>
@@ -234,7 +226,7 @@ export default function PetForm({
         {errors.birthDate && (
           <ErrorText>{errors.birthDate.message}</ErrorText>
         )}
-        <HelperText>
+        <HelperText className="text-xs">
           Optional: Your pet&apos;s birth date or approximate date
         </HelperText>
       </div>
@@ -249,8 +241,7 @@ export default function PetForm({
             step="0.01"
             min="0"
             placeholder="Enter your pet's current weight"
-            className="pr-12"
-            {...register('weight')}
+            className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"            {...register('weight')}
             aria-invalid={!!errors.weight}
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
@@ -259,7 +250,7 @@ export default function PetForm({
         </div>
         <input type="hidden" {...register('weightUnit')} />
         {errors.weight && <ErrorText>{errors.weight.message}</ErrorText>}
-        <HelperText>
+        <HelperText className="text-xs">
           Optional: Current weight (max {weightUnit === 'kg' ? '200kg' : '440lbs'})
         </HelperText>
       </div>
@@ -268,8 +259,8 @@ export default function PetForm({
       {/* Message for EDIT mode */}
       {isEditing && (
         <div className="space-y-2 p-4 bg-muted/50 rounded-md border border-muted">
-          <HelperText>
-            <strong>Weight Tracking:</strong> Use the Weight Tracker to add or update your pet&apos;s weight history.
+        <HelperText className="text-xs">
+          <strong>Weight Tracking:</strong> Use the Weight Tracker to add or update your pet&apos;s weight history.
           </HelperText>
         </div>
       )}
@@ -284,11 +275,11 @@ export default function PetForm({
           aria-invalid={!!errors.microchipNumber}
         />
         {errors.microchipNumber && (
-          <p className="text-sm text-destructive">{errors.microchipNumber.message}</p>
+          <ErrorText>{errors.microchipNumber.message}</ErrorText>
         )}
-        <p className="text-xs text-muted-foreground">
+        <HelperText className="text-xs">
           Optional: Letters and numbers only
-        </p>
+        </HelperText>
       </div> 
 
       {/* Is Neutered */}
@@ -300,27 +291,28 @@ export default function PetForm({
         />
         <Label 
           htmlFor="isNeutered" 
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Spayed/Neutered
         </Label>
       </div>
 
-      {/* Notes */}
+      {/* Bio */}
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+       <Label htmlFor="notes">Bio / About</Label>
         <Textarea
           id="notes"
-          placeholder="Additional notes about your pet..."
+          placeholder="Fun facts, quirks, things you want to remember about your pet..."
           rows={3}
+          maxLength={200}
           {...register('notes')}
           aria-invalid={!!errors.notes}
         />
         {errors.notes && (
           <ErrorText>{errors.notes.message}</ErrorText>
         )}
-        <HelperText>
-          Optional: Any additional information (max 1000 characters)
+        <HelperText className="text-xs">
+          {watch('notes')?.length ?? 0}/200 characters
         </HelperText>
       </div>
 

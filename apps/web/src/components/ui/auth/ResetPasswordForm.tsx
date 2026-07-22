@@ -14,7 +14,7 @@ import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { newPasswordSchema } from '@/lib/validations/password';
 import { toastService } from '@/lib/toast';
-
+import { ErrorText } from '@/components/ui/typography';
   
 type ResetPasswordFormData = z.infer<typeof newPasswordSchema >;
 
@@ -68,7 +68,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -102,9 +102,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   </Button>
                 </div>
                 {form.formState.errors.newPassword && (
-                  <p className="text-sm text-red-600">
-                    {form.formState.errors.newPassword.message}
-                  </p>
+                  <ErrorText>{form.formState.errors.newPassword.message}</ErrorText>
                 )}
               </div>
   
@@ -134,9 +132,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   </Button>
                 </div>
                 {form.formState.errors.confirmPassword && (
-                  <p className="text-sm text-red-600">
-                    {form.formState.errors.confirmPassword.message}
-                  </p>
+                  <ErrorText>{form.formState.errors.confirmPassword.message}</ErrorText>
                 )}
               </div>
   

@@ -13,6 +13,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 interface DryFoodFormProps {
   dryFoodEntry?: DryFoodEntry;
   onSubmit: (data: DryFoodFormData) => Promise<DryFoodEntry | null>;
+  onCancel?: () => void,
   isLoading?: boolean;
   submitLabel?: string;
 }
@@ -20,6 +21,7 @@ interface DryFoodFormProps {
 export function DryFoodForm({ 
   dryFoodEntry,
   onSubmit, 
+  onCancel,
   isLoading = false,
   submitLabel = 'Add Dry Food'
 }: DryFoodFormProps) {
@@ -37,7 +39,7 @@ export function DryFoodForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       <div className="space-y-2">
         <Label htmlFor="brandName">Brand Name (Optional)</Label>
           <Input
@@ -45,6 +47,7 @@ export function DryFoodForm({
               placeholder="e.g., Royal Canin, Hill's"
               maxLength={100}
               {...register('brandName')}
+              aria-invalid={!!errors.brandName}
             />
           {errors.brandName && <ErrorText>{errors.brandName.message}</ErrorText>}
       </div>
@@ -56,11 +59,11 @@ export function DryFoodForm({
           placeholder="e.g., Adult Chicken & Rice"
           maxLength={150}
           {...register('productName')}
+          aria-invalid={!!errors.productName}
         />
         {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
       </div>
 
-      {/* <div className="grid grid-cols-2 gap-4"> */}
       <div className="space-y-2">
         <Label htmlFor="bagWeight">Bag Weight</Label>
         <div className="relative">
@@ -97,8 +100,8 @@ export function DryFoodForm({
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
             grams
           </span>
+        </div>
         {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
-      </div>
       </div>
 
       <div className="space-y-2">
@@ -118,10 +121,22 @@ export function DryFoodForm({
         />
         {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
       </div>
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {submitLabel}
-      </Button>
+      <div className="flex justify-end gap-3 pt-4">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+        )}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

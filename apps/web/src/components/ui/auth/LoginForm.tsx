@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { toastService } from '@/lib/toast';
 import { useSessionContext } from '@/contexts/SessionContext';
-import { PageTitle, MutedText } from '@/components/ui/typography';
+import { PageTitle, MutedText, ErrorText } from '@/components/ui/typography';
 
 // Zod schema for sign in
 const signInSchema = z.object({
@@ -71,7 +71,7 @@ export default function SignInForm() {
         <MutedText>Enter your credentials to access your account</MutedText>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
@@ -82,9 +82,7 @@ export default function SignInForm() {
             {...register('email')}
             aria-invalid={!!errors.email}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+            {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
         </div>
 
         {/* Password */}
@@ -97,9 +95,7 @@ export default function SignInForm() {
             {...register('password')}
             aria-invalid={!!errors.password}
           />
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          )}
+            {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
         </div>
 
         {/* Auth Error Display with shadcn Alert */}

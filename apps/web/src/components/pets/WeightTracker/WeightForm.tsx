@@ -10,6 +10,7 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { DatePicker } from '@/components/ui/date-picker';
 
+
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
   weightEntry?: WeightEntry; // If provided, we're editing
@@ -54,14 +55,7 @@ export default function WeightForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-      {/* Error Display */}
-      {error && (
-        <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
-          <ErrorText>{error}</ErrorText>
-        </div>
-      )}
-
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       {/* Weight */}
       <div className="space-y-2">
       <Label htmlFor="weight">Weight</Label>

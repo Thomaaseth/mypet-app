@@ -706,7 +706,7 @@ describe('PetsService', () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
       const longName = 'A'.repeat(100);
       const longSpecies = 'B'.repeat(50);
-      const longNotes = 'C'.repeat(1000);
+      const longNotes = 'C'.repeat(200);
 
       const newPetData: NewPet = {
         name: longName,

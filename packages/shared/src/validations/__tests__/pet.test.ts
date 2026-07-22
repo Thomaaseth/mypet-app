@@ -32,7 +32,7 @@ describe('petGenderSchema', () => {
   it('rejects an invalid gender', () => {
     expect(petGenderSchema.safeParse('other').success).toBe(false);
   });
-  
+
 });
 
 describe('weightUnitSchema', () => {
@@ -149,9 +149,9 @@ describe.each([
     expect(schema.safeParse({ ...validPet, microchipNumber: 'A'.repeat(21) }).success).toBe(false);
   });
 
-  it('rejects notes over 1000 characters', () => {
-    expect(schema.safeParse({ ...validPet, notes: 'x'.repeat(1001) }).success).toBe(false);
-  });
+  it('rejects notes over 200 characters', () => {
+    expect(schema.safeParse({ ...validPet, notes: 'x'.repeat(201) }).success).toBe(false);
+   });
 
   it('rejects isNeutered as a non-boolean', () => {
     expect(schema.safeParse({ ...validPet, isNeutered: 'true' }).success).toBe(false);

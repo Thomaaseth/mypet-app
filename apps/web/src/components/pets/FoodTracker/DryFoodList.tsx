@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Edit2, Trash2, Calendar, Weight, Utensils, CheckSquare, MoreHorizontal } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Weight, Utensils, CheckSquare, MoreHorizontal, Loader2 } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/utils/date-formatting';
@@ -254,6 +254,7 @@ export function DryFoodList({
           <DryFoodForm
             dryFoodEntry={editingEntry}
             onSubmit={handleUpdate}
+            onCancel={() => setEditingEntry(null)}
             isLoading={isLoading}
             submitLabel="Update Dry Food"
           />
@@ -272,21 +273,31 @@ export function DryFoodList({
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Dry Food Entry</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this dry food entry? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isLoading}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+         <AlertDialogContent>
+           <AlertDialogHeader>
+             <AlertDialogTitle>Delete Dry Food Entry</AlertDialogTitle>
+             <AlertDialogDescription>
+              Are you sure you want to delete this dry food entry for{' '}
+              <span className="font-semibold">
+               {deletingEntry?.brandName && deletingEntry?.productName 
+                  ? `${deletingEntry.brandName} - ${deletingEntry.productName}`
+                  : deletingEntry?.brandName || deletingEntry?.productName || 'this dry food'}
+              </span>
+              ? This action cannot be undone.
+             </AlertDialogDescription>
+           </AlertDialogHeader>
+           <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+             <AlertDialogAction 
+             onClick={handleDelete} 
+             disabled={isLoading} 
+             className="bg-destructive text-white hover:bg-destructive/90">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? 'Deleting...' : 'Delete'}
+             </AlertDialogAction>
+           </AlertDialogFooter>
+         </AlertDialogContent>
+       </AlertDialog>
     </>
   );
 };

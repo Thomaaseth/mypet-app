@@ -110,7 +110,7 @@ export const Navbar = () => {
                     size="sm"
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
-                    className="hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all duration-200 hover:scale-105"
+                    className="hover:bg-destructive hover:text-white hover:border-destructive transition-all duration-200 hover:scale-105"
                   >
                     {logoutMutation.isPending ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

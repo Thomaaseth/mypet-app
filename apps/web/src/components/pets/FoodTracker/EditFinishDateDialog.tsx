@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ErrorText, HelperText } from '@/components/ui/typography';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
@@ -61,7 +60,7 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
       title="Edit Finish Date"
       description="Update when this food was actually finished. Must be between start date and today."
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div className="grid gap-2">
           <Label htmlFor="dateStarted">Start Date (Reference)</Label>
            <DatePicker

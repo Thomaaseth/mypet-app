@@ -76,8 +76,8 @@ export class PetsService {
     if (petData.microchipNumber && petData.microchipNumber.length > 20) {
       throw new BadRequestError('Microchip number must be 20 characters or less');
     }
-    if (petData.notes && petData.notes.length > 1000) {
-      throw new BadRequestError('Notes must be 1000 characters or less');
+    if (petData.notes && petData.notes.length > 200) {
+      throw new BadRequestError('Bion must be 200 characters or less');
     }
 
     // Microchip number format validation (if provided)

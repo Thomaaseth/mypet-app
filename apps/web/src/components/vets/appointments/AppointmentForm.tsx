@@ -24,6 +24,7 @@ import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { Controller } from 'react-hook-form';
 import { DatePicker } from '@/components/ui/date-picker';
+import { MutedText, ErrorText, HelperText } from '@/components/ui/typography';
 
 interface AppointmentFormProps {
   appointment?: AppointmentWithRelations;
@@ -111,7 +112,7 @@ export default function AppointmentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -150,9 +151,9 @@ export default function AppointmentForm({
       <div className="space-y-2">
         <Label htmlFor="veterinarianId">Veterinarian</Label>
         {selectedPetId && availableVetsData && availableVetsData.length === 0 ? (
-          <div className="text-sm text-muted-foreground border rounded-md p-3 bg-muted/50">
-            <p>No veterinarians assigned to this pet yet.</p>
-            <p className="mt-1">Please assign a veterinarian to this pet first in the Vets section.</p>
+          <div className="text-sm p-4 bg-muted/50 rounded-md border">
+             <MutedText>No veterinarians assigned to this pet yet.</MutedText>
+             <MutedText className="mt-1">Please assign a veterinarian to this pet first in the Vets section.</MutedText>
           </div>
         ) : (
           <Select
@@ -172,9 +173,7 @@ export default function AppointmentForm({
             </SelectContent>
           </Select>
         )}
-        {errors.veterinarianId && (
-          <p className="text-sm text-destructive">{errors.veterinarianId.message}</p>
-        )}
+        {errors.veterinarianId && <ErrorText>{errors.veterinarianId.message}</ErrorText>}
       </div>
 
       {/* Date and Time Row */}
@@ -194,9 +193,7 @@ export default function AppointmentForm({
               />
             )}
           />
-          {errors.appointmentDate && (
-            <p className="text-sm text-destructive">{errors.appointmentDate.message}</p>
-          )}
+          {errors.appointmentDate && <ErrorText>{errors.appointmentDate.message}</ErrorText>}
         </div>
 
         <div className="space-y-2">
@@ -217,9 +214,7 @@ export default function AppointmentForm({
               ))}
             </SelectContent>
           </Select>
-          {errors.appointmentTime && (
-            <p className="text-sm text-destructive">{errors.appointmentTime.message}</p>
-          )}
+          {errors.appointmentTime && <ErrorText>{errors.appointmentTime.message}</ErrorText>}
         </div>
       </div>
       
@@ -242,9 +237,7 @@ export default function AppointmentForm({
             ))}
           </SelectContent>
         </Select>
-        {errors.appointmentType && (
-          <p className="text-sm text-destructive">{errors.appointmentType.message}</p>
-        )}
+        {errors.appointmentType && <ErrorText>{errors.appointmentType.message}</ErrorText>}
       </div>
 
       {/* Reason for Visit "Discussion points" */}
@@ -260,12 +253,10 @@ export default function AppointmentForm({
           className="[word-break:break-word]"
           maxLength={100}
         />
-        {errors.reasonForVisit && (
-          <p className="text-sm text-destructive">{errors.reasonForVisit.message}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
+        {errors.reasonForVisit && <ErrorText>{errors.reasonForVisit.message}</ErrorText>}
+        <HelperText className="text-xs">
           {(watch('reasonForVisit')?.length || 0)}/100 characters
-        </p>
+        </HelperText>
       </div>
 
       {/* Visit Notes "Visit summary" (for past and current appointment if hasAppointmentTimePassed) */}
@@ -282,12 +273,10 @@ export default function AppointmentForm({
             className="[word-break:break-word]"
             maxLength={200}
           />
-          {errors.visitNotes && (
-            <p className="text-sm text-destructive">{errors.visitNotes.message}</p>
-          )}
-          <p className="text-xs text-muted-foreground">
+          {errors.visitNotes && <ErrorText>{errors.visitNotes.message}</ErrorText>}
+          <HelperText className="text-xs">
             {(watch('visitNotes')?.length || 0)}/200 characters
-          </p>
+          </HelperText>
         </div>
       )}
 

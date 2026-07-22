@@ -56,7 +56,7 @@ export const basePetFormSchema = z.object({
   
   notes: z
     .string()
-    .max(1000, 'Notes must be less than 1000 characters')
+    .max(200, 'Bio must be less than 200 characters')
     .optional()
     .or(z.literal('')),
 });

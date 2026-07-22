@@ -90,8 +90,8 @@ export class PetValidator {
   private validateNotes(notes?: string): void {
     if (!notes) return; // Notes are optional
 
-    if (notes.length > 1000) {
-      throw new ValidationError('Notes cannot exceed 1000 characters', 'notes');
+    if (notes.length > 200) {
+      throw new ValidationError('Bio cannot exceed 200 characters', 'notes');
     }
   }
 

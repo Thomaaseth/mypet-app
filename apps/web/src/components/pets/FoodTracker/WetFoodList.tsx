@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Edit2, Trash2, Calendar, Package, Utensils, MoreHorizontal, CheckSquare } from 'lucide-react';
+import { Edit2, Trash2, Calendar, Package, Utensils, MoreHorizontal, CheckSquare, Loader2 } from 'lucide-react';
 import { WetFoodForm } from './WetFoodForm';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
 import { formatDateForDisplay } from '@/lib/utils/date-formatting';
@@ -258,6 +258,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
            <WetFoodForm
              wetFoodEntry={editingEntry}
              onSubmit={handleUpdate}
+             onCancel={() => setEditingEntry(null)}
              isLoading={isLoading}
              submitLabel="Update Wet Food"
            />
@@ -294,16 +295,10 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
            <AlertDialogAction 
              onClick={handleDelete} 
              disabled={isLoading}
-             className="bg-red-600 hover:bg-red-700"
-           >
-             {isLoading ? (
-               <>
-                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                 Deleting...
-               </>
-             ) : (
-               'Delete'
-             )}
+             className="bg-destructive text-white hover:bg-destructive/90"           
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? 'Deleting...' : 'Delete'}
            </AlertDialogAction>
          </AlertDialogFooter>
        </AlertDialogContent>

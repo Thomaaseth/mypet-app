@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
+import { MutedText, ErrorText } from '@/components/ui/typography';
 
 const forgotPasswordSchema = z.object({
     email: z.string().email('Please enter a valid email address'),
@@ -57,7 +58,7 @@ export default function ForgotPasswordForm() {
         return (
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
-                  <CheckCircle className="mx-auto h-12 w-12 text-green-600 mb-4" />
+                 <CheckCircle className="mx-auto h-12 w-12 text-success mb-4" />
                   <CardTitle>Check Your Email</CardTitle>
                   <CardDescription>
                     {"We've sent password reset instructions to your email address."}{''}
@@ -65,9 +66,9 @@ export default function ForgotPasswordForm() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground text-center">
+                    <MutedText className="text-center">
                       {"Didn't receive the email? Check your spam folder or try again."}{''}
-                    </p>
+                    </MutedText>
                     <div className="flex space-x-2">
                       <Button 
                         variant="outline" 
@@ -97,7 +98,7 @@ export default function ForgotPasswordForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
@@ -115,9 +116,7 @@ export default function ForgotPasswordForm() {
                   aria-invalid={!!form.formState.errors.email}
                 />
                 {form.formState.errors.email && (
-                  <p className="text-sm text-red-600">
-                    {form.formState.errors.email.message}
-                  </p>
+                  <ErrorText>{form.formState.errors.email.message}</ErrorText>
                 )}
               </div>
   

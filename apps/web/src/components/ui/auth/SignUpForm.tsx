@@ -13,7 +13,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { authErrorHandler } from '../../../lib/errors/handlers';
 import { signUpPasswordSchema } from '@/lib/validations/password';
 import { useSessionContext } from '@/contexts/SessionContext';
-import { PageTitle, MutedText } from '@/components/ui/typography';
+import { PageTitle, MutedText, ErrorText, HelperText } from '@/components/ui/typography';
 
 const signUpSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -70,32 +70,28 @@ export default function SignUpForm() {
         <MutedText>Enter your information to get started with Pettr.</MutedText>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* First Name & Last Name */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">First name</Label>
             <Input
               id="firstName"
-              placeholder="John"
+              placeholder='Enter your first name'
               {...register('firstName')}
               aria-invalid={!!errors.firstName}
             />
-            {errors.firstName && (
-              <p className="text-sm text-destructive">{errors.firstName.message}</p>
-            )}
+            {errors.firstName && <ErrorText>{errors.firstName.message}</ErrorText>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastName">Last name</Label>
             <Input
               id="lastName"
-              placeholder="Doe"
+              placeholder='Enter your last name'
               {...register('lastName')}
               aria-invalid={!!errors.lastName}
             />
-            {errors.lastName && (
-              <p className="text-sm text-destructive">{errors.lastName.message}</p>
-            )}
+            {errors.lastName && <ErrorText>{errors.lastName.message}</ErrorText>}
           </div>
         </div>
 
@@ -105,13 +101,11 @@ export default function SignUpForm() {
           <Input
             id="email"
             type="email"
-            placeholder="john@example.com"
+            placeholder="Enter your email"
             {...register('email')}
             aria-invalid={!!errors.email}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+          {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
         </div>
 
         {/* Password */}
@@ -124,12 +118,10 @@ export default function SignUpForm() {
             {...register('password')}
             aria-invalid={!!errors.password}
           />
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          )}
-          <p className="text-xs text-muted-foreground">
-            Must be 8-128 characters with uppercase, lowercase, number, and special character
-          </p>
+          {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
+          <HelperText className="text-xs">
+             Must be 8-128 characters with uppercase, lowercase, number, and special character
+          </HelperText>
         </div>
 
         {/* Auth Error Display with shadcn Alert */}

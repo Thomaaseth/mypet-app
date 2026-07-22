@@ -12,7 +12,7 @@ import { useVetPets } from '@/queries/vets';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
-import { SectionTitle, MutedText } from '../ui/typography';
+import { SectionTitle, MutedText, ErrorText, HelperText } from '../ui/typography';
 
 interface VetFormProps {
   vet?: Veterinarian;
@@ -87,7 +87,7 @@ export default function VetForm({
 
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -96,16 +96,14 @@ export default function VetForm({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="vetName">Veterinarian Name</Label>
+        <Label htmlFor="vetName">Veterinarian Name*</Label>
         <Input
           id="vetName"
           placeholder="Enter your vet's name"
           {...register('vetName')}
           aria-invalid={!!errors.vetName}
         />
-        {errors.vetName && (
-          <p className="text-sm text-destructive">{errors.vetName.message}</p>
-        )}
+        {errors.vetName && <ErrorText>{errors.vetName.message}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -116,16 +114,14 @@ export default function VetForm({
           {...register('clinicName')}
           aria-invalid={!!errors.clinicName}
         />
-        {errors.clinicName && (
-          <p className="text-sm text-destructive">{errors.clinicName.message}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
+          {errors.clinicName && <ErrorText>{errors.clinicName.message}</ErrorText>} 
+        <HelperText className="text-xs">
           Optional: Leave blank if the vet doesn&apos;t work at a clinic
-        </p>
+        </HelperText>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
+        <Label htmlFor="phone">Phone Number*</Label>
         <Input
           id="phone"
           type="tel"
@@ -133,9 +129,7 @@ export default function VetForm({
           {...register('phone')}
           aria-invalid={!!errors.phone}
         />
-        {errors.phone && (
-          <p className="text-sm text-destructive">{errors.phone.message}</p>
-        )}
+        {errors.phone && <ErrorText>{errors.phone.message}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -143,13 +137,14 @@ export default function VetForm({
         <Input
           id="email"
           type="email"
-          placeholder="contact@pettr.health"
+          placeholder="contact@pettr.life"
           {...register('email')}
           aria-invalid={!!errors.email}
         />
-        {errors.email && (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        )}
+        {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
+        <HelperText className="text-xs">
+          Optional
+        </HelperText>
       </div>
 
       <div className="space-y-2">
@@ -161,25 +156,21 @@ export default function VetForm({
           {...register('website')}
           aria-invalid={!!errors.website}
         />
-        {errors.website && (
-          <p className="text-sm text-destructive">{errors.website.message}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-        Optional: e.g., www.pettr.xyz or example.com
-        </p>
+        {errors.website && <ErrorText>{errors.website.message}</ErrorText>}
+        <HelperText className="text-xs">
+          Optional
+        </HelperText>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="addressLine1">Address</Label>
+        <Label htmlFor="addressLine1">Address*</Label>
         <Input
           id="addressLine1"
           placeholder="Enter address"
           {...register('addressLine1')}
           aria-invalid={!!errors.addressLine1}
         />
-        {errors.addressLine1 && (
-          <p className="text-sm text-destructive">{errors.addressLine1.message}</p>
-        )}
+        {errors.addressLine1 && <ErrorText>{errors.addressLine1.message}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -190,36 +181,30 @@ export default function VetForm({
           {...register('addressLine2')}
           aria-invalid={!!errors.addressLine2}
         />
-        {errors.addressLine2 && (
-          <p className="text-sm text-destructive">{errors.addressLine2.message}</p>
-        )}
+          {errors.addressLine2 && <ErrorText>{errors.addressLine2.message}</ErrorText>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="city">City*</Label>
           <Input
             id="city"
             placeholder="Enter the city"
             {...register('city')}
             aria-invalid={!!errors.city}
           />
-          {errors.city && (
-            <p className="text-sm text-destructive">{errors.city.message}</p>
-          )}
+        {errors.city && <ErrorText>{errors.city.message}</ErrorText>}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="zipCode">ZIP Code</Label>
+          <Label htmlFor="zipCode">ZIP Code*</Label>
           <Input
             id="zipCode"
             placeholder="Enter the zip code"
             {...register('zipCode')}
             aria-invalid={!!errors.zipCode}
           />
-          {errors.zipCode && (
-            <p className="text-sm text-destructive">{errors.zipCode.message}</p>
-          )}
+        {errors.zipCode && <ErrorText>{errors.zipCode.message}</ErrorText>}
         </div>
       </div>
 
@@ -234,12 +219,10 @@ export default function VetForm({
           className="[word-break:break-word]"
           maxLength={100}
         />
-        {errors.notes && (
-          <p className="text-sm text-destructive">{errors.notes.message}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
+        {errors.notes && <ErrorText>{errors.notes.message}</ErrorText>}
+        <HelperText className="text-xs">
           {(watch('notes')?.length || 0)}/100 characters
-        </p>
+        </HelperText>
       </div>
 
       {/* Pet Assignment - show in CREATE and EDIT mode and if user has pets */}
@@ -275,10 +258,10 @@ export default function VetForm({
           </div>
 
                   
-          {selectedPetIds.length === 0 && (
-            <p className="text-xs text-muted-foreground">
+        {selectedPetIds.length === 0 && (
+            <HelperText className="text-xs">
               You can assign this veterinarian to pets later.
-            </p>
+            </HelperText>
           )}
         </div>
       )}

@@ -13,6 +13,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 interface WetFoodFormProps {
   wetFoodEntry?: WetFoodEntry; // If provided, we're editing
   onSubmit: (data: WetFoodFormData) => Promise<WetFoodEntry | null>;
+  onCancel?: () => void,
   isLoading?: boolean;
   submitLabel?: string;
 }
@@ -20,6 +21,7 @@ interface WetFoodFormProps {
 export function WetFoodForm({ 
   wetFoodEntry,
   onSubmit, 
+  onCancel,
   isLoading = false,
   submitLabel = 'Add Wet Food'
 }: WetFoodFormProps) {
@@ -55,6 +57,7 @@ export function WetFoodForm({
           placeholder="e.g., Royal Canin, Hill's"
           maxLength={100}
           {...register('brandName')}
+          aria-invalid={!!errors.brandName}
         />
         {errors.brandName && <ErrorText>{errors.brandName.message}</ErrorText>}
       </div>
@@ -67,6 +70,7 @@ export function WetFoodForm({
           placeholder="e.g., Chicken Pâté, Tuna in Gravy"
           maxLength={150}
           {...register('productName')}
+          aria-invalid={!!errors.productName}
         />
         {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
       </div>
@@ -80,8 +84,8 @@ export function WetFoodForm({
           min="1"
           step="1"
           placeholder="e.g., 12"
-          className="pr-12"
           {...register('numberOfUnits')}
+          aria-invalid={!!errors.numberOfUnits}
         />
         {errors.numberOfUnits && <ErrorText>{errors.numberOfUnits.message}</ErrorText>}
       </div>
@@ -108,8 +112,8 @@ export function WetFoodForm({
 
       {/* Total Weight Display */}
       {totalWeight > 0 && (
-        <div className="bg-blue-50 p-3 rounded-md">
-          <p className="text-sm text-blue-800">
+        <div className="bg-muted/50 rounded-md p-3">
+          <p className="text-sm font-medium">
             Total Weight: {totalWeight.toFixed(1)} {wetFoodUnit}
           </p>
         </div>
@@ -157,11 +161,23 @@ export function WetFoodForm({
         {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
       </div>
 
-      {/* Submit Button */}
-      <Button type="submit" disabled={isLoading} className="w-full">
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {submitLabel}
-      </Button>
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 pt-4">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+        )}
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

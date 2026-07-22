@@ -25,6 +25,7 @@ import type { WeightTargetFormData } from '@/types/weight-targets';
 import { createWeightTargetSchema } from '@/lib/validations/weight';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
+import { ErrorText } from '@/components/ui/typography';
 
 interface TargetRangeFormProps {
   petName: string;
@@ -104,14 +105,7 @@ export default function TargetRangeForm({
 
   return (
     <>
-      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
-        {/* Error Display */}
-        {error && (
-          <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
-            {error}
-          </div>
-        )}
-
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
         {/* Minimum Weight */}
         <div className="space-y-2">
         <Label htmlFor="minWeight">Minimum Weight</Label>
@@ -121,7 +115,7 @@ export default function TargetRangeForm({
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder={`Enter minimum weight`}
+                placeholder="Enter minimum weight"
                 className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 {...register('minWeight')}
                 aria-invalid={!!errors.minWeight}
@@ -130,21 +124,19 @@ export default function TargetRangeForm({
                 {weightUnit}
               </span>
               </div>
-              {errors.minWeight && (
-                <p className="text-sm text-destructive">{errors.minWeight.message}</p>
-              )}
+              {errors.minWeight && <ErrorText>{errors.minWeight.message}</ErrorText>}
         </div>
 
         {/* Maximum Weight */}
         <div className="space-y-2">
-          <Label htmlFor="maxWeight">Maximum Weight ({weightUnit})</Label>
-          <div className='relative'>
+         <Label htmlFor="maxWeight">Maximum Weight</Label>
+           <div className='relative'>
             <Input
                 id="maxWeight"
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder={`Enter maximum weight`}
+                placeholder="Enter maximum weight"
                 className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 {...register('maxWeight')}
                 aria-invalid={!!errors.maxWeight}
@@ -153,9 +145,7 @@ export default function TargetRangeForm({
                   {weightUnit}
                 </span>
               </div>
-              {errors.maxWeight && (
-                <p className="text-sm text-destructive">{errors.maxWeight.message}</p>
-              )}
+              {errors.maxWeight && <ErrorText>{errors.maxWeight.message}</ErrorText>}
           </div>
 
         {/* Educational Accordion */}
@@ -239,7 +229,7 @@ export default function TargetRangeForm({
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete

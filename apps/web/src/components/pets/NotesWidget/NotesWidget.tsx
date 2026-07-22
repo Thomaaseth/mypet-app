@@ -16,6 +16,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+  } from '@/components/ui/alert-dialog';
 import { NotesWidgetSkeleton } from '@/components/ui/skeletons/NotesSkeleton';
 import type { PetNote } from '@/types/pet-notes';
 import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/ui/typography';
@@ -33,7 +43,7 @@ interface NotesWidgetProps {
 interface NoteRowProps {
   note: PetNote;
   onUpdate: (noteId: string, content: string) => Promise<void>;
-  onDelete: (noteId: string) => void;
+  onDelete: (note: PetNote) => void;
   isDeleting: boolean;
 }
 
@@ -101,7 +111,7 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => onDelete(note.id)}
+                onClick={() => onDelete(note)}
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -151,6 +161,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
   const [newNoteContent, setNewNoteContent] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<PetNote | null>(null);
 
   const { data: notes, error: fetchError } = usePetNotes(petId);
   const createMutation = useCreatePetNote(petId);
@@ -184,11 +195,18 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
     await updateMutation.mutateAsync({ noteId, data: { content } });
   };
 
-  const handleDelete = async (noteId: string) => {
-    setDeletingNoteId(noteId);
-    await deleteMutation.mutateAsync(noteId);
-    setDeletingNoteId(null);
+  const handleRequestDelete = (note: PetNote) => {
+    setNoteToDelete(note);
   };
+
+  const handleConfirmDelete = async () => {
+      if (!noteToDelete) return;
+      const noteId = noteToDelete.id;
+      setNoteToDelete(null);
+      setDeletingNoteId(noteId);
+      await deleteMutation.mutateAsync(noteId);
+      setDeletingNoteId(null);
+    };
 
   if (notes === undefined) return <NotesWidgetSkeleton />;
 
@@ -254,6 +272,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             </div>
           </div>
         </ResponsiveDialog>
+        
 
         {/* Notes list */}
         {notes && notes.length > 0 ? (
@@ -262,7 +281,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
               key={note.id}
               note={note}
               onUpdate={handleUpdate}
-              onDelete={handleDelete}
+              onDelete={handleRequestDelete}
               isDeleting={deletingNoteId === note.id}
             />
           ))
@@ -277,6 +296,29 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             />
           )
         )}
+
+        {/* Delete Confirmation */}
+        <AlertDialog open={!!noteToDelete} onOpenChange={(open) => { if (!open) setNoteToDelete(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Note</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this note? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={!!deletingNoteId}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                disabled={!!deletingNoteId}
+                className="bg-destructive text-white hover:bg-destructive/90"
+              >
+                {deletingNoteId && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {deletingNoteId ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {isAtLimit && (
           <p className="text-xs text-muted-foreground text-center pt-1">
