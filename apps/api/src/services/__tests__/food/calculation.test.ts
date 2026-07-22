@@ -8,6 +8,7 @@ import * as schema from '../../../db/schema';
 import { randomUUID } from 'crypto';
 import { UserPreferencesService } from '../../user-preferences.service';
 import { toDateString, addCalendarDays } from '@/shared/utils/dates';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('Business Logic Calculations', () => {
   // NOTE: tests in this describe block deliberately pass randomUUID() as the
@@ -180,6 +181,8 @@ describe('Business Logic Calculations', () => {
   // proving getTodayForUser's actual Intl.DateTimeFormat branch is correctly
   // wired into each service method, not just its no-preferences fallback
   describe('Timezone-aware "today"', () => {
+    useFixedTimeForTimezoneTests();
+
     it('uses the stored user timezone, not server UTC, for depletion calculations', async () => {
       const { primary, testPet } = await setupUserAndPet();
   
@@ -202,20 +205,15 @@ describe('Business Logic Calculations', () => {
   
       const expectedToday = await UserPreferencesService.getTodayForUser(primary.id);
       const serverUtcToday = toDateString(new Date());
+
+      // Time is pinned inside the Kiritimati/UTC divergence window by
+      // useFixedTimeForTimezoneTests(), so this is no longer a runtime coincidence risk.
+      expect(expectedToday).not.toBe(serverUtcToday);
   
       const calculations = await FoodService.calculateDryFoodRemaining(created, primary.id);
   
       // Depletion date is anchored to the user's local "today" + remainingDays
       expect(calculations.depletionDate).toBe(addCalendarDays(expectedToday, calculations.remainingDays));
-  
-      // Guard against a false-pass: if this ever coincides with server UTC's date
-      // (e.g. test runs right at a UTC boundary), the assertion above wouldn't
-      // actually prove timezone-awareness: fail loudly instead of silently passing
-      if (expectedToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
     });
 
     it('uses the stored user timezone, not server UTC, for wet food depletion calculations', async () => {
@@ -239,16 +237,11 @@ describe('Business Logic Calculations', () => {
 
       const expectedToday = await UserPreferencesService.getTodayForUser(primary.id);
       const serverUtcToday = toDateString(new Date());
+      expect(expectedToday).not.toBe(serverUtcToday);
 
       const calculations = await FoodService.calculateWetFoodRemaining(created, primary.id);
 
       expect(calculations.depletionDate).toBe(addCalendarDays(expectedToday, calculations.remainingDays));
-
-      if (expectedToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
     });
 
     it('uses the stored user timezone, not server UTC, when listing all food entries', async () => {
@@ -271,6 +264,8 @@ describe('Business Logic Calculations', () => {
 
       const expectedToday = await UserPreferencesService.getTodayForUser(primary.id);
       const serverUtcToday = toDateString(new Date());
+      expect(expectedToday).not.toBe(serverUtcToday);
+
       const [entry] = await FoodService.getAllFoodEntries(testPet.id, primary.id);
 
       expect(entry.id).toBe(created.id);
@@ -281,12 +276,6 @@ describe('Business Logic Calculations', () => {
       }
 
       expect(entry.depletionDate).toBe(addCalendarDays(expectedToday, entry.remainingDays));
-
-      if (expectedToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
     });
   });
 });

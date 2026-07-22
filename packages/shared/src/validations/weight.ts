@@ -13,9 +13,10 @@ export const weightEntryFormSchema = z.object({
   weightUnit: z.enum(['kg', 'lbs'], {
     errorMap: () => ({ message: 'Please select a valid weight unit' })
   }),
-  date: z.string().min(1, 'Date is required'),
-
-});
+  date: z.string()
+    .min(1, 'Date is required')
+    .refine((val) => !isNaN(new Date(val).getTime()), 'Please enter a valid date'),
+  });
 
   // Schema for partial updates — enforces weightUnit must accompany weight if weight is being changed
   export const updateWeightEntrySchema = weightEntryFormSchema.partial().superRefine((data, ctx) => {

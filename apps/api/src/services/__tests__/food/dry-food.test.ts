@@ -9,6 +9,7 @@ import { makeDryFoodData, makeInvalidDryFoodData } from './helpers/factories';
 import type { DryFoodFormData } from '../../../services/food';
 import { UserPreferencesService } from '../../user-preferences.service';
 import { addCalendarDays, toDateString } from '@/shared/utils/dates';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('Dry Food Operations', () => {
   describe('createDryFoodEntry', () => {
@@ -66,36 +67,30 @@ describe('Dry Food Operations', () => {
       ).rejects.toThrow('Purchase date cannot be in the future');
     });
 
-    it('uses the stored user timezone, not server time, when validating purchase date', async () => {
-      const { primary, testPet } = await setupUserAndPet();
+    describe('timezone-aware purchase date validation', () => {
+      useFixedTimeForTimezoneTests();
 
-      // UTC+14 — furthest-ahead real IANA zone, so a server-time bypass bug
-      // reliably produces a different, detectably wrong "today"
-      await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
-        unitSystem: 'imperial',
-        timezone: 'Pacific/Kiritimati',
-      });
+      it('uses the stored user timezone, not server time, when validating purchase date', async () => {
+        const { primary, testPet } = await setupUserAndPet();
 
-      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
-      const serverUtcToday = toDateString(new Date());
+        await UserPreferencesService.upsertUserPreferences(primary.id, {
+          dateTimeLocale: 'en-US',
+          unitSystem: 'imperial',
+          timezone: 'Pacific/Kiritimati',
+        });
 
-      // Guard against a false-pass if this ever coincides with server UTC's date
-      if (usersToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
+        const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+        const serverUtcToday = toDateString(new Date());
+        expect(usersToday).not.toBe(serverUtcToday);
+
+        const result = await FoodService.createDryFoodEntry(
+          testPet.id,
+          primary.id,
+          makeDryFoodData({ dateStarted: usersToday })
         );
-      }
 
-      // usersToday is legitimately "today" for this user — must be accepted,
-      // not rejected as if compared against server time
-      const result = await FoodService.createDryFoodEntry(
-        testPet.id,
-        primary.id,
-        makeDryFoodData({ dateStarted: usersToday })
-      );
-
-      expect(result.dateStarted).toBe(usersToday);
+        expect(result.dateStarted).toBe(usersToday);
+      });
     });
   });
 

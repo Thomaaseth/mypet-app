@@ -6,6 +6,7 @@ import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';
 import { UserPreferencesService } from '../../user-preferences.service';
 import { addCalendarDays, toDateString } from '@/shared/utils/dates';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('Update Operations', () => {
   describe('updateDryFoodEntry', () => {
@@ -85,6 +86,8 @@ describe('Update Operations', () => {
 });
 
 describe('Timezone-aware dateStarted validation on update', () => {
+  useFixedTimeForTimezoneTests();
+
   it('rejects updating dateStarted to one day past the stored-timezone user\'s own "today"', async () => {
     const { primary, testPet } = await setupUserAndPet();
 
@@ -117,12 +120,7 @@ describe('Timezone-aware dateStarted validation on update', () => {
 
     const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
     const serverUtcToday = toDateString(new Date());
-
-    if (usersToday === serverUtcToday) {
-      throw new Error(
-        'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-      );
-    }
+    expect(usersToday).not.toBe(serverUtcToday);
 
     const updated = await FoodService.updateDryFoodEntry(testPet.id, created.id, primary.id, { dateStarted: usersToday });
 

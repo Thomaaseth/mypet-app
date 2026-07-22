@@ -9,6 +9,7 @@ import { db } from '../../db';
 import { DatabaseTestUtils } from '../../test/database-test-utils';
 import { UserPreferencesService } from '../user-preferences.service';
 import { toDateString } from '@/shared/utils/dates';
+import { useFixedTimeForTimezoneTests } from '../../test/timezone-test-utils';
 
 describe('PetsService', () => {
   describe('getUserPets', () => {
@@ -349,41 +350,6 @@ describe('PetsService', () => {
       expect(entryDate).toBe(petCreatedDate);
     });
 
-    it('uses the stored user timezone, not server UTC, for the auto-created weight entry date', async () => {
-      const { primary } = await DatabaseTestUtils.createTestUsers();
-
-      await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
-        unitSystem: 'imperial',
-        timezone: 'Pacific/Kiritimati',
-      });
-
-      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
-      const serverUtcToday = toDateString(new Date());
-
-      if (usersToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
-
-      const newPetData: NewPet & { weight?: string; weightUnit?: 'kg' | 'lbs' } = {
-        name: 'Weighted Pet',
-        userId: primary.id,
-        animalType: 'cat',
-        weight: '5.50',
-        weightUnit: 'kg',
-      };
-
-      const result = await PetsService.createPet(newPetData);
-
-      const [weightEntry] = await db.select()
-        .from(schema.weightEntries)
-        .where(eq(schema.weightEntries.petId, result.id));
-
-      expect(weightEntry.date).toBe(usersToday);
-    });
-  
     it('should NOT create weight entry when pet is created without weight', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
       const newPetData: NewPet = {
@@ -671,6 +637,47 @@ describe('PetsService', () => {
       const result = await PetsService.getUserPets('non-existent-user');
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('timezone-aware weight entry date', () => {
+    // Scoped to just this test (not the whole createPet describe block):
+    // freezing time here would desync JS `new Date()` from Postgres'
+    // DB-side `defaultNow()`, which the sibling test above depends on
+    // via result.createdAt.
+    useFixedTimeForTimezoneTests();
+
+    it('uses the stored user timezone, not server UTC, for the auto-created weight entry date', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+
+      // No longer a runtime coincidence risk — time is pinned inside the
+      // Kiritimati/UTC divergence window by useFixedTimeForTimezoneTests().
+      expect(usersToday).not.toBe(serverUtcToday);
+
+      const newPetData: NewPet & { weight?: string; weightUnit?: 'kg' | 'lbs' } = {
+        name: 'Weighted Pet',
+        userId: primary.id,
+        animalType: 'cat',
+        weight: '5.50',
+        weightUnit: 'kg',
+      };
+
+      const result = await PetsService.createPet(newPetData);
+
+      const [weightEntry] = await db.select()
+        .from(schema.weightEntries)
+        .where(eq(schema.weightEntries.petId, result.id));
+
+      expect(weightEntry.date).toBe(usersToday);
     });
   });
 

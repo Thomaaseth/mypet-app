@@ -9,6 +9,7 @@ import * as schema from '../../../db/schema';
 import type { WetFoodFormData } from '../../../services/food';
 import { UserPreferencesService } from '../../user-preferences.service';
 import { addCalendarDays, toDateString } from '@/shared/utils/dates';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('Wet Food Operations', () => {
   describe('createWetFoodEntry', () => {
@@ -30,31 +31,15 @@ describe('Wet Food Operations', () => {
       ).rejects.toThrow(BadRequestError);
     });
 
-    it('uses the stored user timezone, not server time, when validating purchase date', async () => {
+    it('should throw BadRequestError for a non-integer (decimal) number of units', async () => {
       const { primary, testPet } = await setupUserAndPet();
-
-      await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
-        unitSystem: 'imperial',
-        timezone: 'Pacific/Kiritimati',
-      });
-
-      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
-      const serverUtcToday = toDateString(new Date());
-
-      if (usersToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
-
-      const result = await FoodService.createWetFoodEntry(
-        testPet.id,
-        primary.id,
-        makeWetFoodData({ dateStarted: usersToday })
-      );
-
-      expect(result.dateStarted).toBe(usersToday);
+      await expect(
+        FoodService.createWetFoodEntry(
+          testPet.id,
+          primary.id,
+          makeInvalidWetFoodData({ numberOfUnits: '2.5' }) as unknown as WetFoodFormData
+        )
+      ).rejects.toThrow(BadRequestError);
     });
 
     it('rejects a purchase date one day past the stored-timezone user\'s own "today"', async () => {
@@ -76,6 +61,32 @@ describe('Wet Food Operations', () => {
           makeWetFoodData({ dateStarted: oneDayPastUsersToday })
         )
       ).rejects.toThrow('Purchase date cannot be in the future');
+    });
+  });
+
+  describe('timezone-aware purchase date validation', () => {
+    useFixedTimeForTimezoneTests();
+
+    it('uses the stored user timezone, not server time, when validating purchase date', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+      expect(usersToday).not.toBe(serverUtcToday);
+
+      const result = await FoodService.createWetFoodEntry(
+        testPet.id,
+        primary.id,
+        makeWetFoodData({ dateStarted: usersToday })
+      );
+
+      expect(result.dateStarted).toBe(usersToday);
     });
   });
 
@@ -111,6 +122,19 @@ describe('Wet Food Operations', () => {
           created.id,
           primary.id,
           { numberOfUnits: 'invalid' } as unknown as WetFoodFormData
+        )
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should reject a non-integer (decimal) number of units on update', async () => {
+      const { primary, testPet } = await setupUserAndPet();
+      const created = await FoodService.createWetFoodEntry(testPet.id, primary.id, makeWetFoodData());
+      await expect(
+        FoodService.updateWetFoodEntry(
+          testPet.id,
+          created.id,
+          primary.id,
+          { numberOfUnits: '2.5' } as unknown as WetFoodFormData
         )
       ).rejects.toThrow(BadRequestError);
     });

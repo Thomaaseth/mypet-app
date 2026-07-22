@@ -87,8 +87,8 @@ export class FoodValidations {
     }
 
     if (data.numberOfUnits !== undefined) {
-      const numberOfUnits = parseInt(data.numberOfUnits, 10);
-      if (!Number.isInteger(numberOfUnits) || numberOfUnits <= 0 || isNaN(numberOfUnits)) {
+      const numberOfUnits = Number(data.numberOfUnits);
+      if (!Number.isInteger(numberOfUnits) || numberOfUnits <= 0) {
         throw new BadRequestError('Number of units must be a positive integer');
       }
       if (numberOfUnits > 100) {

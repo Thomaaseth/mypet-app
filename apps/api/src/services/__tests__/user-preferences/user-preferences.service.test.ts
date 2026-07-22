@@ -4,6 +4,7 @@ import { DatabaseTestUtils } from '../../../test/database-test-utils';
 import { makeUserPreferencesData } from './factories';
 import { toDateString } from '@/shared/utils/dates';
 import { BadRequestError } from '@/middleware/errors';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('UserPreferencesService', () => {
   describe('getUserPreferences', () => {
@@ -106,6 +107,8 @@ describe('UserPreferencesService', () => {
   });
 
   describe('getTodayForUser', () => {
+    useFixedTimeForTimezoneTests();
+
     it('falls back to server-UTC-today when the user has no preferences row', async () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
 
@@ -126,13 +129,7 @@ describe('UserPreferencesService', () => {
 
       const result = await UserPreferencesService.getTodayForUser(primary.id);
       const serverUtcToday = toDateString(new Date());
-
-      // Guard against a false-pass if the test happens to run right at a UTC boundary
-      if (result === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
+      expect(result).not.toBe(serverUtcToday);
 
       const expected = new Intl.DateTimeFormat('en-CA', { timeZone: 'Pacific/Kiritimati' }).format(new Date());
       expect(result).toBe(expected);

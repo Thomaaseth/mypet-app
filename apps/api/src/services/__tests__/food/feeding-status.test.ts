@@ -4,6 +4,7 @@ import { setupUserAndPet } from './helpers/setup';
 import { makeDryFoodData, makeWetFoodData } from './helpers/factories';
 import { addCalendarDays, toDateString } from '@/shared/utils/dates';
 import { UserPreferencesService } from '../../user-preferences.service';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('Feeding Status & Actual Consumption Calculations', () => {
   
@@ -378,6 +379,8 @@ describe('Feeding Status & Actual Consumption Calculations', () => {
 });
 
 describe('Timezone-aware finish date', () => {
+  useFixedTimeForTimezoneTests();
+
   it('uses the stored user timezone, not server time, for dateFinished', async () => {
     const { primary, testPet } = await setupUserAndPet();
 
@@ -389,12 +392,7 @@ describe('Timezone-aware finish date', () => {
 
     const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
     const serverUtcToday = toDateString(new Date());
-
-    if (usersToday === serverUtcToday) {
-      throw new Error(
-        'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-      );
-    }
+    expect(usersToday).not.toBe(serverUtcToday);
 
     const dryFoodData = makeDryFoodData({
       bagWeight: '2.0',

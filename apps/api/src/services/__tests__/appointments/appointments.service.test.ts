@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
 import * as schema from '../../../db/schema';
 import { AppointmentsService } from '../../appointments.service';
 import { UserPreferencesService } from '../../user-preferences.service';
@@ -10,7 +9,7 @@ import { setupUserPetAndVet } from './helpers/setup';
 import { makeAppointmentData } from './helpers/factories';
 import { toDateString, addCalendarDays } from '@/shared/utils/dates';
 import { VeterinariansService } from '@/services/veterinarians.service';
-import { rejects } from 'assert';
+import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
 
 describe('AppointmentsService', () => {
   describe('createAppointment', () => {
@@ -178,37 +177,7 @@ describe('AppointmentsService', () => {
   });
 
   describe('getAppointments', () => {
-    it('returns an appointment in "upcoming" when its date is today or later, using the stored user timezone', async () => {
-      const { primary, testPet, testVet } = await setupUserPetAndVet();
-
-      await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
-        unitSystem: 'imperial',
-        timezone: 'Pacific/Kiritimati',
-      });
-
-      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
-      const serverUtcToday = toDateString(new Date());
-
-      if (usersToday === serverUtcToday) {
-        throw new Error(
-          'Test invariant violated: Pacific/Kiritimati local date matched server UTC date at run time — pick a run time or offset where this test can actually distinguish the two.'
-        );
-      }
-
-      await AppointmentsService.createAppointment(
-        makeAppointmentData({ petId: testPet.id, veterinarianId: testVet.id, appointmentDate: usersToday }),
-        primary.id
-      );
-
-      const upcoming = await AppointmentsService.getAppointments(primary.id, 'upcoming');
-      const past = await AppointmentsService.getAppointments(primary.id, 'past');
-
-      expect(upcoming).toHaveLength(1);
-      expect(past).toHaveLength(0);
-    });
-
-    it('returns an appointment in "past" when its date is before the stored user timezone\'s today', async () => {
+        it('returns an appointment in "past" when its date is before the stored user timezone\'s today', async () => {
       const { primary, testPet, testVet } = await setupUserPetAndVet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
@@ -256,6 +225,35 @@ describe('AppointmentsService', () => {
       expect(upcoming).toHaveLength(2);
       expect(upcoming[0].appointmentDate).toBe(addCalendarDays(usersToday, 3));
       expect(upcoming[1].appointmentDate).toBe(addCalendarDays(usersToday, 10));
+    });
+  });
+
+  describe('timezone-aware upcoming/past classification', () => {
+    useFixedTimeForTimezoneTests();
+
+    it('returns an appointment in "upcoming" when its date is today or later, using the stored user timezone', async () => {
+      const { primary, testPet, testVet } = await setupUserPetAndVet();
+
+      await UserPreferencesService.upsertUserPreferences(primary.id, {
+        dateTimeLocale: 'en-US',
+        unitSystem: 'imperial',
+        timezone: 'Pacific/Kiritimati',
+      });
+
+      const usersToday = await UserPreferencesService.getTodayForUser(primary.id);
+      const serverUtcToday = toDateString(new Date());
+      expect(usersToday).not.toBe(serverUtcToday);
+
+      await AppointmentsService.createAppointment(
+        makeAppointmentData({ petId: testPet.id, veterinarianId: testVet.id, appointmentDate: usersToday }),
+        primary.id
+      );
+
+      const upcoming = await AppointmentsService.getAppointments(primary.id, 'upcoming');
+      const past = await AppointmentsService.getAppointments(primary.id, 'past');
+
+      expect(upcoming).toHaveLength(1);
+      expect(past).toHaveLength(0);
     });
   });
 

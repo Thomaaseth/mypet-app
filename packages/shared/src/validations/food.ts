@@ -13,6 +13,7 @@ const baseFoodValidation = {
     }, 'Daily amount must be a positive number'),
     dateStarted: z.string()
     .min(1, 'Purchase date is required')
+    .refine((val) => !isNaN(new Date(val).getTime()), 'Please enter a valid date'),
 };
 
 // bagWeightUnit is not user-selectable, derived from the user's unitSystem preference,
@@ -56,8 +57,8 @@ export const wetFoodSchema = z.object({
   numberOfUnits: z.string()
     .min(1, 'Number of units is required')
     .refine((val) => {
-      const num = parseInt(val, 10);
-      return !isNaN(num) && Number.isInteger(num) && num > 0;
+      const num = Number(val);
+      return Number.isInteger(num) && num > 0;
     }, 'Number of units must be a positive whole number'),
   weightPerUnit: z.string()
     .min(1, 'Weight per unit is required')
@@ -101,7 +102,10 @@ export const updateDryFoodSchema = z.object({
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  dateStarted: z.string().optional(),
+  dateStarted: z.string().refine(val => {
+    if (!val) return true;
+    return !isNaN(new Date(val).getTime());
+  }, 'Please enter a valid date').optional(),
 }).superRefine((data, ctx) => {
   if (data.bagWeight !== undefined && data.bagWeightUnit === undefined) {
     ctx.addIssue({
@@ -118,8 +122,8 @@ export const updateWetFoodSchema = z.object({
   numberOfUnits: z.string()
     .refine((val) => {
       if (!val) return true;
-      const num = parseInt(val, 10);
-      return !isNaN(num) && Number.isInteger(num) && num > 0;
+      const num = Number(val);
+      return Number.isInteger(num) && num > 0;
     }, 'Number of units must be a positive whole number')
     .optional(),
   weightPerUnit: z.string().refine(val => {
@@ -133,7 +137,10 @@ export const updateWetFoodSchema = z.object({
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, 'Daily amount must be a positive number').optional(),
-  dateStarted: z.string().optional(),
+  dateStarted: z.string().refine(val => {
+    if (!val) return true;
+    return !isNaN(new Date(val).getTime());
+  }, 'Please enter a valid date').optional(),
 }).superRefine((data, ctx) => {
   // wetFoodUnit governs both weightPerUnit and dailyAmount; required if either changes
   if ((data.weightPerUnit !== undefined || data.dailyAmount !== undefined) && data.wetFoodUnit === undefined) {

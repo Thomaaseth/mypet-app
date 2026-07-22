@@ -1,24 +1,6 @@
 export * from '@/shared/validations/pet';
 export * from '@/shared/utils/units';
-import type { WeightUnit } from '@/shared/validations/pet';
-import { convertWeight } from '@/shared/utils/units';
 
-  
-  // export const getWeightInKg = (weight: string | null, unit: WeightUnit): number | null => {
-  //   if (!weight) return null;
-  //   const weightNum = parseFloat(weight);
-  //   if (isNaN(weightNum)) return null;
-    
-  //   return unit === 'kg' ? weightNum : convertWeight(weightNum, 'lbs', 'kg');
-  // };
-  
-  // export const getWeightInLbs = (weight: string | null, unit: WeightUnit): number | null => {
-  //   if (!weight) return null;
-  //   const weightNum = parseFloat(weight);
-  //   if (isNaN(weightNum)) return null;
-    
-  //   return unit === 'lbs' ? weightNum : convertWeight(weightNum, 'kg', 'lbs');
-  // };
   
   // Age calculation utility
   export const calculatePetAge = (birthDate: string | null): string => {
