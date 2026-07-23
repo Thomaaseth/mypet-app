@@ -14,14 +14,20 @@ import { Loader2, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { MutedText, ErrorText } from '@/components/ui/typography';
+import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
+import type { TFunction } from 'i18next';
 
-const forgotPasswordSchema = z.object({
-    email: z.string().email('Please enter a valid email address'),
-});
+const createForgotPasswordSchema = (t: TFunction) =>
+  z.object({
+    email: z.string().email(t('auth.validation.invalidEmail')),
+  });
 
-type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+type ForgotPasswordFormData = z.infer<ReturnType<typeof createForgotPasswordSchema>>;
 
 export default function ForgotPasswordForm() {
+    const { t } = useTranslation();
+    const forgotPasswordSchema = useMemo(() => createForgotPasswordSchema(t), [t]);
     const [emailSent, setEmailSent] = useState(false);
     const { isLoading, error, executeAction } = useErrorState();
   
@@ -59,15 +65,15 @@ export default function ForgotPasswordForm() {
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                  <CheckCircle className="mx-auto h-12 w-12 text-success mb-4" />
-                  <CardTitle>Check Your Email</CardTitle>
+                 <CardTitle>{t('auth.forgotPassword.emailSentTitle')}</CardTitle>
                   <CardDescription>
-                    {"We've sent password reset instructions to your email address."}{''}
+                  {t('auth.forgotPassword.emailSentDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <MutedText className="text-center">
-                      {"Didn't receive the email? Check your spam folder or try again."}{''}
+                    {t('auth.forgotPassword.emailSentHelper')}
                     </MutedText>
                     <div className="flex space-x-2">
                       <Button 
@@ -75,11 +81,11 @@ export default function ForgotPasswordForm() {
                         onClick={() => setEmailSent(false)}
                         className="flex-1"
                       >
-                        Try Again
+                        {t('auth.forgotPassword.tryAgain')}
                       </Button>
                       <Link to="/login" className="flex-1">
                         <Button className="w-full">
-                          Back to Login
+                        {t('auth.forgotPassword.backToLogin')}
                         </Button>
                       </Link>
                     </div>
@@ -92,9 +98,9 @@ export default function ForgotPasswordForm() {
     return (
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Reset Your Password</CardTitle>
+            <CardTitle>{t('auth.forgotPassword.title')}</CardTitle>
             <CardDescription>
-              {"Enter your email address and we'll send you a link to reset your password."}{''}
+            {t('auth.forgotPassword.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -107,11 +113,11 @@ export default function ForgotPasswordForm() {
               )}
   
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.forgotPassword.emailLabel')}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t('auth.forgotPassword.emailPlaceholder')}
                   {...form.register('email')}
                   aria-invalid={!!form.formState.errors.email}
                 />
@@ -128,10 +134,10 @@ export default function ForgotPasswordForm() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {t('auth.forgotPassword.submitting')}
                   </>
                 ) : (
-                  'Send Reset Link'
+                  t('auth.forgotPassword.submit')
                 )}
               </Button>
             </form>
@@ -142,7 +148,7 @@ export default function ForgotPasswordForm() {
                 className="text-sm text-muted-foreground hover:text-primary inline-flex items-center"
               >
                 <ArrowLeft className="mr-1 h-3 w-3" />
-                Back to Login
+                {t('auth.forgotPassword.backToLogin')}
               </Link>
             </div>
           </CardContent>

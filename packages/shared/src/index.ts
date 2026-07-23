@@ -7,3 +7,4 @@ export * from './validations/password';
 export * from './validations/pet-notes';
 export * from './validations/locale';
 export * from './utils/units';
+export * from './validations/language';

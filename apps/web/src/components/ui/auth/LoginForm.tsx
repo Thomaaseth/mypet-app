@@ -13,16 +13,22 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { toastService } from '@/lib/toast';
 import { useSessionContext } from '@/contexts/SessionContext';
 import { PageTitle, MutedText, ErrorText } from '@/components/ui/typography';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
-// Zod schema for sign in
-const signInSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+// Zod schema factory — takes `t` so validation messages are translated
+const createSignInSchema = (t: TFunction) =>
+  z.object({
+    email: z.string().email(t('auth.validation.invalidEmail')),
+    password: z.string().min(1, t('auth.validation.passwordRequired')),
+  });
 
-type SignInFormData = z.infer<typeof signInSchema>;
+type SignInFormData = z.infer<ReturnType<typeof createSignInSchema>>;
 
 export default function SignInForm() {
+  const { t } = useTranslation();
+  const signInSchema = useMemo(() => createSignInSchema(t), [t]);
   const navigate = useNavigate();
   const search = useSearch({ from: '/login' });
   const { refreshSession } = useSessionContext();
@@ -67,18 +73,18 @@ export default function SignInForm() {
   return (
     <div className="mx-auto max-w-md space-y-6">
       <div className="space-y-2 text-center">
-        <PageTitle>Welcome back</PageTitle>
-        <MutedText>Enter your credentials to access your account</MutedText>
+        <PageTitle>{t('auth.login.title')}</PageTitle>
+        <MutedText>{t('auth.login.subtitle')}</MutedText>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* Email */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t('auth.login.emailLabel')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="john@example.com"
+            placeholder={t('auth.login.emailPlaceholder')}
             {...register('email')}
             aria-invalid={!!errors.email}
           />
@@ -87,11 +93,11 @@ export default function SignInForm() {
 
         {/* Password */}
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t('auth.login.passwordLabel')}</Label>
           <Input
             id="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder={t('auth.login.passwordPlaceholder')}
             {...register('password')}
             aria-invalid={!!errors.password}
           />
@@ -109,7 +115,7 @@ export default function SignInForm() {
                 onClick={clearError}
                 className="text-xs hover:underline ml-4"
               >
-                Dismiss
+                {t('auth.login.dismiss')}
               </button>
             </AlertDescription>
           </Alert>
@@ -118,7 +124,7 @@ export default function SignInForm() {
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isLoading ? 'Signing in...' : 'Sign in'}
+          {isLoading ? t('auth.login.submitting') : t('auth.login.submit')}
         </Button>
 
         {/* Forgot Password Link */}
@@ -127,7 +133,7 @@ export default function SignInForm() {
             to="/forgot-password"
             className="text-sm text-muted-foreground hover:text-primary underline underline-offset-4"
           >
-            Forgot your password?
+            {t('auth.login.forgotPassword')}
           </Link>
         </div>
       </form>
@@ -135,12 +141,12 @@ export default function SignInForm() {
       {/* Sign Up Link */}
       <div className="text-center">
         <p className="text-sm text-muted-foreground">
-            {"Don't have an account?"}{' '}
+        {t('auth.login.noAccount')}{' '}
           <Link
             to="/signup"
             className="font-medium text-primary underline underline-offset-4 hover:no-underline"
           >
-            Sign up
+            {t('auth.login.signUpLink')}
           </Link>
         </p>
       </div>

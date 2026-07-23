@@ -28,6 +28,7 @@
     "../../packages/shared/src/validations/veterinarians.ts", 
     "../../packages/shared/src/validations/weight.ts",
     "../../packages/shared/src/validations/locale.ts",
+    "../../packages/shared/src/validations/language.ts",
     "../../packages/shared/src/utils/units.ts"
 ],
   "exclude": ["node_modules"]

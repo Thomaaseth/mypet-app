@@ -12,17 +12,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { newPasswordSchema } from '@/lib/validations/password';
+import { createTranslatedNewPasswordSchema } from '@/lib/validations/password-translated';
 import { toastService } from '@/lib/toast';
 import { ErrorText } from '@/components/ui/typography';
-  
-type ResetPasswordFormData = z.infer<typeof newPasswordSchema >;
+import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
+import type { TFunction } from 'i18next';
+
+type ResetPasswordFormData = z.infer<ReturnType<typeof createTranslatedNewPasswordSchema>>;
 
 interface ResetPasswordFormProps {
     token: string;
 }
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+    const { t } = useTranslation();
+    const newPasswordSchema = useMemo(() => createTranslatedNewPasswordSchema(t), [t]);
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -62,9 +67,9 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     return (
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Reset Your Password</CardTitle>
+          <CardTitle>{t('auth.resetPassword.title')}</CardTitle>
             <CardDescription>
-              Enter your new password below.
+            {t('auth.resetPassword.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -78,12 +83,12 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   
               {/* New Password */}
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">{t('auth.resetPassword.newPasswordLabel')}</Label>
                 <div className="relative">
                   <Input
                     id="newPassword"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter new password"
+                    placeholder={t('auth.resetPassword.newPasswordPlaceholder')}
                     {...form.register('newPassword')}
                     aria-invalid={!!form.formState.errors.newPassword}
                   />
@@ -108,12 +113,12 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   
               {/* Confirm Password */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t('auth.resetPassword.confirmPasswordLabel')}</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm new password"
+                    placeholder={t('auth.resetPassword.confirmPasswordPlaceholder')}
                     {...form.register('confirmPassword')}
                     aria-invalid={!!form.formState.errors.confirmPassword}
                   />
@@ -140,10 +145,10 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Resetting password...
+                    {t('auth.resetPassword.submitting')}
                   </>
                 ) : (
-                  'Reset Password'
+                  t('auth.resetPassword.submit')
                 )}
               </Button>
             </form>

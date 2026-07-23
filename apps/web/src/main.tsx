@@ -8,6 +8,9 @@ import { queryClient } from '@/lib/queryClient';
 // Import styles
 import './globals.css'
 
+// Initialize i18next before the app renders
+import '@/i18n/config'
+
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
