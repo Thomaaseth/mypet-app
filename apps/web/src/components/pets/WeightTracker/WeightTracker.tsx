@@ -37,9 +37,12 @@ import { convertWeight } from '@/lib/validations/pet';
 import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import { getFallbackUnitSystem, getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { getUnitsForSystem } from '@/shared/validations/units';
+import { useTranslation } from 'react-i18next';
+import { WEIGHT_TREND_KEYS, WEIGHT_STATUS_KEYS } from '@/i18n/enum-keys';
 
 interface WeightTrackerProps {
   petId: string;
+  petName: string;
   animalType: 'cat' | 'dog';
 }
 
@@ -54,7 +57,8 @@ function getTargetStatusColor(status: 'within' | 'above' | 'below'): string {
   }
 }
 
-export default function WeightTracker({ petId, animalType }: WeightTrackerProps) {
+export default function WeightTracker({ petId, petName, animalType }: WeightTrackerProps) {
+  const { t } = useTranslation();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTargetRangeDialogOpen, setIsTargetRangeDialogOpen] = useState(false);
@@ -225,7 +229,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Scale className="h-5 w-5" />
-            Weight Tracker
+            {t('weights.tracker.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -244,7 +248,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Scale className="h-5 w-5" />
-            <CardTitle>Weight Tracker</CardTitle>
+            <CardTitle>{t('weights.tracker.title')}</CardTitle>
           </div>
           <div className="flex items-center gap-2">
             {/* Target Range Button */}
@@ -258,13 +262,13 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                       className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                     >
                       <Target className="h-4 w-4" />
-                      <span className="hidden sm:inline">Set Range</span>
+                      <span className="hidden sm:inline">{t('weights.tracker.setRange')}</span>
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
-                    <p className="font-semibold mb-1">Track your pet&apos;s healthy weight</p>
-                    <HelperText>
-                      Ask your vet for your pet&apos;s ideal weight range...
+                  <p className="font-semibold mb-1">{t('weights.tracker.tooltipTitle')}</p>                    
+                  <HelperText>
+                    {t('weights.tracker.tooltipDescription')}
                     </HelperText>
                   </TooltipContent>
                 </Tooltip>
@@ -276,7 +280,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                 >
                 <Target className="h-4 w-4" />
-                <span className="hidden sm:inline">Edit Range</span>
+                <span className="hidden sm:inline">{t('weights.tracker.editRange')}</span>
               </Button>
             )}
 
@@ -288,7 +292,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                 >
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Weight Entry</span>
+                <span className="hidden sm:inline">{t('weights.tracker.addWeightEntry')}</span>
               </Button>
             )}
           </div>
@@ -300,14 +304,16 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
             <div className="flex items-center justify-between">
               <SectionTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Weight Progress
+                {t('weights.tracker.weightProgress')}
               </SectionTitle>
               {trend && (
                 <div className="flex items-center gap-1 text-sm">
                   {trend === 'increasing' && <TrendingUp className="h-4 w-4 text-primary" />}
                   {trend === 'decreasing' && <TrendingDown className="h-4 w-4 text-secondary" />}
                   {trend === 'stable' && <Minus className="h-4 w-4 text-accent" />}
-                  <span className="hidden @min-[260px]:inline text-muted-foreground capitalize">{trend}</span>
+                  <span className="hidden @min-[260px]:inline text-muted-foreground capitalize">
+                    {t(WEIGHT_TREND_KEYS[trend])}
+                  </span>
                 </div>
               )}
             </div>
@@ -326,7 +332,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 { /* Target badge (left) */ }
                   {hasTargetRange && weightTarget && status &&(
                     <Badge variant="outline" className={`text-2xs ${getTargetStatusColor(status)}`}>
-                      {status === 'within' ? 'On Target' : status === 'above' ? 'Above Target' : 'Below Target'}
+                      {t(WEIGHT_STATUS_KEYS[status])}
                     </Badge>
                   )}
 
@@ -355,7 +361,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
          <Alert>
           <AlertDescription className="flex items-center justify-between gap-3 text-xs sm:text-sm">
             <span>
-            Set a target weight range with your vet.
+            {t('weights.tracker.setTargetBannerText')}
             </span>
             <div className="flex items-center gap-1 flex-shrink-0">
               <Button 
@@ -363,7 +369,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                 className="h-0 p-1 text-xs sm:text-sm"
                 onClick={() => setShowLearnMoreDialog(true)}
               >
-                Learn more
+                {t('weights.tracker.learnMore')}
               </Button>
               <Button 
                 variant="outline" 
@@ -382,9 +388,9 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         <ResponsiveDialog
           open={isAddDialogOpen}
           onOpenChange={setIsAddDialogOpen}
-          title="Add Weight Entry"
-          description={`Record your pet's weight. All entries will use ${weightUnit} as the unit.`}
-        >
+          title={t('weights.tracker.addWeightEntry')}
+          description={t('weights.tracker.addWeightDialogDescription', { unit: weightUnit })}
+          >
           <WeightForm
             animalType={animalType}
             onSubmit={handleCreateEntry}
@@ -397,12 +403,12 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
          <ResponsiveDialog
             open={isTargetRangeDialogOpen}
             onOpenChange={setIsTargetRangeDialogOpen}
-            title={`${hasTargetRange ? 'Edit' : 'Set'} Target Weight Range`}
-            description="Enter the healthy weight range for your pet as recommended by your vet."
-          >
+            title={hasTargetRange ? t('weights.tracker.targetRangeDialogTitleEdit') : t('weights.tracker.targetRangeDialogTitleSet')}
+            description={t('weights.tracker.targetRangeDialogDescription')}
+            >
             <TargetRangeForm
               key={`target-form-${isTargetRangeDialogOpen}`}
-              petName="your pet"
+              petName={petName}
               animalType={animalType}
               currentMin={weightTarget?.minWeight ? parseFloat(weightTarget.minWeight) : undefined}
               currentMax={weightTarget?.maxWeight ? parseFloat(weightTarget.maxWeight) : undefined}
@@ -421,30 +427,27 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
         >
           <div className="space-y-4">
             <MutedText>
-              A healthy weight range helps you monitor if your pet is underweight, 
-              overweight, or right on track. Your veterinarian can provide the best 
-              guidance based on:
+            {t('weights.target.educationIntro')}
             </MutedText>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Breed and body type</li>
-              <li>Age and activity level</li>
-              <li>Overall health condition</li>
+              <li>{t('weights.target.educationBreedType')}</li>
+              <li>{t('weights.target.educationAgeActivity')}</li>
+              <li>{t('weights.target.educationHealthCondition')}</li>
             </ul>
             <div className="bg-muted p-3 rounded-md">
               <BodyText>
-                Ask your vet &quot;What&apos;s a healthy weight 
-                range for your pet.&quot; Then add it to the app.
+                {t('weights.target.askVetTip')}
               </BodyText>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowLearnMoreDialog(false)}>
-                Close
+              {t('common.actions.close')}
               </Button>
               <Button onClick={() => {
                 setShowLearnMoreDialog(false);
                 setIsTargetRangeDialogOpen(true);
               }}>
-                Set Target Range
+                {t('weights.tracker.setTargetRangeButton')}
               </Button>
             </div>
           </div>
@@ -460,12 +463,12 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
                     <MutedText className="font-display flex items-center gap-2">
-                    Weight History
+                    {t('weights.tracker.weightHistory')}
                   </MutedText>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">
-                      {weightEntries.length} {weightEntries.length === 1 ? 'entry' : 'entries'}
+                      {t('weights.tracker.entries', { count: weightEntries.length })}
                     </span>
                     {isHistoryOpen ? (
                       <ChevronDown className="h-4 w-4" />
@@ -480,7 +483,7 @@ export default function WeightTracker({ petId, animalType }: WeightTrackerProps)
               <CardContent className="pt-0">
                 {weightEntries.length === 0 ? (
                   <div className="flex items-center justify-center h-32">
-                    <MutedText>No weight entries yet. Add your first entry above!</MutedText>
+                    <MutedText>{t('weights.tracker.noEntriesYet')}</MutedText>                  
                   </div>
                 ) : (
                   <WeightList

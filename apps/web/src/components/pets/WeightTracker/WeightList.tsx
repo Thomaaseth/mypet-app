@@ -36,6 +36,7 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
 import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
 import { getUnitsForSystem } from '@/shared/validations/units';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 5;
 
@@ -56,6 +57,7 @@ export default function WeightList({
   isLoading = false,
   isHistoryOpen,
 }: WeightListProps) {
+  const { t } = useTranslation();
   const [editingEntry, setEditingEntry] = useState<WeightEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<WeightEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -115,10 +117,10 @@ export default function WeightList({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Weight</TableHead>
+            <TableHead>{t('weights.form.dateLabel')}</TableHead>
+            <TableHead>{t('weights.form.weightLabel')}</TableHead>
             <TableHead className="text-right">
-              <span className="hidden sm:inline">Actions</span>
+            <span className="hidden sm:inline">{t('weights.list.actionsColumn')}</span>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -143,7 +145,7 @@ export default function WeightList({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => handleEditClick(entry)}>
                       <Edit2 className="h-4 w-4 mr-2" />
-                      Edit
+                      {t('common.actions.edit')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -151,7 +153,7 @@ export default function WeightList({
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      {t('common.actions.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -173,8 +175,8 @@ export default function WeightList({
       <ResponsiveDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        title="Edit Weight Entry"
-        description="Update the weight and date for this entry."
+        title={t('weights.list.editDialogTitle')}
+        description={t('weights.list.editDialogDescription')}
       >
         {editingEntry && (
           <WeightForm
@@ -191,20 +193,21 @@ export default function WeightList({
       <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Weight Entry</AlertDialogTitle>
+          <AlertDialogTitle>{t('weights.list.deleteDialogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this weight entry from{' '}
-              {deletingEntry && formatDateForDisplay(deletingEntry.date, displayLocale)}? This action cannot be undone.
+            {t('weights.list.deleteConfirmation', {
+              date: deletingEntry ? formatDateForDisplay(deletingEntry.date, displayLocale) : '',
+            })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+          <AlertDialogCancel disabled={isLoading}>{t('common.actions.cancel')}</AlertDialogCancel>
+          <AlertDialogAction 
               onClick={handleDeleteConfirm}
               disabled={isLoading}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
-              Delete Entry
+              {t('weights.list.deleteConfirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

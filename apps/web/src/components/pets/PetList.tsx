@@ -24,6 +24,7 @@ import { WeightTracker } from './WeightTracker';
 import { FoodTracker } from './FoodTracker';
 import NotesWidget from './NotesWidget/NotesWidget';
 import { PageTitle, EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
+import { useTranslation } from 'react-i18next';
 
 function EditPetForm({ 
   pet, 
@@ -49,6 +50,7 @@ function EditPetForm({
 }
 
 export default function PetList() {
+  const { t } = useTranslation();
   const { data: pets, isPending, error } = usePets();
   const createPetMutation = useCreatePet();
   const updatePetMutation = useUpdatePet();
@@ -146,10 +148,10 @@ export default function PetList() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
             <div className="text-center space-y-2">
-              <EmptyStateTitle>Unable to load pets</EmptyStateTitle>
+             <EmptyStateTitle>{t('pets.list.unableToLoad')}</EmptyStateTitle>
                 <MutedText>{appError.message}</MutedText>
               <Button onClick={() => window.location.reload()}>
-                Try Again
+              {t('common.actions.tryAgain')}
               </Button>
             </div>
           </CardContent>
@@ -169,20 +171,20 @@ export default function PetList() {
                 <Heart className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-                <EmptyStateTitle>No pets yet</EmptyStateTitle>
+              <EmptyStateTitle>{t('pets.list.emptyTitle')}</EmptyStateTitle>
                   <EmptyStateDescription className="max-w-md">
-                    Add your first pet to start managing...
+                  {t('pets.list.emptyDescription')}
                   </EmptyStateDescription>
               </div>
               <Button className="mt-4" size="sm" onClick={() => setIsCreateDialogOpen(true)}>
                 <Plus className="h-4 w-4" />
-                Add Your First Pet
+                {t('pets.list.addFirstPet')}
               </Button>
               <ResponsiveDialog
                 open={isCreateDialogOpen}
                 onOpenChange={setIsCreateDialogOpen}
-                title="Add New Pet"
-                description="Fill out your pet's information below. Only the name is required."
+                title={t('pets.list.addPetDialogTitle')}
+                description={t('pets.list.addPetDialogDescription')}
               >
                 <PetForm
                   onSubmit={handleCreatePet}
@@ -204,20 +206,20 @@ export default function PetList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-          <PageTitle>My Pets</PageTitle>
+          <PageTitle>{t('pets.list.pageTitle')}</PageTitle>
             <MutedText>
-              Manage your {pets?.length} pet{pets.length !== 1 ? 's' : ''}
+            {t('pets.list.managePets', { count: pets?.length ?? 0 })}
             </MutedText>
           </div>
           <Button onClick={() => setIsCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Pet
+            {t('pets.list.addPet')}
           </Button>
           <ResponsiveDialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
-            title="Add New Pet"
-            description="Fill out your pet's information below. Only the name is required."
+            title={t('pets.list.addPetDialogTitle')}
+            description={t('pets.list.addPetDialogDescription')}
           >
             <PetForm
               onSubmit={handleCreatePet}
@@ -268,6 +270,7 @@ export default function PetList() {
                  
                     <WeightTracker 
                       petId={pet.id} 
+                      petName={pet.name}
                       animalType={pet.animalType} 
                     />
                     <FoodTracker 
@@ -283,11 +286,11 @@ export default function PetList() {
                   {/* Coming Soon Card */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">More coming soon...</CardTitle>
+                    <CardTitle className="text-lg">{t('pets.list.comingSoonTitle')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-muted-foreground text-sm">
-                        Symptoms tracker, medecine tracker and more coming soon!
+                      {t('pets.list.comingSoonDescription')}
                       </p>
                     </CardContent>
                   </Card>
@@ -304,8 +307,8 @@ export default function PetList() {
           onOpenChange={(open) => {
             if (!open && !isActionLoading) setEditingPet(null);
           }}
-          title="Edit Pet"
-          description="Update your pet's information below."
+          title={t('pets.list.editPetDialogTitle')}
+          description={t('pets.list.editPetDialogDescription')}
         >
           {editingPet && (
             <EditPetForm
@@ -329,14 +332,14 @@ export default function PetList() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Pet</AlertDialogTitle>
+            <AlertDialogTitle>{t('pets.list.deletePetTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete {deletingPet?.name}? This will also delete all associated data including weight entries, vet records, and other information. This action cannot be undone.
+              {t('pets.list.deleteConfirmation', { name: deletingPet?.name ?? '' })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isActionLoading}>
-                Cancel
+              {t('common.actions.cancel')}
               </AlertDialogCancel>
               <AlertDialogAction 
                 onClick={handleDeletePet}
@@ -346,7 +349,7 @@ export default function PetList() {
                 {isActionLoading && 
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 }
-                Delete Pet
+                  {t('pets.list.deletePetTitle')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

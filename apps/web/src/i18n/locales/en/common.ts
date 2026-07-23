@@ -11,6 +11,7 @@ const common = {
       next: 'Next',
       submit: 'Submit',
       loading: 'Loading...',
+      tryAgain: 'Try Again',
     },
     errors: {
       generic: 'Something went wrong. Please try again.',

@@ -28,6 +28,8 @@ import { usePetSignedUrl } from '@/queries/pets';
 import { MutedText, SectionTitle, EntryTitle } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
+import { PET_GENDER_KEYS, ANIMAL_TYPE_KEYS } from '@/i18n/enum-keys';
+import { useTranslation } from 'react-i18next';
 
 interface PetCardProps {
   pet: Pet;
@@ -37,10 +39,11 @@ interface PetCardProps {
 }
 
 export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
+  const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
 
-  const age = calculatePetAge(pet.birthDate);
+  const age = calculatePetAge(pet.birthDate, t);
 
   const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
@@ -62,7 +65,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
             className="w-16 h-16 opacity-30 pointer-events-none select-none mx-auto mb-2"
             alt=""
           />        
-          <MutedText>No photo</MutedText>
+          <MutedText>{t('pets.card.noPhoto')}</MutedText>
         </div>
     </div>
   );
@@ -86,20 +89,20 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
           <div className="min-w-0">
             <SectionTitle>{pet.name}</SectionTitle>
             <MutedText className="capitalize">
-              {pet.species || pet.animalType}
+            {pet.species || t(ANIMAL_TYPE_KEYS[pet.animalType])}
             </MutedText>
           </div>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
                 <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t('pets.card.openMenu')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(pet)}>
                 <Edit2 className="mr-2 h-4 w-4" />
-                Edit
+                {t('common.actions.edit')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -107,7 +110,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t('common.actions.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -123,7 +126,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
           {signedUrl && !imageError ? (
               <img
                 src={signedUrl}
-                alt={`Photo of ${pet.name}`}
+                alt={t('pets.card.photoAlt', { name: pet.name })}
                 className="w-full h-full lg:h-auto object-cover rounded-md"
                 onError={() => setImageError(true)}
               />
@@ -136,7 +139,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                   className="w-10 h-10 lg:w-14 lg:h-14 opacity-30 pointer-events-none select-none"
                   alt=""
                 />
-                <MutedText>No photo</MutedText>
+                <MutedText>{t('pets.card.noPhoto')}</MutedText>
               </div>
             </div>
           )}
@@ -152,12 +155,12 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 {pet.gender === 'male' && <Mars className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 {pet.gender === 'female' && <Venus className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 {pet.gender === 'unknown' && <CircleHelp className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-                <EntryTitle className="truncate">{pet.gender}</EntryTitle>
+                <EntryTitle className="truncate">{t(PET_GENDER_KEYS[pet.gender])}</EntryTitle>
               </div>
               {pet.isNeutered && (
                 <div className="flex items-center gap-2">
                   <HeartOff className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <EntryTitle className="truncate">Spayed/Neutered</EntryTitle>
+                  <EntryTitle className="truncate">{t('pets.card.spayedNeutered')}</EntryTitle>
                 </div>
               )}
               {pet.birthDate && (
@@ -171,7 +174,7 @@ export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps)
                 <EntryTitle className="truncate">
                 {latestWeight
                   ? `${formatWeight(convertWeight(parseFloat(latestWeight.weight), 'kg', weightUnit))} ${weightUnit}`
-                  : 'No weight'}
+                  : t('pets.card.noWeight')}
                 </EntryTitle>
               </div>
               

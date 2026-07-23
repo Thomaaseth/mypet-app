@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import EasyCrop, { type Area } from 'react-easy-crop';
-
+import { useTranslation } from 'react-i18next';
 
 // Canva utility
 async function getCroppedImageAsFile(imageSrc: string, croppedAreaPixels: Area, fileName: string): Promise<File> {
@@ -76,6 +76,7 @@ const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.1;
 
 export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProps) {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // validation error
@@ -108,18 +109,16 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
 
     setClientError(null);
 
-    console.log(file.type, file.name) // DEBUG IOS UPLOAD ISSUE
-
     // Client-side validation MIME type
     if (!ALLOWED_MIME_TYPES.includes(file.type as typeof ALLOWED_MIME_TYPES[number])) {
-      setClientError('Invalid file type. Please upload a JPEG, PNG, or WebP image.');
+      setClientError(t('pets.imageUpload.invalidFileType'));
       return;
     }
 
     // validate size
     if (file.size > MAX_FILE_SIZE_BYTES) {
       // const maxMB = MAX_FILE_SIZE_BYTES / (1024 * 1024);
-      setClientError('Your photo is too large for upload, please try a smaller image, or take a screenshot of it first and retry.');
+      setClientError(t('pets.imageUpload.fileTooLarge'));
       return;
     }
 
@@ -149,7 +148,7 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
     
       uploadMutation.mutate(croppedFile);
   } catch {
-    setClientError('Failed to process image, please try again.');
+    setClientError(t('pets.imageUpload.processingFailed'));
   } finally {
     setIsCropping(false)
   }
@@ -174,7 +173,10 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
           className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer group"
           onClick={() => !isLoading && fileInputRef.current?.click()}
           role="button"
-          aria-label={signedUrl ? `Change photo of ${petName}` : `Upload photo of ${petName}`}
+          aria-label={signedUrl 
+            ? t('pets.imageUpload.changePhotoAria', { name: petName })
+            : t('pets.imageUpload.uploadPhotoAria', { name: petName })
+          }
         >
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center">
@@ -184,21 +186,21 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
             <>
               <img
                 src={signedUrl}
-                alt={`Photo of ${petName}`}
+                alt={t('pets.card.photoAlt', { name: petName })}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <div className="text-white text-center">
                   <Camera className="h-6 w-6 mx-auto mb-1" />
-                  <p className="text-sm font-medium">Change photo</p>
+                  <p className="text-sm font-medium">{t('pets.imageUpload.changePhoto')}</p>
                 </div>
               </div>
             </>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2 group-hover:bg-muted/80 transition-colors">
               <Camera className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground font-medium">Upload photo</p>
-              <p className="text-xs text-muted-foreground">JPEG, PNG or WebP · Max 5MB</p>
+                <p className="text-sm text-muted-foreground font-medium">{t('pets.imageUpload.uploadPhoto')}</p>
+                <p className="text-xs text-muted-foreground">{t('pets.imageUpload.fileRequirements')}</p>
             </div>
           )}
         </div>
@@ -213,7 +215,7 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
             onClick={handleRemove}
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Remove photo
+            {t('pets.imageUpload.removePhoto')}
           </Button>
         )}
 
@@ -239,7 +241,7 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
       <Dialog open={cropDialogOpen} onOpenChange={(open) => !open && handleCropCancel()}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Crop photo</DialogTitle>
+            <DialogTitle>{t('pets.imageUpload.cropTitle')}</DialogTitle>
           </DialogHeader>
 
           {/* Cropper area */}
@@ -278,15 +280,15 @@ export function PetImageUpload({ petId, petName, signedUrl }: PetImageUploadProp
               onClick={handleCropCancel}
               disabled={isCropping}
             >
-              Cancel
+              {t('common.actions.cancel')}
             </Button>
             <Button
               type="button"
               onClick={handleCropConfirm}
               disabled={isCropping}
             >
-              {isCropping && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isCropping ? 'Processing...' : 'Use photo'}
+               {isCropping && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+               {isCropping ? t('pets.imageUpload.processing') : t('pets.imageUpload.usePhoto')}
             </Button>
           </DialogFooter>
         </DialogContent>

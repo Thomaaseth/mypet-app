@@ -9,7 +9,7 @@ import { ErrorText, HelperText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { DatePicker } from '@/components/ui/date-picker';
-
+import { useTranslation } from 'react-i18next';
 
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
@@ -28,6 +28,7 @@ export default function WeightForm({
   isLoading = false,
   error 
 }: WeightFormProps) {
+  const { t } = useTranslation();
   const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
   const {
@@ -58,14 +59,14 @@ export default function WeightForm({
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       {/* Weight */}
       <div className="space-y-2">
-      <Label htmlFor="weight">Weight</Label>
+      <Label htmlFor="weight">{t('weights.form.weightLabel')}</Label>
       <div className="relative">
         <Input
           id="weight"
           type="number"
           step="0.01"
           min="0"
-          placeholder="Enter weight"
+          placeholder={t('weights.form.weightPlaceholder')}
           className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('weight')}
           aria-invalid={!!errors.weight}
@@ -85,7 +86,7 @@ export default function WeightForm({
 
       {/* Date */}
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+       <Label htmlFor="date">{t('weights.form.dateLabel')}</Label>
         <Controller
           name="date"
           control={control}
@@ -102,7 +103,7 @@ export default function WeightForm({
         {errors.date && (
           <ErrorText>{errors.date.message}</ErrorText>
         )}
-          <HelperText>Date cannot be in the future</HelperText>
+          <HelperText>{t('weights.form.dateHelper')}</HelperText>
       </div>
 
       {/* Action Buttons */}
@@ -114,14 +115,14 @@ export default function WeightForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading 
-            ? (isEditing ? 'Updating...' : 'Adding...') 
-            : (isEditing ? 'Update Entry' : 'Add Entry')
+            ? (isEditing ? t('weights.form.submitUpdating') : t('weights.form.submitAdding'))
+            : (isEditing ? t('weights.form.submitUpdate') : t('weights.form.submitAdd'))
           }
         </Button>
       </div>

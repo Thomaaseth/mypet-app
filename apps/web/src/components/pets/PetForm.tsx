@@ -12,16 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Pet, PetFormData } from '@/types/pet';
-import { commonSpeciesSuggestions, petFormSchema } from '@/lib/validations/pet';
+import { petFormSchema } from '@/lib/validations/pet';
 import { PetImageUpload } from '@/components/pets/PetImageUpload';
 import { ErrorText, HelperText } from '../ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { DatePicker } from '@/components/ui/date-picker';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
+import { useTranslation } from 'react-i18next';
+import { PET_GENDER_KEYS, ANIMAL_TYPE_KEYS } from '@/i18n/enum-keys';
 
 interface PetFormProps {
   pet?: Pet; // if provided, we're editing
@@ -40,7 +41,7 @@ export default function PetForm({
   isLoading = false,
   error 
 }: PetFormProps) {
-  const [showSpeciesSuggestions, setShowSpeciesSuggestions] = useState(false);
+  const { t } = useTranslation();
   
   const {
     register,
@@ -53,7 +54,6 @@ export default function PetForm({
   } = usePetForm({ pet });
 
   const isEditing = !!pet;
-  const watchedSpecies = watch('species');
 
   const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
@@ -80,20 +80,13 @@ export default function PetForm({
   }
 };
 
-  // Handle species suggestion click
-  const handleSpeciesSuggestion = (suggestion: string) => {
-    setValue('species', suggestion);
-    clearErrors('species');
-    setShowSpeciesSuggestions(false);
-  };
-
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
 
       {/* Pet Photo — edit mode only, requires existing petId */}
       {isEditing && (
         <div className="space-y-2">
-          <Label>Pet Photo</Label>
+          <Label>{t('pets.form.petPhoto')}</Label>
           <PetImageUpload
             petId={pet.id}
             petName={pet.name}
@@ -104,10 +97,10 @@ export default function PetForm({
 
       {/* Pet Name */}
       <div className="space-y-2">
-        <Label htmlFor="name">Pet Name</Label>
+      <Label htmlFor="name">{t('pets.form.nameLabel')}</Label>
         <Input
           id="name"
-          placeholder="Enter your pet's name"
+          placeholder={t('pets.form.namePlaceholder')}
           {...register('name')}
           aria-invalid={!!errors.name}
         />
@@ -118,7 +111,7 @@ export default function PetForm({
 
       {/* Animal Type */}
         <div className="space-y-2">
-        <Label htmlFor="animalType">Animal Type</Label>
+        <Label htmlFor="animalType">{t('pets.form.animalTypeLabel')}</Label>
         <Select 
             value={watch('animalType')} 
             onValueChange={(value: 'cat' | 'dog') => {
@@ -128,11 +121,11 @@ export default function PetForm({
             }}
         >
           <SelectTrigger aria-invalid={!!errors.animalType}>
-            <SelectValue placeholder="Select cat or dog" />
+            <SelectValue placeholder={t('pets.form.animalTypePlaceholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="cat">Cat</SelectItem>
-            <SelectItem value="dog">Dog</SelectItem>
+            <SelectItem value="cat">{t(ANIMAL_TYPE_KEYS.cat)}</SelectItem>
+            <SelectItem value="dog">{t(ANIMAL_TYPE_KEYS.dog)}</SelectItem>
           </SelectContent>
         </Select>
         {errors.animalType && (
@@ -142,64 +135,35 @@ export default function PetForm({
 
       {/* Species/Breed */}
       <div className="space-y-2">
-      <Label htmlFor="species">Breed or Nickname</Label>
-        <div className="relative">
+      <Label htmlFor="species">{t('pets.form.speciesLabel')}</Label>
           <Input
             id="species"
-            placeholder="Golden Retriever, Persian Cat or pet's nickname"
+            placeholder={t('pets.form.speciesPlaceholder')}
             {...register('species')}
-            onFocus={() => setShowSpeciesSuggestions(true)}
-            onBlur={() => {
-              // Delay hiding to allow clicks on suggestions
-              setTimeout(() => setShowSpeciesSuggestions(false), 200);
-            }}
             aria-invalid={!!errors.species}
           />
-          
-          {/* Species Suggestions Dropdown */}
-            {showSpeciesSuggestions && watch('animalType') && (
-            <div className="absolute top-full left-0 right-0 z-10 mt-1 max-h-48 overflow-y-auto rounded-md border bg-background shadow-lg">
-                {commonSpeciesSuggestions[watch('animalType') as 'cat' | 'dog']
-                .filter(suggestion => 
-                    !watchedSpecies || 
-                    suggestion.toLowerCase().includes(watchedSpecies.toLowerCase())
-                )
-                .map((suggestion: string) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-muted focus:bg-muted focus:outline-none"
-                    onMouseDown={() => handleSpeciesSuggestion(suggestion)}
-                  >
-                    {suggestion}
-                  </button>
-                ))
-                }
-            </div>
-            )}
-        </div>
         {errors.species && (
           <ErrorText>{errors.species.message}</ErrorText>
         )}
         <HelperText className="text-xs">
-          Optional: Enter a breed, or a nickname if you'd rather — anything goes
+          {t('pets.form.speciesHelper')}
         </HelperText>
       </div>
 
       {/* Gender */}
       <div className="space-y-2">
-        <Label htmlFor="sex">Sex</Label>
+      <Label htmlFor="sex">{t('pets.form.genderLabel')}</Label>
         <Select 
           value={watch('gender')} 
           onValueChange={(value: 'male' | 'female' | 'unknown') => setValue('gender', value)}
         >
           <SelectTrigger aria-invalid={!!errors.gender}>
-            <SelectValue placeholder="Select gender" />
+            <SelectValue placeholder={t('pets.form.genderPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="male">Male</SelectItem>
-            <SelectItem value="female">Female</SelectItem>
-            <SelectItem value="unknown">Unknown</SelectItem>
+            <SelectItem value="male">{t(PET_GENDER_KEYS.male)}</SelectItem>
+            <SelectItem value="female">{t(PET_GENDER_KEYS.female)}</SelectItem>
+            <SelectItem value="unknown">{t(PET_GENDER_KEYS.unknown)}</SelectItem>
           </SelectContent>
         </Select>
         {errors.gender && (
@@ -209,7 +173,7 @@ export default function PetForm({
 
       {/* Birth Date */}
       <div className="space-y-2">
-      <Label htmlFor="birthDate">Birth Date</Label>
+      <Label htmlFor="birthDate">{t('pets.form.birthDateLabel')}</Label>
         <Controller
           name="birthDate"
           control={control}
@@ -227,20 +191,20 @@ export default function PetForm({
           <ErrorText>{errors.birthDate.message}</ErrorText>
         )}
         <HelperText className="text-xs">
-          Optional: Your pet&apos;s birth date or approximate date
+        {t('pets.form.birthDateHelper')}
         </HelperText>
       </div>
 
       {/* Weight - Only show in CREATE mode */}
       {!isEditing && (
       <div className="space-y-2">
-        <Label>Weight</Label>
+        <Label>{t('pets.form.weightLabel')}</Label>
         <div className="relative">
           <Input
             type="number"
             step="0.01"
             min="0"
-            placeholder="Enter your pet's current weight"
+            placeholder={t('pets.form.weightPlaceholder')}
             className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"            {...register('weight')}
             aria-invalid={!!errors.weight}
           />
@@ -251,7 +215,7 @@ export default function PetForm({
         <input type="hidden" {...register('weightUnit')} />
         {errors.weight && <ErrorText>{errors.weight.message}</ErrorText>}
         <HelperText className="text-xs">
-          Optional: Current weight (max {weightUnit === 'kg' ? '200kg' : '440lbs'})
+        {t('pets.form.weightHelper', { max: weightUnit === 'kg' ? '200kg' : '440lbs' })}
         </HelperText>
       </div>
     )}
@@ -260,17 +224,17 @@ export default function PetForm({
       {isEditing && (
         <div className="space-y-2 p-4 bg-muted/50 rounded-md border border-muted">
         <HelperText className="text-xs">
-          <strong>Weight Tracking:</strong> Use the Weight Tracker to add or update your pet&apos;s weight history.
-          </HelperText>
+          <strong>{t('pets.form.weightTrackingTitle')}</strong> {t('pets.form.weightTrackingText')}
+        </HelperText>
         </div>
       )}
 
       {/* Microchip Number */}
       <div className="space-y-2">
-        <Label htmlFor="microchipNumber">Microchip Number</Label>
+      <Label htmlFor="microchipNumber">{t('pets.form.microchipLabel')}</Label>
         <Input
           id="microchipNumber"
-          placeholder="Enter microchip number"
+          placeholder={t('pets.form.microchipPlaceholder')}
           {...register('microchipNumber')}
           aria-invalid={!!errors.microchipNumber}
         />
@@ -278,7 +242,7 @@ export default function PetForm({
           <ErrorText>{errors.microchipNumber.message}</ErrorText>
         )}
         <HelperText className="text-xs">
-          Optional: Letters and numbers only
+          {t('pets.form.microchipHelper')}
         </HelperText>
       </div> 
 
@@ -293,16 +257,16 @@ export default function PetForm({
           htmlFor="isNeutered" 
           className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
-          Spayed/Neutered
+          {t('pets.card.spayedNeutered')}
         </Label>
       </div>
 
       {/* Bio */}
       <div className="space-y-2">
-       <Label htmlFor="notes">Bio / About</Label>
+      <Label htmlFor="notes">{t('pets.form.bioLabel')}</Label>
         <Textarea
           id="notes"
-          placeholder="Fun facts, quirks, things you want to remember about your pet..."
+          placeholder={t('pets.form.bioPlaceholder')}
           rows={3}
           maxLength={200}
           {...register('notes')}
@@ -312,7 +276,7 @@ export default function PetForm({
           <ErrorText>{errors.notes.message}</ErrorText>
         )}
         <HelperText className="text-xs">
-          {watch('notes')?.length ?? 0}/200 characters
+          {t('pets.form.characterCount', { count: watch('notes')?.length ?? 0 })}
         </HelperText>
       </div>
 
@@ -325,14 +289,14 @@ export default function PetForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading 
-            ? (isEditing ? 'Updating...' : 'Creating...') 
-            : (isEditing ? 'Update Pet' : 'Create Pet')
+            ? (isEditing ? t('pets.form.submitUpdating') : t('pets.form.submitCreating'))
+            : (isEditing ? t('pets.form.submitUpdate') : t('pets.form.submitCreate'))
           }
         </Button>
       </div>

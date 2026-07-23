@@ -26,6 +26,7 @@ import { createWeightTargetSchema } from '@/lib/validations/weight';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
 import { ErrorText } from '@/components/ui/typography';
+import { useTranslation } from 'react-i18next';
 
 interface TargetRangeFormProps {
   petName: string;
@@ -50,6 +51,7 @@ export default function TargetRangeForm({
   isLoading = false,
   error,
 }: TargetRangeFormProps) {
+  const { t } = useTranslation();
   const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
 
@@ -108,14 +110,14 @@ export default function TargetRangeForm({
       <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
         {/* Minimum Weight */}
         <div className="space-y-2">
-        <Label htmlFor="minWeight">Minimum Weight</Label>
+        <Label htmlFor="minWeight">{t('weights.target.minWeightLabel')}</Label>
           <div className="relative">
             <Input
                 id="minWeight"
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Enter minimum weight"
+                placeholder={t('weights.target.minWeightPlaceholder')}
                 className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 {...register('minWeight')}
                 aria-invalid={!!errors.minWeight}
@@ -129,14 +131,14 @@ export default function TargetRangeForm({
 
         {/* Maximum Weight */}
         <div className="space-y-2">
-         <Label htmlFor="maxWeight">Maximum Weight</Label>
+        <Label htmlFor="maxWeight">{t('weights.target.maxWeightLabel')}</Label>
            <div className='relative'>
             <Input
                 id="maxWeight"
                 type="number"
                 step="0.01"
                 min="0"
-                placeholder="Enter maximum weight"
+                placeholder={t('weights.target.maxWeightPlaceholder')}
                 className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 {...register('maxWeight')}
                 aria-invalid={!!errors.maxWeight}
@@ -152,24 +154,21 @@ export default function TargetRangeForm({
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="why-set-range" className="border-0">
             <AccordionTrigger className="text-sm text-muted-foreground hover:text-foreground py-2 hover:no-underline">
-              Why set a target range?
+              {t('weights.target.whySetRange')}
             </AccordionTrigger>
             <AccordionContent>
               <div className="bg-muted/50 rounded-md p-4 space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  A healthy weight range helps you monitor if your pet is underweight, 
-                  overweight, or right on track. Your veterinarian can provide the best 
-                  guidance based on:
+                  {t('weights.target.educationIntro')}
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
-                  <li>Breed and body type</li>
-                  <li>Age and activity level</li>
-                  <li>Overall health condition</li>
+                  <li>{t('weights.target.educationBreedType')}</li>
+                  <li>{t('weights.target.educationAgeActivity')}</li>
+                  <li>{t('weights.target.educationHealthCondition')}</li>
                 </ul>
                 <div className="bg-background border border-border rounded-md p-3">
                   <p className="text-sm font-medium">
-                    Ask your vet &quot;What&apos;s a healthy weight 
-                    range for your pet.&quot; Then add it to the app.
+                    {t('weights.target.askVetTip')}
                   </p>
                 </div>
               </div>
@@ -189,7 +188,7 @@ export default function TargetRangeForm({
               disabled={isLoading || isDeleting}
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete Target
+              {t('weights.target.deleteTarget')}
             </Button>
           )}
           
@@ -204,11 +203,11 @@ export default function TargetRangeForm({
               onClick={onCancel}
               disabled={isLoading || isDeleting}
             >
-              Cancel
+              {t('common.actions.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || isDeleting}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t('common.actions.save')}
             </Button>
           </div>
         </div>
@@ -218,21 +217,20 @@ export default function TargetRangeForm({
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete target range?</AlertDialogTitle>
+          <AlertDialogTitle>{t('weights.target.deleteDialogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the target weight range for {petName} from the chart. 
-              You can always set it again later.
+              {t('weights.target.deleteDialogDescription', { petName })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>{t('common.actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete
+              {t('common.actions.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

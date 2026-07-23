@@ -22,6 +22,7 @@ import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatDateForDisplay, formatChartTickMonthYear } from '@/lib/utils/date-formatting';
 import { formatWeight } from '@/lib/validations/pet';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
+import { useTranslation } from 'react-i18next';
 
 interface WeightChartProps {
   data: WeightChartData[]; // pre-filtered by parent based on selected time range
@@ -45,7 +46,7 @@ export default function WeightChart({
   filterSlot,
  }: WeightChartProps) {
 
-  
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { units, dateTimeLocale } = usePreferencesContext();
   const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
@@ -55,9 +56,9 @@ export default function WeightChart({
       <div className="mt-6">
       <EmptyStateCta
         icon={TrendingUp}
-        title="No weight tracked yet"
-        description="Add your first weight entry to start tracking your pet's weight progress."
-        buttonLabel="Add First Entry"
+        title={t('weights.chart.noWeightTitle')}
+        description={t('weights.chart.noWeightDescription')}
+        buttonLabel={t('weights.chart.addFirstEntry')}
         onAction={onAddEntry}
       />
      </div>
@@ -101,9 +102,9 @@ export default function WeightChart({
         <div className="space-y-4">
         {/* Latest Weight Display */}
           <div className="text-center p-4 bg-muted/75 rounded-lg">
-            <MetricLabel>Current Weight</MetricLabel>
+            <MetricLabel>{t('weights.chart.currentWeight')}</MetricLabel>
             <MetricValue>{formatWeight(latestWeight.weight)} {weightUnit}</MetricValue>
-            <MetricLabel className="text-xs">as of {latestWeight.date}</MetricLabel>
+            <MetricLabel className="text-xs">{t('weights.chart.asOf', { date: latestWeight.date })}</MetricLabel>
           </div>
 
         {filterSlot}
@@ -111,7 +112,7 @@ export default function WeightChart({
         {/* Chart */}
         {chartData.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[150px] sm:h-[160px]">
-            <HelperText>No entries in this period</HelperText>
+            <HelperText>{t('weights.chart.noEntriesInPeriod')}</HelperText>
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full">
@@ -164,9 +165,8 @@ export default function WeightChart({
                                 <div className="flex items-center gap-2">
                                   <div className="w-3 h-3 rounded-full bg-chart-2" />
                                   <span className="text-sm">
-                                    <span className="text-muted-foreground">Weight: </span>
-                                    <span className="font-semibold font-display">{formatWeight(weight)} {weightUnit}</span>
-                                  </span>
+                                  <span className="text-muted-foreground">{t('weights.chart.weightTooltipLabel')} </span>
+                                  <span className="font-semibold font-display">{formatWeight(weight)} {weightUnit}</span>                                  </span>
                                 </div>
                                 
                                 {/* Target Range (if exists) */}
@@ -174,7 +174,7 @@ export default function WeightChart({
                                   <div className="flex items-center gap-2 pt-1 border-t border-border/50">
                                     <div className="w-3 h-2 bg-secondary/20 border border-secondary border-dashed rounded-sm" />
                                     <span className="text-xs text-muted-foreground">
-                                      Target: <span className="font-display">{formatWeight(targetWeightMin)}-{formatWeight(targetWeightMax)} {weightUnit}</span>
+                                    {t('weights.chart.targetLabel')} <span className="font-display">{formatWeight(targetWeightMin)}-{formatWeight(targetWeightMax)} {weightUnit}</span>
                                     </span>
                                   </div>
                                 )}
@@ -219,15 +219,15 @@ export default function WeightChart({
           {data.length > 1 && (
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <StatLabel>Entries</StatLabel>
+                <StatLabel>{t('weights.chart.entries')}</StatLabel>
                 <StatValue className='text-sm sm:text-lg'>{data.length}</StatValue>
               </div>
               <div>
-                <StatLabel>Min</StatLabel>
+                <StatLabel>{t('weights.chart.min')}</StatLabel>
                 <StatValue className='text-sm sm:text-lg'>{formatWeight(minWeight)} {weightUnit}</StatValue>
               </div>
               <div>
-                <StatLabel>Max</StatLabel>
+                <StatLabel>{t('weights.chart.max')}</StatLabel>
                 <StatValue className='text-sm sm:text-lg'>{formatWeight(maxWeight)} {weightUnit}</StatValue>
               </div>
             </div>
