@@ -3,8 +3,11 @@ import { DryFoodList } from './DryFoodList';
 import { GenericFoodTracker } from './GenericFoodTracker';
 import { useFoodTrackerContext } from './FoodTrackerContext';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
+import { useTranslation } from 'react-i18next';
 
 export function DryFoodTracker() {
+  const { t } = useTranslation();
+
   // Use context
   const {
     activeDryFoodEntries,
@@ -37,15 +40,13 @@ export function DryFoodTracker() {
       FormComponent={DryFoodForm}
       ListComponent={DryFoodList}
       labels={{
-        addButton: 'Add Dry Food',
-        dialogTitle: 'Add New Dry Food Entry',
-        dialogDescription: 'Track new bags of dry food for your pet.',
-        entriesTitle: 'Dry Food Entries',
-        alertSingular: 'entry',
-        alertPlural: 'entries',
-        emptyTitle: 'No active dry food tracked',
-        emptyDescription: 'All current dry food has been finished. Add new dry food to continue tracking.',
-        emptyButtonText: 'Add New Bag',
+        addButton: t('food.dry.addButton'),
+        dialogTitle: t('food.dry.dialogTitle'),
+        dialogDescription: t('food.dry.dialogDescription'),
+        entriesTitle: t('food.dry.entriesTitle'),
+        emptyTitle: t('food.dry.emptyTitle'),
+        emptyDescription: t('food.dry.emptyDescription'),
+        emptyButtonText: t('food.dry.emptyButtonText'),
       }}
     />
   );

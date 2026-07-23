@@ -32,6 +32,8 @@ import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { convertFoodWeight } from '@/lib/validations/pet';
+import { useTranslation } from 'react-i18next';
+import { FOOD_TYPE_TAB_KEYS } from '@/i18n/enum-keys';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: WetFoodEntry): entry is WetFoodEntry & {
@@ -65,6 +67,8 @@ export function WetFoodList({
   onUpdateFinishDate,
   isLoading = false 
 }: WetFoodListProps) {
+  const { t } = useTranslation();
+
  const [editingEntry, setEditingEntry] = useState<WetFoodEntry | null>(null);
  const [deletingEntry, setDeletingEntry] = useState<WetFoodEntry | null>(null);
  const [markingFinishedEntry, setMarkingFinishedEntry] = useState<WetFoodEntry | null>(null);
@@ -100,11 +104,11 @@ export function WetFoodList({
     const isCalculatedFinished = entry.remainingDays <= 0;
     
     if (isCalculatedFinished) {
-      return <Badge variant="destructive">Finished</Badge>;
+      return <Badge variant="destructive">{t('food.shared.statusFinished')}</Badge>;
     } else if (entry.remainingDays <= 7) {
-      return <Badge variant="secondary">Low Stock</Badge>;
+      return <Badge variant="secondary">{t('food.shared.statusLowStock')}</Badge>;
     } else {
-      return <Badge variant="default">Active</Badge>;
+      return <Badge variant="default">{t('food.shared.statusActive')}</Badge>;
     }
   };
 
@@ -143,11 +147,11 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                <CardHeader className="pb-3">
                   <div className="flex items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <SectionTitle>
-                        {entry.brandName && entry.productName
-                          ? `${entry.brandName} - ${entry.productName}`
-                          : entry.brandName || entry.productName || 'Wet Food'}
-                      </SectionTitle>
+                    <SectionTitle>
+                      {entry.brandName && entry.productName
+                        ? `${entry.brandName} - ${entry.productName}`
+                        : entry.brandName || entry.productName || t(FOOD_TYPE_TAB_KEYS.wet)}
+                    </SectionTitle>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {getStatusSection(entry)}
@@ -160,11 +164,11 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                           <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
                               <Edit2 className="h-4 w-4 mr-2" />
-                              Edit
+                              {t('common.actions.edit')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
                               <CheckSquare className="h-4 w-4 mr-2" />
-                              Mark As Finished
+                              {t('food.tracker.markAsFinished')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -172,7 +176,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {t('common.actions.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -188,7 +192,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                     <span className="flex items-center gap-1 shrink-0">
                       <Utensils className="h-4 w-4" />
                       <span>
-                        {formatFoodQuantity(convertFoodWeight(parseFloat(entry.dailyAmount), 'grams', wetFoodUnit).toString())} <FoodUnitLabel unit={wetFoodUnit} />/day
+                        {formatFoodQuantity(convertFoodWeight(parseFloat(entry.dailyAmount), 'grams', wetFoodUnit).toString())} <FoodUnitLabel unit={wetFoodUnit} />{t('food.shared.perDaySuffix')}
                       </span>
                       </span>
                     <span className="flex items-center gap-1 shrink-0">
@@ -200,17 +204,17 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
                <CardContent>
                <div className="grid grid-cols-2 @min-[320px]:grid-cols-3 gap-6 @min-[320px]:gap-4 mb-4">
                <div>
-                    <StatLabel>~Remaining</StatLabel>
+                    <StatLabel>{t('food.shared.remainingLabel')}</StatLabel>
                       <StatValue>
                         {formatRemainingWeight(convertFoodWeight(entry.remainingWeight, 'grams', wetFoodUnit))} <FoodUnitLabel unit={wetFoodUnit} />
                       </StatValue>
                     </div>
                    <div>
-                    <StatLabel>~Days Left</StatLabel>
+                   <StatLabel>{t('food.shared.daysLeftLabel')}</StatLabel>
                     <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>
                    </div>
                    <div>
-                    <StatLabel>~Runs out</StatLabel>
+                   <StatLabel>{t('food.shared.runsOutLabel')}</StatLabel>
                     <StatValue>{formatDateForDisplay(entry.depletionDate, displayLocale)}</StatValue>
                    </div>
                  </div>
@@ -251,8 +255,8 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
      <ResponsiveDialog
         open={!!editingEntry}
         onOpenChange={() => setEditingEntry(null)}
-        title="Edit Wet Food Entry"
-        description="Update the details for this wet food entry."
+        title={t('food.wet.editDialogTitle')}
+        description={t('food.wet.editDialogDescription')}
       >
          {editingEntry && (
            <WetFoodForm
@@ -260,7 +264,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
              onSubmit={handleUpdate}
              onCancel={() => setEditingEntry(null)}
              isLoading={isLoading}
-             submitLabel="Update Wet Food"
+             submitLabel={t('food.wet.updateButton')}
            />
          )}
        </ResponsiveDialog>
@@ -279,26 +283,24 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
      <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
        <AlertDialogContent>
          <AlertDialogHeader>
-           <AlertDialogTitle>Delete Wet Food Entry</AlertDialogTitle>
+           <AlertDialogTitle>{t('food.wet.deleteDialogTitle')}</AlertDialogTitle>
            <AlertDialogDescription>
-             Are you sure you want to delete this wet food entry for{' '}
-             <span className="font-semibold">
-               {deletingEntry?.brandName && deletingEntry?.productName 
-                 ? `${deletingEntry.brandName} - ${deletingEntry.productName}`
-                 : deletingEntry?.brandName || deletingEntry?.productName || 'this wet food'}
-             </span>
-             ? This action cannot be undone.
+              {t('food.wet.deleteConfirmDescription', {
+              name: deletingEntry?.brandName && deletingEntry?.productName
+                ? `${deletingEntry.brandName} - ${deletingEntry.productName}`
+                : deletingEntry?.brandName || deletingEntry?.productName || t('food.wet.genericFallbackName'),
+            })}
            </AlertDialogDescription>
          </AlertDialogHeader>
          <AlertDialogFooter>
-           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+           <AlertDialogCancel disabled={isLoading}>{t('common.actions.cancel')}</AlertDialogCancel>
            <AlertDialogAction 
              onClick={handleDelete} 
              disabled={isLoading}
              className="bg-destructive text-white hover:bg-destructive/90"           
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? t('food.tracker.deleting') : t('common.actions.delete')}
            </AlertDialogAction>
          </AlertDialogFooter>
        </AlertDialogContent>

@@ -7,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useTranslation } from 'react-i18next';
 
 interface EditFinishDateDialogProps {
   entry: DryFoodEntry | WetFoodEntry;
@@ -16,6 +17,7 @@ interface EditFinishDateDialogProps {
 }
 
 export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditFinishDateDialogProps) {
+  const { t } = useTranslation();
   const [dateFinished, setDateFinished] = useState(entry.dateFinished || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +59,12 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
     <ResponsiveDialog
       open={isOpen}
       onOpenChange={onClose}
-      title="Edit Finish Date"
-      description="Update when this food was actually finished. Must be between start date and today."
+      title={t('food.editFinishDate.title')}
+      description={t('food.editFinishDate.description')}
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div className="grid gap-2">
-          <Label htmlFor="dateStarted">Start Date (Reference)</Label>
+        <Label htmlFor="dateStarted">{t('food.editFinishDate.startDateLabel')}</Label>
            <DatePicker
             id="dateStarted"
             value={entry.dateStarted}
@@ -71,7 +73,7 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
           />
         </div>
         <div className="grid gap-2">
-        <Label htmlFor="dateFinished">Finish Date</Label>
+        <Label htmlFor="dateFinished">{t('food.editFinishDate.finishDateLabel')}</Label>
           <DatePicker
             id="dateFinished"
             value={dateFinished}
@@ -79,16 +81,16 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
             minDate={minDate}
             maxDate={maxDate}
           />
-          <HelperText>Between {minDate} and {maxDate}</HelperText>
+          <HelperText>{t('food.editFinishDate.betweenDates', { minDate, maxDate })}</HelperText>
         </div>
         {error && <ErrorText>{error}</ErrorText>}
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-            Cancel
+          {t('common.actions.cancel')}
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Update Date
+            {t('food.editFinishDate.updateDate')}
           </Button>
         </div>
       </form>

@@ -4,6 +4,7 @@ import { toastService } from '@/lib/toast'
 import type { WetFoodFormData } from '@/types/food'
 import { foodKeys } from './index'
 import { buildFinishDateToastMessage } from '@/lib/utils/food-formatting'
+import { useTranslation } from 'react-i18next'
 
 // WET FOOD QUERIES
 // Fetch active wet food entries
@@ -46,23 +47,25 @@ export function useFinishedWetFood(petId: string) {
 // WET FOOD MUTATIONS
 export function useCreateWetFood(petId: string) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (foodData: WetFoodFormData) => 
       wetFoodApi.createWetFoodEntry(petId, foodData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
-      toastService.success('Wet food entry added successfully')
+      toastService.success(t('food.wet.toastAddSuccess'))
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error('Failed to add wet food', appError.message)
+      toastService.error(t('food.wet.toastAddError'), appError.message)
     },
   })
 }
 
 export function useUpdateWetFood(petId: string) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({ foodId, foodData }: { 
@@ -71,17 +74,18 @@ export function useUpdateWetFood(petId: string) {
     }) => wetFoodApi.updateWetFoodEntry(petId, foodId, foodData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
-      toastService.success('Wet food entry updated successfully')
+      toastService.success(t('food.wet.toastUpdateSuccess'))
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error('Failed to update wet food', appError.message)
+      toastService.error(t('food.wet.toastUpdateError'), appError.message)
     },
   })
 }
 
 export function useDeleteWetFood(petId: string) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (foodId: string) => 
@@ -89,17 +93,18 @@ export function useDeleteWetFood(petId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
       queryClient.invalidateQueries({ queryKey: foodKeys.wetFinished(petId) })
-      toastService.success('Wet food entry deleted successfully')
+      toastService.success(t('food.wet.toastDeleteSuccess'))
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error('Failed to delete wet food', appError.message)
+      toastService.error(t('food.wet.toastDeleteError'), appError.message)
     },
   })
 }
 
 export function useMarkWetFoodFinished(petId: string) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (foodId: string) => 
@@ -109,19 +114,20 @@ export function useMarkWetFoodFinished(petId: string) {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetFinished(petId) })
       toastService.success(
         updatedEntry.feedingStatus
-          ? buildFinishDateToastMessage(updatedEntry)
-          : 'Dry food marked as finished'
+          ? buildFinishDateToastMessage(updatedEntry, t)
+          : t('food.wet.toastMarkFinishedFallback')
       )    
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error('Failed to mark as finished', appError.message)
+      toastService.error(t('food.shared.toastMarkFinishedError'), appError.message)
     },
   })
 }
 
 export function useUpdateWetFoodFinishDate(petId: string) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({ foodId, dateFinished }: { 
@@ -133,13 +139,13 @@ export function useUpdateWetFoodFinishDate(petId: string) {
 
       toastService.success(
         updatedEntry.feedingStatus
-          ? buildFinishDateToastMessage(updatedEntry)
-          : 'Finish date updated successfully'
+          ? buildFinishDateToastMessage(updatedEntry, t)
+          : t('food.shared.toastFinishDateUpdatedFallback')
       )
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error('Failed to update finish date', appError.message)
+      toastService.error(t('food.shared.toastUpdateFinishDateError'), appError.message)
     },
   })
 }

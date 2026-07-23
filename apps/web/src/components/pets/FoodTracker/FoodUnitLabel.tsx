@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 type FoodUnit = 'kg' | 'lbs' | 'grams' | 'oz';
 
 interface FoodUnitLabelProps {
@@ -5,24 +7,16 @@ interface FoodUnitLabelProps {
 }
 
 export function FoodUnitLabel({ unit }: FoodUnitLabelProps) {
+  const { t } = useTranslation();
+
   switch (unit) {
     case 'oz':
       return <>oz</>;
     case 'kg':
       return <>kg</>;
     case 'lbs':
-      return (
-        <>
-          <span className="@min-[320px]:hidden">lbs</span>
-          <span className="hidden @min-[320px]:inline">lbs</span>
-        </>
-      );
+      return <>lbs</>;
     case 'grams':
-      return (
-        <>
-          <span className="@min-[320px]:hidden">g</span>
-          <span className="hidden @min-[320px]:inline">grams</span>
-        </>
-      );
+      return <>{t('food.units.grams')}</>;
   }
 }

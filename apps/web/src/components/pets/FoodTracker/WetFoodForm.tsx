@@ -9,6 +9,8 @@ import { ErrorText } from '@/components/ui/typography';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useTranslation } from 'react-i18next';
+import { FoodUnitLabel } from './FoodUnitLabel';
 
 interface WetFoodFormProps {
   wetFoodEntry?: WetFoodEntry; // If provided, we're editing
@@ -23,8 +25,9 @@ export function WetFoodForm({
   onSubmit, 
   onCancel,
   isLoading = false,
-  submitLabel = 'Add Wet Food'
+  submitLabel,
 }: WetFoodFormProps) {
+  const { t } = useTranslation();
   const { units } = usePreferencesContext();
   const wetFoodUnit = units?.wetFoodUnit ?? 'grams';
   const {
@@ -51,10 +54,10 @@ export function WetFoodForm({
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       {/* Brand Name */}
       <div className="space-y-2">
-        <Label htmlFor="brandName">Brand Name (Optional)</Label>
+        <Label htmlFor="brandName">{t('food.shared.brandNameLabel')}</Label>
         <Input
           id="brandName"
-          placeholder="e.g., Royal Canin, Hill's"
+          placeholder={t('food.shared.brandNamePlaceholder')}
           maxLength={100}
           {...register('brandName')}
           aria-invalid={!!errors.brandName}
@@ -64,10 +67,10 @@ export function WetFoodForm({
 
       {/* Product Name */}
       <div className="space-y-2">
-        <Label htmlFor="productName">Product Name (Optional)</Label>
+        <Label htmlFor="productName">{t('food.shared.productNameLabel')}</Label>
         <Input
           id="productName"
-          placeholder="e.g., Chicken Pâté, Tuna in Gravy"
+          placeholder={t('food.wet.productNamePlaceholder')}
           maxLength={150}
           {...register('productName')}
           aria-invalid={!!errors.productName}
@@ -77,13 +80,13 @@ export function WetFoodForm({
 
       {/* Number of Units */}
       <div className="space-y-2">
-        <Label htmlFor="numberOfUnits">Number of Cans/Pouches</Label>
+        <Label htmlFor="numberOfUnits">{t('food.wet.numberOfUnitsLabel')}</Label>
         <Input
           id="numberOfUnits"
           type="number"
           min="1"
           step="1"
-          placeholder="e.g., 12"
+          placeholder={t('food.wet.numberOfUnitsPlaceholder')}
           {...register('numberOfUnits')}
           aria-invalid={!!errors.numberOfUnits}
         />
@@ -92,19 +95,19 @@ export function WetFoodForm({
 
       {/* Weight Per Unit */}
       <div className="space-y-2">
-        <Label htmlFor="weightPerUnit">Weight Per Unit</Label>
+        <Label htmlFor="weightPerUnit">{t('food.wet.weightPerUnitLabel')}</Label>
         <div className="relative">
           <Input
             id="weightPerUnit"
             type="number"
             step="0.01"
-            placeholder="e.g., 85"
+            placeholder={t('food.wet.weightPerUnitPlaceholder')}
             className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             {...register('weightPerUnit')}
             aria-invalid={!!errors.weightPerUnit}
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
-            {wetFoodUnit}
+            <FoodUnitLabel unit={wetFoodUnit} />
           </span>
         </div>
         {errors.weightPerUnit && <ErrorText>{errors.weightPerUnit.message}</ErrorText>}
@@ -114,26 +117,26 @@ export function WetFoodForm({
       {totalWeight > 0 && (
         <div className="bg-muted/50 rounded-md p-3">
           <p className="text-sm font-medium">
-            Total Weight: {totalWeight.toFixed(1)} {wetFoodUnit}
+          {t('food.wet.totalWeightLabel')} {totalWeight.toFixed(1)} <FoodUnitLabel unit={wetFoodUnit} />
           </p>
         </div>
       )}
 
       {/* Daily Amount */}
       <div className="space-y-2">
-        <Label htmlFor="dailyAmount">Daily Amount</Label>
+        <Label htmlFor="dailyAmount">{t('food.wet.dailyAmountLabel')}</Label>
           <div className="relative">
             <Input
               id="dailyAmount"
               type="number"
               step="0.01"
-              placeholder="e.g., 85"
+              placeholder={t('food.wet.dailyAmountPlaceholder')}
               className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               {...register('dailyAmount')}
               aria-invalid={!!errors.dailyAmount}
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
-              {wetFoodUnit}
+              <FoodUnitLabel unit={wetFoodUnit} />
             </span>
           </div>
           {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
@@ -144,7 +147,7 @@ export function WetFoodForm({
 
       {/* Date Started */}
       <div className="space-y-2">
-        <Label htmlFor="dateStarted">Date Started</Label>
+        <Label htmlFor="dateStarted">{t('food.shared.dateStartedLabel')}</Label>
         <Controller
           name="dateStarted"
           control={control}
@@ -170,12 +173,12 @@ export function WetFoodForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {submitLabel}
+          {submitLabel ?? t('food.wet.addButton')}
         </Button>
       </div>
     </form>

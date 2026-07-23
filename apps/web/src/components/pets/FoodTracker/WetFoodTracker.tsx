@@ -3,8 +3,11 @@ import { WetFoodList } from './WetFoodList';
 import { GenericFoodTracker } from './GenericFoodTracker';
 import { useFoodTrackerContext } from './FoodTrackerContext';
 import type { WetFoodEntry, WetFoodFormData } from '@/types/food';
+import { useTranslation } from 'react-i18next';
 
 export function WetFoodTracker() {
+  const { t } = useTranslation();
+
   // Use context
   const {
     activeWetFoodEntries,
@@ -37,15 +40,13 @@ export function WetFoodTracker() {
       FormComponent={WetFoodForm}
       ListComponent={WetFoodList}
       labels={{
-        addButton: 'Add Wet Food',
-        dialogTitle: 'Add New Wet Food Entry',
-        dialogDescription: 'Track new cans/pouches of wet food for your pet.',
-        entriesTitle: 'Wet Food Entries',
-        alertSingular: 'entry',
-        alertPlural: 'entries',
-        emptyTitle: 'No active wet food tracked',
-        emptyDescription: 'All current wet food has been finished. Add new wet food to continue tracking.',
-        emptyButtonText: 'Add First Cans',
+        addButton: t('food.wet.addButton'),
+        dialogTitle: t('food.wet.dialogTitle'),
+        dialogDescription: t('food.wet.dialogDescription'),
+        entriesTitle: t('food.wet.entriesTitle'),
+        emptyTitle: t('food.wet.emptyTitle'),
+        emptyDescription: t('food.wet.emptyDescription'),
+        emptyButtonText: t('food.wet.emptyButtonText'),
       }}
     />
   );

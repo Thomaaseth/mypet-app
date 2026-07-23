@@ -55,8 +55,6 @@ interface FoodTrackerProviderProps {
 }
 
 export function FoodTrackerProvider({ petId, children }: FoodTrackerProviderProps) {
-  console.log('🟡 FoodTrackerProvider RENDER with petId:', petId);
-
   // ============================================
   // DRY FOOD QUERIES & MUTATIONS
   // ============================================

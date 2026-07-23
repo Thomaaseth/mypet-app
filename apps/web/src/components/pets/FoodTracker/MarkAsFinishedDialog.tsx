@@ -9,6 +9,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
+import { useTranslation } from 'react-i18next';
+import { FOOD_TYPE_TAB_KEYS } from '@/i18n/enum-keys';
 
 interface MarkAsFinishedDialogProps {
   entry: DryFoodEntry | WetFoodEntry | null;
@@ -25,6 +27,8 @@ export function MarkAsFinishedDialog({
   onConfirm,
   isLoading = false 
 }: MarkAsFinishedDialogProps) {
+  const { t } = useTranslation();
+
   if (!entry) return null;
 
   const handleConfirm = async () => {
@@ -36,27 +40,25 @@ export function MarkAsFinishedDialog({
 
   const entryName = entry.brandName && entry.productName 
     ? `${entry.brandName} - ${entry.productName}`
-    : entry.brandName || entry.productName || `${entry.foodType === 'dry' ? 'Dry' : 'Wet'} Food`;
+    : entry.brandName || entry.productName || t(FOOD_TYPE_TAB_KEYS[entry.foodType]);
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Mark Food as Finished?</AlertDialogTitle>
+          <AlertDialogTitle>{t('food.tracker.markFinishedTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure <strong>{entryName}</strong> is finished? 
-            The entry will be moved to history with today's date as the finish date.
-            You can always edit finished date later.
+          {t('food.tracker.markFinishedDescription', { name: entryName })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{t('common.actions.cancel')}</AlertDialogCancel>
           <AlertDialogAction 
             onClick={handleConfirm}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
-            {isLoading ? 'Marking...' : 'Mark as Finished'}
+            {isLoading ? t('food.tracker.marking') : t('food.tracker.markAsFinished')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

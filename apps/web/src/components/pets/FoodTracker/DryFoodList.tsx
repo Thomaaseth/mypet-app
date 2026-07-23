@@ -32,6 +32,8 @@ import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { convertFoodWeight } from '@/lib/validations/pet';
+import { useTranslation } from 'react-i18next';
+import { FOOD_TYPE_TAB_KEYS } from '@/i18n/enum-keys';
 
 // Type guard to ensure active entries have required calculated fields
 function isValidActiveEntry(entry: DryFoodEntry): entry is DryFoodEntry & {
@@ -66,6 +68,8 @@ export function DryFoodList({
   onUpdateFinishDate,
   isLoading = false 
 }: DryFoodListProps) {
+  const { t } = useTranslation();
+
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
   // const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
@@ -102,11 +106,11 @@ export function DryFoodList({
     const isCalculatedFinished = entry.remainingDays <= 0;
     
     if (isCalculatedFinished) {
-      return <Badge variant="destructive">Finished</Badge>;
+      return <Badge variant="destructive">{t('food.shared.statusFinished')}</Badge>;
     } else if (entry.remainingDays <= 7) {
-      return <Badge variant="secondary">Low Stock</Badge>;
+      return <Badge variant="secondary">{t('food.shared.statusLowStock')}</Badge>;
     } else {
-      return <Badge variant="default">Active</Badge>;
+      return <Badge variant="default">{t('food.shared.statusActive')}</Badge>;
     }
   };
 
@@ -141,7 +145,7 @@ export function DryFoodList({
                   <SectionTitle>
                     {entry.brandName && entry.productName
                         ? `${entry.brandName} - ${entry.productName}`
-                        : entry.brandName || entry.productName || 'Dry Food'}
+                        : entry.brandName || entry.productName || t(FOOD_TYPE_TAB_KEYS.dry)}
                     </SectionTitle>
                   </div>
                   {/* Actions never shrinks */}
@@ -156,11 +160,11 @@ export function DryFoodList({
                         <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            Edit
+                            {t('common.actions.edit')}
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setMarkingFinishedEntry(entry)}>
                             <CheckSquare className="h-4 w-4 mr-2" />
-                            Mark As Finished
+                            {t('food.tracker.markAsFinished')}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
@@ -168,7 +172,7 @@ export function DryFoodList({
                             className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                            {t('common.actions.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -184,8 +188,8 @@ export function DryFoodList({
                       </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Utensils className="h-4 w-4" />
-                        <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit="grams" />/day </span>
-                      </span>
+                        <span>{formatFoodQuantity(entry.dailyAmount)} <FoodUnitLabel unit="grams" />{t('food.shared.perDaySuffix')}</span>                      
+                        </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Calendar className="h-4 w-4" />
                         {formatDateForDisplay(entry.dateStarted, displayLocale)}
@@ -195,17 +199,17 @@ export function DryFoodList({
                 <CardContent>
                 <div className="grid grid-cols-2 @min-[320px]:grid-cols-3 gap-6 @min-[480px]:gap-4 mb-4">
                 <div>
-                  <StatLabel>~Remaining</StatLabel>
+                <StatLabel>{t('food.shared.remainingLabel')}</StatLabel>
                       <StatValue>
                         {formatRemainingWeight(convertFoodWeight(entry.remainingWeight, 'grams', bagWeightUnit))} <FoodUnitLabel unit={bagWeightUnit} />
                       </StatValue>
                      </div>
                     <div>
-                      <StatLabel>~Days Left</StatLabel>
+                    <StatLabel>{t('food.shared.daysLeftLabel')}</StatLabel>
                       <StatValue>{entry.remainingDays > 0 ? entry.remainingDays : 0}</StatValue>
                     </div>
                     <div>
-                      <StatLabel>~Runs out</StatLabel>
+                    <StatLabel>{t('food.shared.runsOutLabel')}</StatLabel>
                       <StatValue>{formatDateForDisplay(entry.depletionDate, displayLocale)}</StatValue>
                     </div>
                   </div>
@@ -247,8 +251,8 @@ export function DryFoodList({
       <ResponsiveDialog
         open={!!editingEntry}
         onOpenChange={() => setEditingEntry(null)}
-        title="Edit Dry Food Entry"
-        description="Update the details for this dry food entry."
+        title={t('food.dry.editDialogTitle')}
+        description={t('food.dry.editDialogDescription')}
       >
         {editingEntry && (
           <DryFoodForm
@@ -256,7 +260,7 @@ export function DryFoodList({
             onSubmit={handleUpdate}
             onCancel={() => setEditingEntry(null)}
             isLoading={isLoading}
-            submitLabel="Update Dry Food"
+            submitLabel={t('food.dry.updateButton')}
           />
         )}
       </ResponsiveDialog>
@@ -275,25 +279,25 @@ export function DryFoodList({
       <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
          <AlertDialogContent>
            <AlertDialogHeader>
-             <AlertDialogTitle>Delete Dry Food Entry</AlertDialogTitle>
-             <AlertDialogDescription>
-              Are you sure you want to delete this dry food entry for{' '}
-              <span className="font-semibold">
-               {deletingEntry?.brandName && deletingEntry?.productName 
+           <AlertDialogTitle>{t('food.dry.deleteDialogTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('food.dry.deleteConfirmDescription', {
+                name: deletingEntry?.brandName && deletingEntry?.productName
                   ? `${deletingEntry.brandName} - ${deletingEntry.productName}`
-                  : deletingEntry?.brandName || deletingEntry?.productName || 'this dry food'}
-              </span>
-              ? This action cannot be undone.
-             </AlertDialogDescription>
+                  : deletingEntry?.brandName || deletingEntry?.productName || t('food.dry.genericFallbackName'),
+              })}
+            </AlertDialogDescription>
            </AlertDialogHeader>
            <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading}>
+              {t('common.actions.cancel')}
+              </AlertDialogCancel>
              <AlertDialogAction 
              onClick={handleDelete} 
              disabled={isLoading} 
              className="bg-destructive text-white hover:bg-destructive/90">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Deleting...' : 'Delete'}
+              {isLoading ? t('food.tracker.deleting') : t('common.actions.delete')}
              </AlertDialogAction>
            </AlertDialogFooter>
          </AlertDialogContent>

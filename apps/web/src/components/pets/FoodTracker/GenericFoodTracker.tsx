@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { SectionTitle } from '@/components/ui/typography';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
+import { useTranslation } from 'react-i18next';
 
 // Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
@@ -54,8 +55,6 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
     dialogTitle: string;
     dialogDescription: string;
     entriesTitle: string;
-    alertSingular: string;
-    alertPlural: string;
     emptyTitle: string;
     emptyDescription: string;
     emptyButtonText: string;
@@ -70,6 +69,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   ListComponent,
   labels,
 }: GenericFoodTrackerProps<TEntry, TFormData>) {
+  const { t } = useTranslation();
   const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -89,8 +89,8 @@ export function GenericFoodTracker<TEntry, TFormData>({
 
   const hasActiveEntry = activeFoodEntries.length > 0;
   const disableAddButton = hasActiveEntry;
-  const tooltipText = "You can only have one active entry per type of food at any time. Please edit/delete the existing active entry if you need to make changes.";
-
+  const tooltipText = t('food.tracker.duplicateEntryTooltip');
+  
   const handleCreateEntry = async (data: TFormData) => {
     setIsCreating(true);
     const result = await executeAction(async () => {

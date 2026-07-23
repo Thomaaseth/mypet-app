@@ -1,5 +1,7 @@
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { convertFoodWeight } from '@/shared/utils/units';
+import type { TFunction } from 'i18next';
+import { FEEDING_STATUS_KEYS } from '@/i18n/enum-keys';
 
 type FeedingStatus = 'overfeeding' | 'slightly-over' | 'normal' | 'slightly-under' | 'underfeeding';
 
@@ -21,20 +23,11 @@ export function getFeedingStatusColor(status: FeedingStatus): string {
     }
 }
 
-export function getFeedingStatusLabel(status: FeedingStatus): string {
-  switch (status) {
-    case 'overfeeding':
-      return 'Overfeeding';
-    case 'slightly-over':
-      return 'Slightly over';
-    case 'underfeeding':
-      return 'Underfeeding';
-    case 'slightly-under':
-      return 'Slightly under';
-    case 'normal':
-      return 'Normal';
-  }
+export function getFeedingStatusLabel(status: FeedingStatus, t: TFunction): string {
+  return t(FEEDING_STATUS_KEYS[status]);
 }
+
+
 
 export function calculateExpectedDays(entry: DryFoodEntry | WetFoodEntry): number {
   if (entry.foodType === 'dry') {
@@ -52,7 +45,8 @@ export function calculateExpectedDays(entry: DryFoodEntry | WetFoodEntry): numbe
 
 export function formatFeedingStatusMessage(
   entry: DryFoodEntry | WetFoodEntry,
-  dailyAmountUnit: 'grams' | 'oz'
+  dailyAmountUnit: 'grams' | 'oz',
+  t: TFunction
 ): string {
   if (!entry.actualDaysElapsed || !entry.feedingStatus) {
     return '';
@@ -60,7 +54,7 @@ export function formatFeedingStatusMessage(
 
   // const expectedDays = calculateExpectedDays(entry);
   // const daysDifference = Math.abs(entry.actualDaysElapsed - expectedDays);
-  const statusLabel = getFeedingStatusLabel(entry.feedingStatus);
+  const statusLabel = getFeedingStatusLabel(entry.feedingStatus, t);
 
   if (entry.actualDailyConsumption) {
     // actualDailyConsumption is canonical grams — convert to the caller's display unit.
@@ -69,7 +63,7 @@ export function formatFeedingStatusMessage(
     const avg = formatRemainingWeight(avgInDisplayUnit);
 
     const shortUnit = dailyAmountUnit === 'grams' ? 'g' : dailyAmountUnit;
-    return `${statusLabel} • ${avg}${shortUnit}/day`;
+    return `${statusLabel} • ${avg}${shortUnit}${t('food.shared.perDaySuffix')}`;
   }
   return statusLabel;
 }
@@ -78,11 +72,11 @@ export function formatFeedingStatusMessage(
  * Builds the finish-date success toast message for dry/wet food entries.
  * Shared by useUpdateDryFoodFinishDate and useUpdateWetFoodFinishDate
  */
-export function buildFinishDateToastMessage(entry: DryFoodEntry | WetFoodEntry): string {
+export function buildFinishDateToastMessage(entry: DryFoodEntry | WetFoodEntry, t: TFunction): string {
   const expectedDays = calculateExpectedDays(entry);
-  const statusLabel = getFeedingStatusLabel(entry.feedingStatus!);
+  const statusLabel = getFeedingStatusLabel(entry.feedingStatus!, t);
 
-  return `Finished! Consumed in ${entry.actualDaysElapsed} days (expected ${expectedDays} days). Status: ${statusLabel}`;
+  return `${t('food.tracker.finishedToastPrefix', { count: entry.actualDaysElapsed })} ${t('food.tracker.expectedDaysParenthetical', { count: expectedDays })}. ${t('food.tracker.statusSuffix', { status: statusLabel })}`;
 }
 
 /**

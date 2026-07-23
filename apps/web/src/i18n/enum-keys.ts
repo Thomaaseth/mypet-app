@@ -30,3 +30,26 @@ export const WEIGHT_STATUS_KEYS = {
   above: 'weights.tracker.statusAbove',
   below: 'weights.tracker.statusBelow',
 } as const satisfies Record<'within' | 'above' | 'below', string>;
+
+export const FOOD_TYPE_TAB_KEYS = {
+  dry: 'food.tracker.dryFoodTab',
+  wet: 'food.tracker.wetFoodTab',
+} as const satisfies Record<'dry' | 'wet', string>;
+
+export const FOOD_SUPPLY_LABEL_KEYS = {
+  dry: 'food.tracker.drySupplyLabel',
+  wet: 'food.tracker.wetSupplyLabel',
+} as const satisfies Record<'dry' | 'wet', string>;
+
+export const FEEDING_STATUS_KEYS = {
+  overfeeding: 'food.tracker.statusOverfeeding',
+  'slightly-over': 'food.tracker.statusSlightlyOver',
+  underfeeding: 'food.tracker.statusUnderfeeding',
+  'slightly-under': 'food.tracker.statusSlightlyUnder',
+  normal: 'food.tracker.statusNormal',
+} as const satisfies Record<'overfeeding' | 'slightly-over' | 'underfeeding' | 'slightly-under' | 'normal', string>;
+
+export const FOOD_HISTORY_TITLE_KEYS = {
+  dry: 'food.dry.historyTitle',
+  wet: 'food.wet.historyTitle',
+} as const satisfies Record<'dry' | 'wet', string>;

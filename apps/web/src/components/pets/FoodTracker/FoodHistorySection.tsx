@@ -42,6 +42,8 @@ import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { FoodUnitLabel } from './FoodUnitLabel';
 import { convertFoodWeight } from '@/lib/validations/pet';
 import { formatRemainingWeight } from '@/lib/utils/food-formatting';
+import { useTranslation } from 'react-i18next';
+import { FOOD_HISTORY_TITLE_KEYS, FOOD_TYPE_TAB_KEYS } from '@/i18n/enum-keys';
 
 interface FoodHistorySectionProps {
   entries: (DryFoodEntry | WetFoodEntry)[];
@@ -62,6 +64,8 @@ export function FoodHistorySection({
   onDelete,
   isLoading = false 
 }: FoodHistorySectionProps) {
+  const { t } = useTranslation();
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
@@ -100,12 +104,12 @@ export function FoodHistorySection({
                 <div className="flex items-center gap-2">
                   <History className="h-4 w-4" />
                   <MutedText className="font-display">
-                    {foodType === 'dry' ? 'Dry' : 'Wet'} Food History
+                    {t(FOOD_HISTORY_TITLE_KEYS[foodType])}
                   </MutedText>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
-                    {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
+                    {t('food.tracker.entries', { count: entries.length })}
                   </span>
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4" />
@@ -126,11 +130,11 @@ export function FoodHistorySection({
               
                   {/* Title row — name + status badge stacked, not inline */}
                   <div className="flex items-center gap-2 mb-1">
-                    <EntryTitle>
-                      {entry.brandName && entry.productName
-                        ? `${entry.brandName} - ${entry.productName}`
-                        : entry.brandName || entry.productName || `${foodType === 'dry' ? 'Dry' : 'Wet'} Food`}
-                    </EntryTitle>
+                  <EntryTitle>
+                    {entry.brandName && entry.productName
+                      ? `${entry.brandName} - ${entry.productName}`
+                      : entry.brandName || entry.productName || t(FOOD_TYPE_TAB_KEYS[foodType])}
+                  </EntryTitle>
                   </div>
               
                   {/* Status badge on its own line */}
@@ -139,7 +143,7 @@ export function FoodHistorySection({
                       variant="outline"
                       className={`text-xs mb-1 ${getFeedingStatusColor(entry.feedingStatus)}`}
                     >
-                      {formatFeedingStatusMessage(entry, dailyAmountUnit)}
+                    {formatFeedingStatusMessage(entry, dailyAmountUnit, t)}
                     </Badge>
                   )}
               
@@ -153,8 +157,8 @@ export function FoodHistorySection({
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
-                          {(entry as DryFoodEntry).dailyAmount} <FoodUnitLabel unit="grams" />/day
-                        </span>
+                          {(entry as DryFoodEntry).dailyAmount} <FoodUnitLabel unit="grams" />{t('food.shared.perDaySuffix')}
+                          </span>
                       </>
                     ) : (
                       <>
@@ -164,30 +168,30 @@ export function FoodHistorySection({
                         </span>
                         <span className="flex items-center gap-1">
                           <Utensils className="h-3 w-3" />
-                          {formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit}/>/day
+                          {formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />{t('food.shared.perDaySuffix')}
                         </span>
                       </>
                     )}
+                   <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {t('food.tracker.expectedDaysLabel', { count: calculateExpectedDays(entry) })}
+                  </span>
+                  {entry.actualDaysElapsed && (
                     <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Expected {calculateExpectedDays(entry)} days
+                      <Hourglass className="h-3 w-3" />
+                      {t('food.tracker.actualDaysLabel', { count: entry.actualDaysElapsed })}
                     </span>
-                    {entry.actualDaysElapsed && (
-                      <span className="flex items-center gap-1">
-                        <Hourglass className="h-3 w-3" />
-                        Actual {entry.actualDaysElapsed} days
-                      </span>
-                    )}
+                  )}
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {t('food.tracker.startedLabel', { date: formatDateForDisplay(entry.dateStarted, displayLocale) })}
+                  </span>
+                  {entry.dateFinished && (
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      Started {formatDateForDisplay(entry.dateStarted, displayLocale)}
+                      <CheckCircle className="h-3 w-3" />
+                      {t('food.tracker.finishedLabel', { date: formatDateForDisplay(entry.dateFinished, displayLocale) })}
                     </span>
-                    {entry.dateFinished && (
-                      <span className="flex items-center gap-1">
-                        <CheckCircle className="h-3 w-3" />
-                        Finished {formatDateForDisplay(entry.dateFinished, displayLocale)}
-                      </span>
-                    )}
+                  )}
                   </div>
                 </div>
                   
@@ -199,24 +203,24 @@ export function FoodHistorySection({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
-                          <Pencil className="h-4 w-4 mr-2" />
-                          Edit Finish Date
+                      <DropdownMenuItem onClick={() => setEditingEntry(entry)}>
+                        <Pencil className="h-4 w-4 mr-2" />
+                        {t('food.editFinishDate.title')}
+                      </DropdownMenuItem>
+                      {onReorder && (
+                        <DropdownMenuItem onClick={() => onReorder(entry)}>
+                          <RotateCcw className="h-4 w-4 mr-2" />
+                          {t('food.tracker.reorderLabel')}
                         </DropdownMenuItem>
-                        {onReorder && (
-                          <DropdownMenuItem onClick={() => onReorder(entry)}>
-                            <RotateCcw className="h-4 w-4 mr-2" />
-                            Reorder
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => setDeletingEntry(entry)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setDeletingEntry(entry)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {t('common.actions.delete')}
+                      </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

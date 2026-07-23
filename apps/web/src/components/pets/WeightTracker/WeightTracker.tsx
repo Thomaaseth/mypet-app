@@ -8,12 +8,6 @@ import {
 } from '@/components/ui/collapsible';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Plus, Scale, AlertCircle, ChevronDown, ChevronRight, Calendar, Target, X,  TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import WeightForm from './WeightForm';
 import WeightChart from './WeightChart';
@@ -252,37 +246,17 @@ export default function WeightTracker({ petId, petName, animalType }: WeightTrac
           </div>
           <div className="flex items-center gap-2">
             {/* Target Range Button */}
-            {!hasTargetRange ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsTargetRangeDialogOpen(true)}
-                      className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
-                    >
-                      <Target className="h-4 w-4" />
-                      <span className="hidden sm:inline">{t('weights.tracker.setRange')}</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs">
-                  <p className="font-semibold mb-1">{t('weights.tracker.tooltipTitle')}</p>                    
-                  <HelperText>
-                    {t('weights.tracker.tooltipDescription')}
-                    </HelperText>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              <Button 
-                variant="outline"  
+              <Button
+                variant="outline"
                 onClick={() => setIsTargetRangeDialogOpen(true)}
                 className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
-                >
+              >
                 <Target className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('weights.tracker.editRange')}</span>
+                <span className="hidden sm:inline">
+                  {hasTargetRange ? t('weights.tracker.editRange') : t('weights.tracker.setRange')}
+                </span>
               </Button>
-            )}
+            
 
             {/* Add Weight Entry Button */}
             {weightEntries.length > 0 && (

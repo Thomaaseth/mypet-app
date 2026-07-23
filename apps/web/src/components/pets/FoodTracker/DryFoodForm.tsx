@@ -9,6 +9,7 @@ import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { DatePicker } from '@/components/ui/date-picker';
+import { useTranslation } from 'react-i18next';
 
 interface DryFoodFormProps {
   dryFoodEntry?: DryFoodEntry;
@@ -23,8 +24,9 @@ export function DryFoodForm({
   onSubmit, 
   onCancel,
   isLoading = false,
-  submitLabel = 'Add Dry Food'
+  submitLabel,
 }: DryFoodFormProps) {
+  const { t } = useTranslation();
   const { units } = usePreferencesContext();
   const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
   const {
@@ -41,10 +43,10 @@ export function DryFoodForm({
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="brandName">Brand Name (Optional)</Label>
+        <Label htmlFor="brandName">{t('food.shared.brandNameLabel')}</Label>
           <Input
               id="brandName"
-              placeholder="e.g., Royal Canin, Hill's"
+              placeholder={t('food.shared.brandNamePlaceholder')}
               maxLength={100}
               {...register('brandName')}
               aria-invalid={!!errors.brandName}
@@ -53,10 +55,10 @@ export function DryFoodForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="productName">Product Name (Optional)</Label>
+        <Label htmlFor="productName">{t('food.shared.productNameLabel')}</Label>
         <Input
           id="productName"
-          placeholder="e.g., Adult Chicken & Rice"
+          placeholder={t('food.dry.productNamePlaceholder')}
           maxLength={150}
           {...register('productName')}
           aria-invalid={!!errors.productName}
@@ -65,13 +67,13 @@ export function DryFoodForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="bagWeight">Bag Weight</Label>
+        <Label htmlFor="bagWeight">{t('food.dry.bagWeightLabel')}</Label>
         <div className="relative">
           <Input
             id="bagWeight"
             type="number"
             step="0.01"
-            placeholder="e.g., 5.5"
+            placeholder={t('food.dry.bagWeightPlaceholder')}
             className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             {...register('bagWeight')}
             aria-invalid={!!errors.bagWeight}
@@ -86,26 +88,26 @@ export function DryFoodForm({
       <input type="hidden" {...register('bagWeightUnit')} />
 
       <div className="space-y-2">
-        <Label htmlFor="dailyAmount">Daily Amount in grams</Label>
+        <Label htmlFor="dailyAmount">{t('food.dry.dailyAmountLabel')}</Label>
         <div className="relative">
         <Input
           id="dailyAmount"
           type="number"
           step="0.01"
-          placeholder="e.g., 120"
+          placeholder={t('food.dry.dailyAmountPlaceholder')}
           className="pr-12 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           {...register('dailyAmount')}
           aria-invalid={!!errors.dailyAmount}
         />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium pointer-events-none select-none">
-            grams
+          {t('food.units.grams')}
           </span>
         </div>
         {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
       </div>
 
       <div className="space-y-2">
-      <Label htmlFor="dateStarted">Date Started</Label>
+      <Label htmlFor="dateStarted">{t('food.shared.dateStartedLabel')}</Label>
         <Controller
           name="dateStarted"
           control={control}
@@ -129,12 +131,12 @@ export function DryFoodForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {submitLabel}
+          {submitLabel ?? t('food.dry.addButton')}
         </Button>
       </div>
     </form>

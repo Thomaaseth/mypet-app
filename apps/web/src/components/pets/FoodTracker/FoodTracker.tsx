@@ -10,6 +10,8 @@ import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { useTranslation } from 'react-i18next';
+import { FOOD_TYPE_TAB_KEYS, FOOD_SUPPLY_LABEL_KEYS } from '@/i18n/enum-keys';
 
 interface FoodTrackerProps {
   petId: string;
@@ -35,6 +37,7 @@ function hasCalculatedFields(entry: DryFoodEntry | WetFoodEntry): entry is (DryF
 
 // Internal component that uses the context
 function FoodTrackerContent() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'dry' | 'wet'>('dry');
   const { activeFoodEntries, isLoading } = useFoodTrackerContext();
 
@@ -47,7 +50,7 @@ function FoodTrackerContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UtensilsCrossed className="h-5 w-5" />
-            <CardTitle>Food Tracker</CardTitle>  
+            <CardTitle>{t('food.tracker.title')}</CardTitle> 
           </div>
         <div aria-hidden="true" className="h-9.5" /> {/* spacer, exact default Button height */}
       </div>
@@ -59,15 +62,16 @@ function FoodTrackerContent() {
             {activeFoodEntries.length === 1 && hasCalculatedFields(activeFoodEntries[0]) ? (
               // Single food entry
               <div className="text-center p-4 bg-muted/75 rounded-lg">
-                <MetricLabel>{FOOD_TYPE_LABELS[activeFoodEntries[0].foodType]} Supply</MetricLabel>
+                  <MetricLabel>{t(FOOD_SUPPLY_LABEL_KEYS[activeFoodEntries[0].foodType])}</MetricLabel>
                   <MetricValue>
-                    {activeFoodEntries[0].remainingDays > 0 ? `${activeFoodEntries[0].remainingDays} days` : 'Running out'}
+                    {activeFoodEntries[0].remainingDays > 0
+                      ? t('food.tracker.daysRemaining', { count: activeFoodEntries[0].remainingDays })
+                      : t('food.tracker.runningOut')}
                   </MetricValue>
                   <MutedText>
-                    {activeFoodEntries[0].remainingDays > 0 
-                      ? `Runs out ${formatDateForDisplay(activeFoodEntries[0].depletionDate, displayLocale)}`
-                      : 'Needs restocking'
-                    }
+                    {activeFoodEntries[0].remainingDays > 0
+                      ? t('food.tracker.runsOut', { date: formatDateForDisplay(activeFoodEntries[0].depletionDate, displayLocale) })
+                      : t('food.tracker.needsRestocking')}
                   </MutedText>
                 </div>
             ) : (
@@ -79,15 +83,16 @@ function FoodTrackerContent() {
                 .map((entry) => (
                   <div className="text-center p-4 bg-muted/75 rounded-lg">
                     <div className="text-center">
-                    <MetricLabel>{FOOD_TYPE_LABELS[entry.foodType]} Supply</MetricLabel>
+                    <MetricLabel>{t(FOOD_SUPPLY_LABEL_KEYS[entry.foodType])}</MetricLabel>
                       <MetricValue>
-                        {entry.remainingDays > 0 ? `${entry.remainingDays} days` : 'Running out'}
+                        {entry.remainingDays > 0
+                          ? t('food.tracker.daysRemaining', { count: entry.remainingDays })
+                          : t('food.tracker.runningOut')}
                       </MetricValue>
                       <MutedText>
-                        {entry.remainingDays > 0 
-                          ? `Runs out ${formatDateForDisplay(entry.depletionDate, displayLocale)}`
-                          : 'Needs restocking'
-                        }
+                        {entry.remainingDays > 0
+                          ? t('food.tracker.runsOut', { date: formatDateForDisplay(entry.depletionDate, displayLocale) })
+                          : t('food.tracker.needsRestocking')}
                       </MutedText>
                     </div>
                   </div>
@@ -99,8 +104,8 @@ function FoodTrackerContent() {
 
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'dry' | 'wet')}>
           <TabsList className="grid w-full grid-cols-2 mt-2">
-            <TabsTrigger value="dry">Dry Food</TabsTrigger>
-            <TabsTrigger value="wet">Wet Food</TabsTrigger>
+            <TabsTrigger value="dry">{t(FOOD_TYPE_TAB_KEYS.dry)}</TabsTrigger>
+            <TabsTrigger value="wet">{t(FOOD_TYPE_TAB_KEYS.wet)}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="dry" className="mt-4">
