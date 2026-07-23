@@ -26,6 +26,7 @@ import { useUpsertUserPreferences } from '@/queries/user-preferences';
 import { DATE_TIME_LOCALE_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
 import { detectBrowserTimezone } from '@/lib/utils/timezone';
 import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
+import { PreferenceOptionButton } from '@/components/ui/preference-option-button';
 
 // Schema for email update
 const emailUpdateSchema = z.object({
@@ -39,7 +40,7 @@ export default function MyProfilePage() {
   // user session context
   const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
   const { dateTimeLocale: currentDateTimeLocale, unitSystem: currentUnitSystem, isLoading: isLoadingPreferences } = usePreferencesContext();
-  const { mutate: upsertPreferences, isPending: isSavingPreferences } = useUpsertUserPreferences();
+  const { mutate: upsertPreferences, isPending: isSavingPreferences, variables: pendingPreferences } = useUpsertUserPreferences();
 
   // UI-specific state remains as separate useState
   const [passwordVisibility, setPasswordVisibility] = useState({
@@ -241,10 +242,13 @@ export default function MyProfilePage() {
                   {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale, label, description }) => {
                     const isActive = currentDateTimeLocale === dateTimeLocale;
                     return (
-                      <Button
+                      <PreferenceOptionButton
                         key={dateTimeLocale}
-                        variant={isActive ? 'default' : 'outline'}
+                        label={label}
+                        description={description}
+                        isActive={isActive}
                         disabled={isSavingPreferences}
+                        isSaving={isSavingPreferences && !isActive && pendingPreferences?.dateTimeLocale === dateTimeLocale}
                         onClick={() => {
                           if (!isActive) upsertPreferences({
                             dateTimeLocale,
@@ -252,16 +256,7 @@ export default function MyProfilePage() {
                             timezone: detectBrowserTimezone(),
                           });
                         }}
-                        className="flex flex-col h-auto py-3 px-4 flex-1"
-                      >
-                        {isSavingPreferences && !isActive && (
-                          <Loader2 className="h-4 w-4 animate-spin mb-1" />
-                        )}
-                        <span className="font-semibold text-sm">{label}</span>
-                        <span className={`text-xs font-normal ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                          {description}
-                        </span>
-                      </Button>
+                      />
                     );
                   })}
                 </div>
@@ -271,10 +266,13 @@ export default function MyProfilePage() {
                   {UNIT_SYSTEM_OPTIONS.map(({ unitSystem, label, description }) => {
                     const isActive = currentUnitSystem === unitSystem;
                     return (
-                      <Button
+                      <PreferenceOptionButton
                         key={unitSystem}
-                        variant={isActive ? 'default' : 'outline'}
+                        label={label}
+                        description={description}
+                        isActive={isActive}
                         disabled={isSavingPreferences}
+                        isSaving={isSavingPreferences && !isActive && pendingPreferences?.unitSystem === unitSystem}
                         onClick={() => {
                           if (!isActive) upsertPreferences({
                             dateTimeLocale: currentDateTimeLocale ?? getFallbackDateTimeLocale(),
@@ -282,16 +280,7 @@ export default function MyProfilePage() {
                             timezone: detectBrowserTimezone(),
                           });
                         }}
-                        className="flex flex-col h-auto py-3 px-4 flex-1"
-                      >
-                        {isSavingPreferences && !isActive && (
-                          <Loader2 className="h-4 w-4 animate-spin mb-1" />
-                        )}
-                        <span className="font-semibold text-sm">{label}</span>
-                        <span className={`text-xs font-normal ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                          {description}
-                        </span>
-                      </Button>
+                      />
                     );
                   })}
                 </div>

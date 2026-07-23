@@ -8,7 +8,7 @@ import type { DateTimeLocale } from '@/shared/validations/locale';
 import type { UnitSystem } from '@/shared/validations/units';
 import { DATE_TIME_LOCALE_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
 import { detectBrowserTimezone } from '@/lib/utils/timezone';
-
+import { PreferenceOptionButton } from '@/components/ui/preference-option-button';
 
 function PreferenceBannerSkeleton() {
   return (
@@ -58,34 +58,30 @@ export function PreferenceBanner() {
             {/* Date/time format group */}
             <div className="flex gap-2 flex-1">
               {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale, label, description }) => (
-                <Button
+                <PreferenceOptionButton
                   key={dateTimeLocale}
-                  variant={pendingDateTimeLocale === dateTimeLocale ? 'default' : 'outline'}
-                  size="sm"
+                  label={label}
+                  description={description}
+                  isActive={pendingDateTimeLocale === dateTimeLocale}
                   disabled={isPending}
+                  size="compact"
                   onClick={() => setPendingDateTimeLocale(dateTimeLocale)}
-                  className="flex flex-col h-auto py-1.5 px-3 flex-1"
-                  >
-                  <span className="font-semibold text-xs">{label}</span>
-                  <span className="text-[10px] text-muted-foreground font-normal">{description}</span>
-                </Button>
+                />
               ))}
             </div>
 
             {/* Unit system group */}
             <div className="flex gap-2 flex-1">
               {UNIT_SYSTEM_OPTIONS.map(({ unitSystem, label, description }) => (
-                <Button
-                  key={unitSystem}
-                  variant={pendingUnitSystem === unitSystem ? 'default' : 'outline'}
-                  size="sm"
-                  disabled={isPending}
-                  onClick={() => setPendingUnitSystem(unitSystem)}
-                  className="flex flex-col h-auto py-1.5 px-3 flex-1"
-                  >
-                  <span className="font-semibold text-xs">{label}</span>
-                  <span className="text-[10px] text-muted-foreground font-normal">{description}</span>
-                </Button>
+                <PreferenceOptionButton
+                key={unitSystem}
+                label={label}
+                description={description}
+                isActive={pendingUnitSystem === unitSystem}
+                disabled={isPending}
+                size="compact"
+                onClick={() => setPendingUnitSystem(unitSystem)}
+              />
               ))}
             </div>
            </div>

@@ -82,15 +82,12 @@ export const emailTemplates = {
                 margin-bottom: 30px;
               }
               .logo {
-                font-size: 28px;
-                font-weight: bold;
-                color: #4F46E5;
                 margin-bottom: 10px;
               }
               .button {
                 display: inline-block;
                 padding: 14px 30px;
-                background-color: #4F46E5;
+                background-color: #640C26;
                 color: white;
                 text-decoration: none;
                 border-radius: 6px;
@@ -98,7 +95,7 @@ export const emailTemplates = {
                 margin: 20px 0;
               }
               .button:hover {
-                background-color: #4338CA;
+                background-color: #74243C;
               }
               .footer {
                 margin-top: 30px;
@@ -116,8 +113,10 @@ export const emailTemplates = {
           <body>
             <div class="container">
               <div class="header">
-                <div class="logo">🐾 ${APP_NAME}</div>
-                <h1 style="color: #333; margin: 0;">Verify Your Email</h1>
+               <div class="logo">
+                  <img src="${APP_URL}/brand/Full-Logo-Color/PNG/Pettr_Logo_Full-Color_Wine-Ginger.png" alt="${APP_NAME}" width="180" style="display: block; margin: 0 auto;" />
+                </div>
+               <h1 style="color: #333; margin: 0;">Verify Your Email</h1>
               </div>
               
               <p>Hi ${userName},</p>
@@ -125,7 +124,7 @@ export const emailTemplates = {
               <p>Welcome to ${APP_NAME}! We're excited to have you on board. Please verify your email address by clicking the button below:</p>
               
               <div style="text-align: center;">
-                <a href="${verificationUrl}" class="button">Verify Email Address</a>
+                <a href="${verificationUrl}" class="button" style="background-color: #640C26; color: #ffffff !important; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-weight: 600; display: inline-block;">Verify Email Address</a>
               </div>
               
               <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
@@ -178,15 +177,12 @@ export const emailTemplates = {
                 margin-bottom: 30px;
               }
               .logo {
-                font-size: 28px;
-                font-weight: bold;
-                color: #4F46E5;
                 margin-bottom: 10px;
               }
               .button {
                 display: inline-block;
                 padding: 14px 30px;
-                background-color: #4F46E5;
+                background-color: #640C26;
                 color: white;
                 text-decoration: none;
                 border-radius: 6px;
@@ -194,15 +190,15 @@ export const emailTemplates = {
                 margin: 20px 0;
               }
               .button:hover {
-                background-color: #4338CA;
+                background-color: #74243C;
               }
               .warning {
-                background-color: #FEF3C7;
-                border: 1px solid #F59E0B;
+                background-color: #F8F6F6;
+                border: 1px solid #F2EDED;
                 border-radius: 6px;
                 padding: 15px;
                 margin: 20px 0;
-                color: #92400E;
+                color: #746466;
               }
               .footer {
                 margin-top: 30px;
@@ -220,7 +216,9 @@ export const emailTemplates = {
           <body>
             <div class="container">
               <div class="header">
-                <div class="logo">🐾 ${APP_NAME}</div>
+               <div class="logo">
+                  <img src="${APP_URL}/brand/Full-Logo-Color/PNG/Pettr_Logo_Full-Color_Wine-Ginger.png" alt="${APP_NAME}" width="180" style="display: block; margin: 0 auto;" />
+                </div>
                 <h1 style="color: #333; margin: 0;">Reset Your Password</h1>
               </div>
               
@@ -229,14 +227,15 @@ export const emailTemplates = {
               <p>We received a request to reset your password. Click the button below to create a new password:</p>
               
               <div style="text-align: center;">
-                <a href="${resetUrl}" class="button">Reset Password</a>
+                <a href="${resetUrl}" class="button" style="background-color: #640C26; color: #ffffff !important; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-weight: 600; display: inline-block;">Reset Password</a>
               </div>
               
               <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
               <p style="color: #4F46E5; word-break: break-all; font-size: 14px;">${resetUrl}</p>
               
               <div class="warning">
-                <strong>⚠️ Security Notice:</strong> This link will expire in 1 hour. If you didn't request a password reset, please ignore this email or contact support if you have concerns.
+                <strong>Security Notice:</strong> This link will expire in 1 hour. If you didn't request a password reset, please ignore this email or contact support if you have concerns.
+               </div>
               </div>
               
               <div class="divider"></div>
@@ -284,15 +283,12 @@ export const emailTemplates = {
                 margin-bottom: 30px;
               }
               .logo {
-                font-size: 28px;
-                font-weight: bold;
-                color: #4F46E5;
                 margin-bottom: 10px;
               }
               .button {
                 display: inline-block;
                 padding: 14px 30px;
-                background-color: #4F46E5;
+                background-color: #640C26;
                 color: white;
                 text-decoration: none;
                 border-radius: 6px;
@@ -300,12 +296,12 @@ export const emailTemplates = {
                 margin: 20px 0;
               }
               .info-box {
-                background-color: #EBF5FF;
-                border: 1px solid #3B82F6;
+                background-color: #F8F6F6;
+                border: 1px solid #F2EDED;
                 border-radius: 6px;
                 padding: 15px;
                 margin: 20px 0;
-                color: #1E40AF;
+                color: #746466;
               }
               .footer {
                 margin-top: 30px;
@@ -318,7 +314,9 @@ export const emailTemplates = {
           <body>
             <div class="container">
               <div class="header">
-                <div class="logo">🐾 ${APP_NAME}</div>
+                 <div class="logo">
+                  <img src="${APP_URL}/brand/Full-Logo-Color/PNG/Pettr_Logo_Full-Color_Wine-Ginger.png" alt="${APP_NAME}" width="180" style="display: block; margin: 0 auto;" />
+                 </div>
                 <h1 style="color: #333; margin: 0;">Confirm Email Change</h1>
               </div>
               
@@ -327,13 +325,13 @@ export const emailTemplates = {
               <p>You've requested to change your email address to:</p>
               
               <div class="info-box">
-                <strong>${newEmail}</strong>
+                <strong style="color: #190E0F;">${newEmail}</strong>
               </div>
               
               <p>Please confirm this change by clicking the button below:</p>
               
               <div style="text-align: center;">
-                <a href="${verificationUrl}" class="button">Confirm Email Change</a>
+                <a href="${verificationUrl}" class="button" style="background-color: #640C26; color: #ffffff !important; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-weight: 600; display: inline-block;">Confirm Email Change</a>
               </div>
               
               <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>

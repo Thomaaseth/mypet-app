@@ -39,8 +39,8 @@ export function UserPreferencesProvider({ children }: UserPreferencesProviderPro
     dateTimeLocale,
     unitSystem,
     units,
-    hasPreferences: preferences !== null,
-    isLoading: isPending,
+    hasPreferences: !user || !!preferences,
+    isLoading: !!user && isPending,
     error: appError,
   };
 
