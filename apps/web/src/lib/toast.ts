@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import type { TFunction } from 'i18next';
 
 export const toastService = {
   success: (message: string, description?: string) => {
@@ -50,39 +51,39 @@ promise: <T>(
   },
 
 auth: {
-    signUpSuccess: () => 
+    signUpSuccess: (t: TFunction) => 
       toastService.emailSent(
-        "Account created successfully!",
-        "Please check your email to verify your account."
+        t('toasts.auth.signUpSuccessTitle'),
+        t('toasts.auth.signUpSuccessDescription')
       ),
 
-    signInSuccess: () => 
-      toastService.success("Welcome back!"),
+    signInSuccess: (t: TFunction) => 
+      toastService.success(t('toasts.auth.signInSuccess')),
 
-    passwordChanged: () => 
-      toastService.success("Password changed successfully"),
+    passwordChanged: (t: TFunction) => 
+      toastService.success(t('toasts.auth.passwordChanged')),
 
-    emailUpdated: (isVerified: boolean) => 
+    emailUpdated: (isVerified: boolean, t: TFunction) => 
       isVerified 
         ? toastService.emailSent(
-            "Email update initiated",
-            "Check your inbox and click the verification link to complete the change."
+            t('toasts.auth.emailUpdateInitiatedTitle'),
+            t('toasts.auth.emailUpdateInitiatedDescription')
           )
-        : toastService.success("Email updated successfully"),
+        : toastService.success(t('toasts.auth.emailUpdatedSuccess')),
 
-    verificationSent: () => 
-      toastService.emailSent("Verification email sent"),
+    verificationSent: (t: TFunction) => 
+      toastService.emailSent(t('toasts.auth.verificationSentTitle')),
 
-    passwordResetSent: () => 
+    passwordResetSent: (t: TFunction) => 
       toastService.emailSent(
-        "Password reset email sent",
-        "Check your inbox for reset instructions."
+        t('toasts.auth.passwordResetSentTitle'),
+        t('toasts.auth.passwordResetSentDescription')
       ),
 
-    passwordResetSuccess: () => 
+    passwordResetSuccess: (t: TFunction) => 
       toastService.success(
-        "Password reset successfully!",
-        "You can now sign in with your new password."
+        t('toasts.auth.passwordResetSuccessTitle'),
+        t('toasts.auth.passwordResetSuccessDescription')
         ),
   },
 }

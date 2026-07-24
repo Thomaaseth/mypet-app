@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userPreferencesApi, userPreferencesErrorHandler } from '@/lib/api/domains/user-preferences';
 import { toastService } from '@/lib/toast';
+import { useTranslation } from 'react-i18next';
 import type { UserPreferences, UserPreferencesFormData } from '@/types/user-preferences';
 
 export const preferenceKeys = {
@@ -22,6 +23,7 @@ export function useUserPreferences({ enabled = true }: { enabled?: boolean } = {
 // Mutation — banner + profile both use this
 export function useUpsertUserPreferences() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (data: UserPreferencesFormData) =>
@@ -29,7 +31,7 @@ export function useUpsertUserPreferences() {
     onSuccess: (updatedPreferences: UserPreferences) => {
       // Update cache directly — no refetch needed
       queryClient.setQueryData(preferenceKeys.current(), updatedPreferences);
-      toastService.success('Preferences saved successfully');
+      toastService.success(t('toasts.preferences.saveSuccess'));
     },
     onError: (error) => {
       const appError = userPreferencesErrorHandler(error);

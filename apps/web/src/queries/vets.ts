@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tansta
 import { vetApi, vetErrorHandler } from '@/lib/api';
 import { toastService } from '@/lib/toast';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
+import { useTranslation } from 'react-i18next';
 
 // QUERY KEYS - Centralized for cache management
 export const vetKeys = {
@@ -71,6 +72,7 @@ export function usePetVets(petId: string) {
 // CREATE
 export function useCreateVeterinarian() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({
@@ -89,13 +91,13 @@ export function useCreateVeterinarian() {
       invalidatePetRelatedCaches(queryClient);
 
       toastService.success(
-        'Veterinarian added',
-        `${newVet.clinicName || newVet.vetName} has been added!`
+        t('toasts.vets.addSuccessTitle'),
+        t('toasts.vets.addSuccessDescription', { name: newVet.clinicName || newVet.vetName })
       );
     },
     onError: (error) => {
       const appError = vetErrorHandler(error);
-      toastService.error('Failed to add veterinarian', appError.message);
+      toastService.error(t('toasts.vets.addError'), appError.message);
     },
   });
 }
@@ -103,6 +105,7 @@ export function useCreateVeterinarian() {
 // UPDATE
 export function useUpdateVeterinarian() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({
@@ -121,13 +124,13 @@ export function useUpdateVeterinarian() {
       invalidatePetRelatedCaches(queryClient);
 
       toastService.success(
-        'Veterinarian updated',
-        `${updatedVet.clinicName || updatedVet.vetName} has been updated!`
+        t('toasts.vets.updateSuccessTitle'),
+        t('toasts.vets.updateSuccessDescription', { name: updatedVet.clinicName || updatedVet.vetName })
       );
     },
     onError: (error) => {
       const appError = vetErrorHandler(error);
-      toastService.error('Failed to update veterinarian', appError.message);
+      toastService.error(t('toasts.vets.updateError'), appError.message);
     },
   });
 }
@@ -135,6 +138,7 @@ export function useUpdateVeterinarian() {
 // DELETE
 export function useDeleteVeterinarian() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (vetId: string) => vetApi.deleteVeterinarian(vetId),
@@ -151,11 +155,11 @@ export function useDeleteVeterinarian() {
       // (Fixes: deleted vet lingering in dropdowns until page refresh.)
       invalidatePetRelatedCaches(queryClient);
 
-      toastService.success('Veterinarian deleted', 'The veterinarian has been removed.');
-    },
+      toastService.success(t('toasts.vets.deleteSuccessTitle'), t('toasts.vets.deleteSuccessDescription'));
+      },
     onError: (error) => {
       const appError = vetErrorHandler(error);
-      toastService.error('Failed to delete veterinarian', appError.message);
+      toastService.error(t('toasts.vets.deleteError'), appError.message);
     },
   });
 }
@@ -163,6 +167,7 @@ export function useDeleteVeterinarian() {
 // ASSIGN VET TO PETS
 export function useAssignVetToPets() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({
@@ -180,11 +185,11 @@ export function useAssignVetToPets() {
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
       invalidatePetRelatedCaches(queryClient);
 
-      toastService.success('Pets assigned', 'Veterinarian has been assigned to selected pets.');
+      toastService.success(t('toasts.vets.assignSuccessTitle'), t('toasts.vets.assignSuccessDescription'));
     },
     onError: (error) => {
       const appError = vetErrorHandler(error);
-      toastService.error('Failed to assign veterinarian', appError.message);
+      toastService.error(t('toasts.vets.assignError'), appError.message);
     },
   });
 }
@@ -192,6 +197,7 @@ export function useAssignVetToPets() {
 // UNASSIGN VET FROM PETS
 export function useUnassignVetFromPets() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({ vetId, petIds }: { vetId: string; petIds: string[] }) => {
@@ -201,14 +207,11 @@ export function useUnassignVetFromPets() {
       queryClient.invalidateQueries({ queryKey: vetKeys.all });
       invalidatePetRelatedCaches(queryClient);
 
-      toastService.success(
-        'Pets unassigned',
-        'Veterinarian has been unassigned from selected pets.'
-      );
+      toastService.success(t('toasts.vets.unassignSuccessTitle'), t('toasts.vets.unassignSuccessDescription'));
     },
     onError: (error) => {
       const appError = vetErrorHandler(error);
-      toastService.error('Failed to unassign veterinarian', appError.message);
+      toastService.error(t('toasts.vets.unassignError'), appError.message);
     },
   });
 }

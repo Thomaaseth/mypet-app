@@ -12,8 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toastService } from '@/lib/toast';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle, Globe } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { passwordChangeSchema } from '@/lib/validations/password';
+import { useState, useEffect, useMemo } from 'react';
+import { createTranslatedPasswordChangeSchema } from '@/lib/validations/password-translated';
+import type { TFunction } from 'i18next';
 import { 
   AccountInfoSkeleton, 
   EmailFormSkeleton, 
@@ -27,20 +28,33 @@ import { DATE_TIME_LOCALE_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/l
 import { detectBrowserTimezone } from '@/lib/utils/timezone';
 import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
 import { PreferenceOptionButton } from '@/components/ui/preference-option-button';
+import { useTranslation } from 'react-i18next';
+import {
+  DATE_TIME_LOCALE_LABEL_KEYS,
+  DATE_TIME_LOCALE_DESCRIPTION_KEYS,
+  UNIT_SYSTEM_LABEL_KEYS,
+  UNIT_SYSTEM_DESCRIPTION_KEYS,
+} from '@/i18n/enum-keys';
 
-// Schema for email update
-const emailUpdateSchema = z.object({
-  newEmail: z.string().email('Please enter a valid email address'),
-});
+// Component-local schema (not shared with API) — factory pattern so
+// the validation message can be translated via t()
+const createEmailUpdateSchema = (t: TFunction) =>
+  z.object({
+    newEmail: z.string().email(t('auth.validation.invalidEmail')),
+  });
 
-type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
-type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
+type PasswordChangeFormData = z.infer<ReturnType<typeof createTranslatedPasswordChangeSchema>>;
+type EmailUpdateFormData = z.infer<ReturnType<typeof createEmailUpdateSchema>>;
 
 export default function MyProfilePage() {
+  const { t } = useTranslation();
   // user session context
   const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
   const { dateTimeLocale: currentDateTimeLocale, unitSystem: currentUnitSystem, isLoading: isLoadingPreferences } = usePreferencesContext();
   const { mutate: upsertPreferences, isPending: isSavingPreferences, variables: pendingPreferences } = useUpsertUserPreferences();
+
+  const emailUpdateSchema = useMemo(() => createEmailUpdateSchema(t), [t]);
+  const passwordChangeSchema = useMemo(() => createTranslatedPasswordChangeSchema(t), [t]);
 
   // UI-specific state remains as separate useState
   const [passwordVisibility, setPasswordVisibility] = useState({
@@ -95,7 +109,7 @@ export default function MyProfilePage() {
     );
 
     if (result) {
-      toastService.auth.emailUpdated(currentUser?.emailVerified || false);
+      toastService.auth.emailUpdated(currentUser?.emailVerified || false, t);
 
       // Use updateUser 
       if (!currentUser?.emailVerified) {
@@ -127,7 +141,7 @@ export default function MyProfilePage() {
 
     if (result) {
       passwordForm.reset();
-      toastService.auth.passwordChanged();
+      toastService.auth.passwordChanged(t);
     }
 
     return result;
@@ -162,7 +176,7 @@ export default function MyProfilePage() {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Failed to load your profile. Please try refreshing the page.
+            {t('profile.account.loadError')}
           </AlertDescription>
         </Alert>
       </div>
@@ -180,20 +194,20 @@ export default function MyProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
-              Account Information
+              {t('profile.account.title')}
             </CardTitle>
             <CardDescription>
-              Your account details and verification status.
+              {t('profile.account.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium text-muted-foreground">Name</Label>
+                <Label className="text-sm font-medium text-muted-foreground">{t('profile.account.nameLabel')}</Label>
                 <p className="text-sm font-medium">{currentUser.name}</p>
               </div>
               <div>
-                <Label className="text-sm font-medium text-muted-foreground">Email</Label>
+                <Label className="text-sm font-medium text-muted-foreground">{t('profile.account.emailLabel')}</Label>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-medium">{currentUser.email}</p>
                   {currentUser.emailVerified ? (
@@ -204,7 +218,7 @@ export default function MyProfilePage() {
                 </div>
                 {!currentUser.emailVerified && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Email not verified. Check your inbox for verification email.
+                    {t('profile.account.emailNotVerified')}
                   </p>
                 )}
               </div>
@@ -217,10 +231,10 @@ export default function MyProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              Date, Time & Units
+              {t('profile.preferencesCard.title')}
             </CardTitle>
             <CardDescription>
-              Choose your preferred date/time format and measurement system.
+              {t('profile.preferencesCard.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -239,13 +253,13 @@ export default function MyProfilePage() {
               <>
                 {/* Date/Time format */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale, label, description }) => {
+                  {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale }) => {
                     const isActive = currentDateTimeLocale === dateTimeLocale;
                     return (
                       <PreferenceOptionButton
                         key={dateTimeLocale}
-                        label={label}
-                        description={description}
+                        label={t(DATE_TIME_LOCALE_LABEL_KEYS[dateTimeLocale])}
+                        description={t(DATE_TIME_LOCALE_DESCRIPTION_KEYS[dateTimeLocale])}
                         isActive={isActive}
                         disabled={isSavingPreferences}
                         isSaving={isSavingPreferences && !isActive && pendingPreferences?.dateTimeLocale === dateTimeLocale}
@@ -263,13 +277,13 @@ export default function MyProfilePage() {
 
                 {/* Units */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  {UNIT_SYSTEM_OPTIONS.map(({ unitSystem, label, description }) => {
+                  {UNIT_SYSTEM_OPTIONS.map(({ unitSystem }) => {
                     const isActive = currentUnitSystem === unitSystem;
                     return (
                       <PreferenceOptionButton
                         key={unitSystem}
-                        label={label}
-                        description={description}
+                        label={t(UNIT_SYSTEM_LABEL_KEYS[unitSystem])}
+                        description={t(UNIT_SYSTEM_DESCRIPTION_KEYS[unitSystem])}
                         isActive={isActive}
                         disabled={isSavingPreferences}
                         isSaving={isSavingPreferences && !isActive && pendingPreferences?.unitSystem === unitSystem}
@@ -294,10 +308,10 @@ export default function MyProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Update Email
+              {t('profile.emailForm.title')}
             </CardTitle>
             <CardDescription>
-              Change your account email address.
+              {t('profile.emailForm.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -312,11 +326,11 @@ export default function MyProfilePage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="newEmail">New Email Address</Label>
+                <Label htmlFor="newEmail">{t('profile.emailForm.newEmailLabel')}</Label>
                 <Input
                   id="newEmail"
                   type="email"
-                  placeholder="Enter new email address"
+                  placeholder={t('profile.emailForm.newEmailPlaceholder')}
                   {...emailForm.register('newEmail')}
                   aria-invalid={!!emailForm.formState.errors.newEmail}
                 />
@@ -335,7 +349,7 @@ export default function MyProfilePage() {
                 {emailUpdateState.isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {emailUpdateState.isLoading ? 'Updating...' : 'Update Email'}
+                {emailUpdateState.isLoading ? t('profile.emailForm.submitUpdating') : t('profile.emailForm.submitUpdate')}
               </Button>
             </form>
           </CardContent>
@@ -346,10 +360,10 @@ export default function MyProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
-              Change Password
+              {t('profile.passwordForm.title')}
             </CardTitle>
             <CardDescription>
-              Update your account password for better security.
+              {t('profile.passwordForm.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -366,12 +380,12 @@ export default function MyProfilePage() {
               <div className="grid gap-4">
                 {/* Current Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Label htmlFor="currentPassword">{t('profile.passwordForm.currentPasswordLabel')}</Label>
                   <div className="relative">
                     <Input
                       id="currentPassword"
                       type={passwordVisibility.current ? "text" : "password"}
-                      placeholder="Enter current password"
+                      placeholder={t('profile.passwordForm.currentPasswordPlaceholder')}
                       {...passwordForm.register('currentPassword')}
                       aria-invalid={!!passwordForm.formState.errors.currentPassword}
                     />
@@ -394,12 +408,12 @@ export default function MyProfilePage() {
 
                 {/* New Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
+                  <Label htmlFor="newPassword">{t('profile.passwordForm.newPasswordLabel')}</Label>
                   <div className="relative">
                     <Input
                       id="newPassword"
                       type={passwordVisibility.new ? "text" : "password"}
-                      placeholder="Enter new password"
+                      placeholder={t('profile.passwordForm.newPasswordPlaceholder')}
                       {...passwordForm.register('newPassword')}
                       aria-invalid={!!passwordForm.formState.errors.newPassword}
                     />
@@ -422,12 +436,12 @@ export default function MyProfilePage() {
 
                 {/* Confirm New Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword">{t('profile.passwordForm.confirmPasswordLabel')}</Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
                       type={passwordVisibility.confirm ? "text" : "password"}
-                      placeholder="Confirm new password"
+                      placeholder={t('profile.passwordForm.confirmPasswordPlaceholder')}
                       {...passwordForm.register('confirmPassword')}
                       aria-invalid={!!passwordForm.formState.errors.confirmPassword}
                     />
@@ -456,7 +470,7 @@ export default function MyProfilePage() {
                 {passwordChangeState.isLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {passwordChangeState.isLoading ? 'Changing...' : 'Change Password'}
+                {passwordChangeState.isLoading ? t('profile.passwordForm.submitChanging') : t('profile.passwordForm.submitChange')}
               </Button>
             </form>
           </CardContent>

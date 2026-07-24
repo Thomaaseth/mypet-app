@@ -32,6 +32,7 @@ import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
+import { useTranslation } from 'react-i18next';
 
 const MAX_CONTENT_LENGTH = 200;
 const MAX_NOTES = 20;
@@ -48,6 +49,8 @@ interface NoteRowProps {
 }
 
 function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
+  const { t } = useTranslation();
+
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(note.content);
   const [isSaving, setIsSaving] = useState(false);
@@ -107,7 +110,7 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleStartEdit}>
                 <Pencil className="h-4 w-4 mr-2" />
-                Edit
+                {t('common.actions.edit')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -115,7 +118,7 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
                 className="text-destructive focus:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                {t('common.actions.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -125,7 +128,7 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
       <ResponsiveDialog
         open={isEditing}
         onOpenChange={(open) => { if (!open) handleCancel(); }}
-        title="Edit Note"
+        title={t('notes.editDialog.title')}
       >
         <div className="space-y-4">
           <Textarea
@@ -138,15 +141,15 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
           />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-              {editValue.length}/{MAX_CONTENT_LENGTH}
+            {t('notes.charCount', { count: editValue.length })}
             </span>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
-                Cancel
+              {t('common.actions.cancel')}
               </Button>
               <Button onClick={handleSave} disabled={isSaving || !editValue.trim()}>
                 {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Save
+                {t('common.actions.save')}
               </Button>
             </div>
           </div>
@@ -157,6 +160,8 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
 }
 
 export default function NotesWidget({ petId }: NotesWidgetProps) {
+  const { t } = useTranslation();
+
   const [isAdding, setIsAdding] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -216,7 +221,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <NotebookPen className="h-5 w-5" />
-            Notes
+            {t('notes.widget.title')}
           </CardTitle>
           {notes && notes.length > 0 && !isAtLimit && (
             <Button
@@ -226,7 +231,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
               className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add note</span>
+              <span className="hidden sm:inline">{t('notes.widget.addNote')}</span>
             </Button>
           )}
         </div>
@@ -236,7 +241,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
         {fetchError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>Failed to load notes. Please try again.</AlertDescription>
+            <AlertDescription>{t('notes.widget.loadError')}</AlertDescription>
           </Alert>
         )}
 
@@ -244,13 +249,13 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
         <ResponsiveDialog
           open={isAdding}
           onOpenChange={(open) => { if (!open) handleCancelAdd(); }}
-          title="Add Note"
+          title={t('notes.addDialog.title')}
         >
           <div className="space-y-4">
             <Textarea
               value={newNoteContent}
               onChange={(e) => setNewNoteContent(e.target.value)}
-              placeholder="Type a note..."
+              placeholder={t('notes.addDialog.placeholder')}
               maxLength={MAX_CONTENT_LENGTH}
               disabled={isCreating}
               rows={4}
@@ -258,15 +263,15 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             />
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-                {newNoteContent.length}/{MAX_CONTENT_LENGTH}
+              {t('notes.charCount', { count: newNoteContent.length })}
               </span>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleCancelAdd} disabled={isCreating}>
-                  Cancel
+                {t('common.actions.cancel')}
                 </Button>
                 <Button onClick={handleCreate} disabled={isCreating || !newNoteContent.trim()}>
                   {isCreating && <Loader2 className="h-4 w-4 animate-spin sm:mr-2" />}
-                  Add Note
+                  {t('notes.addDialog.submit')}
                 </Button>
               </div>
             </div>
@@ -289,9 +294,9 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
           !isAdding && (
             <EmptyStateCta
               icon={NotebookPen}
-              title="No notes yet"
-              description="Add things you want to remember about your pet."
-              buttonLabel="Add note"
+              title={t('notes.widget.emptyTitle')}
+              description={t('notes.widget.emptyDescription')}
+              buttonLabel={t('notes.widget.addNote')}
               onAction={handleStartAdd}
             />
           )
@@ -301,20 +306,20 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
         <AlertDialog open={!!noteToDelete} onOpenChange={(open) => { if (!open) setNoteToDelete(null); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Note</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this note? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+              <AlertDialogTitle>{t('notes.deleteDialog.title')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                {t('notes.deleteDialog.description')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={!!deletingNoteId}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
+            <AlertDialogCancel disabled={!!deletingNoteId}>{t('common.actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
                 onClick={handleConfirmDelete}
                 disabled={!!deletingNoteId}
                 className="bg-destructive text-white hover:bg-destructive/90"
               >
                 {deletingNoteId && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {deletingNoteId ? 'Deleting...' : 'Delete'}
+                {deletingNoteId ? t('notes.deleteDialog.deleting') : t('common.actions.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -322,7 +327,7 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
 
         {isAtLimit && (
           <p className="text-xs text-muted-foreground text-center pt-1">
-            Maximum of {MAX_NOTES} notes reached.
+            {t('notes.widget.limitReached', { count: MAX_NOTES })}
           </p>
         )}
       </CardContent>

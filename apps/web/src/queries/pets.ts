@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { petApi, petErrorHandler } from '@/lib/api/domains/pets'
 import { toastService } from '@/lib/toast'
+import { useTranslation } from 'react-i18next'
 import type { Pet, PetFormData } from '@/types/pet'
 import type { PetImageUploadResponse } from '@/lib/api/domains/pets/types'
 
@@ -44,6 +45,7 @@ export function usePetSignedUrl(petId: string, hasImage: boolean) {
 // CREATE
 export function useCreatePet() {
     const queryClient = useQueryClient()
+    const { t } = useTranslation()
   
     return useMutation({
       mutationFn: (petData: PetFormData) => {
@@ -59,11 +61,11 @@ export function useCreatePet() {
         queryClient.invalidateQueries({ queryKey: petKeys.all })
         
         // Show success toast
-        toastService.success('Pet created', `${newPet.name} has been added to your pets!`)
+        toastService.success(t('toasts.pets.createSuccessTitle'), t('toasts.pets.createSuccessDescription', { name: newPet.name }))
       },
       onError: (error) => {
         const appError = petErrorHandler(error)
-        toastService.error('Failed to create pet', appError.message)
+        toastService.error(t('toasts.pets.createError'), appError.message)
       },
     })
   }
@@ -71,6 +73,7 @@ export function useCreatePet() {
 // UPDATE 
 export function useUpdatePet() {
     const queryClient = useQueryClient()
+    const { t } = useTranslation()
   
     return useMutation({
       mutationFn: ({ petId, petData }: { petId: string; petData: Partial<PetFormData> }) => {
@@ -92,11 +95,11 @@ export function useUpdatePet() {
         // seeded (undoing the optimization) plus signed-url entries.
         queryClient.invalidateQueries({ queryKey: petKeys.all, exact: true })
 
-        toastService.success('Pet updated', `${updatedPet.name}'s information has been updated!`)
+        toastService.success(t('toasts.pets.updateSuccessTitle'), t('toasts.pets.updateSuccessDescription', { name: updatedPet.name }))
       },
       onError: (error) => {
         const appError = petErrorHandler(error)
-        toastService.error('Failed to update pet', appError.message)
+        toastService.error(t('toasts.pets.updateError'), appError.message)
       },
     })
   }
@@ -104,6 +107,7 @@ export function useUpdatePet() {
 // DELETE (soft delete)
 export function useDeletePet() {
     const queryClient = useQueryClient()
+    const { t } = useTranslation()
   
     return useMutation({
       mutationFn: (petId: string) => petApi.deletePet(petId),
@@ -133,14 +137,14 @@ export function useDeletePet() {
         }
         
         const appError = petErrorHandler(error)
-        toastService.error('Failed to delete pet', appError.message)
+        toastService.error(t('toasts.pets.deleteError'), appError.message)
       },
       onSuccess: (_data, petId, context) => {
         // Get pet name from the snapshot for toast
         const deletedPet = context?.previousPets?.find((p) => p.id === petId);
-        const petName = deletedPet?.name || 'Pet';
+        const petName = deletedPet?.name || t('toasts.pets.deleteFallbackName');
         
-        toastService.success('Pet deleted', `${petName} has been removed.`)
+        toastService.success(t('toasts.pets.deleteSuccessTitle'), t('toasts.pets.deleteSuccessDescription', { name: petName }))
       },
       onSettled: () => {
         // Always refetch to sync with server (regardless of success/error)
@@ -152,6 +156,7 @@ export function useDeletePet() {
   // UPLOAD image
   export function useUploadPetImage(petId: string) {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     return useMutation({
       mutationFn: (file: File) => petApi.uploadPetImage(petId, file),
@@ -166,11 +171,11 @@ export function useDeletePet() {
 
       // Update pet detail cache
       queryClient.setQueryData(petKeys.detail(petId), response.pet);
-      toastService.success('Photo updated', `Your pet's photo has been updated!`)
+      toastService.success(t('toasts.pets.uploadPhotoSuccessTitle'), t('toasts.pets.uploadPhotoSuccessDescription'))
       },
       onError: (error) => {
         const appError = petErrorHandler(error);
-        toastService.error('Failed to upload photo', appError.message)
+        toastService.error(t('toasts.pets.uploadPhotoError'), appError.message)
       }
     })
   }
@@ -178,17 +183,18 @@ export function useDeletePet() {
   // DELETE image
   export function useDeletePetImage(petId: string) {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
   
     return useMutation({
       mutationFn: () => petApi.deletePetImage(petId),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: petKeys.all });
         queryClient.invalidateQueries({ queryKey: petKeys.detail(petId) });
-        toastService.success('Photo removed', `Your pet's photo has been removed.`);
+        toastService.success(t('toasts.pets.removePhotoSuccessTitle'), t('toasts.pets.removePhotoSuccessDescription'));
       },
       onError: (error) => {
         const appError = petErrorHandler(error);
-        toastService.error('Failed to remove photo', appError.message);
+        toastService.error(t('toasts.pets.removePhotoError'), appError.message);
       },
     });
   }

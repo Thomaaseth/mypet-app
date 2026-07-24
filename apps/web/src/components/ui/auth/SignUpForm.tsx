@@ -62,7 +62,7 @@ export default function SignUpForm() {
     );
 
     if (result) {
-      toastService.auth.signUpSuccess();
+      toastService.auth.signUpSuccess(t);
       await refreshSession();
       // Use the redirect param from _authenticated, or default to home
       navigate({ to: search.redirect || '/' });

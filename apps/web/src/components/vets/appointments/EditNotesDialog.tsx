@@ -11,6 +11,7 @@ import { HelperText, BodyText } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
+import { useTranslation } from 'react-i18next';
 
 interface EditNotesDialogProps {
   appointment: AppointmentWithRelations | null;
@@ -27,6 +28,7 @@ export default function EditNotesDialog({
   onSubmit,
   onCancel,
 }: EditNotesDialogProps) {
+  const { t } = useTranslation();
   const [visitNotes, setVisitNotes] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export default function EditNotesDialog({
 
     // Client-side validation
     if (visitNotes.length > 200) {
-      setLocalError('Visit notes must be less than 200 characters');
+      setLocalError(t('appointments.editNotesDialog.validationError'));
       return;
     }
 
@@ -66,14 +68,14 @@ export default function EditNotesDialog({
     <ResponsiveDialog
     open={!!appointment}
     onOpenChange={(open) => { if (!open) onCancel(); }}
-    title="Edit Visit Notes"
-    description="Update notes from this vet visit"
+    title={t('appointments.editNotesDialog.title')}
+    description={t('appointments.editNotesDialog.description')}
   >
     {/* Appointment context info */}
     <div className="space-y-1 -mt-2 mb-2">
-      <BodyText><span className="font-bold">Pet:</span> {appointment.pet.name}</BodyText>
-      <BodyText><span className="font-bold">Vet:</span> {appointment.veterinarian.clinicName || appointment.veterinarian.vetName}</BodyText>
-      <BodyText><span className="font-bold">Date:</span> {displayDate} at {displayTime}</BodyText>
+      <BodyText><span className="font-bold">{t('appointments.deleteDialog.petLabel')}</span> {appointment.pet.name}</BodyText>
+      <BodyText><span className="font-bold">{t('appointments.deleteDialog.vetLabel')}</span> {appointment.veterinarian.clinicName || appointment.veterinarian.vetName}</BodyText>
+      <BodyText><span className="font-bold">{t('appointments.deleteDialog.dateLabel')}</span> {t('appointments.editNotesDialog.dateTimeValue', { date: displayDate, time: displayTime })}</BodyText>
     </div>
 
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -86,7 +88,7 @@ export default function EditNotesDialog({
 
       {appointment.reasonForVisit && (
         <div className="space-y-2">
-          <Label className="text-muted-foreground">Discussion Points (read-only)</Label>
+          <Label className="text-muted-foreground">{t('appointments.editNotesDialog.discussionPointsReadOnlyLabel')}</Label>
           <div className="text-sm border rounded-md p-3 bg-muted/50 text-muted-foreground">
             {appointment.reasonForVisit}
           </div>
@@ -94,10 +96,10 @@ export default function EditNotesDialog({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="visitNotes">Visit Summary</Label>
+        <Label htmlFor="visitNotes">{t('appointments.form.visitSummaryLabel')}</Label>
         <Textarea
           id="visitNotes"
-          placeholder="Notes and recommendations from the vet visit..."
+          placeholder={t('appointments.form.visitSummaryPlaceholder')}
           rows={6}
           value={visitNotes}
           onChange={(e) => setVisitNotes(e.target.value)}
@@ -105,16 +107,16 @@ export default function EditNotesDialog({
           className="resize-none [word-break:break-word]"
           maxLength={200}
         />
-        <HelperText>{visitNotes.length}/200 characters</HelperText>
+        <HelperText>{t('appointments.form.visitSummaryCharCount', { count: visitNotes.length })}</HelperText>
       </div>
 
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t('common.actions.cancel')}
         </Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isLoading ? 'Saving...' : 'Save Notes'}
+          {isLoading ? t('appointments.editNotesDialog.submitSaving') : t('appointments.editNotesDialog.submitSave')}
         </Button>
       </div>
     </form>

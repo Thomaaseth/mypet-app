@@ -59,7 +59,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       );
   
       if (result) {
-        toastService.auth.passwordResetSuccess();
+        toastService.auth.passwordResetSuccess(t);
         navigate({ to: '/login' });
       }
     };

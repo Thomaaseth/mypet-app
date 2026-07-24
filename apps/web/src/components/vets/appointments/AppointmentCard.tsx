@@ -33,6 +33,8 @@ import { MutedText, BodyText, SectionTitle } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
 import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
+import { useTranslation } from 'react-i18next';
+import { APPOINTMENT_TYPE_KEYS } from '@/i18n/enum-keys';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
@@ -44,17 +46,14 @@ interface AppointmentCardProps {
 }
 
 // Badge variant based on appointment type
-const getAppointmentTypeBadge = (type: AppointmentType) => {
-  const badges: Record<AppointmentType, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-    checkup: { variant: 'default', label: 'Checkup' },
-    vaccination: { variant: 'secondary', label: 'Vaccination' },
-    surgery: { variant: 'destructive', label: 'Surgery' },
-    dental: { variant: 'default', label: 'Dental' },
-    grooming: { variant: 'secondary', label: 'Grooming' },
-    emergency: { variant: 'destructive', label: 'Emergency' },
-    other: { variant: 'outline', label: 'Other' },
-  };
-  return badges[type];
+const APPOINTMENT_TYPE_BADGE_VARIANT: Record<AppointmentType, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  checkup: 'default',
+  vaccination: 'secondary',
+  surgery: 'destructive',
+  dental: 'default',
+  grooming: 'secondary',
+  emergency: 'destructive',
+  other: 'outline',
 };
 
 export default function AppointmentCard({
@@ -64,13 +63,14 @@ export default function AppointmentCard({
   onEditNotes,
   onDelete,
 }: AppointmentCardProps) {
+  const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { dateTimeLocale } = usePreferencesContext();
   const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
 
-  const typeBadge = getAppointmentTypeBadge(appointment.appointmentType);
+  const badgeVariant = APPOINTMENT_TYPE_BADGE_VARIANT[appointment.appointmentType];
   const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
   const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
   
@@ -101,8 +101,8 @@ export default function AppointmentCard({
                   {appointment.pet.name}
                 </SectionTitle>
               </div>
-              <Badge variant={typeBadge.variant} className="text-xs">
-                {typeBadge.label}
+              <Badge variant={badgeVariant} className="text-xs">
+                {t(APPOINTMENT_TYPE_KEYS[appointment.appointmentType])}
               </Badge>
             </div>
             <CardAction>
@@ -120,7 +120,7 @@ export default function AppointmentCard({
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                     <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">{t('vets.card.openMenu')}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -134,7 +134,7 @@ export default function AppointmentCard({
                         }}
                       >
                         <Edit2 className="mr-2 h-4 w-4" />
-                        Edit
+                        {t('common.actions.edit')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -146,7 +146,7 @@ export default function AppointmentCard({
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Cancel
+                        {t('common.actions.cancel')}
                       </DropdownMenuItem>
                     </>
                   ) : (
@@ -159,7 +159,7 @@ export default function AppointmentCard({
                         }}
                       >
                         <FileText className="mr-2 h-4 w-4" />
-                        Edit Visit Summary
+                        {t('appointments.card.editVisitSummary')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -171,7 +171,7 @@ export default function AppointmentCard({
                         className="text-destructive focus:text-destructive"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
+                        {t('common.actions.delete')}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -221,7 +221,7 @@ export default function AppointmentCard({
               {/* Discussion points */}
               {appointment.reasonForVisit && (
                 <div className="pt-2 border-t space-y-1">
-                  <BodyText className="font-medium text-sm">Discussion points:</BodyText>
+                  <BodyText className="font-medium text-sm">{t('appointments.card.discussionPointsLabel')}</BodyText>
                   <MutedText className="text-xs whitespace-pre-wrap break-words">
                     {appointment.reasonForVisit}
                   </MutedText>
@@ -231,7 +231,7 @@ export default function AppointmentCard({
               {/* Visit summary — past only */}
               {(!isUpcoming || hasAppointmentTimePassed) && (
                 <div className="pt-2 border-t space-y-1">
-                  <BodyText className="font-medium text-sm">Visit summary:</BodyText>
+                  <BodyText className="font-medium text-sm">{t('appointments.card.visitSummaryLabel')}</BodyText>
                   <MutedText className="text-xs whitespace-pre-wrap break-words">
                     {appointment.visitNotes}
                   </MutedText>

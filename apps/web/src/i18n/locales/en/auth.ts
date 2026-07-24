@@ -36,6 +36,7 @@ const auth = {
         passwordsDoNotMatch: 'Passwords do not match',
         invalidEmail: 'Please enter a valid email address',
         passwordRequired: 'Password is required',
+        currentPasswordRequired: 'Current password is required',
         firstNameRequired: 'First name is required',
         lastNameRequired: 'Last name is required',
         passwordMinLength: 'Password must be at least 8 characters',

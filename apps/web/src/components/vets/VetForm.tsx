@@ -13,6 +13,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
 import { SectionTitle, MutedText, ErrorText, HelperText } from '../ui/typography';
+import { useTranslation } from 'react-i18next';
 
 interface VetFormProps {
   vet?: Veterinarian;
@@ -32,6 +33,7 @@ export default function VetForm({
   isLoading = false,
   error,
 }: VetFormProps) {
+  const { t } = useTranslation();
   const isEditing = !!vet;
 
   const [selectedPetIds, setSelectedPetIds] = useState<string[]>([]);
@@ -96,10 +98,10 @@ export default function VetForm({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="vetName">Veterinarian Name*</Label>
+        <Label htmlFor="vetName">{t('vets.form.vetNameLabel')}</Label>
         <Input
           id="vetName"
-          placeholder="Enter your vet's name"
+          placeholder={t('vets.form.vetNamePlaceholder')}
           {...register('vetName')}
           aria-invalid={!!errors.vetName}
         />
@@ -107,25 +109,25 @@ export default function VetForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="clinicName">Clinic Name</Label>
+        <Label htmlFor="clinicName">{t('vets.form.clinicNameLabel')}</Label>
         <Input
           id="clinicName"
-          placeholder="Enter the clinic's name (optional)"
+          placeholder={t('vets.form.clinicNamePlaceholder')}
           {...register('clinicName')}
           aria-invalid={!!errors.clinicName}
         />
           {errors.clinicName && <ErrorText>{errors.clinicName.message}</ErrorText>} 
         <HelperText className="text-xs">
-          Optional: Leave blank if the vet doesn&apos;t work at a clinic
+          {t('vets.form.clinicNameHelper')}
         </HelperText>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number*</Label>
+        <Label htmlFor="phone">{t('vets.form.phoneLabel')}</Label>
         <Input
           id="phone"
           type="tel"
-          placeholder="Enter contact number"
+          placeholder={t('vets.form.phonePlaceholder')}
           {...register('phone')}
           aria-invalid={!!errors.phone}
         />
@@ -133,7 +135,7 @@ export default function VetForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t('vets.form.emailLabel')}</Label>
         <Input
           id="email"
           type="email"
@@ -143,12 +145,12 @@ export default function VetForm({
         />
         {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
         <HelperText className="text-xs">
-          Optional
+          {t('vets.form.optionalHelper')}
         </HelperText>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="website">Website</Label>
+        <Label htmlFor="website">{t('vets.form.websiteLabel')}</Label>
         <Input
           id="website"
           type="text"
@@ -158,15 +160,15 @@ export default function VetForm({
         />
         {errors.website && <ErrorText>{errors.website.message}</ErrorText>}
         <HelperText className="text-xs">
-          Optional
+          {t('vets.form.optionalHelper')}
         </HelperText>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="addressLine1">Address*</Label>
+        <Label htmlFor="addressLine1">{t('vets.form.addressLabel')}</Label>
         <Input
           id="addressLine1"
-          placeholder="Enter address"
+          placeholder={t('vets.form.addressPlaceholder')}
           {...register('addressLine1')}
           aria-invalid={!!errors.addressLine1}
         />
@@ -174,10 +176,10 @@ export default function VetForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="addressLine2">Address Line 2</Label>
+        <Label htmlFor="addressLine2">{t('vets.form.addressLine2Label')}</Label>
         <Input
           id="addressLine2"
-          placeholder="(Optional)"
+          placeholder={t('vets.form.addressLine2Placeholder')}
           {...register('addressLine2')}
           aria-invalid={!!errors.addressLine2}
         />
@@ -186,10 +188,10 @@ export default function VetForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="city">City*</Label>
+          <Label htmlFor="city">{t('vets.form.cityLabel')}</Label>
           <Input
             id="city"
-            placeholder="Enter the city"
+            placeholder={t('vets.form.cityPlaceholder')}
             {...register('city')}
             aria-invalid={!!errors.city}
           />
@@ -197,10 +199,10 @@ export default function VetForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="zipCode">ZIP Code*</Label>
+          <Label htmlFor="zipCode">{t('vets.form.zipCodeLabel')}</Label>
           <Input
             id="zipCode"
-            placeholder="Enter the zip code"
+            placeholder={t('vets.form.zipCodePlaceholder')}
             {...register('zipCode')}
             aria-invalid={!!errors.zipCode}
           />
@@ -209,10 +211,10 @@ export default function VetForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t('vets.form.notesLabel')}</Label>
         <Textarea
           id="notes"
-          placeholder="Additional information about this veterinarian..."
+          placeholder={t('vets.form.notesPlaceholder')}
           rows={3}
           {...register('notes')}
           aria-invalid={!!errors.notes}
@@ -221,7 +223,7 @@ export default function VetForm({
         />
         {errors.notes && <ErrorText>{errors.notes.message}</ErrorText>}
         <HelperText className="text-xs">
-          {(watch('notes')?.length || 0)}/100 characters
+          {t('vets.form.notesCharCount', { count: watch('notes')?.length || 0 })}
         </HelperText>
       </div>
 
@@ -229,8 +231,8 @@ export default function VetForm({
       {pets && pets.length > 0 && (
         <div className="space-y-4 p-4 border rounded-md bg-muted/50">
           <div className="space-y-2">
-          <SectionTitle>Assign to Pets</SectionTitle>
-          <MutedText>Select which pets use this veterinarian.</MutedText>
+          <SectionTitle>{t('vets.form.assignToPetsTitle')}</SectionTitle>
+          <MutedText>{t('vets.form.assignToPetsDescription')}</MutedText>
           </div>
 
           <div className="space-y-2">
@@ -260,7 +262,7 @@ export default function VetForm({
                   
         {selectedPetIds.length === 0 && (
             <HelperText className="text-xs">
-              You can assign this veterinarian to pets later.
+              {t('vets.form.assignLaterHelper')}
             </HelperText>
           )}
         </div>
@@ -270,18 +272,18 @@ export default function VetForm({
       <div className="flex justify-end gap-3 pt-4">
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading
             ? isEditing
-              ? 'Updating...'
-              : 'Creating...'
+              ? t('vets.form.submitUpdating')
+              : t('vets.form.submitCreating')
             : isEditing
-            ? 'Update Veterinarian'
-            : 'Add Veterinarian'}
+            ? t('vets.form.submitUpdate')
+            : t('vets.form.submitCreate')}
         </Button>
       </div>
     </form>

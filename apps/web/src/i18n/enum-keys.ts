@@ -1,4 +1,7 @@
 import type { PetGender } from '@/types/pet';
+import type { AppointmentType } from '@/types/appointments';
+import type { DateTimeLocale } from '@/shared/validations/locale';
+import type { UnitSystem } from '@/shared/validations/units';
 
 /**
  * Maps runtime enum values to their translation keys.
@@ -53,3 +56,33 @@ export const FOOD_HISTORY_TITLE_KEYS = {
   dry: 'food.dry.historyTitle',
   wet: 'food.wet.historyTitle',
 } as const satisfies Record<'dry' | 'wet', string>;
+
+export const APPOINTMENT_TYPE_KEYS = {
+  checkup: 'appointments.type.checkup',
+  vaccination: 'appointments.type.vaccination',
+  surgery: 'appointments.type.surgery',
+  dental: 'appointments.type.dental',
+  grooming: 'appointments.type.grooming',
+  emergency: 'appointments.type.emergency',
+  other: 'appointments.type.other',
+} as const satisfies Record<AppointmentType, string>;
+
+export const DATE_TIME_LOCALE_LABEL_KEYS = {
+  'fr-FR': 'preferences.dateTimeLocale.frFR.label',
+  'en-US': 'preferences.dateTimeLocale.enUS.label',
+} as const satisfies Record<DateTimeLocale, string>;
+ 
+export const DATE_TIME_LOCALE_DESCRIPTION_KEYS = {
+  'fr-FR': 'preferences.dateTimeLocale.frFR.description',
+  'en-US': 'preferences.dateTimeLocale.enUS.description',
+} as const satisfies Record<DateTimeLocale, string>;
+ 
+export const UNIT_SYSTEM_LABEL_KEYS = {
+  metric: 'preferences.unitSystem.metric.label',
+  imperial: 'preferences.unitSystem.imperial.label',
+} as const satisfies Record<UnitSystem, string>;
+ 
+export const UNIT_SYSTEM_DESCRIPTION_KEYS = {
+  metric: 'preferences.unitSystem.metric.description',
+  imperial: 'preferences.unitSystem.imperial.description',
+} as const satisfies Record<UnitSystem, string>;

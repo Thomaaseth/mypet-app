@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { petNoteApi, petNoteErrorHandler } from "@/lib/api/domains/pet-notes";
 import { toast, toastService } from "@/lib/toast";
 import type { PetNote, PetNoteFormData } from '@/types/pet-notes';
+import { useTranslation } from 'react-i18next';
 
 // QUERY KEYS
 export const petNoteKeys = {
@@ -21,16 +22,17 @@ export function usePetNotes(petId: string) {
 // CREATE
 export function useCreatePetNote(petId: string) {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
   
     return useMutation({
       mutationFn: (data: PetNoteFormData) => petNoteApi.createNote(petId, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: petNoteKeys.byPet(petId) });
-        toastService.success('Note added');
+        toastService.success(t('toasts.notes.addSuccess'));
       },
       onError: (error) => {
         const appError = petNoteErrorHandler(error);
-        toastService.error('Failed to add note', appError.message);
+        toastService.error(t('toasts.notes.addError'), appError.message);
       },
     });
 }
@@ -38,17 +40,18 @@ export function useCreatePetNote(petId: string) {
 // UPDATE
 export function useUpdatePetNote(petId: string) {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     return useMutation({
         mutationFn: ({ noteId, data }: { noteId: string, data: PetNoteFormData }) =>
             petNoteApi.updateNote(petId, noteId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: petNoteKeys.byPet(petId) });
-            toastService.success('Note updated');
+            toastService.success(t('toasts.notes.updateSuccess'));
         },
         onError: (error) => {
             const appError = petNoteErrorHandler(error);
-            toastService.error('Failed to updated note', appError.message)
+            toastService.error(t('toasts.notes.updateError'), appError.message)
         }
     })
 }
@@ -56,6 +59,7 @@ export function useUpdatePetNote(petId: string) {
 // DELETE
 export function useDeletePetNote(petId: string) {
     const queryClient = useQueryClient();
+    const { t } = useTranslation();
 
     return useMutation({
         mutationFn: (noteId: string) => petNoteApi.deleteNote(petId, noteId),
@@ -78,7 +82,7 @@ export function useDeletePetNote(petId: string) {
             return { previousNotes };
         },
         onSuccess: () => {
-            toastService.success('Note deleted');
+            toastService.success(t('toasts.notes.deleteSuccess'));
         },
         onError: (error, _noteId, context) => {
             // rollback on error
@@ -86,7 +90,7 @@ export function useDeletePetNote(petId: string) {
                 queryClient.setQueryData(petNoteKeys.byPet(petId), context.previousNotes);
             }
             const appError = petNoteErrorHandler(error);
-            toastService.error('Failed to delete note', appError.message)
+            toastService.error(t('toasts.notes.deleteError'), appError.message)
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: petNoteKeys.byPet(petId) })

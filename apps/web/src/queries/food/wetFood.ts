@@ -54,11 +54,11 @@ export function useCreateWetFood(petId: string) {
       wetFoodApi.createWetFoodEntry(petId, foodData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
-      toastService.success(t('food.wet.toastAddSuccess'))
+      toastService.success(t('toasts.food.wet.addSuccess'))
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error(t('food.wet.toastAddError'), appError.message)
+      toastService.error(t('toasts.food.wet.addError'), appError.message)
     },
   })
 }
@@ -74,11 +74,11 @@ export function useUpdateWetFood(petId: string) {
     }) => wetFoodApi.updateWetFoodEntry(petId, foodId, foodData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
-      toastService.success(t('food.wet.toastUpdateSuccess'))
+      toastService.success(t('toasts.food.wet.updateSuccess'))
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error(t('food.wet.toastUpdateError'), appError.message)
+      toastService.error(t('toasts.food.wet.updateError'), appError.message)
     },
   })
 }
@@ -93,11 +93,11 @@ export function useDeleteWetFood(petId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: foodKeys.wetActive(petId) })
       queryClient.invalidateQueries({ queryKey: foodKeys.wetFinished(petId) })
-      toastService.success(t('food.wet.toastDeleteSuccess'))
+      toastService.success(t('toasts.food.wet.deleteSuccess'))
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error(t('food.wet.toastDeleteError'), appError.message)
+      toastService.error(t('toasts.food.wet.deleteError'), appError.message)
     },
   })
 }
@@ -115,12 +115,12 @@ export function useMarkWetFoodFinished(petId: string) {
       toastService.success(
         updatedEntry.feedingStatus
           ? buildFinishDateToastMessage(updatedEntry, t)
-          : t('food.wet.toastMarkFinishedFallback')
+          : t('toasts.food.wet.markFinishedFallback')
       )    
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error(t('food.shared.toastMarkFinishedError'), appError.message)
+      toastService.error(t('toasts.food.shared.markFinishedError'), appError.message)
     },
   })
 }
@@ -140,12 +140,12 @@ export function useUpdateWetFoodFinishDate(petId: string) {
       toastService.success(
         updatedEntry.feedingStatus
           ? buildFinishDateToastMessage(updatedEntry, t)
-          : t('food.shared.toastFinishDateUpdatedFallback')
+          : t('toasts.food.shared.finishDateUpdatedFallback')
       )
     },
     onError: (error) => {
       const appError = foodErrorHandler(error)
-      toastService.error(t('food.shared.toastUpdateFinishDateError'), appError.message)
+      toastService.error(t('toasts.food.shared.updateFinishDateError'), appError.message)
     },
   })
 }

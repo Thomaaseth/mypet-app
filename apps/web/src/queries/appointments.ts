@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appointmentApi, appointmentErrorHandler } from '@/lib/api';
 import { toastService } from '@/lib/toast';
+import { useTranslation } from 'react-i18next';
 import type { 
   AppointmentWithRelations, 
   AppointmentFormData,
@@ -50,6 +51,7 @@ export function useLastVetForPet(petId: string, options?: { enabled?: boolean })
 // CREATE
 export function useCreateAppointment() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (appointmentData: AppointmentFormData) => {
@@ -67,13 +69,13 @@ export function useCreateAppointment() {
 
       // Show success toast
       toastService.success(
-        'Appointment created',
-        `Appointment scheduled for ${newAppointment.pet.name}`
+        t('toasts.appointments.createSuccessTitle'),
+        t('toasts.appointments.createSuccessDescription', { name: newAppointment.pet.name })
       );
     },
     onError: (error) => {
       const appError = appointmentErrorHandler(error);
-      toastService.error('Failed to create appointment', appError.message);
+      toastService.error(t('toasts.appointments.createError'), appError.message);
     },
   });
 }
@@ -81,6 +83,7 @@ export function useCreateAppointment() {
 // UPDATE
 export function useUpdateAppointment() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({
@@ -104,13 +107,13 @@ export function useUpdateAppointment() {
 
       // Show success toast
       toastService.success(
-        'Appointment updated',
-        `Updated appointment for ${updatedAppointment.pet.name}`
+        t('toasts.appointments.updateSuccessTitle'),
+        t('toasts.appointments.updateSuccessDescription', { name: updatedAppointment.pet.name })
       );
     },
     onError: (error) => {
       const appError = appointmentErrorHandler(error);
-      toastService.error('Failed to update appointment', appError.message);
+      toastService.error(t('toasts.appointments.updateError'), appError.message);
     },
   });
 }
@@ -118,6 +121,7 @@ export function useUpdateAppointment() {
 // UPDATE VISIT NOTES ONLY (for past appointments)
 export function useUpdateVisitNotes() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: ({
@@ -139,11 +143,11 @@ export function useUpdateVisitNotes() {
       });
 
       // Show success toast
-      toastService.success('Visit notes updated', 'Notes saved successfully');
+      toastService.success(t('toasts.appointments.updateNotesSuccessTitle'), t('toasts.appointments.updateNotesSuccessDescription'));
     },
     onError: (error) => {
       const appError = appointmentErrorHandler(error);
-      toastService.error('Failed to update notes', appError.message);
+      toastService.error(t('toasts.appointments.updateNotesError'), appError.message);
     },
   });
 }
@@ -151,6 +155,7 @@ export function useUpdateVisitNotes() {
 // DELETE
 export function useDeleteAppointment() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (appointmentId: string) => appointmentApi.deleteAppointment(appointmentId),
@@ -185,7 +190,7 @@ export function useDeleteAppointment() {
     },
     onSuccess: () => {
       // Show success toast
-      toastService.success('Appointment deleted', 'The appointment has been removed.');
+      toastService.success(t('toasts.appointments.deleteSuccessTitle'), t('toasts.appointments.deleteSuccessDescription'));
     },
     onError: (error, _appointmentId, context) => {
       // Rollback on error
@@ -197,7 +202,7 @@ export function useDeleteAppointment() {
       }
 
       const appError = appointmentErrorHandler(error);
-      toastService.error('Failed to delete appointment', appError.message);
+      toastService.error(t('toasts.appointments.deleteError'), appError.message);
     },
     onSettled: () => {
       // Always refetch after error or success

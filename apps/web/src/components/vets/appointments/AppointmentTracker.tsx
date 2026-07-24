@@ -19,8 +19,10 @@ import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appo
 import { EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 import { AppointmentTrackerSkeleton } from '@/components/ui/skeletons/AppointmentSkeleton';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
+import { useTranslation } from 'react-i18next';
 
 export default function AppointmentTracker() {
+  const { t } = useTranslation();
   const { data: upcomingAppointments } = useAppointments('upcoming');
   const { data: pastAppointments } = useAppointments('past');
   const createMutation = useCreateAppointment();
@@ -96,7 +98,7 @@ export default function AppointmentTracker() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Appointments
+            {t('appointments.tracker.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -113,8 +115,8 @@ export default function AppointmentTracker() {
         <ResponsiveDialog
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
-          title="Book New Appointment"
-          description="Schedule a vet appointment for your pet"
+          title={t('appointments.tracker.bookDialogTitle')}
+          description={t('appointments.tracker.bookDialogDescription')}
         >
           <AppointmentForm
             onSubmit={handleCreateAppointment}
@@ -127,15 +129,15 @@ export default function AppointmentTracker() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Appointments
+              {t('appointments.tracker.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <EmptyStateCta
               icon={Calendar}
-              title="No appointments yet"
-              description="Schedule your first vet appointment"
-              buttonLabel="Book Appointment"
+              title={t('appointments.tracker.emptyTitle')}
+              description={t('appointments.tracker.emptyDescription')}
+              buttonLabel={t('appointments.tracker.bookAppointment')}
               onAction={() => setIsCreateDialogOpen(true)}
             />
           </CardContent>
@@ -149,8 +151,8 @@ export default function AppointmentTracker() {
         <ResponsiveDialog
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
-          title="Book New Appointment"
-          description="Schedule a vet appointment for your pet"
+          title={t('appointments.tracker.bookDialogTitle')}
+          description={t('appointments.tracker.bookDialogDescription')}
         >
           <AppointmentForm
             onSubmit={handleCreateAppointment}
@@ -164,7 +166,7 @@ export default function AppointmentTracker() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Appointments
+                {t('appointments.tracker.title')}
               </CardTitle>
               {upcomingAppointments && upcomingAppointments.length > 0 && (
                 <Button
@@ -173,7 +175,7 @@ export default function AppointmentTracker() {
                   className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-3 sm:py-2"
                 >
                   <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Book Appointment</span>
+                  <span className="hidden sm:inline">{t('appointments.tracker.bookAppointment')}</span>
                 </Button>
               )}
             </div>
@@ -185,10 +187,10 @@ export default function AppointmentTracker() {
             }}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="upcoming">
-                  Upcoming ({upcomingAppointments?.length || 0})
+                  {t('appointments.tracker.upcomingTab', { count: upcomingAppointments?.length || 0 })}
                 </TabsTrigger>
                 <TabsTrigger value="past">
-                  Past ({pastAppointments?.length || 0})
+                  {t('appointments.tracker.pastTab', { count: pastAppointments?.length || 0 })}
                 </TabsTrigger>
               </TabsList>
     
@@ -200,13 +202,13 @@ export default function AppointmentTracker() {
                     <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
                       <Calendar className="h-6 w-6 text-muted-foreground" />
                     </div>
-                    <EmptyStateTitle className="mb-2">No upcoming appointments</EmptyStateTitle>
+                    <EmptyStateTitle className="mb-2">{t('appointments.tracker.noUpcomingTitle')}</EmptyStateTitle>
                     <EmptyStateDescription className="mb-4">
-                      Book a vet appointment to keep track of your pet's health.
+                      {t('appointments.tracker.noUpcomingDescription')}
                     </EmptyStateDescription>
                     <Button size= "sm" onClick={() => setIsCreateDialogOpen(true)}>
                       <Plus className="h-4 w-4" />
-                      Book Appointment
+                      {t('appointments.tracker.bookAppointment')}
                     </Button>
                   </div>
                 ) : (
@@ -231,7 +233,7 @@ export default function AppointmentTracker() {
                             size="sm"
                             onClick={() => setVisibleUpcomingCount(prev => Math.min(prev + 3, upcomingAppointments.length))}
                           >
-                            Show More
+                            {t('appointments.tracker.showMore')}
                           </Button>
                         )}
                         {visibleUpcomingCount > 3 && (
@@ -244,14 +246,14 @@ export default function AppointmentTracker() {
                                 return Math.max(3, prev - (remainder === 0 ? 3 : remainder));
                               })}
                             >
-                              Show Less
+                              {t('appointments.tracker.showLess')}
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setVisibleUpcomingCount(3)}
                             >
-                              Collapse All
+                              {t('appointments.tracker.collapseAll')}
                             </Button>
                           </>
                         )}
@@ -266,7 +268,7 @@ export default function AppointmentTracker() {
                   <AppointmentTrackerSkeleton />
                 ) : pastAppointments?.length === 0 ? (
                   <div className="text-center py-8">
-                    <MutedText>No past appointments</MutedText>
+                    <MutedText>{t('appointments.tracker.noPastAppointments')}</MutedText>
                   </div>
                 ) : (
                   <>
@@ -290,7 +292,7 @@ export default function AppointmentTracker() {
                             size="sm"
                             onClick={() => setVisiblePastCount(prev => Math.min(prev + 3, pastAppointments.length))}
                           >
-                            Show More
+                            {t('appointments.tracker.showMore')}
                           </Button>
                         )}
                         {visiblePastCount > 3 && (
@@ -303,14 +305,14 @@ export default function AppointmentTracker() {
                                 return Math.max(3, prev - (remainder === 0 ? 3 : remainder));
                               })}
                             >
-                              Show Less
+                              {t('appointments.tracker.showLess')}
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setVisiblePastCount(3)}
                             >
-                              Collapse All
+                              {t('appointments.tracker.collapseAll')}
                             </Button>
                           </>
                         )}
@@ -325,8 +327,8 @@ export default function AppointmentTracker() {
             <ResponsiveDialog
               open={!!editingAppointment}
               onOpenChange={(open) => { if (!open) setEditingAppointment(null); }}
-              title="Edit Appointment"
-              description="Update appointment details"
+              title={t('appointments.tracker.editDialogTitle')}
+              description={t('appointments.tracker.editDialogDescription')}
             >
               {editingAppointment && (
                 <AppointmentForm

@@ -16,6 +16,11 @@ const common = {
     errors: {
       generic: 'Something went wrong. Please try again.',
       network: 'Network error. Please check your connection and try again.',
+      genericTitle: 'Something went wrong',
+      emailAlreadyInUseTitle: 'Email already in use',
+      emailAlreadyInUseDescription: 'Try signing in instead or use a different email',
+      invalidCredentialsTitle: 'Invalid credentials',
+      invalidCredentialsDescription: 'Please check your email and password',
     },
   } as const;
   

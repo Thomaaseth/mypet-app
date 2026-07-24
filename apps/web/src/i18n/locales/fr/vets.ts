@@ -1,0 +1,56 @@
+import type vets from '../en/vets';
+import type { TranslationShape } from '../../translation-shape';
+
+const fr: TranslationShape<typeof vets> = {
+  card: {
+    openMenu: 'Ouvrir le menu',
+  },
+  form: {
+    vetNameLabel: 'Nom du vétérinaire*',
+    vetNamePlaceholder: 'Entrez le nom de votre vétérinaire',
+    clinicNameLabel: 'Nom de la clinique',
+    clinicNamePlaceholder: 'Entrez le nom de la clinique (facultatif)',
+    clinicNameHelper: "Facultatif : laissez vide si le vétérinaire ne travaille pas dans une clinique",
+    phoneLabel: 'Numéro de téléphone*',
+    phonePlaceholder: 'Entrez le numéro de contact',
+    emailLabel: 'E-mail',
+    optionalHelper: 'Facultatif',
+    websiteLabel: 'Site web',
+    addressLabel: 'Adresse*',
+    addressPlaceholder: "Entrez l'adresse",
+    addressLine2Label: "Complément d'adresse",
+    addressLine2Placeholder: '(Facultatif)',
+    cityLabel: 'Ville*',
+    cityPlaceholder: 'Entrez la ville',
+    zipCodeLabel: 'Code postal*',
+    zipCodePlaceholder: 'Entrez le code postal',
+    notesLabel: 'Notes',
+    notesPlaceholder: 'Informations complémentaires sur ce vétérinaire...',
+    notesCharCount: '{{count}}/100 caractères',
+    assignToPetsTitle: 'Assigner à des animaux',
+    assignToPetsDescription: 'Sélectionnez les animaux qui consultent ce vétérinaire.',
+    assignLaterHelper: 'Vous pourrez assigner ce vétérinaire à des animaux plus tard.',
+    submitCreate: 'Ajouter le vétérinaire',
+    submitUpdate: 'Mettre à jour le vétérinaire',
+    submitCreating: 'Création en cours...',
+    submitUpdating: 'Mise à jour en cours...',
+  },
+  list: {
+    unableToLoad: 'Impossible de charger les vétérinaires',
+    emptyTitle: 'Aucun vétérinaire pour le moment',
+    emptyDescription: 'Ajoutez votre premier vétérinaire pour garder une trace...',
+    addFirstVet: 'Ajouter votre premier vétérinaire',
+    addVetDialogTitle: 'Ajouter un nouveau vétérinaire',
+    addVetDialogDescription: 'Les champs marqués d\'un * sont obligatoires.',
+    pageTitle: 'My vets',
+    manageVets: 'Gérez les vétérinaires de vos animaux',
+    addVet: 'Ajouter un vétérinaire',
+    vetsCardTitle: 'Mes vétérinaires ({{count}})',
+    editVetDialogTitle: 'Modifier le vétérinaire',
+    editVetDialogDescription: 'Mettez à jour les informations du vétérinaire ci-dessous.',
+    deleteConfirmTitle: 'Êtes-vous sûr ?',
+    deleteConfirmation: 'Cela supprimera {{name}} de votre liste de vétérinaires. Cette action est irréversible.',
+  },
+};
+
+export default fr;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AppError } from '@/lib/errors';
 import { toastService } from '@/lib/toast';
+import { useTranslation } from 'react-i18next';
 
 interface UseErrorStateOptions {
   showErrorToast?: boolean;
@@ -20,6 +21,8 @@ interface UseErrorStateReturn {
 }
 
 export function useErrorState(options: UseErrorStateOptions = {}): UseErrorStateReturn {
+  const { t } = useTranslation();
+
   const { showErrorToast = false, toastCriticalOnly = false } = options;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
@@ -49,20 +52,20 @@ export function useErrorState(options: UseErrorStateOptions = {}): UseErrorState
       // Field-specific error messages for toasts
       if (appError.field === 'email' && appError.code === 'EMAIL_EXISTS') {
         toastService.error(
-          "Email already in use", 
-          "Try signing in instead or use a different email"
+          t('common.errors.emailAlreadyInUseTitle'), 
+          t('common.errors.emailAlreadyInUseDescription')
         );
       } else if (appError.code === 'INVALID_CREDENTIALS') {
         toastService.error(
-          "Invalid credentials", 
-          "Please check your email and password"
+          t('common.errors.invalidCredentialsTitle'), 
+          t('common.errors.invalidCredentialsDescription')
         );
       } else if (appError.code === 'WEAK_PASSWORD') {
         // Don't show toast for weak password - better handled inline
         return;
       } else {
         // Generic error toast
-        toastService.error("Something went wrong", appError.message);
+        toastService.error(t('common.errors.genericTitle'), appError.message);
       }
     }
   };

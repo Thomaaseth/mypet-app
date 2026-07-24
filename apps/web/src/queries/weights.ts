@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { weightApi, weightErrorHandler } from '@/lib/api/domains/weights'
 import { toastService } from '@/lib/toast'
+import { useTranslation } from 'react-i18next'
 import type { 
   WeightEntry, 
   WeightFormData, 
@@ -68,6 +69,7 @@ export function useWeightEntries({ petId }: UseWeightEntriesOptions) {
 // CREATE
 export function useCreateWeightEntry(petId: string, animalType: 'cat' | 'dog') {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: (weightData: WeightFormData) => 
@@ -76,11 +78,11 @@ export function useCreateWeightEntry(petId: string, animalType: 'cat' | 'dog') {
       // Invalidate weight entries for this pet
       queryClient.invalidateQueries({ queryKey: weightKeys.byPet(petId) })
       
-      toastService.success('Weight entry added successfully')
+      toastService.success(t('toasts.weights.addSuccess'))
     },
     onError: (error) => {
       const appError = weightErrorHandler(error)
-      toastService.error('Failed to add weight entry', appError.message)
+      toastService.error(t('toasts.weights.addError'), appError.message)
     },
   })
 }
@@ -88,6 +90,7 @@ export function useCreateWeightEntry(petId: string, animalType: 'cat' | 'dog') {
 // UPDATE
 export function useUpdateWeightEntry(petId: string, animalType: 'cat' | 'dog') {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: ({ weightId, weightData }: { 
@@ -97,11 +100,11 @@ export function useUpdateWeightEntry(petId: string, animalType: 'cat' | 'dog') {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: weightKeys.byPet(petId) })
       
-      toastService.success('Weight entry updated successfully')
+      toastService.success(t('toasts.weights.updateSuccess'))
     },
     onError: (error) => {
       const appError = weightErrorHandler(error)
-      toastService.error('Failed to update weight entry', appError.message)
+      toastService.error(t('toasts.weights.updateError'), appError.message)
     },
   })
 }
@@ -109,6 +112,7 @@ export function useUpdateWeightEntry(petId: string, animalType: 'cat' | 'dog') {
 // DELETE
 export function useDeleteWeightEntry(petId: string) {
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: (weightId: string) => 
@@ -131,7 +135,7 @@ export function useDeleteWeightEntry(petId: string) {
       return { previousData }
     },
     onSuccess: () => {
-      toastService.success('Weight entry deleted successfully')
+      toastService.success(t('toasts.weights.deleteSuccess'))
     },
     onError: (error, _weightId, context) => {
       // Rollback on error
@@ -140,7 +144,7 @@ export function useDeleteWeightEntry(petId: string) {
       }
       
       const appError = weightErrorHandler(error)
-      toastService.error('Failed to delete weight entry', appError.message)
+      toastService.error(t('toasts.weights.deleteError'), appError.message)
     },
     onSettled: () => {
       // Always refetch after error or success

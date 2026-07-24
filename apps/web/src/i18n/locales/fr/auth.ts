@@ -39,6 +39,7 @@ const fr: TranslationShape<typeof auth> = {
     passwordsDoNotMatch: 'Les mots de passe ne correspondent pas',
     invalidEmail: 'Veuillez entrer une adresse e-mail valide',
     passwordRequired: 'Le mot de passe est requis',
+    currentPasswordRequired: 'Le mot de passe actuel est requis',
     firstNameRequired: 'Le prénom est requis',
     lastNameRequired: 'Le nom est requis',
     passwordMinLength: 'Le mot de passe doit contenir au moins 8 caractères',

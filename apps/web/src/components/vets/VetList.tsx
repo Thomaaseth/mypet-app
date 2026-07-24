@@ -28,8 +28,10 @@ import { AppointmentTracker } from './appointments';
 import { vetErrorHandler, vetApi } from '@/lib/api';
 import { PageTitle, EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 import { VetListSkeleton } from '@/components/ui/skeletons/VetSkeleton';
+import { useTranslation } from 'react-i18next';
 
 export default function VetList() {
+  const { t } = useTranslation();
   const { data: vets, error } = useVeterinarians();
   const createVetMutation = useCreateVeterinarian();
   const updateVetMutation = useUpdateVeterinarian();
@@ -139,9 +141,9 @@ export default function VetList() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
             <div className="text-center space-y-2">
-              <EmptyStateTitle>Unable to load veterinarians</EmptyStateTitle>
+              <EmptyStateTitle>{t('vets.list.unableToLoad')}</EmptyStateTitle>
               <MutedText>{appError.message}</MutedText>
-              <Button onClick={() => window.location.reload()}>Try Again</Button>
+              <Button onClick={() => window.location.reload()}>{t('common.actions.tryAgain')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -160,20 +162,20 @@ export default function VetList() {
                 <Stethoscope className="h-8 w-8 text-muted-foreground" />
               </div>
               <div className="space-y-2">
-              <EmptyStateTitle>No veterinarians yet</EmptyStateTitle>
+              <EmptyStateTitle>{t('vets.list.emptyTitle')}</EmptyStateTitle>
                 <EmptyStateDescription className="max-w-md">
-                  Add your first veterinarian to keep track...
+                  {t('vets.list.emptyDescription')}
                 </EmptyStateDescription>
               </div>
                 <Button className="mt-4" size="sm" onClick={() => setIsCreateDialogOpen(true)}>
                   <Plus className="h-4 w-4" />
-                  Add Your First Veterinarian
+                  {t('vets.list.addFirstVet')}
                 </Button>
                 <ResponsiveDialog
                   open={isCreateDialogOpen}
                   onOpenChange={setIsCreateDialogOpen}
-                  title="Add New Veterinarian"
-                  description="Fields marked with * are required."
+                  title={t('vets.list.addVetDialogTitle')}
+                  description={t('vets.list.addVetDialogDescription')}
                 >
                   <VetForm
                     onSubmit={handleCreateVet}
@@ -195,14 +197,14 @@ export default function VetList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <PageTitle>My Veterinarians</PageTitle>
-            <MutedText>Manage your pets&apos; vets</MutedText>
+            <PageTitle>{t('vets.list.pageTitle')}</PageTitle>
+            <MutedText>{t('vets.list.manageVets')}</MutedText>
           </div>
           <ResponsiveDialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
-            title="Add New Veterinarian"
-            description="Fields marked with * are required."
+            title={t('vets.list.addVetDialogTitle')}
+            description={t('vets.list.addVetDialogDescription')}
           >
             <VetForm
               onSubmit={handleCreateVet}
@@ -218,7 +220,7 @@ export default function VetList() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Stethoscope className="h-4 w-4" />
-                My Vets ({vets.length})
+                {t('vets.list.vetsCardTitle', { count: vets.length })}
               </CardTitle>
               <Button 
                 size="sm"
@@ -226,7 +228,7 @@ export default function VetList() {
                 className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
               >
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Vet</span>
+                <span className="hidden sm:inline">{t('vets.list.addVet')}</span>
               </Button>
             </div>
           </CardHeader>
@@ -252,8 +254,8 @@ export default function VetList() {
         <ResponsiveDialog
           open={!!editingVet}
           onOpenChange={(open) => { if (!open) setEditingVet(null); }}
-          title="Edit Veterinarian"
-          description="Update the veterinarian's information below."
+          title={t('vets.list.editVetDialogTitle')}
+          description={t('vets.list.editVetDialogDescription')}
         >
           {editingVet && (
             <VetForm
@@ -272,21 +274,20 @@ export default function VetList() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogTitle>{t('vets.list.deleteConfirmTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                This will remove {deletingVet?.clinicName || deletingVet?.vetName} from
-                your veterinarians list. This action cannot be undone.
+                {t('vets.list.deleteConfirmation', { name: deletingVet?.clinicName || deletingVet?.vetName || '' })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isActionLoading}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={isActionLoading}>{t('common.actions.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteVet}
                 disabled={isActionLoading}
                 className="bg-destructive text-white hover:bg-destructive/90"
               >
                 {isActionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Delete
+                {t('common.actions.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

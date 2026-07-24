@@ -31,6 +31,7 @@ import type { Veterinarian } from '@/types/veterinarian';
 import { usePets } from '@/queries/pets';
 import { useVetPets } from '@/queries/vets';
 import { MutedText, HelperText, EntryTitle, SectionTitle, BodyText } from '@/components/ui/typography';
+import { useTranslation } from 'react-i18next';
 
 interface VetCardProps {
   vet: Veterinarian;
@@ -43,7 +44,7 @@ export default function VetCard({
   onEdit,
   onDelete,
 }: VetCardProps) {
-  
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
@@ -123,7 +124,7 @@ export default function VetCard({
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Open menu</span>
+                  <span className="sr-only">{t('vets.card.openMenu')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -135,7 +136,7 @@ export default function VetCard({
                   }}
                 >
                   <Edit2 className="mr-2 h-4 w-4" />
-                  Edit
+                  {t('common.actions.edit')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -147,7 +148,7 @@ export default function VetCard({
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t('common.actions.delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

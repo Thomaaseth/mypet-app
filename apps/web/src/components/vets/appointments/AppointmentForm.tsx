@@ -25,6 +25,8 @@ import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { Controller } from 'react-hook-form';
 import { DatePicker } from '@/components/ui/date-picker';
 import { MutedText, ErrorText, HelperText } from '@/components/ui/typography';
+import { useTranslation } from 'react-i18next';
+import { APPOINTMENT_TYPE_KEYS } from '@/i18n/enum-keys';
 
 interface AppointmentFormProps {
   appointment?: AppointmentWithRelations;
@@ -43,6 +45,7 @@ export default function AppointmentForm({
   isLoading = false,
   error,
 }: AppointmentFormProps) {
+  const { t } = useTranslation();
   const isEditing = !!appointment;
   const isPastAppointment = appointment ? !isUpcomingAppointment(appointment.appointmentDate) : false;
 
@@ -122,7 +125,7 @@ export default function AppointmentForm({
 
       {/* Pet Selection */}
       <div className="space-y-2">
-        <Label htmlFor="petId">Pet</Label>
+        <Label htmlFor="petId">{t('appointments.form.petLabel')}</Label>
         <Select
           value={selectedPetId}
           onValueChange={(value) => {
@@ -132,7 +135,7 @@ export default function AppointmentForm({
           disabled={isPastAppointment || isLoading}
         >
           <SelectTrigger id="petId" aria-invalid={!!errors.petId}>
-            <SelectValue placeholder="Select a pet" />
+            <SelectValue placeholder={t('appointments.form.petPlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             {pets?.map((pet) => (
@@ -149,11 +152,11 @@ export default function AppointmentForm({
 
       {/* Veterinarian Selection */}
       <div className="space-y-2">
-        <Label htmlFor="veterinarianId">Veterinarian</Label>
+        <Label htmlFor="veterinarianId">{t('appointments.form.vetLabel')}</Label>
         {selectedPetId && availableVetsData && availableVetsData.length === 0 ? (
           <div className="text-sm p-4 bg-muted/50 rounded-md border">
-             <MutedText>No veterinarians assigned to this pet yet.</MutedText>
-             <MutedText className="mt-1">Please assign a veterinarian to this pet first in the Vets section.</MutedText>
+             <MutedText>{t('appointments.form.noVetsAssigned')}</MutedText>
+             <MutedText className="mt-1">{t('appointments.form.assignVetFirst')}</MutedText>
           </div>
         ) : (
           <Select
@@ -162,7 +165,7 @@ export default function AppointmentForm({
             disabled={!selectedPetId || isPastAppointment || isLoading}
           >
             <SelectTrigger id="veterinarianId" aria-invalid={!!errors.veterinarianId}>
-              <SelectValue placeholder={selectedPetId ? "Select a veterinarian" : "Select a pet first"} />
+              <SelectValue placeholder={selectedPetId ? t('appointments.form.vetPlaceholder') : t('appointments.form.vetPlaceholderNoPet')} />
             </SelectTrigger>
             <SelectContent>
               {availableVetsData?.map((vet) => (
@@ -179,7 +182,7 @@ export default function AppointmentForm({
       {/* Date and Time Row */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="appointmentDate">Date</Label>
+          <Label htmlFor="appointmentDate">{t('appointments.form.dateLabel')}</Label>
           <Controller
             name="appointmentDate"
             control={control}
@@ -197,14 +200,14 @@ export default function AppointmentForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="appointmentTime">Time</Label>
+          <Label htmlFor="appointmentTime">{t('appointments.form.timeLabel')}</Label>
           <Select
             value={watch('appointmentTime')}
             onValueChange={(value) => setValue('appointmentTime', value)}
             disabled={isPastAppointment || isLoading}
           >
             <SelectTrigger id="appointmentTime" aria-invalid={!!errors.appointmentTime}>
-              <SelectValue placeholder="Select time" />
+              <SelectValue placeholder={t('appointments.form.timePlaceholder')} />
             </SelectTrigger>
             <SelectContent className="max-h-[200px]">
               {timeOptions.map((time) => (
@@ -220,19 +223,19 @@ export default function AppointmentForm({
       
       {/* Appointment Type */}
       <div className="space-y-2">
-        <Label htmlFor="appointmentType">Appointment Type</Label>
+        <Label htmlFor="appointmentType">{t('appointments.form.typeLabel')}</Label>
         <Select
           value={watch('appointmentType')}
           onValueChange={(value) => setValue('appointmentType', value as AppointmentType)}
           disabled={isPastAppointment || isLoading}
         >
           <SelectTrigger id="appointmentType" aria-invalid={!!errors.appointmentType}>
-            <SelectValue placeholder="Select type" />
+            <SelectValue placeholder={t('appointments.form.typePlaceholder')} />
           </SelectTrigger>
           <SelectContent>
             {appointmentTypes.map((type) => (
               <SelectItem key={type} value={type}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {t(APPOINTMENT_TYPE_KEYS[type])}
               </SelectItem>
             ))}
           </SelectContent>
@@ -242,10 +245,10 @@ export default function AppointmentForm({
 
       {/* Reason for Visit "Discussion points" */}
       <div className="space-y-2">
-        <Label htmlFor="reasonForVisit">Discussion Points</Label>
+        <Label htmlFor="reasonForVisit">{t('appointments.form.discussionPointsLabel')}</Label>
         <Textarea
           id="reasonForVisit"
-          placeholder="Topics to discuss with the veterinarian (e.g., change of diet, urinary issues)"
+          placeholder={t('appointments.form.discussionPointsPlaceholder')}
           rows={3}
           {...register('reasonForVisit')}
           aria-invalid={!!errors.reasonForVisit}
@@ -255,17 +258,17 @@ export default function AppointmentForm({
         />
         {errors.reasonForVisit && <ErrorText>{errors.reasonForVisit.message}</ErrorText>}
         <HelperText className="text-xs">
-          {(watch('reasonForVisit')?.length || 0)}/100 characters
+          {t('appointments.form.discussionPointsCharCount', { count: watch('reasonForVisit')?.length || 0 })}
         </HelperText>
       </div>
 
       {/* Visit Notes "Visit summary" (for past and current appointment if hasAppointmentTimePassed) */}
       {(isPastAppointment || hasAppointmentTimePassed) && (
         <div className="space-y-2">
-          <Label htmlFor="visitNotes">Visit Summary</Label>
+          <Label htmlFor="visitNotes">{t('appointments.form.visitSummaryLabel')}</Label>
           <Textarea
             id="visitNotes"
-            placeholder="Notes and recommendations from the vet visit..."
+            placeholder={t('appointments.form.visitSummaryPlaceholder')}
             rows={4}
             {...register('visitNotes')}
             aria-invalid={!!errors.visitNotes}
@@ -275,7 +278,7 @@ export default function AppointmentForm({
           />
           {errors.visitNotes && <ErrorText>{errors.visitNotes.message}</ErrorText>}
           <HelperText className="text-xs">
-            {(watch('visitNotes')?.length || 0)}/200 characters
+            {t('appointments.form.visitSummaryCharCount', { count: watch('visitNotes')?.length || 0 })}
           </HelperText>
         </div>
       )}
@@ -289,15 +292,15 @@ export default function AppointmentForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancel
+            {t('common.actions.cancel')}
           </Button>
         )}
         <Button type="submit" disabled={isLoading || (!!selectedPetId && (!availableVetsData || availableVetsData.length === 0))}
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading
-            ? (isEditing ? 'Updating...' : 'Creating...')
-            : (isEditing ? 'Update Appointment' : 'Create Appointment')}
+            ? (isEditing ? t('appointments.form.submitUpdating') : t('appointments.form.submitCreating'))
+            : (isEditing ? t('appointments.form.submitUpdate') : t('appointments.form.submitCreate'))}
         </Button>
       </div>
     </form>

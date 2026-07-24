@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { weightTargetApi, weightTargetErrorHandler } from '@/lib/api/domains/weight-targets';
 import type { WeightTarget, WeightTargetFormData } from '@/types/weight-targets';
 import { toastService } from '@/lib/toast';
+import { useTranslation } from 'react-i18next';
 
 // Query keys
 export const weightTargetKeys = {
@@ -23,6 +24,7 @@ export function useWeightTarget(petId: string) {
 // Mutation hook - Upsert weight target
 export function useUpsertWeightTarget(petId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: (targetData: WeightTargetFormData) =>
@@ -42,7 +44,7 @@ export function useUpsertWeightTarget(petId: string) {
       // data doesn't contain the target, so refetching it would re-download
       // identical data.
 
-      toastService.success('Weight target saved successfully');
+      toastService.success(t('toasts.weightTargets.saveSuccess'));
     },
     onError: (error) => {
       const appError = weightTargetErrorHandler(error);
@@ -54,6 +56,7 @@ export function useUpsertWeightTarget(petId: string) {
 // Mutation hook - Delete weight target
 export function useDeleteWeightTarget(petId: string) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: () => weightTargetApi.deleteWeightTarget(petId),
@@ -67,7 +70,7 @@ export function useDeleteWeightTarget(petId: string) {
       );
 
 
-      toastService.success('Weight target deleted successfully');
+      toastService.success(t('toasts.weightTargets.deleteSuccess'));
     },
     onError: (error) => {
       const appError = weightTargetErrorHandler(error);

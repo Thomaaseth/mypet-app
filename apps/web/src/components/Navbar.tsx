@@ -10,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { PageTitle } from './ui/typography';
 
 export const Navbar = () => {
   const navigate = useNavigate();

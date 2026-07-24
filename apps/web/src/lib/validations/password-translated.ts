@@ -36,3 +36,17 @@ export const createTranslatedSignUpPasswordSchema = (t: TFunction) =>
         path: ['confirmPassword'],
       }
     );
+
+  export const createTranslatedPasswordChangeSchema = (t: TFunction) =>
+    z.object({
+      currentPassword: z.string().min(1, t('auth.validation.currentPasswordRequired')),
+    }).merge(z.object({
+      newPassword: createTranslatedPasswordValidation(t),
+      confirmPassword: z.string().min(1, t('auth.validation.confirmPasswordRequired')),
+    })).refine(
+      (data) => data.newPassword === data.confirmPassword,
+      {
+        message: t('auth.validation.passwordsDoNotMatch'),
+        path: ['confirmPassword'],
+      }
+    );
