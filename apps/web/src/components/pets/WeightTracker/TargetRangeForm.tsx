@@ -22,11 +22,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import type { WeightTargetFormData } from '@/types/weight-targets';
-import { createWeightTargetSchema } from '@/lib/validations/weight';
+import { createWeightTargetSchema, getAnimalWeightLimits } from '@/lib/validations/weight';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
 import { ErrorText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
+import { ANIMAL_TYPE_KEYS } from '@/i18n/enum-keys';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface TargetRangeFormProps {
   petName: string;
@@ -54,6 +56,19 @@ export default function TargetRangeForm({
   const { t } = useTranslation();
   const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? 'kg';
+
+  // The out-of-range message needs interpolated values (min/max in the
+  // user's unit, translated animal type) that Zod's message string can't
+  // carry — it only stores the translation key. Recompute them here from
+  // the same shared limits used by the schema.
+  const renderTargetError = (message?: string): string => {
+    if (!message) return '';
+    if (message === 'weights.validation.targetOutOfAnimalRange') {
+      const { min, max } = getAnimalWeightLimits(animalType, weightUnit);
+      return t(message, { min, max, unit: weightUnit, animalType: t(ANIMAL_TYPE_KEYS[animalType]) });
+    }
+    return t(message as TranslationKey);
+  };
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -126,7 +141,7 @@ export default function TargetRangeForm({
                 {weightUnit}
               </span>
               </div>
-              {errors.minWeight && <ErrorText>{errors.minWeight.message}</ErrorText>}
+              {errors.minWeight && <ErrorText>{renderTargetError(errors.minWeight.message)}</ErrorText>}
         </div>
 
         {/* Maximum Weight */}
@@ -147,7 +162,7 @@ export default function TargetRangeForm({
                   {weightUnit}
                 </span>
               </div>
-              {errors.maxWeight && <ErrorText>{errors.maxWeight.message}</ErrorText>}
+              {errors.maxWeight && <ErrorText>{renderTargetError(errors.maxWeight.message)}</ErrorText>}
           </div>
 
         {/* Educational Accordion */}

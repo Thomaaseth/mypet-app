@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { key } from './i18n-keys';
 
 // Appointment type enum values (must match database enum)
 export const appointmentTypes = [
@@ -29,39 +30,39 @@ const isValid5MinuteIncrement = (time: string): boolean => {
 // Base appointment form schema
 export const appointmentFormSchema = z.object({
   petId: z.string()
-    .min(1, 'Please select a pet')
-    .uuid('Invalid pet ID'),
+    .min(1, key('appointments.validation.petRequired'))
+    .uuid(key('vets.validation.invalidPetId')),
   
   veterinarianId: z.string()
-    .min(1, 'Please select a veterinarian')
-    .uuid('Invalid veterinarian ID'),
+    .min(1, key('appointments.validation.vetRequired'))
+    .uuid(key('vets.validation.invalidVetId')), // reused from vets since same validation
   
   appointmentDate: z.string()
-    .min(1, 'Date is required')
+    .min(1, key('weights.validation.dateRequired'))
     .refine((val) => {
       const date = new Date(val);
       return !isNaN(date.getTime());
-    }, 'Please enter a valid date'),
+    }, key('weights.validation.invalidDate')), // reused from weights since same date validation
   
   appointmentTime: z.string()
-    .min(1, 'Time is required')
-    .refine(isValidTime, 'Please enter a valid time (HH:MM in 24-hour format)')
-    .refine(isValid5MinuteIncrement, 'Time must be in 5-minute increments (e.g., 14:05, 14:10)'),
+    .min(1, key('appointments.validation.timeRequired'))
+    .refine(isValidTime, key('appointments.validation.invalidTimeFormat'))
+    .refine(isValid5MinuteIncrement, key('appointments.validation.timeIncrementInvalid')),
   
   appointmentType: z.enum(appointmentTypes, {
-    required_error: 'Please select an appointment type',
-    invalid_type_error: 'Invalid appointment type',
+    required_error: key('appointments.validation.typeRequired'),
+    invalid_type_error: key('appointments.validation.invalidType'),
   }),
 
   // "Discussion points"
   reasonForVisit: z.string()
-    .max(100, 'Reason must be less than 100 characters')
+    .max(100, key('appointments.validation.reasonTooLong'))
     .optional()
     .or(z.literal('')),
 
   // "Visit summary"
   visitNotes: z.string()
-    .max(200, 'Notes must be less than 200 characters')
+    .max(200, key('appointments.validation.visitNotesTooLong'))
     .optional()
     .or(z.literal('')),
 });
@@ -73,13 +74,13 @@ export const createAppointmentSchema = appointmentFormSchema;
 
 // Schema for updating an appointment (full edit for upcoming, notes only for past)
 export const updateAppointmentSchema = appointmentFormSchema.extend({
-  id: z.string().uuid('Invalid appointment ID'),
+  id: z.string().uuid(key('appointments.validation.invalidAppointmentId')),
 });
 
 // Schema for updating only visit notes (for past appointments)
 export const updateVisitNotesSchema = z.object({
   visitNotes: z.string()
-    .max(200, 'Notes must be less than 200 characters')
+    .max(200, key('appointments.validation.visitNotesTooLong'))
     .optional()
     .or(z.literal('')),
 });
@@ -102,4 +103,3 @@ export const validateUpdateAppointment = (data: unknown) => {
 export const validateUpdateVisitNotes = (data: unknown) => {
   return updateVisitNotesSchema.safeParse(data);
 };
-

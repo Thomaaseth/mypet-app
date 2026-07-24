@@ -11,6 +11,7 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useTranslation } from 'react-i18next';
 import { FoodUnitLabel } from './FoodUnitLabel';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface WetFoodFormProps {
   wetFoodEntry?: WetFoodEntry; // If provided, we're editing
@@ -62,7 +63,7 @@ export function WetFoodForm({
           {...register('brandName')}
           aria-invalid={!!errors.brandName}
         />
-        {errors.brandName && <ErrorText>{errors.brandName.message}</ErrorText>}
+        {errors.brandName && <ErrorText>{t(errors.brandName.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Product Name */}
@@ -75,7 +76,7 @@ export function WetFoodForm({
           {...register('productName')}
           aria-invalid={!!errors.productName}
         />
-        {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
+        {errors.productName && <ErrorText>{t(errors.productName.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Number of Units */}
@@ -90,7 +91,7 @@ export function WetFoodForm({
           {...register('numberOfUnits')}
           aria-invalid={!!errors.numberOfUnits}
         />
-        {errors.numberOfUnits && <ErrorText>{errors.numberOfUnits.message}</ErrorText>}
+        {errors.numberOfUnits && <ErrorText>{t(errors.numberOfUnits.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Weight Per Unit */}
@@ -110,7 +111,7 @@ export function WetFoodForm({
             <FoodUnitLabel unit={wetFoodUnit} />
           </span>
         </div>
-        {errors.weightPerUnit && <ErrorText>{errors.weightPerUnit.message}</ErrorText>}
+        {errors.weightPerUnit && <ErrorText>{t(errors.weightPerUnit.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Total Weight Display */}
@@ -139,7 +140,7 @@ export function WetFoodForm({
               <FoodUnitLabel unit={wetFoodUnit} />
             </span>
           </div>
-          {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
+          {errors.dailyAmount && <ErrorText>{t(errors.dailyAmount.message as TranslationKey)}</ErrorText>}
         </div>
       
       {/* Wet food unit, hidden, derived from user preferences*/}
@@ -161,7 +162,7 @@ export function WetFoodForm({
             />
           )}
         />
-        {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
+        {errors.dateStarted && <ErrorText>{t(errors.dateStarted.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Action Buttons */}

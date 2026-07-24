@@ -21,6 +21,10 @@ const notes = {
       description: 'Are you sure you want to delete this note? This action cannot be undone.',
       deleting: 'Deleting...',
     },
+    validation: {
+        contentRequired: 'Note cannot be empty',
+        contentTooLong: 'Note must be less than 200 characters',
+      },
   } as const;
   
   export default notes;

@@ -23,6 +23,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { useTranslation } from 'react-i18next';
 import { PET_GENDER_KEYS, ANIMAL_TYPE_KEYS } from '@/i18n/enum-keys';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface PetFormProps {
   pet?: Pet; // if provided, we're editing
@@ -105,7 +106,7 @@ export default function PetForm({
           aria-invalid={!!errors.name}
         />
         {errors.name && (
-          <ErrorText>{errors.name.message}</ErrorText>
+          <ErrorText>{t(errors.name.message as TranslationKey)}</ErrorText>
         )}
       </div>
 
@@ -129,7 +130,7 @@ export default function PetForm({
           </SelectContent>
         </Select>
         {errors.animalType && (
-            <ErrorText>{errors.animalType.message}</ErrorText>
+            <ErrorText>{t(errors.animalType.message as TranslationKey)}</ErrorText>
         )}
         </div>
 
@@ -143,7 +144,7 @@ export default function PetForm({
             aria-invalid={!!errors.species}
           />
         {errors.species && (
-          <ErrorText>{errors.species.message}</ErrorText>
+          <ErrorText>{t(errors.species.message as TranslationKey)}</ErrorText>
         )}
         <HelperText className="text-xs">
           {t('pets.form.speciesHelper')}
@@ -167,7 +168,7 @@ export default function PetForm({
           </SelectContent>
         </Select>
         {errors.gender && (
-          <ErrorText>{errors.gender.message}</ErrorText>
+          <ErrorText>{t(errors.gender.message as TranslationKey)}</ErrorText>
         )}
       </div>
 
@@ -188,7 +189,7 @@ export default function PetForm({
           )}
         />
         {errors.birthDate && (
-          <ErrorText>{errors.birthDate.message}</ErrorText>
+          <ErrorText>{t(errors.birthDate.message as TranslationKey)}</ErrorText>
         )}
         <HelperText className="text-xs">
         {t('pets.form.birthDateHelper')}
@@ -213,7 +214,7 @@ export default function PetForm({
           </span>
         </div>
         <input type="hidden" {...register('weightUnit')} />
-        {errors.weight && <ErrorText>{errors.weight.message}</ErrorText>}
+        {errors.weight && <ErrorText>{t(errors.weight.message as TranslationKey)}</ErrorText>}
         <HelperText className="text-xs">
         {t('pets.form.weightHelper', { max: weightUnit === 'kg' ? '200kg' : '440lbs' })}
         </HelperText>
@@ -239,7 +240,7 @@ export default function PetForm({
           aria-invalid={!!errors.microchipNumber}
         />
         {errors.microchipNumber && (
-          <ErrorText>{errors.microchipNumber.message}</ErrorText>
+          <ErrorText>{t(errors.microchipNumber.message as TranslationKey)}</ErrorText>
         )}
         <HelperText className="text-xs">
           {t('pets.form.microchipHelper')}
@@ -273,7 +274,7 @@ export default function PetForm({
           aria-invalid={!!errors.notes}
         />
         {errors.notes && (
-          <ErrorText>{errors.notes.message}</ErrorText>
+          <ErrorText>{t(errors.notes.message as TranslationKey)}</ErrorText>
         )}
         <HelperText className="text-xs">
           {t('pets.form.characterCount', { count: watch('notes')?.length ?? 0 })}

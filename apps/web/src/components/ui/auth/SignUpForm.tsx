@@ -11,25 +11,23 @@ import { toastService } from '@/lib/toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { authErrorHandler } from '../../../lib/errors/handlers';
-import { createTranslatedSignUpPasswordSchema } from '@/lib/validations/password-translated';
+import { signUpPasswordSchema } from '@/lib/validations/password';
 import { useSessionContext } from '@/contexts/SessionContext';
 import { PageTitle, MutedText, ErrorText, HelperText } from '@/components/ui/typography';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
+import { key } from '@/i18n/translation-key';
+import type { TranslationKey } from '@/i18n/translation-key';
 
-const createSignUpSchema = (t: TFunction) =>
-  z.object({
-    firstName: z.string().min(1, t('auth.validation.firstNameRequired')),
-    lastName: z.string().min(1, t('auth.validation.lastNameRequired')),
-    email: z.string().email(t('auth.validation.invalidEmail')),
-  }).merge(createTranslatedSignUpPasswordSchema(t));
+const signUpSchema = z.object({
+  firstName: z.string().min(1, key('auth.validation.firstNameRequired')),
+  lastName: z.string().min(1, key('auth.validation.lastNameRequired')),
+  email: z.string().email(key('auth.validation.invalidEmail')),
+}).merge(signUpPasswordSchema);
 
-type SignUpFormData = z.infer<ReturnType<typeof createSignUpSchema>>;
+type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function SignUpForm() {
   const { t } = useTranslation();
-  const signUpSchema = useMemo(() => createSignUpSchema(t), [t]);
   const navigate = useNavigate();
   const search = useSearch({ from: '/signup' });
   const { refreshSession } = useSessionContext();
@@ -87,7 +85,7 @@ export default function SignUpForm() {
               {...register('firstName')}
               aria-invalid={!!errors.firstName}
             />
-            {errors.firstName && <ErrorText>{errors.firstName.message}</ErrorText>}
+            {errors.firstName && <ErrorText>{t(errors.firstName.message as TranslationKey)}</ErrorText>}
           </div>
           <div className="space-y-2">
           <Label htmlFor="lastName">{t('auth.signup.lastNameLabel')}</Label>
@@ -97,7 +95,7 @@ export default function SignUpForm() {
               {...register('lastName')}
               aria-invalid={!!errors.lastName}
             />
-            {errors.lastName && <ErrorText>{errors.lastName.message}</ErrorText>}
+            {errors.lastName && <ErrorText>{t(errors.lastName.message as TranslationKey)}</ErrorText>}
           </div>
         </div>
 
@@ -111,7 +109,7 @@ export default function SignUpForm() {
             {...register('email')}
             aria-invalid={!!errors.email}
           />
-          {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
+          {errors.email && <ErrorText>{t(errors.email.message as TranslationKey)}</ErrorText>}
         </div>
 
         {/* Password */}
@@ -124,7 +122,7 @@ export default function SignUpForm() {
             {...register('password')}
             aria-invalid={!!errors.password}
           />
-          {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
+          {errors.password && <ErrorText>{t(errors.password.message as TranslationKey)}</ErrorText>}
           <HelperText className="text-xs">
           {t('auth.signup.passwordRequirements')}
           </HelperText>

@@ -72,6 +72,22 @@ const weights = {
         entries_other: '{{count}} entries',
         noEntriesYet: 'No weight entries yet. Add your first entry above!',
       },
+      validation: {
+        weightRequired: 'Weight is required',
+        weightMustBePositive: 'Weight must be a positive number',
+        invalidWeightUnit: 'Please select a valid weight unit',
+        dateRequired: 'Date is required',
+        invalidDate: 'Please enter a valid date',
+        weightUnitRequiredForUpdate: 'Weight unit is required when updating weight',
+        minWeightRequired: 'Minimum weight is required',
+        minWeightMustBePositive: 'Minimum weight must be a positive number',
+        maxWeightRequired: 'Maximum weight is required',
+        maxWeightMustBePositive: 'Maximum weight must be a positive number',
+        maxMustExceedMin: 'Maximum weight must be greater than minimum weight',
+        absoluteMaxExceeded: 'Weight exceeds absolute maximum (200kg / 440lbs)',
+        outOfAnimalRange: 'Weight must be between {{min}}-{{max}}{{unit}} for a {{animalType}}',
+        targetOutOfAnimalRange: 'Target weight range must be between {{min}}-{{max}}{{unit}} for a {{animalType}}',
+      },
   } as const;
   
   export default weights;

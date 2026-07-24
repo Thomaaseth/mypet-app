@@ -24,6 +24,10 @@ const fr: TranslationShape<typeof notes> = {
     description: 'Êtes-vous sûr de vouloir supprimer cette note ? Cette action est irréversible.',
     deleting: 'Suppression en cours...',
   },
+  validation: {
+    contentRequired: 'La note ne peut pas être vide',
+    contentTooLong: 'La note doit contenir moins de 200 caractères',
+  },
 };
 
 export default fr;

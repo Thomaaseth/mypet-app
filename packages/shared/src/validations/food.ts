@@ -1,19 +1,20 @@
 import { z } from 'zod';
 import { convertFoodWeight } from '../utils/units';
+import { key } from './i18n-keys';
 
 // Base validation
 const baseFoodValidation = {
-  brandName: z.string().trim().max(100, 'Brand name must be 100 characters or less').optional(),
-  productName: z.string().trim().max(150, 'Product name must be 150 characters or less').optional(),
+  brandName: z.string().trim().max(100, key('food.validation.brandNameTooLong')).optional(),
+  productName: z.string().trim().max(150, key('food.validation.productNameTooLong')).optional(),
   dailyAmount: z.string()
-    .min(1, 'Daily amount is required')
+    .min(1, key('food.validation.dailyAmountRequired'))
     .refine((val) => {
       const num = parseFloat(val.replace(',', '.'));
       return !isNaN(num) && num > 0;
-    }, 'Daily amount must be a positive number'),
+    }, key('food.validation.dailyAmountMustBePositive')),
     dateStarted: z.string()
-    .min(1, 'Purchase date is required')
-    .refine((val) => !isNaN(new Date(val).getTime()), 'Please enter a valid date'),
+    .min(1, key('food.validation.dateStartedRequired'))
+    .refine((val) => !isNaN(new Date(val).getTime()), key('weights.validation.invalidDate')),
 };
 
 // bagWeightUnit is not user-selectable, derived from the user's unitSystem preference,
@@ -23,14 +24,14 @@ const baseFoodValidation = {
 export const dryFoodSchema = z.object({
   ...baseFoodValidation,
   bagWeight: z.string()
-    .min(1, 'Bag weight is required')
+    .min(1, key('food.validation.bagWeightRequired'))
     .refine((val) => {
       const num = parseFloat(val.replace(',', '.'));
       return !isNaN(num) && num > 0;
-    }, 'Bag weight must be a positive number'),
+    }, key('food.validation.bagWeightMustBePositive')),
   bagWeightUnit: z.enum(['kg', 'lbs'], {
-    required_error: 'Bag weight unit is required',
-    invalid_type_error: 'Invalid bag weight unit for dry food'
+    required_error: key('food.validation.bagWeightUnitRequired'),
+    invalid_type_error: key('food.validation.invalidBagWeightUnit')
   }),
 }).superRefine((data, ctx) => {
   const bagWeight = parseFloat(data.bagWeight.replace(',', '.'));
@@ -42,7 +43,7 @@ export const dryFoodSchema = z.object({
   if (dailyAmount >= bagWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Daily amount should be less than total bag weight',
+      message: key('food.validation.dailyAmountExceedsBagWeight'),
       path: ['dailyAmount']
     });
   }
@@ -55,20 +56,20 @@ export const dryFoodSchema = z.object({
 export const wetFoodSchema = z.object({
   ...baseFoodValidation,
   numberOfUnits: z.string()
-    .min(1, 'Number of units is required')
+    .min(1, key('food.validation.numberOfUnitsRequired'))
     .refine((val) => {
       const num = Number(val);
       return Number.isInteger(num) && num > 0;
-    }, 'Number of units must be a positive whole number'),
+    }, key('food.validation.numberOfUnitsMustBePositive')),
   weightPerUnit: z.string()
-    .min(1, 'Weight per unit is required')
+    .min(1, key('food.validation.weightPerUnitRequired'))
     .refine((val) => {
       const num = parseFloat(val.replace(',', '.'));
       return !isNaN(num) && num > 0;
-    }, 'Weight per unit must be a positive number'),
+    }, key('food.validation.weightPerUnitMustBePositive')),
   wetFoodUnit: z.enum(['grams', 'oz'], {
-    required_error: 'Weight unit is required',
-    invalid_type_error: 'Invalid weight unit for wet food'
+    required_error: key('food.validation.wetFoodUnitRequired'),
+    invalid_type_error: key('food.validation.invalidWetFoodUnit')
   }),
 }).superRefine((data, ctx) => {
   const numberOfUnits = Number(data.numberOfUnits);
@@ -81,7 +82,7 @@ export const wetFoodSchema = z.object({
   if (dailyAmountInGrams >= totalWeightInGrams) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Daily amount should be less than total weight',
+      message: key('food.validation.dailyAmountExceedsTotalWeight'),
       path: ['dailyAmount']
     });
   }
@@ -95,22 +96,22 @@ export const updateDryFoodSchema = z.object({
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
-  }, 'Bag weight must be a positive number').optional(),
+  }, key('food.validation.bagWeightMustBePositive')).optional(),
   bagWeightUnit: z.enum(['kg', 'lbs']).optional(),
   dailyAmount: z.string().refine(val => {
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
-  }, 'Daily amount must be a positive number').optional(),
+  }, key('food.validation.dailyAmountMustBePositive')).optional(),
   dateStarted: z.string().refine(val => {
     if (!val) return true;
     return !isNaN(new Date(val).getTime());
-  }, 'Please enter a valid date').optional(),
+  }, key('weights.validation.invalidDate')).optional(),
 }).superRefine((data, ctx) => {
   if (data.bagWeight !== undefined && data.bagWeightUnit === undefined) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Bag weight unit is required when updating bag weight',
+      message: key('food.validation.bagWeightUnitRequiredForUpdate'),
       path: ['bagWeightUnit'],
     });
   }
@@ -124,29 +125,29 @@ export const updateWetFoodSchema = z.object({
       if (!val) return true;
       const num = Number(val);
       return Number.isInteger(num) && num > 0;
-    }, 'Number of units must be a positive whole number')
+    }, key('food.validation.numberOfUnitsMustBePositive'))
     .optional(),
   weightPerUnit: z.string().refine(val => {
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
-  }, 'Weight per unit must be a positive number').optional(),
+  }, key('food.validation.weightPerUnitMustBePositive')).optional(),
   wetFoodUnit: z.enum(['grams', 'oz']).optional(),
   dailyAmount: z.string().refine(val => {
     if (!val) return true;
     const num = parseFloat(val.replace(',', '.'));
     return !isNaN(num) && num > 0;
-  }, 'Daily amount must be a positive number').optional(),
+  }, key('food.validation.dailyAmountMustBePositive')).optional(),
   dateStarted: z.string().refine(val => {
     if (!val) return true;
     return !isNaN(new Date(val).getTime());
-  }, 'Please enter a valid date').optional(),
+  }, key('weights.validation.invalidDate')).optional(),
 }).superRefine((data, ctx) => {
   // wetFoodUnit governs both weightPerUnit and dailyAmount; required if either changes
   if ((data.weightPerUnit !== undefined || data.dailyAmount !== undefined) && data.wetFoodUnit === undefined) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: 'Weight unit is required when updating weight per unit or daily amount',
+      message: key('food.validation.wetFoodUnitRequiredForUpdate'),
       path: ['wetFoodUnit'],
     });
   }

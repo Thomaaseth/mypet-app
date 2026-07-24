@@ -10,6 +10,9 @@ import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useTranslation } from 'react-i18next';
+import { getAnimalWeightLimits } from '@/lib/validations/weight';
+import { ANIMAL_TYPE_KEYS } from '@/i18n/enum-keys';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface WeightFormProps {
   animalType: 'cat' | 'dog';
@@ -41,6 +44,19 @@ export default function WeightForm({
 
 
   const isEditing = !!weightEntry;
+
+  // The out-of-range weight message needs interpolated values (min/max in
+  // the user's unit, translated animal type) that Zod's message string
+  // can't carry — it only stores the translation key. Recompute them here
+  // from the same shared limits used by the schema.
+  const renderWeightError = (message?: string): string => {
+    if (!message) return '';
+    if (message === 'weights.validation.outOfAnimalRange') {
+      const { min, max } = getAnimalWeightLimits(animalType, weightUnit);
+      return t(message, { min, max, unit: weightUnit, animalType: t(ANIMAL_TYPE_KEYS[animalType]) });
+    }
+    return t(message as TranslationKey);
+  };
 
   // Handle form submission
   const onFormSubmit = async (formData: WeightFormData) => {
@@ -77,7 +93,7 @@ export default function WeightForm({
         </div>
 
         {errors.weight && (
-          <ErrorText>{errors.weight.message}</ErrorText>
+          <ErrorText>{renderWeightError(errors.weight.message)}</ErrorText>
         )}
       </div>
       
@@ -101,7 +117,7 @@ export default function WeightForm({
           )}
         />
         {errors.date && (
-          <ErrorText>{errors.date.message}</ErrorText>
+          <ErrorText>{t(errors.date.message as TranslationKey)}</ErrorText>
         )}
           <HelperText>{t('weights.form.dateHelper')}</HelperText>
       </div>

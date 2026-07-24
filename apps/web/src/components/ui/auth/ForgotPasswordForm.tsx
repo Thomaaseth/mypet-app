@@ -15,19 +15,17 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { MutedText, ErrorText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
-import type { TFunction } from 'i18next';
+import { key } from '@/i18n/translation-key';
+import type { TranslationKey } from '@/i18n/translation-key';
 
-const createForgotPasswordSchema = (t: TFunction) =>
-  z.object({
-    email: z.string().email(t('auth.validation.invalidEmail')),
-  });
+const forgotPasswordSchema = z.object({
+  email: z.string().email(key('auth.validation.invalidEmail')),
+});
 
-type ForgotPasswordFormData = z.infer<ReturnType<typeof createForgotPasswordSchema>>;
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordForm() {
     const { t } = useTranslation();
-    const forgotPasswordSchema = useMemo(() => createForgotPasswordSchema(t), [t]);
     const [emailSent, setEmailSent] = useState(false);
     const { isLoading, error, executeAction } = useErrorState();
   
@@ -122,7 +120,7 @@ export default function ForgotPasswordForm() {
                   aria-invalid={!!form.formState.errors.email}
                 />
                 {form.formState.errors.email && (
-                  <ErrorText>{form.formState.errors.email.message}</ErrorText>
+                  <ErrorText>{t(form.formState.errors.email.message as TranslationKey)}</ErrorText>
                 )}
               </div>
   

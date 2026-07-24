@@ -1,21 +1,46 @@
 import { z } from 'zod';
 import type { WeightUnit } from './pet';
+import { key } from './i18n-keys';
+
+// Per-animal healthy weight range, in kg. Exported so the same numbers
+// power both the Zod validation (below) and the UI's error-message
+// interpolation (the specific min/max/unit shown to the user)
+const ANIMAL_WEIGHT_LIMITS_KG = {
+  cat: { min: 0.05, max: 15 },
+  dog: { min: 0.5, max: 90 },
+} as const;
+
+const KG_TO_LB = 2.20462;
+
+export function getAnimalWeightLimits(
+  animalType: 'cat' | 'dog',
+  displayUnit: WeightUnit
+): { min: number; max: number } {
+  const limitsKg = ANIMAL_WEIGHT_LIMITS_KG[animalType];
+  if (displayUnit === 'kg') {
+    return limitsKg;
+  }
+  return {
+    min: Number((limitsKg.min * KG_TO_LB).toFixed(1)),
+    max: Number((limitsKg.max * KG_TO_LB).toFixed(1)),
+  };
+}
 
 // Base weight entry validation schema
 export const weightEntryFormSchema = z.object({
   weight: z
     .string()
-    .min(1, 'Weight is required')
+    .min(1, key('weights.validation.weightRequired'))
     .refine((val) => {
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
-    }, 'Weight must be a positive number'),
+    }, key('weights.validation.weightMustBePositive')),
   weightUnit: z.enum(['kg', 'lbs'], {
-    errorMap: () => ({ message: 'Please select a valid weight unit' })
+    errorMap: () => ({ message: key('weights.validation.invalidWeightUnit') })
   }),
   date: z.string()
-    .min(1, 'Date is required')
-    .refine((val) => !isNaN(new Date(val).getTime()), 'Please enter a valid date'),
+    .min(1, key('weights.validation.dateRequired'))
+    .refine((val) => !isNaN(new Date(val).getTime()), key('weights.validation.invalidDate')),
   });
 
   // Schema for partial updates — enforces weightUnit must accompany weight if weight is being changed
@@ -23,7 +48,7 @@ export const weightEntryFormSchema = z.object({
     if (data.weight !== undefined && data.weightUnit === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Weight unit is required when updating weight',
+        message: key('weights.validation.weightUnitRequiredForUpdate'),
         path: ['weightUnit'],
       });
     }
@@ -31,26 +56,26 @@ export const weightEntryFormSchema = z.object({
 
 export const weightTargetSchema = z.object({
   minWeight: z.string()
-    .min(1, 'Minimum weight is required')
+    .min(1, key('weights.validation.minWeightRequired'))
     .refine((val) => {
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
-    }, 'Minimum weight must be a positive number'),
-  maxWeight: z.string()
-    .min(1, 'Maximum weight is required')
+  }, key('weights.validation.minWeightMustBePositive')),
+    maxWeight: z.string()
+    .min(1, key('weights.validation.maxWeightRequired'))
     .refine((val) => {
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
-    }, 'Maximum weight must be a positive number'),
-  weightUnit: z.enum(['kg', 'lbs'], {
-    errorMap: () => ({ message: 'Please select a valid weight unit' }),
+  }, key('weights.validation.maxWeightMustBePositive')),
+    weightUnit: z.enum(['kg', 'lbs'], {
+    errorMap: () => ({ message: key('weights.validation.invalidWeightUnit') }),
   }),
 }).refine((data) => {
   const min = parseFloat(data.minWeight);
   const max = parseFloat(data.maxWeight);
   return max > min;
 }, {
-  message: 'Maximum weight must be greater than minimum weight',
+  message: key('weights.validation.maxMustExceedMin'),
   path: ['maxWeight'],
 });
 
@@ -59,26 +84,20 @@ export const createWeightEntrySchema = (
   _weightUnit: WeightUnit, // kept for API compatibility, schema uses data.weightUnit internally
   animalType: 'cat' | 'dog'
 ) => {
-  // Animal-specific limits (defined outside for reuse)
-  const limits = {
-    cat: { min: 0.05, max: 15 },
-    dog: { min: 0.5, max: 90 },
-  };
-  
-  const animalLimits = limits[animalType];
-
   return weightEntryFormSchema.refine((data) => {
     const weight = parseFloat(data.weight);
     if (isNaN(weight) || weight <= 0) return false;
-
+ 
     // Convert to kg for validation (use data.weightUnit)
-    const weightInKg = data.weightUnit === 'kg' ? weight : weight / 2.20462;
-    
+    const weightInKg = data.weightUnit === 'kg' ? weight : weight / KG_TO_LB;
+ 
+    const animalLimits = ANIMAL_WEIGHT_LIMITS_KG[animalType];
+ 
     // Check animal-specific limits
     if (weightInKg < animalLimits.min || weightInKg > animalLimits.max) {
       return false;
     }
-
+ 
     // Check absolute maximum
     if (weightInKg > 200) {
       return false;
@@ -86,56 +105,41 @@ export const createWeightEntrySchema = (
     
     return true;
   }, (data) => {
-    // generate the error message dynamically
     const weight = parseFloat(data.weight);
-    const weightInKg = data.weightUnit === 'kg' ? weight : weight / 2.20462;
-    
-    // Determine which limit was violated
+    const weightInKg = data.weightUnit === 'kg' ? weight : weight / KG_TO_LB;
+ 
+    // Determine which limit was violated. Message is a translation key only —
+    // the interpolation values (min/max/unit/animalType) are recomputed at
+    // render time from `getAnimalWeightLimits`, not embedded here.
     if (weightInKg > 200) {
       return {
-        message: 'Weight exceeds absolute maximum (200kg / 440lbs)',
+        message: key('weights.validation.absoluteMaxExceeded'),
         path: ['weight']
       };
     }
-    
-    // Animal limit violated - show range in user's selected unit
-    const displayLimits = data.weightUnit === 'kg'
-      ? `${animalLimits.min}-${animalLimits.max}kg`
-      : `${(animalLimits.min * 2.20462).toFixed(1)}-${(animalLimits.max * 2.20462).toFixed(1)}lbs`;
-    
+ 
     return {
-      message: `Weight must be between ${displayLimits} for ${animalType}s`,
+      message: key('weights.validation.outOfAnimalRange'),
       path: ['weight']
     };
   });
 };
 
 export const createWeightTargetSchema = (animalType: 'cat' | 'dog') => {
-  const limits = {
-    cat: { min: 0.05, max: 15 },
-    dog: { min: 0.5, max: 90 },
-  };
-
-  const animalLimits = limits[animalType];
-
+  const animalLimits = ANIMAL_WEIGHT_LIMITS_KG[animalType];
+ 
   return weightTargetSchema.refine((data) => {
     const minInKg = data.weightUnit === 'kg'
       ? parseFloat(data.minWeight)
-      : parseFloat(data.minWeight) / 2.20462;
+      : parseFloat(data.minWeight) / KG_TO_LB;
     const maxInKg = data.weightUnit === 'kg'
       ? parseFloat(data.maxWeight)
-      : parseFloat(data.maxWeight) / 2.20462;
-
+      : parseFloat(data.maxWeight) / KG_TO_LB;
+ 
     return minInKg >= animalLimits.min && maxInKg <= animalLimits.max;
-  }, (data) => {
-    const displayLimits = data.weightUnit === 'kg'
-      ? `${animalLimits.min}-${animalLimits.max}kg`
-      : `${(animalLimits.min * 2.20462).toFixed(1)}-${(animalLimits.max * 2.20462).toFixed(1)}lbs`;
-
-    return {
-      message: `Target weight range must be between ${displayLimits} for ${animalType}s`,
-      path: ['maxWeight'],
-    };
+  }, {
+    message: key('weights.validation.targetOutOfAnimalRange'),
+    path: ['maxWeight'],
   });
 };
 

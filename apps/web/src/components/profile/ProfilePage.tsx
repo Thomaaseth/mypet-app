@@ -12,9 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toastService } from '@/lib/toast';
 import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle, Globe } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
-import { createTranslatedPasswordChangeSchema } from '@/lib/validations/password-translated';
-import type { TFunction } from 'i18next';
+import { useState, useEffect } from 'react';
+import { passwordChangeSchema } from '@/lib/validations/password';
 import { 
   AccountInfoSkeleton, 
   EmailFormSkeleton, 
@@ -35,16 +34,16 @@ import {
   UNIT_SYSTEM_LABEL_KEYS,
   UNIT_SYSTEM_DESCRIPTION_KEYS,
 } from '@/i18n/enum-keys';
+import { key } from '@/i18n/translation-key';
+import type { TranslationKey } from '@/i18n/translation-key';
 
-// Component-local schema (not shared with API) — factory pattern so
-// the validation message can be translated via t()
-const createEmailUpdateSchema = (t: TFunction) =>
-  z.object({
-    newEmail: z.string().email(t('auth.validation.invalidEmail')),
-  });
+// Component-local schema (not shared with API)
+const emailUpdateSchema = z.object({
+  newEmail: z.string().email(key('auth.validation.invalidEmail')),
+});
 
-type PasswordChangeFormData = z.infer<ReturnType<typeof createTranslatedPasswordChangeSchema>>;
-type EmailUpdateFormData = z.infer<ReturnType<typeof createEmailUpdateSchema>>;
+type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
+type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
 
 export default function MyProfilePage() {
   const { t } = useTranslation();
@@ -52,9 +51,6 @@ export default function MyProfilePage() {
   const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
   const { dateTimeLocale: currentDateTimeLocale, unitSystem: currentUnitSystem, isLoading: isLoadingPreferences } = usePreferencesContext();
   const { mutate: upsertPreferences, isPending: isSavingPreferences, variables: pendingPreferences } = useUpsertUserPreferences();
-
-  const emailUpdateSchema = useMemo(() => createEmailUpdateSchema(t), [t]);
-  const passwordChangeSchema = useMemo(() => createTranslatedPasswordChangeSchema(t), [t]);
 
   // UI-specific state remains as separate useState
   const [passwordVisibility, setPasswordVisibility] = useState({
@@ -336,7 +332,7 @@ export default function MyProfilePage() {
                 />
                 {emailForm.formState.errors.newEmail && (
                   <p className="text-sm text-destructive">
-                    {emailForm.formState.errors.newEmail.message}
+                    {t(emailForm.formState.errors.newEmail.message as TranslationKey)}
                   </p>
                 )}
               </div>
@@ -401,7 +397,7 @@ export default function MyProfilePage() {
                   </div>
                   {passwordForm.formState.errors.currentPassword && (
                     <p className="text-sm text-destructive">
-                      {passwordForm.formState.errors.currentPassword.message}
+                      {t(passwordForm.formState.errors.currentPassword.message as TranslationKey)}
                     </p>
                   )}
                 </div>
@@ -429,7 +425,7 @@ export default function MyProfilePage() {
                   </div>
                   {passwordForm.formState.errors.newPassword && (
                     <p className="text-sm text-destructive">
-                      {passwordForm.formState.errors.newPassword.message}
+                      {t(passwordForm.formState.errors.newPassword.message as TranslationKey)}
                     </p>
                   )}
                 </div>
@@ -457,7 +453,7 @@ export default function MyProfilePage() {
                   </div>
                   {passwordForm.formState.errors.confirmPassword && (
                     <p className="text-sm text-destructive">
-                      {passwordForm.formState.errors.confirmPassword.message}
+                      {t(passwordForm.formState.errors.confirmPassword.message as TranslationKey)}
                     </p>
                   )}
                 </div>

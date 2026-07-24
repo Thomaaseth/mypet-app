@@ -1,44 +1,44 @@
-
 import { z } from 'zod';
+import { key } from './i18n-keys';
 
 export const passwordValidation = z
   .string()
-  .min(8, 'Password must be at least 8 characters')
-  .max(128, 'Password must be less than 128 characters')
-  .regex(/(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
-  .regex(/(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-  .regex(/(?=.*\d)/, 'Password must contain at least one number')
-  .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, 'Password must contain at least one special character');
+  .min(8, key('auth.validation.passwordMinLength'))
+  .max(128, key('auth.validation.passwordMaxLength'))
+  .regex(/(?=.*[A-Z])/, key('auth.validation.passwordUppercase'))
+  .regex(/(?=.*[a-z])/, key('auth.validation.passwordLowercase'))
+  .regex(/(?=.*\d)/, key('auth.validation.passwordNumber'))
+  .regex(/(?=.*[!@#$%^&*(),.?":{}|<>])/, key('auth.validation.passwordSpecialChar'));
 
 export const createPasswordConfirmSchema = (passwordFieldName: string = 'password') => {
   return z.object({
     [passwordFieldName]: passwordValidation,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    confirmPassword: z.string().min(1, key('auth.validation.confirmPasswordRequired')),
   }).refine(data => data[passwordFieldName] === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: key('auth.validation.passwordsDoNotMatch'),
     path: ["confirmPassword"],
   });
 };
 
 export const newPasswordBaseSchema = z.object({
     newPassword: passwordValidation,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    confirmPassword: z.string().min(1, key('auth.validation.confirmPasswordRequired')),
   });
 
   export const newPasswordSchema = newPasswordBaseSchema.refine(
     data => data.newPassword === data.confirmPassword, 
     {
-      message: "Passwords do not match",
+      message: key('auth.validation.passwordsDoNotMatch'),
       path: ["confirmPassword"],
     }
   );
   
   export const passwordChangeSchema = z.object({
-    currentPassword: z.string().min(1, 'Current password is required'),
+    currentPassword: z.string().min(1, key('auth.validation.currentPasswordRequired')),
   }).merge(newPasswordBaseSchema).refine(
     data => data.newPassword === data.confirmPassword,
     {
-      message: "Passwords do not match", 
+      message: key('auth.validation.passwordsDoNotMatch'), 
       path: ["confirmPassword"],
     }
   );

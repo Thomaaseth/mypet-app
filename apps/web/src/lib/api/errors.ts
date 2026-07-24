@@ -154,7 +154,7 @@ export function createApiError(
 
 export function logApiError(error: ApiError): void {
   if (process.env.NODE_ENV === 'development') {
-    console.group(`🚨 API Error: ${error.code}`);
+    console.group(`API Error: ${error.code}`);
     console.error(error.getDebugInfo());
     console.groupEnd();
   }

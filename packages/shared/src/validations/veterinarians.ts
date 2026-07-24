@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { key } from './i18n-keys';
 
 // Phone validation - international format support
 const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
@@ -7,67 +8,67 @@ const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]
 export const baseVeterinarianFormSchema = z.object({
   vetName: z
     .string()
-    .min(1, 'Veterinarian name is required')
-    .max(100, 'Veterinarian name must be less than 100 characters')
-    .regex(/^[\p{L}\s\-'\.]+$/u, 'Veterinarian name can only contain letters, spaces, hyphens, apostrophes, and periods'),
+    .min(1, key('vets.validation.vetNameRequired'))
+    .max(100, key('vets.validation.vetNameTooLong'))
+    .regex(/^[\p{L}\s\-'\.]+$/u, key('vets.validation.vetNameInvalidChars')),
   
   clinicName: z
     .string()
-    .max(100, 'Clinic name must be less than 100 characters')
-    .regex(/^[\p{L}\p{N}\s\-'\.&]*$/u, 'Clinic name can only contain letters, numbers, spaces, hyphens, apostrophes, periods, and ampersands')
+    .max(100, key('vets.validation.clinicNameTooLong'))
+    .regex(/^[\p{L}\p{N}\s\-'\.&]*$/u, key('vets.validation.clinicNameInvalidChars'))
     .optional()
     .or(z.literal('')),
   
   phone: z
     .string()
-    .min(1, 'Phone number is required')
-    .regex(phoneRegex, 'Please enter a valid phone number')
-    .max(20, 'Phone number must be less than 20 characters'),
+    .min(1, key('vets.validation.phoneRequired'))
+    .regex(phoneRegex, key('vets.validation.phoneInvalid'))
+    .max(20, key('vets.validation.phoneTooLong')),
   
   email: z
     .string()
-    .email('Please enter a valid email address')
-    .max(100, 'Email must be less than 100 characters')
+    .email(key('auth.validation.invalidEmail'))
+    .max(100, key('vets.validation.emailTooLong'))
     .optional()
     .or(z.literal('')),
   
     website: z
     .string()
-    .min(4, 'Website is too short') // At minimum: "w.co"
-    .max(100, 'Website URL must be less than 100 characters') // More reasonable
+    .min(4, key('vets.validation.websiteTooShort')) // At minimum: "w.co"
+    .max(100, key('vets.validation.websiteTooLong')) // More reasonable
     .regex(
       /^(https?:\/\/)?(www\.)?[\w\-]+(\.[\w\-]+)+/,
-      'Please enter a valid website (e.g., www.example.com or example.com)'
+      key('vets.validation.websiteInvalid')
     )
     .optional()
     .or(z.literal('')),
   
   addressLine1: z
     .string()
-    .min(1, 'Address is required')
-    .max(255, 'Address must be less than 255 characters'),
+    .min(1, key('vets.validation.addressRequired'))
+    .max(255, key('vets.validation.addressTooLong')),
   
   addressLine2: z
     .string()
-    .max(255, 'Address line 2 must be less than 255 characters')
+    .max(255, key('vets.validation.addressLine2TooLong'))
     .optional()
     .or(z.literal('')),
   
   city: z
     .string()
-    .min(1, 'City is required')
-    .max(100, 'City must be less than 100 characters')
-    .regex(/^[\p{L}\s\-'\.]+$/u, 'City can only contain letters, spaces, hyphens, apostrophes, and periods'),
+    .min(1, key('vets.validation.cityRequired'))
+    .max(100, key('vets.validation.cityTooLong'))
+    .regex(/^[\p{L}\s\-'\.]+$/u, key('vets.validation.cityInvalidChars')),
   
   zipCode: z
     .string()
-    .min(1, 'ZIP/Postal code is required')
-    .max(20, 'ZIP/Postal code must be less than 20 characters')
-    .regex(/^[A-Za-z0-9\s\-]+$/, 'ZIP/Postal code can only contain letters, numbers, spaces, and hyphens'),
+    .min(1, key('vets.validation.zipCodeRequired'))
+    .max(20, key('vets.validation.zipCodeTooLong'))
+    .regex(/^[A-Za-z0-9\s\-]+$/, key('vets.validation.zipCodeInvalidChars')),
   
   notes: z
     .string()
-    .max(100, 'Notes must be less than 100 characters')
+    .max(100, key('vets.validation.notesTooLong'))
     .optional()
     .or(z.literal('')),
 });
@@ -77,7 +78,7 @@ export const createVeterinarianSchema = baseVeterinarianFormSchema;
 
 // Schema for updating a veterinarian
 export const updateVeterinarianSchema = baseVeterinarianFormSchema.extend({
-  id: z.string().uuid('Invalid veterinarian ID'),
+  id: z.string().uuid(key('vets.validation.invalidVetId')),
 });
 
 // Types inferred from schemas
@@ -99,10 +100,9 @@ export const validatePetAssignment = (data: unknown) => {
 }
 
 // Pet assignment schema for "Apply to other pets" feature
+// Not currently used anywhere TODO check 
 export const petAssignmentSchema = z.object({
-  petIds: z.array(z.string().uuid('Invalid pet ID')).min(1, 'Select at least one pet'),
+  petIds: z.array(z.string().uuid(key('vets.validation.invalidPetId'))).min(1, key('vets.validation.selectAtLeastOnePet')),
 });
 
 export type PetAssignmentData = z.infer<typeof petAssignmentSchema>;
-
-

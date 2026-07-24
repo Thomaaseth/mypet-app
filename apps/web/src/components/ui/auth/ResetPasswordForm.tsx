@@ -12,14 +12,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { createTranslatedNewPasswordSchema } from '@/lib/validations/password-translated';
+import { newPasswordSchema } from '@/lib/validations/password';
 import { toastService } from '@/lib/toast';
 import { ErrorText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
-import { useMemo } from 'react';
-import type { TFunction } from 'i18next';
+import type { TranslationKey } from '@/i18n/translation-key';
 
-type ResetPasswordFormData = z.infer<ReturnType<typeof createTranslatedNewPasswordSchema>>;
+type ResetPasswordFormData = z.infer<typeof newPasswordSchema>;
 
 interface ResetPasswordFormProps {
     token: string;
@@ -27,7 +26,6 @@ interface ResetPasswordFormProps {
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const { t } = useTranslation();
-    const newPasswordSchema = useMemo(() => createTranslatedNewPasswordSchema(t), [t]);
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -107,7 +105,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   </Button>
                 </div>
                 {form.formState.errors.newPassword && (
-                  <ErrorText>{form.formState.errors.newPassword.message}</ErrorText>
+                  <ErrorText>{t(form.formState.errors.newPassword.message as TranslationKey)}</ErrorText>
                 )}
               </div>
   
@@ -137,7 +135,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                   </Button>
                 </div>
                 {form.formState.errors.confirmPassword && (
-                  <ErrorText>{form.formState.errors.confirmPassword.message}</ErrorText>
+                  <ErrorText>{t(form.formState.errors.confirmPassword.message as TranslationKey)}</ErrorText>
                 )}
               </div>
   

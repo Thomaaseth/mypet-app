@@ -79,6 +79,18 @@ const fr: TranslationShape<typeof appointments> = {
     editDialogTitle: 'Modifier le rendez-vous',
     editDialogDescription: 'Mettez à jour les détails du rendez-vous',
   },
+  validation: {
+    petRequired: 'Veuillez sélectionner un animal',
+    vetRequired: 'Veuillez sélectionner un vétérinaire',
+    timeRequired: "L'heure est requise",
+    invalidTimeFormat: "Veuillez saisir une heure valide (HH:MM au format 24h)",
+    timeIncrementInvalid: 'L\'heure doit être par intervalles de 5 minutes (ex. : 14:05, 14:10)',
+    typeRequired: 'Veuillez sélectionner un type de rendez-vous',
+    invalidType: 'Type de rendez-vous invalide',
+    reasonTooLong: 'Le motif doit contenir moins de 100 caractères',
+    visitNotesTooLong: 'Les notes doivent contenir moins de 200 caractères',
+    invalidAppointmentId: 'ID de rendez-vous invalide',
+  },
 };
 
 export default fr;

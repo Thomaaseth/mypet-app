@@ -76,6 +76,18 @@ const appointments = {
         editDialogTitle: 'Edit Appointment',
         editDialogDescription: 'Update appointment details',
       },
+      validation: {
+        petRequired: 'Please select a pet',
+        vetRequired: 'Please select a veterinarian',
+        timeRequired: 'Time is required',
+        invalidTimeFormat: 'Please enter a valid time (HH:MM in 24-hour format)',
+        timeIncrementInvalid: 'Time must be in 5-minute increments (e.g., 14:05, 14:10)',
+        typeRequired: 'Please select an appointment type',
+        invalidType: 'Invalid appointment type',
+        reasonTooLong: 'Reason must be less than 100 characters',
+        visitNotesTooLong: 'Notes must be less than 200 characters',
+        invalidAppointmentId: 'Invalid appointment ID',
+      },
   } as const;
   
   export default appointments;

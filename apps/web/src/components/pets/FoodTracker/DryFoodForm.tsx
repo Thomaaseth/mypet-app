@@ -10,6 +10,7 @@ import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useTranslation } from 'react-i18next';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface DryFoodFormProps {
   dryFoodEntry?: DryFoodEntry;
@@ -51,7 +52,7 @@ export function DryFoodForm({
               {...register('brandName')}
               aria-invalid={!!errors.brandName}
             />
-          {errors.brandName && <ErrorText>{errors.brandName.message}</ErrorText>}
+          {errors.brandName && <ErrorText>{t(errors.brandName.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -63,7 +64,7 @@ export function DryFoodForm({
           {...register('productName')}
           aria-invalid={!!errors.productName}
         />
-        {errors.productName && <ErrorText>{errors.productName.message}</ErrorText>}
+        {errors.productName && <ErrorText>{t(errors.productName.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -82,7 +83,7 @@ export function DryFoodForm({
             {bagWeightUnit}
           </span>
         </div>
-        {errors.bagWeight && <ErrorText>{errors.bagWeight.message}</ErrorText>}
+        {errors.bagWeight && <ErrorText>{t(errors.bagWeight.message as TranslationKey)}</ErrorText>}
       </div>
 
       <input type="hidden" {...register('bagWeightUnit')} />
@@ -103,7 +104,7 @@ export function DryFoodForm({
           {t('food.units.grams')}
           </span>
         </div>
-        {errors.dailyAmount && <ErrorText>{errors.dailyAmount.message}</ErrorText>}
+        {errors.dailyAmount && <ErrorText>{t(errors.dailyAmount.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -121,7 +122,7 @@ export function DryFoodForm({
             />
           )}
         />
-        {errors.dateStarted && <ErrorText>{errors.dateStarted.message}</ErrorText>}
+        {errors.dateStarted && <ErrorText>{t(errors.dateStarted.message as TranslationKey)}</ErrorText>}
       </div>
       <div className="flex justify-end gap-3 pt-4">
         {onCancel && (

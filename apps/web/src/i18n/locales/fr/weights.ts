@@ -75,6 +75,22 @@ const fr: TranslationShape<typeof weights> = {
     entries_other: '{{count}} entrées',
     noEntriesYet: "Aucune entrée de poids pour le moment. Ajoutez votre première entrée ci-dessus !",
   },
+  validation: {
+    weightRequired: 'Le poids est requis',
+    weightMustBePositive: 'Le poids doit être un nombre positif',
+    invalidWeightUnit: 'Veuillez sélectionner une unité de poids valide',
+    dateRequired: 'La date est requise',
+    invalidDate: 'Veuillez saisir une date valide',
+    weightUnitRequiredForUpdate: "L'unité de poids est requise lors de la mise à jour du poids",
+    minWeightRequired: 'Le poids minimum est requis',
+    minWeightMustBePositive: 'Le poids minimum doit être un nombre positif',
+    maxWeightRequired: 'Le poids maximum est requis',
+    maxWeightMustBePositive: 'Le poids maximum doit être un nombre positif',
+    maxMustExceedMin: 'Le poids maximum doit être supérieur au poids minimum',
+    absoluteMaxExceeded: 'Le poids dépasse le maximum absolu (200 kg / 440 lbs)',
+    outOfAnimalRange: 'Le poids doit être compris entre {{min}}-{{max}}{{unit}} pour un {{animalType}}',
+    targetOutOfAnimalRange: "L'objectif de poids doit être compris entre {{min}}-{{max}}{{unit}} pour un {{animalType}}",
+  },
 };
 
 export default fr;

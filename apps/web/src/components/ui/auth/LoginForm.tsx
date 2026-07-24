@@ -13,22 +13,19 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { toastService } from '@/lib/toast';
 import { useSessionContext } from '@/contexts/SessionContext';
 import { PageTitle, MutedText, ErrorText } from '@/components/ui/typography';
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
+import { key } from '@/i18n/translation-key';
+import type { TranslationKey } from '@/i18n/translation-key';
 
-// Zod schema factory — takes `t` so validation messages are translated
-const createSignInSchema = (t: TFunction) =>
-  z.object({
-    email: z.string().email(t('auth.validation.invalidEmail')),
-    password: z.string().min(1, t('auth.validation.passwordRequired')),
-  });
+const signInSchema = z.object({
+  email: z.string().email(key('auth.validation.invalidEmail')),
+  password: z.string().min(1, key('auth.validation.passwordRequired')),
+});
 
-type SignInFormData = z.infer<ReturnType<typeof createSignInSchema>>;
+type SignInFormData = z.infer<typeof signInSchema>;
 
 export default function SignInForm() {
   const { t } = useTranslation();
-  const signInSchema = useMemo(() => createSignInSchema(t), [t]);
   const navigate = useNavigate();
   const search = useSearch({ from: '/login' });
   const { refreshSession } = useSessionContext();
@@ -88,7 +85,7 @@ export default function SignInForm() {
             {...register('email')}
             aria-invalid={!!errors.email}
           />
-            {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
+            {errors.email && <ErrorText>{t(errors.email.message as TranslationKey)}</ErrorText>}
         </div>
 
         {/* Password */}
@@ -101,7 +98,7 @@ export default function SignInForm() {
             {...register('password')}
             aria-invalid={!!errors.password}
           />
-            {errors.password && <ErrorText>{errors.password.message}</ErrorText>}
+            {errors.password && <ErrorText>{t(errors.password.message as TranslationKey)}</ErrorText>}
         </div>
 
         {/* Auth Error Display with shadcn Alert */}

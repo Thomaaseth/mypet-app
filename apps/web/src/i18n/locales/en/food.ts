@@ -111,6 +111,27 @@ const food = {
       futureDate: 'Finish date cannot be in the future',
       updateDate: 'Update Date',
     },
+    validation: {
+      brandNameTooLong: 'Brand name must be 100 characters or less',
+      productNameTooLong: 'Product name must be 150 characters or less',
+      dailyAmountRequired: 'Daily amount is required',
+      dailyAmountMustBePositive: 'Daily amount must be a positive number',
+      dateStartedRequired: 'Purchase date is required',
+      bagWeightRequired: 'Bag weight is required',
+      bagWeightMustBePositive: 'Bag weight must be a positive number',
+      bagWeightUnitRequired: 'Bag weight unit is required',
+      invalidBagWeightUnit: 'Invalid bag weight unit for dry food',
+      dailyAmountExceedsBagWeight: 'Daily amount should be less than total bag weight',
+      bagWeightUnitRequiredForUpdate: 'Bag weight unit is required when updating bag weight',
+      numberOfUnitsRequired: 'Number of units is required',
+      numberOfUnitsMustBePositive: 'Number of units must be a positive whole number',
+      weightPerUnitRequired: 'Weight per unit is required',
+      weightPerUnitMustBePositive: 'Weight per unit must be a positive number',
+      wetFoodUnitRequired: 'Weight unit is required',
+      invalidWetFoodUnit: 'Invalid weight unit for wet food',
+      dailyAmountExceedsTotalWeight: 'Daily amount should be less than total weight',
+      wetFoodUnitRequiredForUpdate: 'Weight unit is required when updating weight per unit or daily amount',
+    },
 } as const;
 
 export default food;

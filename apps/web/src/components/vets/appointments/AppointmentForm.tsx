@@ -27,6 +27,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { MutedText, ErrorText, HelperText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
 import { APPOINTMENT_TYPE_KEYS } from '@/i18n/enum-keys';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface AppointmentFormProps {
   appointment?: AppointmentWithRelations;
@@ -146,7 +147,7 @@ export default function AppointmentForm({
           </SelectContent>
         </Select>
         {errors.petId && (
-          <p className="text-sm text-destructive">{errors.petId.message}</p>
+          <p className="text-sm text-destructive">{t(errors.petId.message as TranslationKey)}</p>
         )}
       </div>
 
@@ -176,7 +177,7 @@ export default function AppointmentForm({
             </SelectContent>
           </Select>
         )}
-        {errors.veterinarianId && <ErrorText>{errors.veterinarianId.message}</ErrorText>}
+        {errors.veterinarianId && <ErrorText>{t(errors.veterinarianId.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Date and Time Row */}
@@ -196,7 +197,7 @@ export default function AppointmentForm({
               />
             )}
           />
-          {errors.appointmentDate && <ErrorText>{errors.appointmentDate.message}</ErrorText>}
+          {errors.appointmentDate && <ErrorText>{t(errors.appointmentDate.message as TranslationKey)}</ErrorText>}
         </div>
 
         <div className="space-y-2">
@@ -217,7 +218,7 @@ export default function AppointmentForm({
               ))}
             </SelectContent>
           </Select>
-          {errors.appointmentTime && <ErrorText>{errors.appointmentTime.message}</ErrorText>}
+          {errors.appointmentTime && <ErrorText>{t(errors.appointmentTime.message as TranslationKey)}</ErrorText>}
         </div>
       </div>
       
@@ -240,7 +241,7 @@ export default function AppointmentForm({
             ))}
           </SelectContent>
         </Select>
-        {errors.appointmentType && <ErrorText>{errors.appointmentType.message}</ErrorText>}
+        {errors.appointmentType && <ErrorText>{t(errors.appointmentType.message as TranslationKey)}</ErrorText>}
       </div>
 
       {/* Reason for Visit "Discussion points" */}
@@ -256,7 +257,7 @@ export default function AppointmentForm({
           className="[word-break:break-word]"
           maxLength={100}
         />
-        {errors.reasonForVisit && <ErrorText>{errors.reasonForVisit.message}</ErrorText>}
+        {errors.reasonForVisit && <ErrorText>{t(errors.reasonForVisit.message as TranslationKey)}</ErrorText>}
         <HelperText className="text-xs">
           {t('appointments.form.discussionPointsCharCount', { count: watch('reasonForVisit')?.length || 0 })}
         </HelperText>
@@ -276,7 +277,7 @@ export default function AppointmentForm({
             className="[word-break:break-word]"
             maxLength={200}
           />
-          {errors.visitNotes && <ErrorText>{errors.visitNotes.message}</ErrorText>}
+          {errors.visitNotes && <ErrorText>{t(errors.visitNotes.message as TranslationKey)}</ErrorText>}
           <HelperText className="text-xs">
             {t('appointments.form.visitSummaryCharCount', { count: watch('visitNotes')?.length || 0 })}
           </HelperText>

@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { key } from './i18n-keys';
 
 export const petNoteFormSchema = z.object({
     content: z
         .string()
-        .min(1, 'Note cannot be empty')
-        .max(200, 'Note must be less than 200 characters')
+        .min(1, key('notes.validation.contentRequired'))
+        .max(200, key('notes.validation.contentTooLong'))
 })
 
 export type PetNoteFormData = z.infer<typeof petNoteFormSchema>;
@@ -16,4 +17,4 @@ export const validateCreateNote = (data: unknown) => {
 
 export const validateUpdateNote = (data: unknown) => {
     return petNoteFormSchema.safeParse(data);
-}
+};

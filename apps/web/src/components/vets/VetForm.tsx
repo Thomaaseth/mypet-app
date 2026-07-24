@@ -14,6 +14,7 @@ import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
 import { baseVeterinarianFormSchema } from '@/lib/validations/veterinarians';
 import { SectionTitle, MutedText, ErrorText, HelperText } from '../ui/typography';
 import { useTranslation } from 'react-i18next';
+import type { TranslationKey } from '@/i18n/translation-key';
 
 interface VetFormProps {
   vet?: Veterinarian;
@@ -105,7 +106,7 @@ export default function VetForm({
           {...register('vetName')}
           aria-invalid={!!errors.vetName}
         />
-        {errors.vetName && <ErrorText>{errors.vetName.message}</ErrorText>}
+        {errors.vetName && <ErrorText>{t(errors.vetName.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -116,7 +117,7 @@ export default function VetForm({
           {...register('clinicName')}
           aria-invalid={!!errors.clinicName}
         />
-          {errors.clinicName && <ErrorText>{errors.clinicName.message}</ErrorText>} 
+          {errors.clinicName && <ErrorText>{t(errors.clinicName.message as TranslationKey)}</ErrorText>} 
         <HelperText className="text-xs">
           {t('vets.form.clinicNameHelper')}
         </HelperText>
@@ -131,7 +132,7 @@ export default function VetForm({
           {...register('phone')}
           aria-invalid={!!errors.phone}
         />
-        {errors.phone && <ErrorText>{errors.phone.message}</ErrorText>}
+        {errors.phone && <ErrorText>{t(errors.phone.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -143,7 +144,7 @@ export default function VetForm({
           {...register('email')}
           aria-invalid={!!errors.email}
         />
-        {errors.email && <ErrorText>{errors.email.message}</ErrorText>}
+        {errors.email && <ErrorText>{t(errors.email.message as TranslationKey)}</ErrorText>}
         <HelperText className="text-xs">
           {t('vets.form.optionalHelper')}
         </HelperText>
@@ -158,7 +159,7 @@ export default function VetForm({
           {...register('website')}
           aria-invalid={!!errors.website}
         />
-        {errors.website && <ErrorText>{errors.website.message}</ErrorText>}
+        {errors.website && <ErrorText>{t(errors.website.message as TranslationKey)}</ErrorText>}
         <HelperText className="text-xs">
           {t('vets.form.optionalHelper')}
         </HelperText>
@@ -172,7 +173,7 @@ export default function VetForm({
           {...register('addressLine1')}
           aria-invalid={!!errors.addressLine1}
         />
-        {errors.addressLine1 && <ErrorText>{errors.addressLine1.message}</ErrorText>}
+        {errors.addressLine1 && <ErrorText>{t(errors.addressLine1.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="space-y-2">
@@ -183,7 +184,7 @@ export default function VetForm({
           {...register('addressLine2')}
           aria-invalid={!!errors.addressLine2}
         />
-          {errors.addressLine2 && <ErrorText>{errors.addressLine2.message}</ErrorText>}
+          {errors.addressLine2 && <ErrorText>{t(errors.addressLine2.message as TranslationKey)}</ErrorText>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -195,7 +196,7 @@ export default function VetForm({
             {...register('city')}
             aria-invalid={!!errors.city}
           />
-        {errors.city && <ErrorText>{errors.city.message}</ErrorText>}
+        {errors.city && <ErrorText>{t(errors.city.message as TranslationKey)}</ErrorText>}
         </div>
 
         <div className="space-y-2">
@@ -206,7 +207,7 @@ export default function VetForm({
             {...register('zipCode')}
             aria-invalid={!!errors.zipCode}
           />
-        {errors.zipCode && <ErrorText>{errors.zipCode.message}</ErrorText>}
+        {errors.zipCode && <ErrorText>{t(errors.zipCode.message as TranslationKey)}</ErrorText>}
         </div>
       </div>
 
@@ -221,7 +222,7 @@ export default function VetForm({
           className="[word-break:break-word]"
           maxLength={100}
         />
-        {errors.notes && <ErrorText>{errors.notes.message}</ErrorText>}
+        {errors.notes && <ErrorText>{t(errors.notes.message as TranslationKey)}</ErrorText>}
         <HelperText className="text-xs">
           {t('vets.form.notesCharCount', { count: watch('notes')?.length || 0 })}
         </HelperText>

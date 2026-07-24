@@ -114,6 +114,27 @@ shared: {
     futureDate: 'La date de fin ne peut pas être dans le futur',
     updateDate: 'Mettre à jour la date',
   },
+  validation: {
+    brandNameTooLong: 'Le nom de la marque doit contenir 100 caractères ou moins',
+    productNameTooLong: 'Le nom du produit doit contenir 150 caractères ou moins',
+    dailyAmountRequired: 'La quantité journalière est requise',
+    dailyAmountMustBePositive: 'La quantité journalière doit être un nombre positif',
+    dateStartedRequired: "La date d'achat est requise",
+    bagWeightRequired: 'Le poids du sac est requis',
+    bagWeightMustBePositive: 'Le poids du sac doit être un nombre positif',
+    bagWeightUnitRequired: 'L\'unité de poids du sac est requise',
+    invalidBagWeightUnit: 'Unité de poids du sac invalide pour les croquettes',
+    dailyAmountExceedsBagWeight: 'La quantité journalière doit être inférieure au poids total du sac',
+    bagWeightUnitRequiredForUpdate: "L'unité de poids du sac est requise lors de la mise à jour du poids du sac",
+    numberOfUnitsRequired: "Le nombre d'unités est requis",
+    numberOfUnitsMustBePositive: "Le nombre d'unités doit être un nombre entier positif",
+    weightPerUnitRequired: 'Le poids par unité est requis',
+    weightPerUnitMustBePositive: 'Le poids par unité doit être un nombre positif',
+    wetFoodUnitRequired: "L'unité de poids est requise",
+    invalidWetFoodUnit: 'Unité de poids invalide pour la pâtée',
+    dailyAmountExceedsTotalWeight: 'La quantité journalière doit être inférieure au poids total',
+    wetFoodUnitRequiredForUpdate: "L'unité de poids est requise lors de la mise à jour du poids par unité ou de la quantité journalière",
+  },
 };
 
 export default fr;

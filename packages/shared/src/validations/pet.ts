@@ -1,32 +1,33 @@
 import { z } from 'zod';
+import { key } from './i18n-keys';
 
 export type WeightUnit = 'kg' | 'lbs';
 
 // Pet gender and weight unit enums for validation
 export const petGenderSchema = z.enum(['male', 'female', 'unknown'], {
-  errorMap: () => ({ message: 'Please select a valid gender' })
+  errorMap: () => ({ message: key('pets.validation.invalidGender') })
 });
 
 export const weightUnitSchema = z.enum(['kg', 'lbs'], {
-  errorMap: () => ({ message: 'Please select a valid weight unit' })
+  errorMap: () => ({ message: key('weights.validation.invalidWeightUnit') })
 });
 
 // Base pet validation schema (no refine so we can use .extend, .shape, .partial)
 export const basePetFormSchema = z.object({
   name: z
     .string()
-    .min(1, 'Pet name is required')
-    .max(50, 'Pet name must be less than 50 characters')
-    .regex(/^[\p{L}\s\-'\.]+$/u, 'Pet name can only contain letters, spaces, hyphens, apostrophes, and periods'),
+    .min(1, key('pets.validation.nameRequired'))
+    .max(50, key('pets.validation.nameTooLong'))
+    .regex(/^[\p{L}\s\-'\.]+$/u, key('pets.validation.nameInvalidChars')),
   
   animalType: z.enum(['cat', 'dog'], {
-  errorMap: () => ({ message: 'Please select if this is a cat or dog' })
+  errorMap: () => ({ message: key('pets.validation.animalTypeRequired') })
   }),
 
   species: z
     .string()
-    .max(50, 'Species/breed must be less than 50 characters')
-    .regex(/^[\p{L}\s\-'\.]*$/u, 'Species/breed can only contain letters, spaces, hyphens, apostrophes, and periods')
+    .max(50, key('pets.validation.speciesTooLong'))
+    .regex(/^[\p{L}\s\-'\.]*$/u, key('pets.validation.speciesInvalidChars'))
     .optional()
     .or(z.literal('')),
   
@@ -34,7 +35,7 @@ export const basePetFormSchema = z.object({
   
   birthDate: z
     .string()
-    .refine((date) => !date || !isNaN(new Date(date).getTime()), 'Please enter a valid birth date')
+    .refine((date) => !date || !isNaN(new Date(date).getTime()), key('pets.validation.invalidBirthDate'))
     .optional()
     .or(z.literal('')),
   
@@ -49,14 +50,14 @@ export const basePetFormSchema = z.object({
   
   microchipNumber: z
     .string()
-    .regex(/^[A-Za-z0-9\s-]*$/, 'Microchip number can only contain letters, numbers, spaces, and hyphens')
-    .max(20, 'Microchip number must be less than 20 characters')
+    .regex(/^[A-Za-z0-9\s-]*$/, key('pets.validation.microchipInvalidChars'))
+    .max(20, key('pets.validation.microchipTooLong'))
     .optional()
     .or(z.literal('')),
   
   notes: z
     .string()
-    .max(200, 'Bio must be less than 200 characters')
+    .max(200, key('pets.validation.notesTooLong'))
     .optional()
     .or(z.literal('')),
 });
@@ -77,7 +78,7 @@ export const petFormSchema = basePetFormSchema.refine((data) => {
   
   return true;
 }, {
-  message: 'Weight exceeds maximum allowed (200kg / 440lbs)',
+  message: key('pets.validation.weightExceedsMax'),
   path: ['weight']
 });
 
@@ -99,7 +100,7 @@ export const createPetSchema = basePetFormSchema.extend({
   
   return true;
 }, {
-  message: 'Weight exceeds maximum allowed (200kg / 440lbs)',
+  message: key('pets.validation.weightExceedsMax'),
   path: ['weight']
 });
 
@@ -107,7 +108,7 @@ export const updatePetSchema = basePetFormSchema
   .omit({ weight: true, weightUnit: true })
   .partial()
   .extend({
-    id: z.string().uuid('Invalid pet ID'),
+    id: z.string().uuid(key('vets.validation.invalidPetId')),
   });
 
 // Export types
@@ -127,4 +128,3 @@ export const validateCreatePet = (data: unknown) => {
 export const validateUpdatePet = (data: unknown) => {
   return updatePetSchema.safeParse(data);
 };
-
