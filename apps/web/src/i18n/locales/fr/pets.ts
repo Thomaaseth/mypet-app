@@ -33,7 +33,7 @@ const fr: TranslationShape<typeof pets> = {
     animalTypePlaceholder: 'Choisir chat ou chien',
     speciesLabel: 'Race ou surnom',
     speciesPlaceholder: 'Entrez une race ou un surnom',
-    speciesHelper: 'Facultatif : indiquez une race, ou un surnom si vous préférez — tout est possible',
+    speciesHelper: 'Facultatif : indiquez une race, ou un surnom si vous préférez, tout est possible',
     genderLabel: 'Sexe',
     genderPlaceholder: 'Choisir le sexe',
     birthDateLabel: 'Date de naissance',

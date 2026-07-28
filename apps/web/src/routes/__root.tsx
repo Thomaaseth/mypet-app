@@ -28,8 +28,7 @@ function RootComponent() {
         <UserPreferencesProvider>
           <CookieConsentProvider>
             <div
-              className="min-h-screen flex flex-col"
-              style={{ paddingBottom: 'var(--cookie-consent-reserved-height, 0px)' }}
+              className="min-h-dvh flex flex-col"
             >
               <NetworkStatusBanner />
               <Navbar />

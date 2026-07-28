@@ -1,7 +1,6 @@
 const cookies = {
   banner: {
-    description:
-      'We use cookies to keep you signed in. We\u2019d also like to use analytics cookies to understand how the app is used \u2014 only with your permission.',
+    description: 'We use cookies to keep you signed in.',
     acceptAll: 'Accept all',
     rejectNonEssential: 'Reject non-essential',
     managePreferences: 'Manage preferences',

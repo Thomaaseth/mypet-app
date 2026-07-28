@@ -30,7 +30,7 @@ const pets = {
         animalTypePlaceholder: 'Select cat or dog',
         speciesLabel: 'Breed or Nickname',
         speciesPlaceholder: 'Enter a breed or nickname',
-        speciesHelper: "Optional: Enter a breed, or a nickname if you'd rather — anything goes",
+        speciesHelper: "Optional: Enter a breed, or a nickname if you'd rather, anything goes",
         genderLabel: 'Sex',
         genderPlaceholder: 'Select gender',
         birthDateLabel: 'Birth Date',
