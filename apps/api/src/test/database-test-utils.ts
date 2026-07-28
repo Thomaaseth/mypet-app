@@ -21,6 +21,7 @@ export class DatabaseTestUtils {
       await db.delete(schema.weightTargets);
       await db.delete(schema.veterinarians);
       await db.delete(schema.userPreferences);
+      await db.delete(schema.cookieConsentLog);
       await db.delete(schema.pets);
       await db.delete(schema.user);
     } catch (error) {

@@ -8,3 +8,4 @@ export * from './validations/pet-notes';
 export * from './validations/locale';
 export * from './utils/units';
 export * from './validations/language';
+export * from './validations/cookie-consent';

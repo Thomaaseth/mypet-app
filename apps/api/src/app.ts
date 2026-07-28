@@ -14,6 +14,7 @@ import adminRoutes from '@/routes/admin.routes';
 import vetRoutes from '@/routes/veterinarians.routes';
 import appointmentRoutes from '@/routes/appointments.routes';
 import userPreferencesRoutes from '@/routes/user-preferences.routes'
+import cookieConsentRoutes from '@/routes/cookie-consent.routes'
 
 export const app = express();
 
@@ -65,6 +66,9 @@ app.use('/api/appointments', appointmentRoutes)
 
 // USER PREFERENCES
 app.use('/api/users/preferences', userPreferencesRoutes)
+
+// COOKIE CONSENT AUDIT LOG (public, no auth required)
+app.use('/api/cookie-consent', cookieConsentRoutes)
 
 // APP HEALTH   
 app.get('/api/health', healthRateLimit, (req, res, next) => {

@@ -10,3 +10,4 @@ export * from './appointments';
 export * from './pet-notes';
 export * from './rate-limit';
 export * from './user-preferences';
+export * from './cookie-consent-log';

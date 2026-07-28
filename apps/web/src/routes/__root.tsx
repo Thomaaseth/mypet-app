@@ -27,18 +27,23 @@ function RootComponent() {
       <SessionProvider>
         <UserPreferencesProvider>
           <CookieConsentProvider>
-          <NetworkStatusBanner />
-            <Navbar />
-            <PreferenceBanner />
-            <main className="min-h-screen">
-              <Outlet />
+            <div
+              className="min-h-screen flex flex-col"
+              style={{ paddingBottom: 'var(--cookie-consent-reserved-height, 0px)' }}
+            >
+              <NetworkStatusBanner />
+              <Navbar />
+              <PreferenceBanner />
+              <main className="flex-1">
+                <Outlet />
+              </main>
               <Footer />
-            </main>
+            </div>
             <CookieConsentBanner />
             <Toaster position="bottom-right" />
             {/* Only show devtools in development */}
             {import.meta.env.DEV && <TanStackRouterDevtools />}
-            </CookieConsentProvider>
+          </CookieConsentProvider>
         </UserPreferencesProvider>
       </SessionProvider>
     </LanguageProvider>

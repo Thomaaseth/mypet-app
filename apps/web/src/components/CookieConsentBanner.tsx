@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Cookie } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useCookieConsentContext } from '@/contexts/CookieConsentContext';
+import { useElementHeight } from '@/hooks/useElementHeight';
+
+// Read by RootComponent's layout (see __root.tsx) to reserve exactly this
+// much bottom space while the card is visible, so it's never hidden behind
+// it, regardless of position/shape. Kept as a bridge via a CSS custom
+// property rather than lifting state, so this component and the root layout
+// don't need to share a provider tree just for a height number.
+const RESERVED_HEIGHT_CSS_VAR = '--cookie-consent-reserved-height';
 
 export function CookieConsentBanner() {
   const { t } = useTranslation();
@@ -13,6 +21,20 @@ export function CookieConsentBanner() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingAnalytics, setPendingAnalytics] = useState(consent.analytics);
+  const [cardRef, cardHeight] = useElementHeight<HTMLDivElement>();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    // +16px margin-equivalent gap so the reserved space isn't flush against
+    // the card's own bottom offset (the card itself sits `bottom-4`/16px up).
+    root.style.setProperty(
+      RESERVED_HEIGHT_CSS_VAR,
+      hasConsented ? '0px' : `${cardHeight + 16}px`
+    );
+    return () => {
+      root.style.setProperty(RESERVED_HEIGHT_CSS_VAR, '0px');
+    };
+  }, [hasConsented, cardHeight]);
 
   if (hasConsented) return null;
 
@@ -28,24 +50,25 @@ export function CookieConsentBanner() {
 
   return (
     <>
-      <div className="sticky bottom-0 left-0 right-0 z-50 border-t bg-background px-4 py-4 shadow-lg">
-        <div className="container mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-2 text-sm text-foreground">
-            <Cookie className="h-4 w-4 shrink-0 mt-0.5 sm:mt-0" />
-            <span>{t('cookies.banner.description')}</span>
-          </div>
+      <div
+        ref={cardRef}
+        className="fixed bottom-4 left-4 z-50 w-[calc(100vw-2rem)] max-w-sm rounded-lg border bg-background p-4 shadow-lg"
+      >
+        <div className="flex items-start gap-2 text-sm text-foreground mb-3">
+          <Cookie className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>{t('cookies.banner.description')}</span>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <Button variant="ghost" size="sm" onClick={openDialog}>
-              {t('cookies.banner.managePreferences')}
-            </Button>
-            <Button variant="outline" size="sm" onClick={rejectNonEssential}>
-              {t('cookies.banner.rejectNonEssential')}
-            </Button>
-            <Button size="sm" onClick={acceptAll}>
-              {t('cookies.banner.acceptAll')}
-            </Button>
-          </div>
+        <div className="flex flex-col gap-2">
+          <Button size="sm" onClick={acceptAll}>
+            {t('cookies.banner.acceptAll')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={rejectNonEssential}>
+            {t('cookies.banner.rejectNonEssential')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={openDialog}>
+            {t('cookies.banner.managePreferences')}
+          </Button>
         </div>
       </div>
 
