@@ -11,6 +11,8 @@ import vets from './vets';
 import appointments from './appointments';
 import preferences from './preferences';
 import profile from './profile';
+import cookies from './cookies';
+import footer from './footer';
 
 const fr: TranslationShape<typeof en> = {
   common,
@@ -24,6 +26,8 @@ const fr: TranslationShape<typeof en> = {
   appointments,
   preferences,
   profile,
+  cookies,
+  footer,
 };
 
 export default fr;

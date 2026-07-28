@@ -9,6 +9,8 @@ import vets from './vets';
 import appointments from './appointments';
 import preferences from './preferences';
 import profile from './profile';
+import cookies from './cookies';
+import footer from './footer';
 
 const en = {
   common,
@@ -22,6 +24,8 @@ const en = {
   appointments,
   preferences,
   profile,
+  cookies,
+  footer,
 } as const;
 
 export default en;
