@@ -36,22 +36,6 @@ export const auth = betterAuth({
             domain: process.env.COOKIE_DOMAIN // Set actual domain for production!!!
         } : undefined,
     },
-    // rateLimit: {
-    //     enabled: true,
-    //     window: 60,        // better-auth default — 60 second window
-    //     max: 100,          // better-auth default — 100 requests per window
-    //     storage: "memory", // due to bug on "database" storage - revisit if resolved
-    //     // customRules: {
-    //     //     "/sign-in/email": {
-    //     //         window: 10,   // better-auth default
-    //     //         max: 3,       // better-auth default
-    //     //     },
-    //     //     "/forget-password": {
-    //     //         window: 60,
-    //     //         max: 3,       // 3 attempts before lockout
-    //     //     },
-    //     // },
-    // },
     emailAndPassword: {
         enabled: true,
         disableSignUp: false,
@@ -118,6 +102,13 @@ export const auth = betterAuth({
         autoSignInAfterVerification: true, // Auto sign in after email verification
     },
     user: {
+        additionalFields: {
+            termsAcceptedAt: {
+                type: "date",
+                required: false,
+                input: false,
+            },
+        },
         changeEmail: {
             enabled: true,
             sendChangeEmailVerification: async ({ user, newEmail, url, token }: {
@@ -147,6 +138,20 @@ export const auth = betterAuth({
                 }
                 
                 authLogger.info({ newEmail: newEmail }, 'Email change verification sent successfully');
+            },
+        },
+    },
+    databaseHooks: {
+        user: {
+            create: {
+                before: async (user) => {
+                    return {
+                        data: {
+                            ...user,
+                            termsAcceptedAt: new Date(),
+                        },
+                    };
+                },
             },
         },
     },

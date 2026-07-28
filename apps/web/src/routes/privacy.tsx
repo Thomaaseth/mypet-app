@@ -156,7 +156,7 @@ function PrivacyPageFr() {
       </LegalSection>
 
       <LegalSection title="7. Mineurs">
-        <p>Pettr ne s&apos;adresse pas aux personnes de moins de 16 ans et ne doit pas être utilisé par elles.</p>
+        <p>Pettr ne s&apos;adresse pas aux personnes de moins de 16 ans et ne doit pas être utilisé par celles-ci.</p>
       </LegalSection>
 
       <LegalSection title="8. Modifications de cette politique">

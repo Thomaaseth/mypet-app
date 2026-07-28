@@ -30,6 +30,10 @@ const auth = {
         submitting: 'Creating account...',
         haveAccount: 'Already have an account?',
         signInLink: 'Sign in',
+        acceptTermsPrefix: 'I agree to the',
+        termsLink: 'Terms of Service',
+        acceptTermsMiddle: 'and',
+        privacyLink: 'Privacy Policy',
       },
     validation: {
         confirmPasswordRequired: 'Please confirm your password',
@@ -39,6 +43,7 @@ const auth = {
         currentPasswordRequired: 'Current password is required',
         firstNameRequired: 'First name is required',
         lastNameRequired: 'Last name is required',
+        mustAcceptTerms: 'You must accept the Terms of Service and Privacy Policy to create an account',
         passwordMinLength: 'Password must be at least 8 characters',
         passwordMaxLength: 'Password must be less than 128 characters',
         passwordUppercase: 'Password must contain at least one uppercase letter',

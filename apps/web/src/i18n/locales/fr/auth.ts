@@ -33,6 +33,10 @@ const fr: TranslationShape<typeof auth> = {
     submitting: 'Création du compte...',
     haveAccount: 'Vous avez déjà un compte ?',
     signInLink: 'Se connecter',
+    acceptTermsPrefix: "J'accepte les",
+    termsLink: "Conditions d'utilisation",
+    acceptTermsMiddle: 'et la',
+    privacyLink: 'Politique de confidentialité',
   },
   validation: {
     confirmPasswordRequired: 'Veuillez confirmer votre mot de passe',
@@ -42,6 +46,7 @@ const fr: TranslationShape<typeof auth> = {
     currentPasswordRequired: 'Le mot de passe actuel est requis',
     firstNameRequired: 'Le prénom est requis',
     lastNameRequired: 'Le nom est requis',
+    mustAcceptTerms: "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour créer un compte",
     passwordMinLength: 'Le mot de passe doit contenir au moins 8 caractères',
     passwordMaxLength: 'Le mot de passe doit contenir moins de 128 caractères',
     passwordUppercase: 'Le mot de passe doit contenir au moins une majuscule',

@@ -7,6 +7,7 @@ import { useNavigate, useSearch, Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toastService } from '@/lib/toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -22,6 +23,9 @@ const signUpSchema = z.object({
   firstName: z.string().min(1, key('auth.validation.firstNameRequired')),
   lastName: z.string().min(1, key('auth.validation.lastNameRequired')),
   email: z.string().email(key('auth.validation.invalidEmail')),
+    acceptedTerms: z.boolean().refine((val) => val === true, {
+    message: key('auth.validation.mustAcceptTerms'),
+  }),
 }).merge(signUpPasswordSchema);
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
@@ -36,9 +40,14 @@ export default function SignUpForm() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      acceptedTerms: false,
+    },
   });
 
   const onSubmit = async (data: SignUpFormData) => {
@@ -126,6 +135,40 @@ export default function SignUpForm() {
           <HelperText className="text-xs">
           {t('auth.signup.passwordRequirements')}
           </HelperText>
+        </div>
+
+        {/* Terms & Privacy acceptance — required before account creation */}
+        <div className="space-y-1">
+          <div className="flex items-start gap-2">
+            <Checkbox
+              id="acceptedTerms"
+              checked={watch('acceptedTerms')}
+              onCheckedChange={(checked) => setValue('acceptedTerms', checked === true)}
+              className="mt-0.5"
+              aria-invalid={!!errors.acceptedTerms}
+            />
+            <Label htmlFor="acceptedTerms" className="block text-sm font-normal leading-snug">
+              {t('auth.signup.acceptTermsPrefix')}{' '}
+              <Link
+                to="/terms"
+                search={{}}
+                target="_blank"
+                className="underline underline-offset-2 hover:no-underline"
+              >
+                {t('auth.signup.termsLink')}
+              </Link>{' '}
+              {t('auth.signup.acceptTermsMiddle')}{' '}
+              <Link
+                to="/privacy"
+                search={{}}
+                target="_blank"
+                className="underline underline-offset-2 hover:no-underline"
+              >
+                {t('auth.signup.privacyLink')}
+              </Link>
+            </Label>
+          </div>
+          {errors.acceptedTerms && <ErrorText>{t(errors.acceptedTerms.message as TranslationKey)}</ErrorText>}
         </div>
 
         {/* Auth Error Display with shadcn Alert */}

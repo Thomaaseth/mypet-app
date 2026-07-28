@@ -30,8 +30,7 @@ function CookiePolicyPageEn() {
         <p>
           When you first visit Pettr, you&apos;re asked to accept or reject non-essential cookies via a consent
           banner. You can change your choice at any time via &quot;Manage preferences&quot; in the site footer and that
-          link stays available even after the initial banner is gone, so changing your mind doesn&apos;t require
-          waiting for it to reappear. Your choice is stored locally in your browser, and — separately — we
+          link stays available even after the initial banner is gone. Your choice is stored locally in your browser, and - separately - we
           keep a record that consent was requested and what you chose, so that we can demonstrate compliance
           if ever asked to (see our Privacy Policy for detail on that record).
         </p>
@@ -74,8 +73,7 @@ function CookiePolicyPageFr() {
           Lors de votre première visite sur Pettr, il vous est demandé d&apos;accepter ou de refuser les cookies
           non essentiels via une bannière de consentement. Vous pouvez modifier votre choix à tout moment via
           « Gérer les préférences » dans le pied de page du site et ce lien reste disponible même après la
-          disparition de la bannière initiale, afin que changer d&apos;avis ne nécessite pas d&apos;attendre qu&apos;elle
-          réapparaisse. Votre choix est stocké localement dans votre navigateur, et — séparément — nous
+          disparition de la bannière initiale. Votre choix est stocké localement dans votre navigateur, et - séparément - nous
           conservons un registre attestant que le consentement a été demandé et de votre choix, afin de
           pouvoir démontrer notre conformité si cela nous est demandé (voir notre Politique de confidentialité
           pour plus de détails sur ce registre).
