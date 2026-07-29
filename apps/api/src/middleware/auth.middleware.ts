@@ -5,33 +5,6 @@ import { respondWithError } from '../lib/json';
 import { APIError } from 'better-auth/api';
 import { authLogger } from '../lib/logger';
 
-
-// export interface AuthenticatedRequest extends Request {
-//     authSession?: {
-//       user: {
-//         id: string;
-//         email: string;
-//         name: string;
-//         emailVerified: boolean;
-//         role: string,
-//         banned: boolean | null,
-//         createdAt: Date;
-//         updatedAt: Date;
-//         image?: string | null;
-//       };
-//       session: {
-//         id: string;
-//         userId: string;
-//         expiresAt: Date;
-//         token: string;
-//         createdAt: Date;
-//         updatedAt: Date;
-//         ipAddress?: string | null;
-//         userAgent?: string | null;
-//       };
-//     };
-//   }
-
 // Derive session type directly from better-auth 
 type BetterAuthSession = Awaited<ReturnType<typeof auth.api.getSession>>;
 
