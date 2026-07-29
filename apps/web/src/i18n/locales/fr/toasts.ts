@@ -53,6 +53,7 @@ const fr: TranslationShape<typeof toasts> = {
     emailUpdateInitiatedDescription: 'Consultez votre boîte de réception et cliquez sur le lien de vérification pour finaliser le changement.',
     emailUpdatedSuccess: 'E-mail mis à jour avec succès',
     verificationSentTitle: 'E-mail de vérification envoyé',
+    verificationSentDescription: 'Consultez votre boîte de réception pour activer votre compte.',
     passwordResetSentTitle: 'E-mail de réinitialisation envoyé',
     passwordResetSentDescription: 'Consultez votre boîte de réception pour les instructions de réinitialisation.',
     passwordResetSuccessTitle: 'Mot de passe réinitialisé avec succès !',

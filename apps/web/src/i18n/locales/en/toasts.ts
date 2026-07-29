@@ -50,6 +50,7 @@ const toasts = {
         emailUpdateInitiatedDescription: 'Check your inbox and click the verification link to complete the change.',
         emailUpdatedSuccess: 'Email updated successfully',
         verificationSentTitle: 'Verification email sent',
+        verificationSentDescription: 'Check your inbox for a verification link to activate your account.',
         passwordResetSentTitle: 'Password reset email sent',
         passwordResetSentDescription: 'Check your inbox for reset instructions.',
         passwordResetSuccessTitle: 'Password reset successfully!',

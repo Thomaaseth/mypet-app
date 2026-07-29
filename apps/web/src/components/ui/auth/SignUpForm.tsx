@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authClient } from '../../../lib/auth-client';
 import { useErrorState } from '../../../hooks/useErrorsState';
-import { useNavigate, useSearch, Link } from '@tanstack/react-router';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { authErrorHandler } from '../../../lib/errors/handlers';
 import { signUpPasswordSchema } from '@/lib/validations/password';
-import { useSessionContext } from '@/contexts/SessionContext';
 import { PageTitle, MutedText, ErrorText, HelperText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
 import { key } from '@/i18n/translation-key';
@@ -39,8 +38,6 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 export default function SignUpForm() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const search = useSearch({ from: '/signup' });
-  const { refreshSession } = useSessionContext();
   const { isLoading, error, clearError, executeAction } = useErrorState();
 
   const {
@@ -76,9 +73,9 @@ export default function SignUpForm() {
 
     if (result) {
       toastService.auth.signUpSuccess(t);
-      await refreshSession();
-      // Use the redirect param from _authenticated, or default to home
-      navigate({ to: search.redirect || '/' });
+      // Email verification is required before login, so there's no session yet.
+      // Send the user to the verify-email page
+      navigate({ to: '/verify-email', search: { email: data.email } });
     }
   };
 

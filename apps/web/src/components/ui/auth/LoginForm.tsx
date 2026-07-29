@@ -51,6 +51,17 @@ export default function SignInForm() {
         });
 
         if (error) {
+          // Unverified email => redirect to the verify-email page instead of
+          // showing an inline error. Branch on the semantic code rather than
+          // the 403 status: the code is specific to this condition
+          // BETTER-AUTH CONTRACT: 'EMAIL_NOT_VERIFIED' is better-auth's string.
+          // If it changes on upgrade, this branch silently stops firing and
+          // unverified users get a raw error instead of the redirect. Re-verify
+          // after any better-auth version bump.          
+          if (error.code === 'EMAIL_NOT_VERIFIED') {
+            navigate({ to: '/verify-email', search: { email: data.email } });
+            return null;
+          }          
           throw error;
         }
 

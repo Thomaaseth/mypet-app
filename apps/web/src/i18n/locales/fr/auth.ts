@@ -58,6 +58,16 @@ const fr: TranslationShape<typeof auth> = {
     passwordNumber: 'Le mot de passe doit contenir au moins un chiffre',
     passwordSpecialChar: 'Le mot de passe doit contenir au moins un caractère spécial',
   },
+verifyEmail: {
+  title: "Vérifiez votre adresse e-mail",
+  subtitle: "Nous avons envoyé un lien de vérification à {{email}}. Cliquez dessus pour activer votre compte.",
+  subtitleNoEmail: "Consultez votre boîte de réception pour activer votre compte.",
+  noEmailHelper: "Vous n'avez pas reçu l'e-mail ? Vérifiez vos spams, ou renvoyez-le ci-dessous.",
+  resend: "Renvoyer l'e-mail de vérification",
+  resending: "Envoi en cours...",
+  resendCooldown: "Renvoi possible dans {{time}}",
+  backToLogin: "Retour à la connexion"
+},
   forgotPassword: {
     emailSentTitle: 'Vérifiez votre e-mail',
     emailSentDescription: 'Nous avons envoyé les instructions de réinitialisation à votre adresse e-mail.',

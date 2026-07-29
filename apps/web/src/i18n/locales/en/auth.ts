@@ -55,7 +55,17 @@ const auth = {
         passwordNumber: 'Password must contain at least one number',
         passwordSpecialChar: 'Password must contain at least one special character',
       },
-      forgotPassword: {
+    verifyEmail: {
+        title: "Verify your email",
+        subtitle: "We sent a verification link to {{email}}. Click it to activate your account.",
+        subtitleNoEmail: "Check your inbox for a verification link to activate your account.",
+        noEmailHelper: "Didn't get the email? Check your spam folder, or resend it below.",
+        resend: "Resend verification email",
+        resending: "Sending...",
+        resendCooldown: "Resend available in {{time}}",
+        backToLogin: "Back to sign in"
+      },
+    forgotPassword: {
         emailSentTitle: 'Check Your Email',
         emailSentDescription: "We've sent password reset instructions to your email address.",
         emailSentHelper: "Didn't receive the email? Check your spam folder or try again.",
@@ -68,7 +78,7 @@ const auth = {
         submit: 'Send Reset Link',
         submitting: 'Sending...',
       },
-      resetPassword: {
+    resetPassword: {
         title: 'Reset Your Password',
         subtitle: 'Enter your new password below.',
         newPasswordLabel: 'New Password',

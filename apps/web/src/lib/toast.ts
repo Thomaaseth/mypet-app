@@ -23,9 +23,9 @@ export const toastService = {
     });
   },
 
-  emailSent: (message: string = "Email sent!", description?: string) => {
+  emailSent: (message: string, description?: string) => {
     return toast.success(message, {
-      description: description || "Check your inbox and follow the instructions.",
+      description,
       duration: 5000,
     });
   },
@@ -72,7 +72,10 @@ auth: {
         : toastService.success(t('toasts.auth.emailUpdatedSuccess')),
 
     verificationSent: (t: TFunction) => 
-      toastService.emailSent(t('toasts.auth.verificationSentTitle')),
+      toastService.emailSent(
+        t('toasts.auth.verificationSentTitle'),
+        t('toasts.auth.verificationSentDescription')
+      ),
 
     passwordResetSent: (t: TFunction) => 
       toastService.emailSent(
