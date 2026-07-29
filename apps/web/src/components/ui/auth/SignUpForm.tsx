@@ -20,8 +20,14 @@ import { key } from '@/i18n/translation-key';
 import type { TranslationKey } from '@/i18n/translation-key';
 
 const signUpSchema = z.object({
-  firstName: z.string().min(1, key('auth.validation.firstNameRequired')),
-  lastName: z.string().min(1, key('auth.validation.lastNameRequired')),
+  firstName: z.string()
+    .min(1, key('auth.validation.firstNameRequired'))
+    .max(50, key('auth.validation.firstNameTooLong'))
+    .regex(/^[\p{L}\p{N} \-'\.]+$/u, key('auth.validation.firstNameInvalidChars')),
+  lastName: z.string()
+    .min(1, key('auth.validation.lastNameRequired'))
+    .max(50, key('auth.validation.lastNameTooLong'))
+    .regex(/^[\p{L}\p{N} \-'\.]+$/u, key('auth.validation.lastNameInvalidChars')),
   email: z.string().email(key('auth.validation.invalidEmail')),
     acceptedTerms: z.boolean().refine((val) => val === true, {
     message: key('auth.validation.mustAcceptTerms'),

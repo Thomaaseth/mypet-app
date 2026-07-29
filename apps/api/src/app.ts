@@ -5,7 +5,7 @@ import { middlewareLogResponse, errorMiddleware } from "./middleware";
 import { healthCheck, readinessCheck } from "./handlers/health";
 import cors from 'cors';
 import { config } from "./config";
-import { authRateLimit, healthRateLimit, generalRateLimit } from "./middleware/rate-limit";
+import { authRateLimit, healthRateLimit, generalRateLimit, emailRateLimit, publicWriteRateLimit } from "./middleware/rate-limit";
 import helmet from "helmet";
 
 import petRoutes from '@/routes/pets.routes';
@@ -20,6 +20,7 @@ export const app = express();
 
 // Trust exactly one proxy hop
 // Required for req.ip to reflect the real client IP behind a reverse proxy
+// MAY NEED TO BE CHANGED AFTER DEPLOY (Cloudflare CDN)
 app.set('trust proxy', 1);
 
 app.use(cors({
@@ -33,19 +34,23 @@ app.use(helmet())
 
 app.use(middlewareLogResponse);
 
+// BROAD IP-based limiter, covers the entire /api 
+// Includes better-auth endpoints
+app.use('/api', generalRateLimit);
+
 // Auth rate limit
+// Stricter rate limit that run after generalRateLimit
 // app.use('/api/auth', authRateLimit);
 // Apply authRateLimit only to mutating auth endpoints
 app.use('/api/auth/sign-in', authRateLimit);
 app.use('/api/auth/sign-up', authRateLimit);
 app.use('/api/auth/forget-password', authRateLimit);
 app.use('/api/auth/reset-password', authRateLimit);
+app.use('/api/auth/send-verification-email', emailRateLimit);
+
 
 // Better-auth routes
 app.all('/api/auth/*splat', toNodeHandler(auth));
-
-// General rate limit
-app.use('/api', generalRateLimit);
 
 // JSON Parsing middleware
 app.use(express.json({ limit: '10kb' }));
@@ -68,7 +73,7 @@ app.use('/api/appointments', appointmentRoutes)
 app.use('/api/users/preferences', userPreferencesRoutes)
 
 // COOKIE CONSENT AUDIT LOG (public, no auth required)
-app.use('/api/cookie-consent', cookieConsentRoutes)
+app.use('/api/cookie-consent', publicWriteRateLimit, cookieConsentRoutes)
 
 // APP HEALTH   
 app.get('/api/health', healthRateLimit, (req, res, next) => {

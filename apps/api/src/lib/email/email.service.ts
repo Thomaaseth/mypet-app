@@ -1,6 +1,53 @@
 import { Resend } from 'resend';
 import { config } from '../../config';
 import { authLogger } from '../../lib/logger';
+import { redisClient } from '../redis';
+
+// Per-recipient email quota — throttles by the address being emailed,
+// so it survives IP rotation and covers every send path (signup, resend,
+// change-email) since all funnel through sendEmail().
+// 5 sends per hour per address. Keyed by type so future flows (e.g. password
+// reset) get their own independent budget and can't starve verification.
+const EMAIL_QUOTA_MAX = 5;
+const EMAIL_QUOTA_WINDOW_SECONDS = 60 * 60; // 1 hour
+
+export type EmailType = 'verification' | 'change-email' | 'password-reset';
+
+// Returns true if allowed to send, false if over quota.
+// Fails OPEN: if Redis is unavailable, allow the send (monitored via redis.ts alert).
+export async function checkEmailQuota(type: EmailType, recipient: string): Promise<boolean> {
+  if (!redisClient) return true; // dev / no Redis = not enforced, fail open
+
+  // Normalize: lowercase + trim so casing variants share one budget.
+  const key = `email-quota:${type}:${recipient.trim().toLowerCase()}`;
+
+  try {
+    const count = await redisClient.incr(key);
+    if (count === 1) {
+      // First send in this window — set the expiry.
+      await redisClient.expire(key, EMAIL_QUOTA_WINDOW_SECONDS);
+    }
+    return count <= EMAIL_QUOTA_MAX;
+  } catch (err) {
+    // Redis error mid-flight — fail open.
+    authLogger.error({ err, recipient }, 'Email quota check failed — allowing send (fail open)');
+    return true;
+  }
+}
+
+// HTML-escape dynamic values before interpolating into email templates.
+// Email HTML has no framework auto-escaping (unlike React), so every
+// user-derived value MUST be escaped at the interpolation site.
+// Ref: OWASP XSS Prevention Cheat Sheet (Rule #1 - HTML entity encoding).
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 
 const resend = new Resend(config.email.resendApiKey);
 
@@ -23,7 +70,16 @@ interface EmailResult {
 }
 
 // Send EMAIL
-export async function sendEmail({ to, subject, html }: EmailOptions): Promise<EmailResult> {
+export async function sendEmail(
+  { to, subject, html }: EmailOptions,
+  type: EmailType,
+): Promise<EmailResult> {
+    // Enforce per-recipient quota
+    const allowed = await checkEmailQuota(type, to);
+    if (!allowed)  {
+        authLogger.warn({ to, type }, 'Email quota exceeded, send throttled');
+        return { success: false, error: 'EMAIL_QUOTA_EXCEEDED' };
+    }
     try {
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
@@ -119,8 +175,8 @@ export const emailTemplates = {
                <h1 style="color: #333; margin: 0;">Verify Your Email</h1>
               </div>
               
-              <p>Hi ${userName},</p>
-              
+              <p>Hi ${escapeHtml(userName)},</p>
+
               <p>Welcome to ${APP_NAME}! We're excited to have you on board. Please verify your email address by clicking the button below:</p>
               
               <div style="text-align: center;">
@@ -222,7 +278,7 @@ export const emailTemplates = {
                 <h1 style="color: #333; margin: 0;">Reset Your Password</h1>
               </div>
               
-              <p>Hi ${userName},</p>
+              <p>Hi ${escapeHtml(userName)},</p>
               
               <p>We received a request to reset your password. Click the button below to create a new password:</p>
               
@@ -320,12 +376,12 @@ export const emailTemplates = {
                 <h1 style="color: #333; margin: 0;">Confirm Email Change</h1>
               </div>
               
-              <p>Hi ${userName},</p>
-              
+              <p>Hi ${escapeHtml(userName)},</p>
+                            
               <p>You've requested to change your email address to:</p>
               
               <div class="info-box">
-                <strong style="color: #190E0F;">${newEmail}</strong>
+                <strong style="color: #190E0F;">${escapeHtml(newEmail)}</strong>
               </div>
               
               <p>Please confirm this change by clicking the button below:</p>
@@ -356,17 +412,17 @@ export const emailTemplates = {
   export const emailService = {
     async sendVerificationEmail(user: { email: string; name: string }, verificationUrl: string): Promise<EmailResult> {
       const { subject, html } = emailTemplates.verifyEmail(user.name, verificationUrl);
-      return sendEmail({ to: user.email, subject, html });
+      return sendEmail({ to: user.email, subject, html }, 'verification');
     },
   
     async sendPasswordResetEmail(user: { email: string; name: string }, resetUrl: string): Promise<EmailResult> {
       const { subject, html } = emailTemplates.resetPassword(user.name, resetUrl);
-      return sendEmail({ to: user.email, subject, html });
+      return sendEmail({ to: user.email, subject, html }, 'password-reset'); // TO BUILD - NOT WIRED UP YET
     },
   
     async sendEmailChangeVerification(user: { email: string; name: string }, newEmail: string, verificationUrl: string): Promise<EmailResult> {
       const { subject, html } = emailTemplates.changeEmail(user.name, newEmail, verificationUrl);
       // Send to the NEW email address
-      return sendEmail({ to: newEmail, subject, html });
+      return sendEmail({ to: newEmail, subject, html }, 'change-email');
     }
   };

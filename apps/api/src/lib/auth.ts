@@ -92,13 +92,21 @@ export const auth = betterAuth({
             );
             
             if (!result.success) {
-                authLogger.error({ error: result.error, email: user.email }, 'Failed to send email verification');
-                throw new Error('Failed to send verification email');
+                // Quota hit: do NOT fail the signup, create the account,
+                // the email is quietly skipped (but users can't trigger a resend later, NEED TO BUILD).
+                if (result.error === 'EMAIL_QUOTA_EXCEEDED') {
+                    authLogger.warn({ email: user.email }, 'Verification email skipped — recipient over quota (signup NOT blocked)');
+                } else {
+                    // Genuine send failure — surface it.
+                    authLogger.error({ error: result.error, email: user.email }, 'Failed to send email verification');
+                    throw new Error('Failed to send verification email');
+                }
+            } else {
+                authLogger.info({ email: user.email }, 'Email verification sent successfully');
             }
-            
-            authLogger.info({ email: user.email }, 'Email verification sent successfully');
         },
         sendOnSignUp: true, // Automatically send verification email on signup
+        sendOnSignIn: false, // do NOT resend verification email on every failed login after signup
         autoSignInAfterVerification: true, // Auto sign in after email verification
     },
     user: {
@@ -159,6 +167,26 @@ export const auth = betterAuth({
         before: createAuthMiddleware(async (ctx) => {
             if (ctx.path !== "/sign-up/email") {
                 return;
+            }
+            // Server-side name validation
+            // Client Zod is bypassable via direct API calls; this ensures the
+            // name can never contain HTML-injection characters before it's
+            // stored and later interpolated into outgoing emails.
+            const name = ctx.body?.name;
+            if (!name || typeof name !== "string") {
+                throw new APIError("BAD_REQUEST", {
+                    message: "Name is required",
+                });
+            }
+            if (name.length > 101) { // 50 + space + 50, matches client max per field
+                throw new APIError("BAD_REQUEST", {
+                    message: "Name is too long",
+                });
+            }
+            if (!/^[\p{L}\p{N} \-'\.]+$/u.test(name)) {
+                throw new APIError("BAD_REQUEST", {
+                    message: "Name contains invalid characters",
+                });
             }
 
             const password = ctx.body?.password;

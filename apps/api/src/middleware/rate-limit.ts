@@ -1,34 +1,18 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
-import { Redis } from 'ioredis';
 import type { Request } from 'express';
 import type { AuthenticatedRequest } from './auth.middleware';
-import { logger } from '../lib/logger';
-
-// Redis client only instantiated when REDIS_URL is set (production)
-// in dev all limiters fall back to in-memory store automatically
-const redisClient = process.env.REDIS_URL
-  ? new Redis(process.env.REDIS_URL, {
-      // Fail fast
-      enableOfflineQueue: true,
-      maxRetriesPerRequest: 3,
-      connectTimeout: 10000,
-    })
-  : null;
-
-// returns a RedisStore if Redis is available, undefined otherwise
-// undefined = express-rate-limit uses its default in-memory store
-redisClient?.on('error', (err: Error) => {
-  // Log but don't crash — if Redis dies, express-rate-limit falls back gracefully
-  logger.error({ err }, 'Redis connection error');
-});
+import { redisClient } from '@/lib/redis';
 
 function makeStore(prefix: string): RedisStore | undefined {
-    if (!redisClient) return undefined;
-  
+    const client = redisClient;
+    if (!client) return undefined;
+
     return new RedisStore({
       prefix: `rl:${prefix}:`,
-      sendCommand: (...args: [string, ...string[]]) => redisClient.call(...args) as Promise<number>,
+      // `client` is a local const, so TS proves it stays non-null inside the
+      // closure — narrowing an imported binding doesn't survive into the arrow.
+      sendCommand: (...args: [string, ...string[]]) => client.call(...args) as Promise<number>,
     });
   }
 
@@ -50,6 +34,19 @@ export const authRateLimit = rateLimit({
     message: { error: 'Too many authentication attempts, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false, 
+});
+
+// email-triggering endpoints (verification resend, etc.)
+// Very strict
+// 3 req per 15 min per IP
+export const emailRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 3,
+    keyGenerator: getClientIp,
+    store: makeStore('email'),
+    message: { error: 'Too many email requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 // general IP limiter
@@ -77,6 +74,19 @@ export const userRateLimit = rateLimit({
       return userId ?? ipKeyGenerator(req.ip ?? req.socket.remoteAddress ?? 'unknown');
     },
     store: makeStore('user'),
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// public unauthenticated write endpoints (e.g. cookie-consent audit log)
+// Tighter than general since these hit the DB without auth.
+// 20 req per 15 min per IP
+export const publicWriteRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    keyGenerator: getClientIp,
+    store: makeStore('public-write'),
     message: { error: 'Too many requests, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
