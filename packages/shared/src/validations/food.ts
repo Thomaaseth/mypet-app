@@ -33,7 +33,7 @@ export const dryFoodSchema = z.object({
     required_error: key('food.validation.bagWeightUnitRequired'),
     invalid_type_error: key('food.validation.invalidBagWeightUnit')
   }),
-}).superRefine((data, ctx) => {
+}).strict().superRefine((data, ctx) => {
   const bagWeight = parseFloat(data.bagWeight.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
 
@@ -71,7 +71,7 @@ export const wetFoodSchema = z.object({
     required_error: key('food.validation.wetFoodUnitRequired'),
     invalid_type_error: key('food.validation.invalidWetFoodUnit')
   }),
-}).superRefine((data, ctx) => {
+}).strict().superRefine((data, ctx) => {
   const numberOfUnits = Number(data.numberOfUnits);
   const totalWeight = numberOfUnits * parseFloat(data.weightPerUnit.replace(',', '.'));
   const dailyAmount = parseFloat(data.dailyAmount.replace(',', '.'));
@@ -107,7 +107,7 @@ export const updateDryFoodSchema = z.object({
     if (!val) return true;
     return !isNaN(new Date(val).getTime());
   }, key('weights.validation.invalidDate')).optional(),
-}).superRefine((data, ctx) => {
+}).strict().superRefine((data, ctx) => {
   if (data.bagWeight !== undefined && data.bagWeightUnit === undefined) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -142,7 +142,7 @@ export const updateWetFoodSchema = z.object({
     if (!val) return true;
     return !isNaN(new Date(val).getTime());
   }, key('weights.validation.invalidDate')).optional(),
-}).superRefine((data, ctx) => {
+}).strict().superRefine((data, ctx) => {
   // wetFoodUnit governs both weightPerUnit and dailyAmount; required if either changes
   if ((data.weightPerUnit !== undefined || data.dailyAmount !== undefined) && data.wetFoodUnit === undefined) {
     ctx.addIssue({

@@ -9,6 +9,7 @@ import {
   validateUpdateVisitNotes,
   appointmentTypes,
 } from '../appointments';
+import { expectRejectsUnknownKey } from './_helpers';
 
 const VALID_PET_ID = '123e4567-e89b-12d3-a456-426614174000';
 const VALID_VET_ID = '987e6543-e21b-12d3-a456-426614174999';
@@ -51,6 +52,8 @@ describe('appointmentFormSchema', () => {
   it('rejects an unparseable appointmentDate', () => {
     expect(appointmentFormSchema.safeParse({ ...valid, appointmentDate: 'not-a-date' }).success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(appointmentFormSchema, valid));
 
   // This schema never had a future-date restriction (appointments are
   // inherently forward-looking), and the past-date restriction was
@@ -154,6 +157,8 @@ describe('updateAppointmentSchema', () => {
   it('still enforces the base schema fields (e.g. valid time)', () => {
     expect(updateAppointmentSchema.safeParse({ ...validUpdate, appointmentTime: '14:07' }).success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(updateAppointmentSchema, validUpdate));
 });
 
 describe('updateVisitNotesSchema', () => {
@@ -172,6 +177,8 @@ describe('updateVisitNotesSchema', () => {
   it('rejects notes over 200 characters', () => {
     expect(updateVisitNotesSchema.safeParse({ visitNotes: 'x'.repeat(201) }).success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(updateVisitNotesSchema, { visitNotes: 'All good' }));
 });
 
 describe('throwing/safeParse validate* helpers', () => {

@@ -41,10 +41,10 @@ export const weightEntryFormSchema = z.object({
   date: z.string()
     .min(1, key('weights.validation.dateRequired'))
     .refine((val) => !isNaN(new Date(val).getTime()), key('weights.validation.invalidDate')),
-  });
+  }).strict();
 
   // Schema for partial updates — enforces weightUnit must accompany weight if weight is being changed
-  export const updateWeightEntrySchema = weightEntryFormSchema.partial().superRefine((data, ctx) => {
+  export const updateWeightEntrySchema = weightEntryFormSchema.partial().strict().superRefine((data, ctx) => {
     if (data.weight !== undefined && data.weightUnit === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -70,7 +70,7 @@ export const weightTargetSchema = z.object({
     weightUnit: z.enum(['kg', 'lbs'], {
     errorMap: () => ({ message: key('weights.validation.invalidWeightUnit') }),
   }),
-}).refine((data) => {
+}).strict().refine((data) => {
   const min = parseFloat(data.minWeight);
   const max = parseFloat(data.maxWeight);
   return max > min;
@@ -157,4 +157,3 @@ export const validateWeightEntry = (
   const schema = createWeightEntrySchema(_weightUnit, animalType);
   return schema.safeParse(data);
 };
-

@@ -65,7 +65,7 @@ export const appointmentFormSchema = z.object({
     .max(200, key('appointments.validation.visitNotesTooLong'))
     .optional()
     .or(z.literal('')),
-});
+}).strict();
 
 // Schema for creating a new appointment.
 // NOTE: previously refined to reject past dates; that restriction was
@@ -75,7 +75,7 @@ export const createAppointmentSchema = appointmentFormSchema;
 // Schema for updating an appointment (full edit for upcoming, notes only for past)
 export const updateAppointmentSchema = appointmentFormSchema.extend({
   id: z.string().uuid(key('appointments.validation.invalidAppointmentId')),
-});
+}).strict();
 
 // Schema for updating only visit notes (for past appointments)
 export const updateVisitNotesSchema = z.object({
@@ -83,7 +83,7 @@ export const updateVisitNotesSchema = z.object({
     .max(200, key('appointments.validation.visitNotesTooLong'))
     .optional()
     .or(z.literal('')),
-});
+}).strict();
 
 // Types inferred from schemas
 export type AppointmentFormData = z.infer<typeof appointmentFormSchema>;

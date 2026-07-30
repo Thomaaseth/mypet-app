@@ -9,6 +9,7 @@ import {
   validateUpdateDryFoodData,
   validateUpdateWetFoodData,
 } from '../food';
+import { expectRejectsUnknownKey } from './_helpers';
 
 describe('dryFoodSchema', () => {
   const valid = {
@@ -76,6 +77,8 @@ describe('dryFoodSchema', () => {
     const result = dryFoodSchema.safeParse({ ...valid, bagWeight: '2', bagWeightUnit: 'lbs', dailyAmount: '1000' });
     expect(result.success).toBe(false);
   });
+  
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(dryFoodSchema, valid)); 
 });
 
 describe('wetFoodSchema', () => {
@@ -143,6 +146,8 @@ describe('wetFoodSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(wetFoodSchema, valid));
 });
 
 describe('updateDryFoodSchema', () => {
@@ -173,6 +178,8 @@ describe('updateDryFoodSchema', () => {
   it('accepts bagWeight when bagWeightUnit is also provided', () => {
     expect(updateDryFoodSchema.safeParse({ bagWeight: '3', bagWeightUnit: 'kg' }).success).toBe(true);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(updateDryFoodSchema, {}));
 });
 
 describe('updateWetFoodSchema', () => {
@@ -213,6 +220,8 @@ describe('updateWetFoodSchema', () => {
   it('rejects a non-integer numberOfUnits on update', () => {
     expect(updateWetFoodSchema.safeParse({ numberOfUnits: '2.5' }).success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(updateWetFoodSchema, {}));
 });
 
 describe('throwing validate* helpers', () => {

@@ -7,6 +7,7 @@ import {
   createWeightTargetSchema,
   validateWeightEntry,
 } from '../weight';
+import { expectRejectsUnknownKey } from './_helpers';
 
 describe('weightEntryFormSchema', () => {
   const valid = { weight: '4.5', weightUnit: 'kg' as const, date: '2026-07-22' };
@@ -44,6 +45,8 @@ describe('weightEntryFormSchema', () => {
     const farFuture = '2099-01-01';
     expect(weightEntryFormSchema.safeParse({ ...valid, date: farFuture }).success).toBe(true);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(weightEntryFormSchema, valid));
 });
 
 describe('updateWeightEntrySchema', () => {
@@ -66,6 +69,8 @@ describe('updateWeightEntrySchema', () => {
   it('accepts weight when weightUnit is also provided', () => {
     expect(updateWeightEntrySchema.safeParse({ weight: '5', weightUnit: 'kg' }).success).toBe(true);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(updateWeightEntrySchema, {}));
 });
 
 describe('weightTargetSchema', () => {
@@ -91,6 +96,8 @@ describe('weightTargetSchema', () => {
     expect(weightTargetSchema.safeParse({ ...valid, minWeight: '0' }).success).toBe(false);
     expect(weightTargetSchema.safeParse({ ...valid, maxWeight: '-2' }).success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(weightTargetSchema, valid));
 });
 
 describe('createWeightEntrySchema (animal-specific limits)', () => {
@@ -135,6 +142,8 @@ describe('createWeightEntrySchema (animal-specific limits)', () => {
     const schema = createWeightEntrySchema('kg', 'dog');
     expect(schema.safeParse({ ...base, weight: '250' }).success).toBe(false);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(createWeightEntrySchema('kg', 'cat'), { ...base, weight: '4' }));
 });
 
 describe('createWeightTargetSchema (animal-specific limits)', () => {
@@ -152,6 +161,8 @@ describe('createWeightTargetSchema (animal-specific limits)', () => {
     const schema = createWeightTargetSchema('dog');
     expect(schema.safeParse({ minWeight: '10', maxWeight: '40', weightUnit: 'kg' }).success).toBe(true);
   });
+
+  it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(createWeightTargetSchema('cat'), { minWeight: '3', maxWeight: '5', weightUnit: 'kg' }));
 });
 
 describe('validateWeightEntry', () => {

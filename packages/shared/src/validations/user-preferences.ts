@@ -7,7 +7,7 @@ export const userPreferencesFormSchema = z.object({
   dateTimeLocale: dateTimeLocaleSchema,
   unitSystem: unitSystemSchema,
   timezone: timezoneSchema,
-});
+}).strict();
 
 export type UserPreferencesFormData = z.infer<typeof userPreferencesFormSchema>;
 

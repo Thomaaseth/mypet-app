@@ -63,7 +63,7 @@ export const basePetFormSchema = z.object({
 });
 
 // Enhanced validation with unit-specific weight limits (this will be a ZodEffects)
-export const petFormSchema = basePetFormSchema.refine((data) => {
+export const petFormSchema = basePetFormSchema.strict().refine((data) => {
   if (!data.weight) return true; // Optional field
   
   const weight = parseFloat(data.weight);
@@ -85,7 +85,7 @@ export const petFormSchema = basePetFormSchema.refine((data) => {
 // Schema for creating a new pet (all required fields must be provided)
 export const createPetSchema = basePetFormSchema.extend({
   name: basePetFormSchema.shape.name, // name is already required
-}).refine((data) => {
+}).strict().refine((data) => {
   if (!data.weight) return true; // Optional field
   
   const weight = parseFloat(data.weight);
@@ -109,7 +109,8 @@ export const updatePetSchema = basePetFormSchema
   .partial()
   .extend({
     id: z.string().uuid(key('vets.validation.invalidPetId')),
-  });
+  })
+  .strict();
 
 // Export types
 export type PetFormData = z.infer<typeof petFormSchema>;

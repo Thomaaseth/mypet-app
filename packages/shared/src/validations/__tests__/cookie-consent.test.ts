@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { cookieConsentLogSchema } from '../cookie-consent';
+import { cookieConsentLogSchema, cookieConsentChoicesSchema } from '../cookie-consent';
+import { expectRejectsUnknownKey } from './_helpers';
 
 describe('cookieConsentLogSchema', () => {
   it('accepts a valid payload', () => {
@@ -46,4 +47,10 @@ describe('cookieConsentLogSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('cookieConsentLogSchema rejects unknown keys (strict)', () =>
+  expectRejectsUnknownKey(cookieConsentLogSchema, { consentId: '123e4567-e89b-12d3-a456-426614174000', choices: { necessary: true, analytics: true } }));
+
+  it('cookieConsentChoicesSchema rejects unknown keys (strict)', () =>
+  expectRejectsUnknownKey(cookieConsentChoicesSchema, { necessary: true, analytics: true }));
 });

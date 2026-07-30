@@ -71,15 +71,15 @@ export const baseVeterinarianFormSchema = z.object({
     .max(100, key('vets.validation.notesTooLong'))
     .optional()
     .or(z.literal('')),
-});
+}).strict();
 
-// Schema for creating a new veterinarian
+// Schema for creating a new veterinarian (inherits .strict() from the base)
 export const createVeterinarianSchema = baseVeterinarianFormSchema;
 
 // Schema for updating a veterinarian
 export const updateVeterinarianSchema = baseVeterinarianFormSchema.extend({
   id: z.string().uuid(key('vets.validation.invalidVetId')),
-});
+}).strict();
 
 // Types inferred from schemas
 export type VeterinarianFormData = z.infer<typeof baseVeterinarianFormSchema>;
@@ -100,9 +100,8 @@ export const validatePetAssignment = (data: unknown) => {
 }
 
 // Pet assignment schema for "Apply to other pets" feature
-// Not currently used anywhere TODO check 
 export const petAssignmentSchema = z.object({
   petIds: z.array(z.string().uuid(key('vets.validation.invalidPetId'))).min(1, key('vets.validation.selectAtLeastOnePet')),
-});
+}).strict();
 
 export type PetAssignmentData = z.infer<typeof petAssignmentSchema>;

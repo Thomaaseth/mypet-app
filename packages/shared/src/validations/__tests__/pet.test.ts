@@ -6,6 +6,7 @@ import {
   petGenderSchema,
   weightUnitSchema,
 } from '../pet';
+import { expectRejectsUnknownKey } from './_helpers';
 
 const VALID_UUID = '123e4567-e89b-12d3-a456-426614174000';
 
@@ -156,6 +157,10 @@ describe.each([
   it('rejects isNeutered as a non-boolean', () => {
     expect(schema.safeParse({ ...validPet, isNeutered: 'true' }).success).toBe(false);
   });
+
+  it('petFormSchema rejects unknown keys (strict)', () => expectRejectsUnknownKey(petFormSchema, validPet));
+
+  it('createPetSchema rejects unknown keys (strict)', () => expectRejectsUnknownKey(createPetSchema, validPet));
 });
 
 describe('updatePetSchema', () => {
@@ -188,16 +193,12 @@ describe('updatePetSchema', () => {
   });
 
   // weight/weightUnit are intentionally omitted from this schema — a pet's
-  // weight isn't updatable through this endpoint. Zod silently strips
-  // unrecognized keys (no .strict() on this schema), so passing `weight`
-  // doesn't cause a rejection — it's just discarded. This test pins down
-  // that "silently ignored" behavior so it's a documented decision, not an
-  // accident someone discovers later.
-  it('silently strips a weight field if present, without rejecting or applying it', () => {
+  // weight isn't updatable through this endpoint. The schema is .strict(),
+  // so passing an unrecognized key like `weight` is REJECTED (not silently
+  // stripped). This guards against mass-assignment: an attacker can't smuggle
+  // extra columns into an update, and gets a 400 instead of a silent no-op.
+  it('rejects an unrecognized field (weight) rather than silently stripping it', () => {
     const result = updatePetSchema.safeParse({ id: VALID_UUID, weight: '999999' });
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect((result.data as Record<string, unknown>).weight).toBeUndefined();
-    }
+    expect(result.success).toBe(false);
   });
 });
