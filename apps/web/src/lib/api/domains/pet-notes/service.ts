@@ -1,5 +1,4 @@
 import type { PetNoteRepository } from "./repository";
-import type { PetNoteValidator } from "./validator";
 import {
     ApiError,
     ValidationError,
@@ -16,7 +15,6 @@ import type { PetNoteError } from './types';
 export class PetNoteService {
     constructor(
         private repository: PetNoteRepository,
-        private validator: PetNoteValidator
     ) {}
 
     async getNotes(petId: string): Promise<PetNote[]> {
@@ -29,7 +27,6 @@ export class PetNoteService {
 
     async createNote(petId: string, data: PetNoteFormData): Promise<PetNote> {
         try {
-            this.validator.validateNoteData(data);
             return await this.repository.createNote(petId, data);
         } catch (error) {
             throw this.handleError(error);
@@ -38,7 +35,6 @@ export class PetNoteService {
     
     async updateNote(petId: string, noteId: string, data: PetNoteFormData): Promise<PetNote> {
         try {
-            this.validator.validateNoteData(data);
             return await this.repository.updateNote(petId, noteId, data);
         } catch (error) {
             throw this.handleError(error);

@@ -77,12 +77,16 @@ export function useUpdatePet() {
   
     return useMutation({
       mutationFn: ({ petId, petData }: { petId: string; petData: Partial<PetFormData> }) => {
-        // Transform data
-        const transformedData = {
-          ...petData,
-          weight: petData.weight ? petData.weight.replace(',', '.') : '',
-        }
-        return petApi.updatePet(petId, transformedData)
+        const rest: Partial<PetFormData> = { ...petData };
+        delete rest.weight;
+        delete rest.weightUnit;
+
+        const transformedData: Partial<PetFormData> =
+          petData.weight !== undefined && petData.weight !== ''
+            ? { ...rest, weight: petData.weight.replace(',', '.') }
+            : rest;
+
+        return petApi.updatePet(petId, transformedData);
       },
       onSuccess: (updatedPet) => {
         // Seed the detail cache directly from the server response — the PUT

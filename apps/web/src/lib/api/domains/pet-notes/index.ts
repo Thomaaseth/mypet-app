@@ -1,9 +1,8 @@
 import { PetNoteService } from './service';
 import { petNoteRepository } from './repository';
-import { petNoteValidator } from './validator';
 import type { PetNoteFormData } from '@/types/pet-notes';
 
-const petNoteService = new PetNoteService(petNoteRepository, petNoteValidator);
+const petNoteService = new PetNoteService(petNoteRepository);
 
 export const petNoteApi = {
     getNotes: (petId: string) => petNoteService.getNotes(petId),
@@ -16,5 +15,4 @@ export const petNoteApi = {
 export const petNoteErrorHandler = (error: unknown) => petNoteService.mapError(error);
 
 export { PetNoteRepository } from './repository';
-export { PetNoteValidator } from './validator';
 export { PetNoteService } from './service';

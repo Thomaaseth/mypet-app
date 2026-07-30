@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
   MoreHorizontal, 
@@ -38,7 +38,7 @@ interface PetCardProps {
   onView?: (pet: Pet) => void;
 }
 
-export default function PetCard({ pet, onEdit, onDelete, onView }: PetCardProps) {
+export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
   const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));

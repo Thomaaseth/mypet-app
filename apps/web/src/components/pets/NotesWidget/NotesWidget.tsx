@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { NotebookPen, Plus, Trash2, Check, X, AlertCircle, Loader2, Pencil, MoreHorizontal } from 'lucide-react';
+import { NotebookPen, Plus, Trash2, AlertCircle, Loader2, Pencil, MoreHorizontal } from 'lucide-react';
 import {
   usePetNotes,
   useCreatePetNote,
@@ -28,13 +28,16 @@ import {
   } from '@/components/ui/alert-dialog';
 import { NotesWidgetSkeleton } from '@/components/ui/skeletons/NotesSkeleton';
 import type { PetNote } from '@/types/pet-notes';
-import { EmptyStateTitle, EmptyStateDescription, BodyText } from '@/components/ui/typography';
+import { BodyText, ErrorText } from '@/components/ui/typography';
 import { Textarea } from '@/components/ui/textarea';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 import { useTranslation } from 'react-i18next';
+import type { TranslationKey } from '@/i18n/translation-key';
+import { petNoteFormSchema } from '@/lib/validations/pet-notes';
+import { usePetNoteForm } from '@/hooks/usePetNoteForm';
 
-const MAX_CONTENT_LENGTH = 200;
+const MAX_CONTENT_LENGTH = petNoteFormSchema.shape.content.maxLength ?? 200;
 const MAX_NOTES = 20;
 
 interface NotesWidgetProps {
@@ -52,34 +55,24 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
   const { t } = useTranslation();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(note.content);
-  const [isSaving, setIsSaving] = useState(false);
 
-  const handleStartEdit = () => {
-    setEditValue(note.content);
-    setIsEditing(true);
-  };
+  const {
+    register, handleSubmit, watch, reset,
+    formState: { errors, isSubmitting },
+  } = usePetNoteForm({ defaultValues: { content: note.content } });
 
-  const handleCancel = () => {
-    setEditValue(note.content);
-    setIsEditing(false);
-  };
+  const contentValue = watch('content') ?? '';
 
-  const handleSave = async () => {
-    const trimmed = editValue.trim();
-    // No change — skip the API call
-    if (trimmed === note.content) {
-      setIsEditing(false);
-      return;
-    }
-    if (!trimmed || trimmed.length > MAX_CONTENT_LENGTH) return;
+  const handleStartEdit = () => { reset({ content: note.content }); setIsEditing(true); };
+  const handleCancel = () => { reset({ content: note.content }); setIsEditing(false); };
 
-    setIsSaving(true);
+  const onSave = handleSubmit(async (data) => {
+    const trimmed = data.content.trim();
+    if (!trimmed) return;                                   // schema min(1) passes "   "
+    if (trimmed === note.content) { setIsEditing(false); return; } // no change → skip API
     await onUpdate(note.id, trimmed);
-    setIsSaving(false);
     setIsEditing(false);
-  };
-
+  });
 
     return (
       <>
@@ -132,23 +125,23 @@ function NoteRow({ note, onUpdate, onDelete, isDeleting }: NoteRowProps) {
       >
         <div className="space-y-4">
           <Textarea
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
+            {...register('content')}
             maxLength={MAX_CONTENT_LENGTH}
-            disabled={isSaving}
+            disabled={isSubmitting}
             rows={4}
             className="resize-none"
           />
+          {errors.content && <ErrorText>{t(errors.content.message as TranslationKey)}</ErrorText>}
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
-            {t('notes.charCount', { count: editValue.length })}
+              {t('notes.charCount', { count: contentValue.length })}
             </span>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
-              {t('common.actions.cancel')}
+              <Button variant="outline" onClick={handleCancel} disabled={isSubmitting}>
+                {t('common.actions.cancel')}
               </Button>
-              <Button onClick={handleSave} disabled={isSaving || !editValue.trim()}>
-                {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              <Button onClick={onSave} disabled={isSubmitting || !contentValue.trim()}>
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {t('common.actions.save')}
               </Button>
             </div>
@@ -163,8 +156,6 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
   const { t } = useTranslation();
 
   const [isAdding, setIsAdding] = useState(false);
-  const [newNoteContent, setNewNoteContent] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [noteToDelete, setNoteToDelete] = useState<PetNote | null>(null);
 
@@ -173,28 +164,34 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
   const updateMutation = useUpdatePetNote(petId);
   const deleteMutation = useDeletePetNote(petId);
 
+  const {
+    register: registerAdd,
+    handleSubmit: handleSubmitAdd,
+    watch: watchAdd,
+    resetToEmpty,
+    formState: { errors: addErrors, isSubmitting: isCreating },
+  } = usePetNoteForm();
+
+  const addContentValue = watchAdd('content') ?? '';
   const isAtLimit = (notes?.length ?? 0) >= MAX_NOTES;
 
   const handleStartAdd = () => {
-    setNewNoteContent('');
+    resetToEmpty();
     setIsAdding(true);
   };
 
   const handleCancelAdd = () => {
-    setNewNoteContent('');
+    resetToEmpty();
     setIsAdding(false);
   };
 
-  const handleCreate = async () => {
-    const trimmed = newNoteContent.trim();
-    if (!trimmed || trimmed.length > MAX_CONTENT_LENGTH) return;
-
-    setIsCreating(true);
+  const handleCreate = handleSubmitAdd(async (data) => {
+    const trimmed = data.content.trim();
+    if (!trimmed) return;
     await createMutation.mutateAsync({ content: trimmed });
-    setIsCreating(false);
-    setNewNoteContent('');
+    resetToEmpty();
     setIsAdding(false);
-  };
+  });
 
   const handleUpdate = async (noteId: string, content: string) => {
     await updateMutation.mutateAsync({ noteId, data: { content } });
@@ -205,13 +202,13 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
   };
 
   const handleConfirmDelete = async () => {
-      if (!noteToDelete) return;
-      const noteId = noteToDelete.id;
-      setNoteToDelete(null);
-      setDeletingNoteId(noteId);
-      await deleteMutation.mutateAsync(noteId);
-      setDeletingNoteId(null);
-    };
+    if (!noteToDelete) return;
+    const noteId = noteToDelete.id;
+    setNoteToDelete(null);
+    setDeletingNoteId(noteId);
+    await deleteMutation.mutateAsync(noteId);
+    setDeletingNoteId(null);
+  };
 
   if (notes === undefined) return <NotesWidgetSkeleton />;
 
@@ -253,23 +250,25 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
         >
           <div className="space-y-4">
             <Textarea
-              value={newNoteContent}
-              onChange={(e) => setNewNoteContent(e.target.value)}
+              {...registerAdd('content')}
               placeholder={t('notes.addDialog.placeholder')}
               maxLength={MAX_CONTENT_LENGTH}
               disabled={isCreating}
               rows={4}
               className="resize-none"
             />
+            {addErrors.content && (
+              <ErrorText>{t(addErrors.content.message as TranslationKey)}</ErrorText>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
-              {t('notes.charCount', { count: newNoteContent.length })}
+                {t('notes.charCount', { count: addContentValue.length })}
               </span>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleCancelAdd} disabled={isCreating}>
-                {t('common.actions.cancel')}
+                  {t('common.actions.cancel')}
                 </Button>
-                <Button onClick={handleCreate} disabled={isCreating || !newNoteContent.trim()}>
+                <Button onClick={handleCreate} disabled={isCreating || !addContentValue.trim()}>
                   {isCreating && <Loader2 className="h-4 w-4 animate-spin sm:mr-2" />}
                   {t('notes.addDialog.submit')}
                 </Button>
@@ -277,7 +276,6 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
             </div>
           </div>
         </ResponsiveDialog>
-        
 
         {/* Notes list */}
         {notes && notes.length > 0 ? (
@@ -307,13 +305,13 @@ export default function NotesWidget({ petId }: NotesWidgetProps) {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>{t('notes.deleteDialog.title')}</AlertDialogTitle>
-                <AlertDialogDescription>
+              <AlertDialogDescription>
                 {t('notes.deleteDialog.description')}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
             <AlertDialogFooter>
-            <AlertDialogCancel disabled={!!deletingNoteId}>{t('common.actions.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
+              <AlertDialogCancel disabled={!!deletingNoteId}>{t('common.actions.cancel')}</AlertDialogCancel>
+              <AlertDialogAction
                 onClick={handleConfirmDelete}
                 disabled={!!deletingNoteId}
                 className="bg-destructive text-white hover:bg-destructive/90"
