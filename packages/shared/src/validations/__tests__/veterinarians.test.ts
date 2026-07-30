@@ -13,8 +13,9 @@ describe('baseVeterinarianFormSchema', () => {
 });
 
 describe('createVeterinarianSchema', () => {
-  it('is the same schema as the base (alias, inherits strict)', () => {
-    expect(createVeterinarianSchema).toBe(baseVeterinarianFormSchema);
+  // extends the base with optional petIds, so base fields still pass.
+  it('accepts the base vet fields (create is a superset of the base)', () => {
+    expect(createVeterinarianSchema.safeParse(validVet).success).toBe(true);
   });
 });
 
@@ -36,4 +37,21 @@ describe('petAssignmentSchema', () => {
     expect(petAssignmentSchema.safeParse({ petIds: [] }).success).toBe(false);
   });
   it('rejects unknown keys (strict)', () => expectRejectsUnknownKey(petAssignmentSchema, { petIds: [VALID_UUID] }));
+});
+
+describe('createVeterinarianSchema — petIds', () => {
+  const validVet = { vetName: 'Dr. Jane Smith', phone: '555-123-4567', addressLine1: '123 Main St', city: 'Springfield', zipCode: '12345' };
+
+  it('accepts a create body with no petIds', () => {
+    expect(createVeterinarianSchema.safeParse(validVet).success).toBe(true);
+  });
+  it('accepts a create body with a valid petIds array', () => {
+    expect(createVeterinarianSchema.safeParse({ ...validVet, petIds: ['123e4567-e89b-12d3-a456-426614174000'] }).success).toBe(true);
+  });
+  it('rejects a malformed petIds entry (not a uuid)', () => {
+    expect(createVeterinarianSchema.safeParse({ ...validVet, petIds: ['not-a-uuid'] }).success).toBe(false);
+  });
+  it('still rejects a genuinely unknown key (strict preserved through extend)', () => {
+    expect(createVeterinarianSchema.safeParse({ ...validVet, petIds: [], injected: true }).success).toBe(false);
+  });
 });

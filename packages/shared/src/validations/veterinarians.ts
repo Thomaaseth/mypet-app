@@ -74,7 +74,12 @@ export const baseVeterinarianFormSchema = z.object({
 }).strict();
 
 // Schema for creating a new veterinarian (inherits .strict() from the base)
-export const createVeterinarianSchema = baseVeterinarianFormSchema;
+// Added petIds so that it can ride along on create without leaking into update
+export const createVeterinarianSchema = baseVeterinarianFormSchema.extend( {
+    petIds: z
+    .array(z.string().uuid(key('vets.validation.invalidPetId')))
+    .optional(),
+}).strict();
 
 // Schema for updating a veterinarian
 export const updateVeterinarianSchema = baseVeterinarianFormSchema.extend({

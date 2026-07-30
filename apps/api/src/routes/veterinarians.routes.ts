@@ -95,17 +95,13 @@ router.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunc
       throw new BadRequestError(`Validation error: ${firstError.message}`);
     }
 
-    const vetData: VeterinarianFormData = validation.data;
+    // petIds now comes from validated data (real UUIDs), not the raw body
+    const { petIds, ...vetData } = validation.data;
 
-    // Extract pet assignment data if provided
-    const { petIds } = req.body;
-
-    const newVet = await VeterinariansService.createVeterinarian({
-      ...vetData,
-      userId,
-    },
-    petIds
-  );
+    const newVet = await VeterinariansService.createVeterinarian(
+      { ...vetData, userId },
+      petIds,
+    );
     
 
     respondWithCreated(res, { veterinarian: newVet }, 'Veterinarian created successfully');
