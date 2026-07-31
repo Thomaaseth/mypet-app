@@ -1,10 +1,10 @@
 import { PetService } from './service';
 import { petRepository } from './repository';
-import { petValidator } from './validator';
+import { petNormalizer } from './validator';
 import type { PetEditFormData, PetFormData } from '@/lib/validations/pet';
 
 // Create configured service instance
-const petService = new PetService(petRepository, petValidator);
+const petService = new PetService(petRepository, petNormalizer);
 
 // Export the same interface as your current petApi
 export const petApi = {
@@ -26,5 +26,5 @@ export type { PetError, PetImageUploadResponse } from './types';
 
 // Export individual components for testing or advanced use
 export { PetRepository } from './repository';
-export { PetValidator } from './validator';
+export { PetNormalizer } from './validator';
 export { PetService } from './service';

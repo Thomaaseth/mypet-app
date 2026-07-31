@@ -4,7 +4,7 @@ import type { PetFormData } from '@/lib/validations/pet';
  * two places: the form (zodResolver + shared schema) and the server (strict
  * schema). This only reshapes valid input.
  */
-export class PetValidator {
+export class PetNormalizer {
   transformPetData(data: Partial<PetFormData>): Partial<PetFormData> {
     const transformed = { ...data };
 
@@ -29,4 +29,4 @@ export class PetValidator {
 }
 
 // Default instance
-export const petValidator = new PetValidator();
+export const petNormalizer = new PetNormalizer();

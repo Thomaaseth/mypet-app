@@ -1,9 +1,8 @@
 import type { PetError, PetImageUploadResponse } from './types';
 import type { PetRepository } from './repository';
-import type { PetValidator } from './validator';
+import type { PetNormalizer } from './validator';
 import { 
-  ApiError, 
-  ValidationError, 
+  ApiError,  
   NotFoundError,
   UnauthorizedError,
   ForbiddenError 
@@ -14,7 +13,7 @@ import type { PetEditFormData, PetFormData } from '@/lib/validations/pet';
 export class PetService {
   constructor(
     private repository: PetRepository,
-    private validator: PetValidator
+    private validator: PetNormalizer
   ) {}
 
   async getPets(): Promise<Pet[]> {
@@ -106,15 +105,6 @@ export class PetService {
     let message: string;
     let field: keyof PetFormData | undefined;
     let code: string;
-
-    // Handle validation errors from validator
-    if (error instanceof ValidationError) {
-      return {
-        message: error.message,
-        field: error.field as keyof PetFormData,
-        code: error.code,
-      };
-    }
     
     // Handle API errors
     if (error instanceof NotFoundError) {
