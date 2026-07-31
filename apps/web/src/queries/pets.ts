@@ -2,8 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { petApi, petErrorHandler } from '@/lib/api/domains/pets'
 import { toastService } from '@/lib/toast'
 import { useTranslation } from 'react-i18next'
-import type { Pet, PetFormData } from '@/types/pet'
+import type { Pet } from '@/types/pet'
+import type { PetEditFormData } from '@/lib/validations/pet'
 import type { PetImageUploadResponse } from '@/lib/api/domains/pets/types'
+import type { PetFormData } from '@/lib/validations/pet';
 
 // QUERY KEYS - Centralized for cache management
 export const petKeys = {
@@ -76,18 +78,9 @@ export function useUpdatePet() {
     const { t } = useTranslation()
   
     return useMutation({
-      mutationFn: ({ petId, petData }: { petId: string; petData: Partial<PetFormData> }) => {
-        const rest: Partial<PetFormData> = { ...petData };
-        delete rest.weight;
-        delete rest.weightUnit;
-
-        const transformedData: Partial<PetFormData> =
-          petData.weight !== undefined && petData.weight !== ''
-            ? { ...rest, weight: petData.weight.replace(',', '.') }
-            : rest;
-
-        return petApi.updatePet(petId, transformedData);
-      },
+      mutationFn: ({ petId, petData }: { petId: string; petData: PetEditFormData }) => {
+        return petApi.updatePet(petId, petData);
+    },
       onSuccess: (updatedPet) => {
         // Seed the detail cache directly from the server response — the PUT
         // returns the same plain Pet row shape as GET /pets/:id, so this is

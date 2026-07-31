@@ -60,6 +60,7 @@ describe('AppointmentsService', () => {
           userId: secondary.id,
           name: 'Other Pet',
           animalType: 'cat',
+          gender: 'female'
         }).returning();
   
         await expect(
@@ -132,6 +133,7 @@ describe('AppointmentsService', () => {
         userId: secondary.id,
         name: 'Other Pet',
         animalType: 'cat',
+        gender: 'male'
       }).returning();
 
       await expect(

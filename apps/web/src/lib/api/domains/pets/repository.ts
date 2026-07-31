@@ -1,7 +1,7 @@
 import { get, post, put, del } from '../../base';
 import type { PetImageUploadResponse, PetSignedUrlResponse } from './types';
-import type { Pet, PetFormData } from '@/types/pet';
-
+import type { Pet } from '@/types/pet';
+import type { PetFormData } from '@/lib/validations/pet';
 
 // Handles data access operations using existing API functions
 export class PetRepository {

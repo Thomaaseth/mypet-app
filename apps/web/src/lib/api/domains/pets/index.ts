@@ -1,7 +1,7 @@
 import { PetService } from './service';
 import { petRepository } from './repository';
 import { petValidator } from './validator';
-import type { PetFormData } from '@/types/pet';
+import type { PetEditFormData, PetFormData } from '@/lib/validations/pet';
 
 // Create configured service instance
 const petService = new PetService(petRepository, petValidator);
@@ -11,8 +11,7 @@ export const petApi = {
   getPets: () => petService.getPets(),
   getPetById: (petId: string) => petService.getPetById(petId),
   createPet: (petData: PetFormData) => petService.createPet(petData),
-  updatePet: (petId: string, petData: Partial<PetFormData>) => petService.updatePet(petId, petData),
-  deletePet: (petId: string) => petService.deletePet(petId),
+  updatePet: (petId: string, petData: PetEditFormData) => petService.updatePet(petId, petData),  deletePet: (petId: string) => petService.deletePet(petId),
   permanentlyDeletePet: (petId: string) => petService.permanentlyDeletePet(petId),
   getPetSignedUrl: (petId: string) => petService.getPetSignedUrl(petId),
   uploadPetImage: (petId: string, file: File) => petService.uploadPetImage(petId, file),

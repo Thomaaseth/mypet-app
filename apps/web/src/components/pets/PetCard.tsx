@@ -10,7 +10,6 @@ import {
   HeartOff,
   Venus,
   Mars,
-  CircleHelp,
   Cpu
 } from 'lucide-react';
 import {
@@ -154,7 +153,6 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
               <div className="flex items-center gap-2">
                 {pet.gender === 'male' && <Mars className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 {pet.gender === 'female' && <Venus className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-                {pet.gender === 'unknown' && <CircleHelp className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 <EntryTitle className="truncate">{t(PET_GENDER_KEYS[pet.gender])}</EntryTitle>
               </div>
               {pet.isNeutered && (

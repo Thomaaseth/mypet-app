@@ -87,7 +87,7 @@ const fr: TranslationShape<typeof pets> = {
     deleteConfirmation: 'Êtes-vous sûr de vouloir supprimer {{name}} ? Cela supprimera également toutes les données associées, y compris l\'historique de poids, les dossiers vétérinaires et autres informations. Cette action est irréversible.',
   },
   validation: {
-    invalidGender: 'Veuillez sélectionner un sexe valide',
+    genderRequired: 'Veuillez sélectionner un sexe valide',
     nameRequired: "Le nom de l'animal est requis",
     nameTooLong: "Le nom de l'animal doit contenir moins de 50 caractères",
     nameInvalidChars: "Le nom de l'animal ne peut contenir que des lettres, espaces, tirets, apostrophes et points",
@@ -97,6 +97,7 @@ const fr: TranslationShape<typeof pets> = {
     invalidBirthDate: 'Veuillez saisir une date de naissance valide',
     microchipInvalidChars: 'Le numéro de puce ne peut contenir que des lettres, chiffres, espaces et tirets',
     microchipTooLong: 'Le numéro de puce doit contenir moins de 20 caractères',
+    microchipTooShort: 'Le numéro de puce doit contenir au moins 8 caractères',
     notesTooLong: 'La bio doit contenir moins de 200 caractères',
     weightExceedsMax: 'Le poids dépasse le maximum autorisé (200 kg / 440 lbs)',
   },

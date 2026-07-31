@@ -16,8 +16,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Heart, Loader2 } from 'lucide-react';
 import { usePets, useCreatePet, useUpdatePet, useDeletePet, usePetSignedUrl } from '@/queries/pets';
 import PetCard from './PetCard';
-import PetForm from './PetForm';
-import type { Pet, PetFormData } from '@/types/pet';
+import type { Pet } from '@/types/pet';
+import { PetCreateForm } from './PetCreateForm';
+import { PetEditForm } from './PetEditForm';
+import type { PetEditFormData, PetFormData } from '@/lib/validations/pet';
 import { petErrorHandler } from '@/lib/api/domains/pets';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 import { WeightTracker } from './WeightTracker';
@@ -33,13 +35,13 @@ function EditPetForm({
   isLoading 
 }: { 
   pet: Pet; 
-  onSubmit: (data: PetFormData) => Promise<Pet | null>; 
+  onSubmit: (data: PetEditFormData) => Promise<Pet | null>; 
   onCancel: () => void; 
   isLoading: boolean; 
 }) {
   const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
   return (
-    <PetForm
+    <PetEditForm
       pet={pet}
       signedUrl={signedUrl ?? null}
       onSubmit={onSubmit}
@@ -83,7 +85,7 @@ export default function PetList() {
   };
 
   // Handle update pet
-  const handleUpdatePet = async (petData: PetFormData): Promise<Pet | null> => {
+  const handleUpdatePet = async (petData: PetEditFormData): Promise<Pet | null> => {
     if (!editingPet) return null;
     
     try {
@@ -186,7 +188,7 @@ export default function PetList() {
                 title={t('pets.list.addPetDialogTitle')}
                 description={t('pets.list.addPetDialogDescription')}
               >
-                <PetForm
+                <PetCreateForm
                   onSubmit={handleCreatePet}
                   onCancel={() => setIsCreateDialogOpen(false)}
                   isLoading={isActionLoading}
@@ -221,7 +223,7 @@ export default function PetList() {
             title={t('pets.list.addPetDialogTitle')}
             description={t('pets.list.addPetDialogDescription')}
           >
-            <PetForm
+            <PetCreateForm
               onSubmit={handleCreatePet}
               onCancel={() => setIsCreateDialogOpen(false)}
               isLoading={isActionLoading}

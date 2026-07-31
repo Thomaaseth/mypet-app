@@ -2,7 +2,6 @@ import { WeightService } from './service';
 import { weightRepository } from './repository';
 import { weightValidator } from './validator';
 import type { WeightFormData } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
 
 // Create configured service instance
 const weightService = new WeightService(weightRepository, weightValidator);

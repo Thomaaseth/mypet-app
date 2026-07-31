@@ -1,4 +1,4 @@
-import type { PetGender } from '@/types/pet';
+import type { PetGender } from '@/lib/validations/pet';
 import type { AppointmentType } from '@/types/appointments';
 import type { DateTimeLocale } from '@/shared/validations/locale';
 import type { UnitSystem } from '@/shared/validations/units';
@@ -14,7 +14,6 @@ import type { UnitSystem } from '@/shared/validations/units';
 export const PET_GENDER_KEYS = {
   male: 'pets.gender.male',
   female: 'pets.gender.female',
-  unknown: 'pets.gender.unknown',
 } as const satisfies Record<PetGender, string>;
 
 export const ANIMAL_TYPE_KEYS = {

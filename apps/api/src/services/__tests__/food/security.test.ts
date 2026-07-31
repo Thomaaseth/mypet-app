@@ -13,6 +13,7 @@ describe('Security and Authorization', () => {
       userId: secondary.id,
       name: 'Other Pet',
       animalType: 'cat',
+      gender: 'male',
       isActive: true,
     }).returning();
 
@@ -31,6 +32,7 @@ describe('Security and Authorization', () => {
       userId: primary.id,
       name: 'Inactive Pet',
       animalType: 'cat',
+      gender: 'male',
       isActive: false,
     }).returning();
 
@@ -45,6 +47,7 @@ describe('Security and Authorization', () => {
       userId: secondary.id,
       name: 'Other Pet',
       animalType: 'cat',
+      gender: 'male',
       isActive: true,
     }).returning();
 

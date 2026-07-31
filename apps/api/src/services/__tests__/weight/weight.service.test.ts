@@ -39,6 +39,7 @@ describe('WeightEntriesService', () => {
           userId: secondary.id,
           name: 'Other User Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
   
@@ -79,6 +80,7 @@ describe('WeightEntriesService', () => {
           userId: secondary.id,
           name: 'Other User Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
         
@@ -190,6 +192,7 @@ describe('WeightEntriesService', () => {
           userId: secondary.id,
           name: 'Other User Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
         
@@ -287,6 +290,7 @@ describe('WeightEntriesService', () => {
           userId: secondary.id,
           name: 'Other User Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
         
@@ -362,6 +366,7 @@ describe('WeightEntriesService', () => {
           userId: secondary.id,
           name: 'Other User Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
         
@@ -382,6 +387,7 @@ describe('WeightEntriesService', () => {
           userId: secondary.id,
           name: 'Other User Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
         
@@ -399,6 +405,7 @@ describe('WeightEntriesService', () => {
           userId: primary.id,
           name: 'Inactive Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: false,
         }).returning();
   
@@ -464,6 +471,7 @@ describe('WeightEntriesService', () => {
           userId: primary.id,
           name: 'Test Cat',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         }).returning();
           
@@ -472,6 +480,7 @@ describe('WeightEntriesService', () => {
           userId: primary.id,
           name: 'Test Dog', 
           animalType: 'dog',
+          gender: 'male',
           isActive: true,
         }).returning();
         

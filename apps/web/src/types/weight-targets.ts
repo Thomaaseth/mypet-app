@@ -1,4 +1,4 @@
-import type { WeightUnit } from './pet';
+import type { WeightUnit } from '@/lib/validations/pet';
 
 export interface WeightTarget {
   id: string;

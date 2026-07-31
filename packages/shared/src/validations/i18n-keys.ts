@@ -59,9 +59,10 @@ export type ValidationMessageKey =
   // pets.validation.*
   | 'pets.validation.animalTypeRequired'
   | 'pets.validation.invalidBirthDate'
-  | 'pets.validation.invalidGender'
+  | 'pets.validation.genderRequired'
   | 'pets.validation.microchipInvalidChars'
   | 'pets.validation.microchipTooLong'
+  | 'pets.validation.microchipTooShort'
   | 'pets.validation.nameInvalidChars'
   | 'pets.validation.nameRequired'
   | 'pets.validation.nameTooLong'

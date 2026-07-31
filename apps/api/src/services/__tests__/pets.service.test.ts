@@ -20,6 +20,7 @@ describe('PetsService', () => {
           userId: primary.id,
           name: 'Fluffy',
           animalType: 'cat',
+          gender: 'male',
           species: 'Persian',
           isActive: true,
         },
@@ -27,6 +28,7 @@ describe('PetsService', () => {
           userId: primary.id,
           name: 'Buddy',
           animalType: 'dog',
+          gender: 'male',
           species: 'Golden Retriever',
           isActive: true,
         },
@@ -50,6 +52,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'First Pet',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
       
       await new Promise(resolve => setTimeout(resolve, 10));
@@ -58,6 +61,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Second Pet',
         animalType: 'dog',
+        gender: 'male',
       }).returning();
 
       const result = await PetsService.getUserPets(primary.id);
@@ -75,12 +79,14 @@ describe('PetsService', () => {
           userId: primary.id,
           name: 'Active Pet',
           animalType: 'cat',
+          gender: 'male',
           isActive: true,
         },
         {
           userId: primary.id,
           name: 'Inactive Pet',
           animalType: 'dog',
+          gender: 'male',
           isActive: false,
         },
       ]);
@@ -108,11 +114,13 @@ describe('PetsService', () => {
           userId: primary.id,
           name: 'My Pet',
           animalType: 'cat',
+          gender: 'male',
         },
         {
           userId: secondary.id,
           name: 'Other Pet',
           animalType: 'dog',
+          gender: 'male',
         },
       ]);
 
@@ -137,6 +145,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Fluffy',
         animalType: 'cat',
+        gender: 'male',
         species: 'Persian',
       }).returning();
 
@@ -163,6 +172,7 @@ describe('PetsService', () => {
         userId: secondary.id,
         name: 'Other User Pet',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
 
       await expect(
@@ -176,6 +186,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Inactive Pet',
         animalType: 'cat',
+        gender: 'male',
         isActive: false,
       }).returning();
 
@@ -200,8 +211,8 @@ describe('PetsService', () => {
         name: 'Fluffy',
         userId: primary.id,
         animalType: 'cat',
+        gender: 'male',
         species: 'Persian',
-        gender: 'female',
       };
 
       const result = await PetsService.createPet(newPetData);
@@ -226,6 +237,7 @@ describe('PetsService', () => {
         name: 'Basic Pet',
         userId: primary.id,
         animalType: 'dog',
+        gender: 'male',
       };
 
       const result = await PetsService.createPet(newPetData);
@@ -234,36 +246,14 @@ describe('PetsService', () => {
       expect(result.userId).toBe(primary.id);
       expect(result.animalType).toBe('dog');
       expect(result.species).toBeNull();
-      expect(result.gender).toBe('unknown');
-    });
-
-    it('should throw BadRequestError when name is missing', async () => {
-      const { primary } = await DatabaseTestUtils.createTestUsers();
-      const invalidData = {
-        userId: primary.id,
-        animalType: 'cat',
-      } as NewPet;
-
-      await expect(PetsService.createPet(invalidData)).rejects.toThrow(BadRequestError);
-      await expect(PetsService.createPet(invalidData)).rejects.toThrow('Pet name, user ID, and animal type are required');
     });
 
     it('should throw BadRequestError when userId is missing', async () => {
       const invalidData = {
         name: 'Fluffy',
         animalType: 'cat',
+        gender: 'male',
       } as NewPet;
-
-      await expect(PetsService.createPet(invalidData)).rejects.toThrow(BadRequestError);
-    });
-
-    it('should throw BadRequestError when name is empty string', async () => {
-      const { primary } = await DatabaseTestUtils.createTestUsers();
-      const invalidData: NewPet = {
-        name: '',
-        userId: primary.id,
-        animalType: 'cat',
-      };
 
       await expect(PetsService.createPet(invalidData)).rejects.toThrow(BadRequestError);
     });
@@ -273,6 +263,7 @@ describe('PetsService', () => {
         name: 'Fluffy',
         userId: '',
         animalType: 'cat',
+        gender: 'male',
       };
 
       await expect(PetsService.createPet(invalidData)).rejects.toThrow(BadRequestError);
@@ -284,6 +275,7 @@ describe('PetsService', () => {
         name: 'Fluffy',
         userId: primary.id,
         animalType: 'cat',
+        gender: 'male',
         species: '',
         notes: '',
         microchipNumber: '',
@@ -326,6 +318,7 @@ describe('PetsService', () => {
         name: 'Weighted Pet',
         userId: primary.id,
         animalType: 'cat',
+        gender: 'male',
         weight: '5.50',
         weightUnit: 'kg',
       };
@@ -356,6 +349,7 @@ describe('PetsService', () => {
         name: 'Weightless Pet',
         userId: primary.id,
         animalType: 'dog',
+        gender: 'male',
         // No weight provided
       };
   
@@ -380,6 +374,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Original Name',
         animalType: 'cat',
+        gender: 'male',
         species: 'Persian',
       }).returning();
 
@@ -401,6 +396,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Original Name',
         animalType: 'cat',
+        gender: 'male',
         species: 'Persian',
       }).returning();
 
@@ -418,6 +414,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Test Pet',
         animalType: 'cat',
+        gender: 'male',
         species: 'Persian',
       }).returning();
 
@@ -450,6 +447,7 @@ describe('PetsService', () => {
         userId: secondary.id,
         name: 'Other User Pet',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
 
       const updateData = { name: 'Hacker Name' };
@@ -465,6 +463,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Test Pet',
         animalType: 'cat',
+        gender: 'male',
         isActive: false,
       }).returning();
 
@@ -492,6 +491,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Pet to Delete',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
 
       await PetsService.deletePet(pet.id, primary.id);
@@ -510,6 +510,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Pet to Delete',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
 
       await PetsService.deletePet(pet.id, primary.id);
@@ -534,6 +535,7 @@ describe('PetsService', () => {
         userId: secondary.id,
         name: 'Other User Pet',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
 
       await expect(
@@ -549,6 +551,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Pet to Hard Delete',
         animalType: 'dog',
+        gender: 'male',
       }).returning();
 
       await PetsService.hardDeletePet(pet.id, primary.id);
@@ -575,6 +578,7 @@ describe('PetsService', () => {
         userId: secondary.id,
         name: 'Other User Pet',
         animalType: 'dog',
+        gender: 'male',
       }).returning();
 
       await expect(
@@ -588,9 +592,9 @@ describe('PetsService', () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
       
       await db.insert(schema.pets).values([
-        { userId: primary.id, name: 'Pet 1', animalType: 'cat', isActive: true },
-        { userId: primary.id, name: 'Pet 2', animalType: 'dog', isActive: true },
-        { userId: primary.id, name: 'Pet 3', animalType: 'cat', isActive: false },
+        { userId: primary.id, name: 'Pet 1', animalType: 'cat', gender: 'male', isActive: true },
+        { userId: primary.id, name: 'Pet 2', animalType: 'dog', gender: 'male', isActive: true },
+        { userId: primary.id, name: 'Pet 3', animalType: 'cat', gender: 'male', isActive: false },
       ]);
 
       const result = await PetsService.getUserPets(primary.id);
@@ -610,8 +614,8 @@ describe('PetsService', () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
       
       await db.insert(schema.pets).values([
-        { userId: primary.id, name: 'Inactive Pet 1', animalType: 'cat', isActive: false },
-        { userId: primary.id, name: 'Inactive Pet 2', animalType: 'dog', isActive: false },
+        { userId: primary.id, name: 'Inactive Pet 1', animalType: 'cat', gender: 'male', isActive: false },
+        { userId: primary.id, name: 'Inactive Pet 2', animalType: 'dog', gender: 'male', isActive: false },
       ]);
 
       const result = await PetsService.getUserPets(primary.id);
@@ -623,9 +627,9 @@ describe('PetsService', () => {
       const { primary, secondary } = await DatabaseTestUtils.createTestUsers();
 
       await db.insert(schema.pets).values([
-        { userId: primary.id, name: 'My Pet', animalType: 'cat', isActive: true },
-        { userId: secondary.id, name: 'Other Pet 1', animalType: 'dog', isActive: true },
-        { userId: secondary.id, name: 'Other Pet 2', animalType: 'cat', isActive: true },
+        { userId: primary.id, name: 'My Pet', animalType: 'cat', gender: 'male', isActive: true },
+        { userId: secondary.id, name: 'Other Pet 1', animalType: 'dog', gender: 'male', isActive: true },
+        { userId: secondary.id, name: 'Other Pet 2', animalType: 'cat', gender: 'male', isActive: true },
       ]);
 
       const result = await PetsService.getUserPets(primary.id);
@@ -667,6 +671,7 @@ describe('PetsService', () => {
         name: 'Weighted Pet',
         userId: primary.id,
         animalType: 'cat',
+        gender: 'male',
         weight: '5.50',
         weightUnit: 'kg',
       };
@@ -688,6 +693,7 @@ describe('PetsService', () => {
         userId: primary.id,
         name: 'Concurrent Pet',
         animalType: 'cat',
+        gender: 'male',
       }).returning();
 
       const updatePromises = [
@@ -712,6 +718,7 @@ describe('PetsService', () => {
         name: longName,
         userId: primary.id,
         animalType: 'cat',
+        gender: 'male',
         species: longSpecies,
         notes: longNotes,
       };
@@ -729,6 +736,7 @@ describe('PetsService', () => {
         name: 'Type Test Pet',
         userId: primary.id,
         animalType: 'dog',
+        gender: 'male',
         isNeutered: true,
         birthDate: '2020-12-25',
       };
@@ -747,6 +755,7 @@ describe('PetsService', () => {
         name: "Fluffy's Pet & Co. (2024)",
         userId: primary.id,
         animalType: 'cat',
+        gender: 'male',
         species: 'Maine Coon™',
         notes: 'Special chars: àáâãäå æç èéêë ìíîï ñ òóôõö øù úûüý',
       };

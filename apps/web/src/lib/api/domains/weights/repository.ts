@@ -3,7 +3,7 @@ import type {
   WeightEntry,
   WeightFormData
 } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
+import type { WeightUnit } from '@/lib/validations/pet';
 
 // Handles data access operations using existing API functions
 export class WeightRepository {

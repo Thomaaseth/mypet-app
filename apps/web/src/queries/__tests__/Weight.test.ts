@@ -26,7 +26,6 @@ import {
 } from '@/queries/weights';
 import { mockWeightEntries } from '@/test/mocks/handlers';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 const TEST_PET_ID = 'pet-1';

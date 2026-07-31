@@ -4,7 +4,6 @@ import type {
   WeightEntry,
   WeightFormData,
 } from '@/types/weights';
-import type { WeightUnit } from '@/types/pet';
 import {
   ApiError,
   NotFoundError,

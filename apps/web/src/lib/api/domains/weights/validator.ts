@@ -1,5 +1,5 @@
 import { validateWeightEntry, type WeightFormData } from '@/lib/validations/weight';
-import type { WeightUnit } from '@/types/pet';
+import type { WeightUnit } from '@/lib/validations/pet';
 
 export class WeightValidator {
   validateWeightEntry(data: WeightFormData, weightUnit: WeightUnit, animalType: 'cat' | 'dog') {

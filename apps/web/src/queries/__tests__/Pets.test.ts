@@ -28,8 +28,9 @@ import {
   usePetSignedUrl,
 } from '@/queries/pets';
 import { mockPets } from '@/test/mocks/handlers';
-import type { Pet, PetFormData } from '@/types/pet';
+import type { Pet } from '@/types/pet';
 import { resetMockPets } from '@/test/mocks/handlers';
+import type { PetFormData, PetEditFormData } from '@/lib/validations/pet';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
@@ -238,7 +239,7 @@ describe('Pets Queries', () => {
         name: '',
         animalType: 'cat',
         species: '',
-        gender: 'unknown',
+        gender: 'male',
         birthDate: '',
         weight: '',
         weightUnit: 'kg',
@@ -307,9 +308,11 @@ describe('Pets Queries', () => {
         { queryClient }
       );
 
-      const updateData: Partial<PetFormData> = {
+      const updateData: PetEditFormData = {
         name: 'Fluffy Updated',
-        weight: '5.0',
+        animalType: 'cat',
+        gender: 'male',
+        isNeutered: false,
       };
 
       await mutationResult.current.mutateAsync({ petId, petData: updateData });
@@ -354,8 +357,7 @@ describe('Pets Queries', () => {
       await expect(
         result.current.mutateAsync({
           petId: 'non-existent',
-          petData: { name: 'Test' },
-        })
+          petData: { name: 'Test', animalType: 'cat', gender: 'male', isNeutered: false },        })
       ).rejects.toThrow();
     });
   });

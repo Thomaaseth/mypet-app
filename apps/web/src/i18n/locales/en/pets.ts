@@ -84,7 +84,7 @@ const pets = {
         deleteConfirmation: 'Are you sure you want to delete {{name}}? This will also delete all associated data including weight entries, vet records, and other information. This action cannot be undone.',
       },
       validation: {
-        invalidGender: 'Please select a valid gender',
+        genderRequired: 'Please select a sex',
         nameRequired: 'Pet name is required',
         nameTooLong: 'Pet name must be less than 50 characters',
         nameInvalidChars: 'Pet name can only contain letters, spaces, hyphens, apostrophes, and periods',
@@ -94,6 +94,7 @@ const pets = {
         invalidBirthDate: 'Please enter a valid birth date',
         microchipInvalidChars: 'Microchip number can only contain letters, numbers, spaces, and hyphens',
         microchipTooLong: 'Microchip number must be less than 20 characters',
+        microchipTooShort: 'Microchip number must be more than 8 characters',
         notesTooLong: 'Bio must be less than 200 characters',
         weightExceedsMax: 'Weight exceeds maximum allowed (200kg / 440lbs)',
       },

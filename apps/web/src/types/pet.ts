@@ -1,5 +1,4 @@
-export type PetGender = 'male' | 'female' | 'unknown';
-export type WeightUnit = 'kg' | 'lbs';
+import type { PetGender } from '@/lib/validations/pet';
 
 export interface Pet {
   id: string;
@@ -16,18 +15,4 @@ export interface Pet {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-}
-
-// Form data types
-export interface PetFormData {
-  name: string;
-  animalType: 'cat' | 'dog';
-  species?: string; // Free text field
-  gender: PetGender;
-  birthDate: string; // HTML date input format: YYYY-MM-DD
-  weight: string; // String for form input (the weight value)
-  weightUnit: WeightUnit; // Unit selection
-  isNeutered: boolean;
-  microchipNumber: string;
-  notes: string;
 }

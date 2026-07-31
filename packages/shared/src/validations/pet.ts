@@ -4,8 +4,8 @@ import { key } from './i18n-keys';
 export type WeightUnit = 'kg' | 'lbs';
 
 // Pet gender and weight unit enums for validation
-export const petGenderSchema = z.enum(['male', 'female', 'unknown'], {
-  errorMap: () => ({ message: key('pets.validation.invalidGender') })
+export const petGenderSchema = z.enum(['male', 'female'], {
+  errorMap: () => ({ message: key('pets.validation.genderRequired') })
 });
 
 export const weightUnitSchema = z.enum(['kg', 'lbs'], {
@@ -52,6 +52,10 @@ export const basePetFormSchema = z.object({
     .string()
     .regex(/^[A-Za-z0-9\s-]*$/, key('pets.validation.microchipInvalidChars'))
     .max(20, key('pets.validation.microchipTooLong'))
+    .refine(
+      (v) => { const s = v.replace(/[\s-]/g, ''); return s.length === 0 || s.length >= 8; },
+      key('pets.validation.microchipTooShort'),
+    )
     .optional()
     .or(z.literal('')),
   
@@ -112,10 +116,17 @@ export const updatePetSchema = basePetFormSchema
   })
   .strict();
 
+// Edit FORM schema: full object (name still required), no weight/weightUnit
+export const petEditFormSchema = basePetFormSchema
+  .omit({ weight: true, weightUnit: true })
+  .strict();
+
 // Export types
 export type PetFormData = z.infer<typeof petFormSchema>;
 export type CreatePetData = z.infer<typeof createPetSchema>;
 export type UpdatePetData = z.infer<typeof updatePetSchema>;
+export type PetEditFormData = z.infer<typeof petEditFormSchema>;
+export type PetGender = z.infer<typeof petGenderSchema>;
 
 // Validate functions
 export const validatePetForm = (data: unknown) => {
@@ -128,4 +139,8 @@ export const validateCreatePet = (data: unknown) => {
 
 export const validateUpdatePet = (data: unknown) => {
   return updatePetSchema.safeParse(data);
+};
+
+export const validatePetEditForm = (data: unknown) => {
+  return petEditFormSchema.safeParse(data)
 };

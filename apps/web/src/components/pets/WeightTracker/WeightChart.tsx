@@ -1,4 +1,4 @@
-import { TrendingUp, Plus } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, ReferenceArea } from 'recharts';
 import {
   ChartConfig,
@@ -6,7 +6,7 @@ import {
   ChartTooltip,
 } from '@/components/ui/chart';
 import type { WeightChartData } from '@/queries/weights';
-import type { WeightUnit } from '@/types/pet';
+import type { WeightUnit } from '@/lib/validations/pet';
 import { 
   StatLabel, 
   StatValue, 
@@ -48,7 +48,7 @@ export default function WeightChart({
 
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const { units, dateTimeLocale } = usePreferencesContext();
+  const { dateTimeLocale } = usePreferencesContext();
   const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
 
   if (data.length === 0 && !hasAnyEntries) {

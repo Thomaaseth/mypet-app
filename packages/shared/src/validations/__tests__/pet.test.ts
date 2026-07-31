@@ -19,15 +19,14 @@ const validPet = {
   weight: '4.5',
   weightUnit: 'kg' as const,
   isNeutered: true,
-  microchipNumber: 'ABC123',
+  microchipNumber: 'ABC12345',
   notes: 'Friendly cat',
 };
 
 describe('petGenderSchema', () => {
-  it('accepts male, female, unknown', () => {
+  it('accepts male, female', () => {
     expect(petGenderSchema.safeParse('male').success).toBe(true);
     expect(petGenderSchema.safeParse('female').success).toBe(true);
-    expect(petGenderSchema.safeParse('unknown').success).toBe(true);
   });
 
   it('rejects an invalid gender', () => {
@@ -143,13 +142,21 @@ describe.each([
   });
 
   it('rejects an invalid microchipNumber (disallowed characters)', () => {
-    expect(schema.safeParse({ ...validPet, microchipNumber: 'ABC-123@' }).success).toBe(false);
+    expect(schema.safeParse({ ...validPet, microchipNumber: 'ABCD1234@' }).success).toBe(false);
   });
 
   it('rejects a microchipNumber over 20 characters', () => {
     expect(schema.safeParse({ ...validPet, microchipNumber: 'A'.repeat(21) }).success).toBe(false);
   });
 
+  it('rejects a microchipNumber under 8 characters (stripped)', () => {
+    expect(schema.safeParse({ ...validPet, microchipNumber: 'ABC123' }).success).toBe(false);
+  });
+
+  it('accepts a microchipNumber whose separators are stripped to ≥8 chars', () => {
+    expect(schema.safeParse({ ...validPet, microchipNumber: 'ABC-123-45' }).success).toBe(true);
+  });
+  
   it('rejects notes over 200 characters', () => {
     expect(schema.safeParse({ ...validPet, notes: 'x'.repeat(201) }).success).toBe(false);
    });

@@ -1,12 +1,6 @@
 import { db } from '../db';
 import * as schema from '../db/schema';
 
-/**
- * Database test utilities following industry standards
- * - Clean database in correct dependency order
- * - Generate unique test data to prevent conflicts
- * - Reusable setup patterns for all service tests
- */
 export class DatabaseTestUtils {
   /**
    * Clean all tables in correct dependency order
@@ -89,6 +83,7 @@ export class DatabaseTestUtils {
       name: `Test Pet ${index + 1}`,
       animalType: index % 2 === 0 ? ('cat' as const) : ('dog' as const),
       species: index % 2 === 0 ? 'Persian' : 'Golden Retriever',
+      gender: index % 2 === 0 ? ('female' as const) : ('male' as const),
       isActive: true,
     }));
 

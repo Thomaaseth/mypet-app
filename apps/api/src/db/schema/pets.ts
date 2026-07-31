@@ -10,7 +10,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { user } from './auth-schema';
 
-export const petGenderEnum = pgEnum('pet_gender', ['male', 'female', 'unknown']);
+export const petGenderEnum = pgEnum('pet_gender', ['male', 'female']);
 export const petAnimalTypeEnum = pgEnum('pet_animal_type', ['cat', 'dog']);
 
 // Pets table
@@ -20,7 +20,7 @@ export const pets = pgTable('pets', {
   name: varchar('name', { length: 100 }).notNull(),
   animalType: petAnimalTypeEnum('animal_type').notNull(), // REQUIRED
   species: varchar('species', { length: 50 }), // Optional
-  gender: petGenderEnum('gender').default('unknown'),
+  gender: petGenderEnum('gender').notNull(),
   birthDate: date('birth_date'),
   isNeutered: boolean('is_neutered').default(false),
   microchipNumber: varchar('microchip_number', { length: 50 }),

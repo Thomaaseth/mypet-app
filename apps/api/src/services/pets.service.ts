@@ -16,88 +16,26 @@ import { UserPreferencesService } from './user-preferences.service';
 export class PetsService {
   // input validation helpers
   private static validatePetInputs(petData: Partial<NewPet>, today: string, isUpdate = false): void {
-    // Required fields validation (only for create)
-    if (!isUpdate) {
-      if (!petData.name || !petData.userId || !petData.animalType) {
-        throw new BadRequestError('Pet name, user ID, and animal type are required');
-      }
+    // userId is auth-derived (never in the request body/schema), so it's guarded
+    // here. Everything else (name/animalType/gender/lengths/microchip format)
+    // is enforced by the strict shared schema at the route
+    // (validateCreatePet / validateUpdatePet) and is not duplicated.
+    if (!isUpdate && !petData.userId) {
+      throw new BadRequestError('User ID is required');
     }
 
-    // Name validation
-    if (petData.name !== undefined) {
-      if (typeof petData.name !== 'string' || petData.name.trim().length === 0) {
-        throw new BadRequestError('Pet name must be a non-empty string');
-      }
-      if (petData.name.length > 100) {
-        throw new BadRequestError('Pet name must be 100 characters or less');
-      }
-    }
-
-    // Animal type validation
-    if (petData.animalType !== undefined) {
-      const validAnimalTypes = ['cat', 'dog'];
-      if (!validAnimalTypes.includes(petData.animalType)) {
-        throw new BadRequestError('Animal type must be either cat or dog');
-      }
-    }
-
-    // Gender validation
-    if (petData.gender !== undefined && petData.gender !== null) {
-      const validGenders: PetGender[] = ['male', 'female', 'unknown'];
-      if (!validGenders.includes(petData.gender)) {
-        throw new BadRequestError('Gender must be male, female, or unknown');
-      }
-    }
-
-    // Birth date validation
-    if (petData.birthDate !== undefined && petData.birthDate !== null && petData.birthDate !== '') {
-      if (isNaN(new Date(petData.birthDate).getTime())) {
-        throw new BadRequestError('Invalid birth date format');
-      }
-
-      // Birth date cannot be in the future
+    // Birth-date business rules the shared schema can't express: they depend on
+    // the user's timezone-aware "today". (Date *format* is validated by the schema.)
+    if (petData.birthDate) {
       if (petData.birthDate > today) {
         throw new BadRequestError('Birth date cannot be in the future');
       }
-
-      // Reasonable age limits (cats/dogs only — pets can't be older than 30 years)
       const thirtyYearsAgo = new Date();
       thirtyYearsAgo.setUTCFullYear(thirtyYearsAgo.getUTCFullYear() - 30);
       const thirtyYearsAgoString = thirtyYearsAgo.toISOString().split('T')[0];
       if (petData.birthDate < thirtyYearsAgoString) {
         throw new BadRequestError('Birth date cannot be more than 30 years ago');
       }
-    }
-
-    // String field length validations
-    if (petData.species && petData.species.length > 50) {
-      throw new BadRequestError('Species must be 50 characters or less');
-    }
-    if (petData.microchipNumber && petData.microchipNumber.length > 20) {
-      throw new BadRequestError('Microchip number must be 20 characters or less');
-    }
-    if (petData.notes && petData.notes.length > 200) {
-      throw new BadRequestError('Bion must be 200 characters or less');
-    }
-
-    // Microchip number format validation (if provided)
-    if (petData.microchipNumber && petData.microchipNumber.trim().length > 0) {
-      // Basic alphanumeric validation (microchips are usually 10-15 alphanumeric chars)
-      if (!/^[a-zA-Z0-9]{8,20}$/.test(petData.microchipNumber.trim())) {
-        throw new BadRequestError('Microchip number must be 8-20 alphanumeric characters');
-      }
-    }
-  }
-
-  private static validateWeightFields(weight: string, weightUnit: WeightUnit): void {
-    const weightValue = parseFloat(weight);
-    if (isNaN(weightValue) || weightValue <= 0) {
-      throw new BadRequestError('Weight must be a positive number');
-    }
-    
-    const validWeightUnits: WeightUnit[] = ['kg', 'lbs'];
-    if (!validWeightUnits.includes(weightUnit)) {
-      throw new BadRequestError('Weight unit must be kg or lbs');
     }
   }
 
@@ -195,7 +133,7 @@ export class PetsService {
       
       // Validate weight separately if provided
       if (weight && weightUnit) {
-        this.validateWeightFields(weight, weightUnit);
+        // this.validateWeightFields(weight, weightUnit);
         const weightInKg = convertWeight(parseFloat(weight), weightUnit, 'kg');
         this.validateWeightLimits(weightInKg, petData.animalType);
       }

@@ -23,6 +23,8 @@ export interface AppointmentFormData {
   visitNotes?: string;
 }
 
+
+
 export class AppointmentsService {
 
   // Verify pet ownership (reuse pattern from other services)

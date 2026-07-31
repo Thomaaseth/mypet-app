@@ -8,7 +8,8 @@ import {
   UnauthorizedError,
   ForbiddenError 
 } from '../../errors';
-import type { Pet, PetFormData } from '@/types/pet';
+import type { Pet } from '@/types/pet';
+import type { PetEditFormData, PetFormData } from '@/lib/validations/pet';
 
 export class PetService {
   constructor(
@@ -45,12 +46,7 @@ export class PetService {
 
   async createPet(petData: PetFormData): Promise<Pet> {
     try {
-      // Business validation
-      this.validator.validatePetData(petData, false);
-      
-      // Transform data
-      const transformedData = this.validator.transformPetData(petData) as PetFormData;
-      
+      const transformedData: PetFormData = { ...petData, ...this.validator.transformPetData(petData) };
       return await this.repository.createPet(transformedData);
     } catch (error) {
       console.error('Error creating pet:', error);
@@ -58,11 +54,8 @@ export class PetService {
     }
   }
 
-  async updatePet(petId: string, petData: Partial<PetFormData>): Promise<Pet> {
-    try {
-      // Business validation
-      this.validator.validatePetData(petData, true);
-      
+  async updatePet(petId: string, petData: PetEditFormData): Promise<Pet> {
+    try {      
       // Transform data
       const transformedData = this.validator.transformPetData(petData);
       

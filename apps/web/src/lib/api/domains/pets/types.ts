@@ -1,4 +1,5 @@
-import type { Pet, PetFormData } from '@/types/pet'
+import type { Pet } from '@/types/pet'
+import type { PetFormData } from '@/lib/validations/pet';
 
 export interface PetSignedUrlResponse {
     signedUrl: string | null;

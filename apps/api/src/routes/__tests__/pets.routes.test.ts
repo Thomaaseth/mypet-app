@@ -1,4 +1,3 @@
-// apps/api/src/routes/__tests__/pets.routes.test.ts
 import express, { type Request, type Response, type NextFunction } from 'express';
 import request from 'supertest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -94,7 +93,7 @@ const validPetBody = {
   weight: '4.5',
   weightUnit: 'kg',
   isNeutered: true,
-  microchipNumber: 'ABC123',
+  microchipNumber: 'ABC12345',
   notes: 'Friendly',
 };
 
@@ -108,7 +107,7 @@ const fakePet = {
   gender: 'female',
   birthDate: '2020-01-01',
   isNeutered: true,
-  microchipNumber: 'ABC123',
+  microchipNumber: 'ABC12345',
   notes: 'Friendly',
   imageUrl: null,
   isActive: true,
@@ -185,6 +184,13 @@ describe('POST /api/pets', () => {
       expect.objectContaining({ name: 'Whiskers', animalType: 'cat', userId: TEST_USER_ID }),
     );
   });
+  it('returns 400 when a required field (name) is omitted, and does not call the service', async () => {
+    const { name: _name, ...bodyWithoutName } = validPetBody;
+    const res = await request(app).post('/api/pets').send(bodyWithoutName);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Validation error/);
+    expect(PetsService.createPet).not.toHaveBeenCalled();
+  });
 });
 
 describe('PUT /api/pets/:id', () => {
@@ -192,6 +198,19 @@ describe('PUT /api/pets/:id', () => {
     const res = await request(app)
       .put(`/api/pets/${VALID_PET_ID}`)
       .send({ name: 'New Name', isAdmin: true });
+    expect(res.status).toBe(400);
+    expect(PetsService.updatePet).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when the real edit payload leaks weight/weightUnit, and does not call the service', async () => {
+    // The edit form's PetFormData still carries weight/weightUnit (empty in edit
+    // mode), so the client must omit them before PUT. updatePetSchema does
+    // .omit({ weight, weightUnit }).strict(), so if they DO leak, the route
+    // rejects at validation — documenting that weight isn't editable here
+    // (weight changes go through the weight-tracking feature).
+    const res = await request(app)
+      .put(`/api/pets/${VALID_PET_ID}`)
+      .send({ name: 'New Name', weight: '', weightUnit: 'kg' });
     expect(res.status).toBe(400);
     expect(PetsService.updatePet).not.toHaveBeenCalled();
   });
