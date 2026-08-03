@@ -1,4 +1,12 @@
 import pino from 'pino';
+import { APP_ENV } from '../config/app-env';
+
+// Strip the query string from any logged URL
+function stripUrlQuery(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  const queryStart = value.indexOf('?');
+  return queryStart === -1 ? value : value.slice(0, queryStart);
+}
 
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -11,6 +19,35 @@ export const logger = pino({
       ignore: 'pid,hostname',
     }
   } : undefined,
+
+  // Redact secrets if they ever reach a log object.
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+      'res.headers["set-cookie"]',
+      'password',
+      '*.password',
+      'token',
+      '*.token',
+      'secret',
+      '*.secret',
+      'apiKey',
+      '*.apiKey',
+      // Uncomment after launch to redact PII (visible during beta for
+      // user tracing):
+      // 'email',
+      // '*.email',
+    ],
+    censor: '[Redacted]',
+  },
+
+  serializers: {
+    // Keep pino's standard error serializer (type/message/stack).
+    err: pino.stdSerializers.err,
+    // Scrub query strings (and their tokens) from any logged URL.
+    url: stripUrlQuery,
+  },
   
   // Add base context
   base: {

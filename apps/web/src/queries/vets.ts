@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { vetApi, vetErrorHandler } from '@/lib/api';
 import { toastService } from '@/lib/toast';
-import type { Veterinarian, VeterinarianFormData } from '@/types/veterinarian';
+import type { VeterinarianFormData } from '@/types/veterinarian';
 import { useTranslation } from 'react-i18next';
 
 // QUERY KEYS - Centralized for cache management
@@ -152,7 +152,7 @@ export function useDeleteVeterinarian() {
 
       // Backend cascade-unassigns the vet from pets — refetch pet-side
       // caches so assignment lists & appointment dropdowns drop it too.
-      // (Fixes: deleted vet lingering in dropdowns until page refresh.)
+      // (Fixed: deleted vet lingering in dropdowns until page refresh.)
       invalidatePetRelatedCaches(queryClient);
 
       toastService.success(t('toasts.vets.deleteSuccessTitle'), t('toasts.vets.deleteSuccessDescription'));

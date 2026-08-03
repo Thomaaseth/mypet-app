@@ -3,11 +3,11 @@ import { config } from '../../config';
 import { authLogger } from '../../lib/logger';
 import { redisClient } from '../redis';
 
-// Per-recipient email quota — throttles by the address being emailed,
+// Per-recipient email quota; throttles by the address being emailed,
 // so it survives IP rotation and covers every send path (signup, resend,
 // change-email) since all funnel through sendEmail().
 // 5 sends per hour per address. Keyed by type so future flows (e.g. password
-// reset) get their own independent budget and can't starve verification.
+// reset) get their own independent budget
 const EMAIL_QUOTA_MAX = 5;
 const EMAIL_QUOTA_WINDOW_SECONDS = 60 * 60; // 1 hour
 
@@ -51,10 +51,12 @@ function escapeHtml(value: string): string {
 
 const resend = new Resend(config.email.resendApiKey);
 
-// Email configuration
-// Use Resend's default domain 
-// const FROM_EMAIL = 'Pettr <onboarding@resend.dev>';
-const FROM_EMAIL = 'hello@pettr.life'
+// From-address comes from EMAIL_FROM_ADDRESS via config,
+// so staging/prod set their own sender.
+const FROM_EMAIL = config.email.fromAddress;
+// Optional Reply-To (contact@pettr.life) so user replies reach a monitored
+// inbox instead of the send-only from-address
+const REPLY_TO = config.email.replyTo;
 const APP_NAME = 'Pettr';
 const APP_URL = config.env.webUrl;
 
@@ -86,6 +88,7 @@ export async function sendEmail(
             to: [to],
             subject,
             html,
+            ...(REPLY_TO ? { replyTo: REPLY_TO } : {}),
         });
 
         if (error) {
@@ -191,7 +194,7 @@ export const emailTemplates = {
               <p style="color: #666; font-size: 14px;">This link will expire in 24 hours. If you didn't create an account with ${APP_NAME}, you can safely ignore this email.</p>
               
               <div class="footer">
-                <p>Need help? Contact us at support@mypetapp.com</p>
+                <p>Need help? Contact us at contact@pettr.life</p>
                 <p>&copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
               </div>
             </div>
@@ -297,7 +300,7 @@ export const emailTemplates = {
               <div class="divider"></div>
               
               <div class="footer">
-                <p>Need help? Contact us at support@mypetapp.com</p>
+                <p>Need help? Contact us at contact@pettr.life</p>
                 <p>&copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
               </div>
             </div>
@@ -396,7 +399,7 @@ export const emailTemplates = {
               <p style="color: #666; font-size: 14px; margin-top: 20px;">If you didn't request this change, please ignore this email and your email address will remain unchanged.</p>
               
               <div class="footer">
-                <p>Need help? Contact us at support@mypetapp.com</p>
+                <p>Need help? Contact us at contact@pettr.life</p>
                 <p>&copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.</p>
               </div>
             </div>

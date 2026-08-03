@@ -6,7 +6,8 @@ import {
   boolean, 
   date, 
   timestamp, 
-  uuid
+  uuid,
+  index
 } from 'drizzle-orm/pg-core';
 import { user } from './auth-schema';
 
@@ -29,7 +30,9 @@ export const pets = pgTable('pets', {
   isActive: boolean('is_active').default(true), // Soft delete flag
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index('pets_user_id_idx').on(table.userId),
+}));
 
 // Types 
 export type Pet = typeof pets.$inferSelect;

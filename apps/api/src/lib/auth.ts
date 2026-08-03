@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
+import { allowedEmails } from "../db/schema";
+import { eq } from "drizzle-orm";
 import { admin } from "better-auth/plugins";
 import { config } from "../config";
 import { createAuthMiddleware, APIError } from "better-auth/api";
@@ -92,8 +94,7 @@ export const auth = betterAuth({
             );
             
             if (!result.success) {
-                // Quota hit: do NOT fail the signup, create the account,
-                // the email is quietly skipped (but users can't trigger a resend later, NEED TO BUILD).
+                // Quota hit: do NOT fail the signup, create the account, user can re-trigger Send
                 if (result.error === 'EMAIL_QUOTA_EXCEEDED') {
                     authLogger.warn({ email: user.email }, 'Verification email skipped — recipient over quota (signup NOT blocked)');
                 } else {
@@ -168,6 +169,27 @@ export const auth = betterAuth({
             if (ctx.path !== "/sign-up/email") {
                 return;
             }
+
+            // Closed-beta allowlist: only invited emails may self-register
+            // Empty table => nobody can sign up.
+            const signupEmail = ctx.body?.email;
+            if (!signupEmail || typeof signupEmail !== "string") {
+                throw new APIError("BAD_REQUEST", {
+                    message: "Email is required",
+                });
+            }
+            // Lowercase the incoming address
+            const [allowed] = await db
+                .select({ id: allowedEmails.id })
+                .from(allowedEmails)
+                .where(eq(allowedEmails.email, signupEmail.trim().toLowerCase()))
+                .limit(1);
+            if (!allowed) {
+                throw new APIError("FORBIDDEN", {
+                    message: "This email isn't on the beta access list.",
+                });
+            }
+
             // Server-side name validation
             // Client Zod is bypassable via direct API calls; this ensures the
             // name can never contain HTML-injection characters before it's

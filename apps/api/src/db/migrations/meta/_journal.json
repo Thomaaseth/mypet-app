@@ -141,6 +141,34 @@
       "when": 1785506506368,
       "tag": "0019_dazzling_tigra",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1785750534846,
+      "tag": "0020_enable_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1785767376837,
+      "tag": "0021_cloudy_kinsey_walden",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1785774269622,
+      "tag": "0022_complete_thaddeus_ross",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1785774718801,
+      "tag": "0023_enable_rls_allowed_emails",
+      "breakpoints": true
     }
   ]
 }

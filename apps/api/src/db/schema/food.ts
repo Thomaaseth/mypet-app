@@ -8,7 +8,8 @@ import {
   date, 
   timestamp, 
   uuid,
-  check
+  check,
+  index
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
@@ -45,6 +46,8 @@ export const foodEntries = pgTable('food_entries', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
+  // Foreign-key index: main access path is "food entries for pet X".
+  petIdIdx: index('food_entries_pet_id_idx').on(table.petId),
   // Database constraints
 dryFoodConstraint: check('dry_food_check', sql`
   (food_type != 'dry' OR (

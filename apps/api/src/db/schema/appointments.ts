@@ -6,7 +6,8 @@ import {
     date,
     time,
     timestamp, 
-    uuid
+    uuid,
+    index
   } from 'drizzle-orm/pg-core';
   import { user } from './auth-schema';
   import { pets } from './pets';
@@ -28,7 +29,7 @@ import {
     id: uuid('id').primaryKey().defaultRandom(),
     userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }).notNull(),
     petId: uuid('pet_id').references(() => pets.id, { onDelete: 'cascade' }).notNull(),
-    veterinarianId: uuid('veterinarian_id').references(() => veterinarians.id, { onDelete: 'cascade' }).notNull(),
+    veterinarianId: uuid('veterinarian_id').references(() => veterinarians.id, { onDelete: 'restrict' }).notNull(),
     
     // Appointment details
     appointmentDate: date('appointment_date').notNull(),
@@ -42,7 +43,10 @@ import {
     // Timestamps
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-  });
+  }, (table) => ({
+    userIdIdx: index('appointments_user_id_idx').on(table.userId),
+    petIdIdx: index('appointments_pet_id_idx').on(table.petId),
+  }));
   
   // Types
   export type Appointment = typeof appointments.$inferSelect;

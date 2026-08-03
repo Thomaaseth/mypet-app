@@ -1,6 +1,6 @@
 import type { MigrationConfig } from "drizzle-orm/migrator";
 import { getConfig } from "@/shared/config/config";
-import { getTestDatabaseUrl } from "./lib/get-test-database-url";
+import { resolveDatabaseUrl } from "./config/database-identity";
 
 function envOrThrow(key: string): string {
     const value = process.env[key];
@@ -9,47 +9,6 @@ function envOrThrow(key: string): string {
     }
     return value;
 }
-
-export function getDatabaseUrl(): string {
-    const isTest = process.env.NODE_ENV === 'test';
-    if (isTest) {
-        return getTestDatabaseUrl();
-    }
-    return envOrThrow("DATABASE_URL");
-}
-
-// // Helper to get database URL with test support
-// export function getDatabaseUrl(): string {
-//     const isTest = process.env.NODE_ENV === 'test';
-    
-//     if (isTest) {
-//         const url = process.env.TEST_DATABASE_URL || 'postgresql://localhost:5432/pettr_test';
-//         const parsed = new URL(url);
-//         const hostname = parsed.hostname;
-//         // pathname must be like "/pettr_test" —
-//         const databaseName = parsed.pathname.replace(/^\//, '');
-//         // SAFETY GUARD 
-//         // Two independent checks, both required:
-//         //   1. Host must be localhost/127.0.0.1 — never a remote host,
-//         //      never a tunnel/port-forward exposing a remote DB as local.
-//         //   2. Database NAME must end in "_test" — protects against a real/
-//         //      important local database also running on port 5432. Never
-//         //      point TEST_DATABASE_URL at a database you care about, even
-//         //      locally, even under a plausible-looking name.
-//         if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-//             throw new Error(`Refusing to run tests against non-local host "${hostname}"`);
-//         }
-//         if (!databaseName.endsWith('_test')) {
-//             throw new Error(
-//                 `Refusing to run tests against database "${databaseName}" — ` +
-//                 `test database names must end in "_test".`
-//             );
-//         }
-//         return url;
-//     }
-//     // In non-test environments, DATABASE_URL is required
-//     return envOrThrow("DATABASE_URL");
-// }
 
 // Helper to get required env vars with test fallbacks
 function getRequiredEnv(key: string, testFallback?: string): string {
@@ -85,6 +44,8 @@ type Config = {
     };
     email: {
         resendApiKey: string;
+        fromAddress: string;
+        replyTo: string | undefined;
     };
 };
 
@@ -100,7 +61,7 @@ export const config: Config = {
         cookieDomain: process.env.COOKIE_DOMAIN,
     },
     db: {
-        url: getDatabaseUrl(),
+        url: resolveDatabaseUrl(),
         migrationConfig: migrationConfig
     },
     auth: {
@@ -108,5 +69,7 @@ export const config: Config = {
     },
     email: {
         resendApiKey: getRequiredEnv("RESEND_API_KEY", "test-resend-key"),
+        fromAddress: getRequiredEnv("EMAIL_FROM_ADDRESS", "Pettr <onboarding@resend.dev>"),
+        replyTo: process.env.EMAIL_REPLY_TO,
     }
 }

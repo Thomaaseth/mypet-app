@@ -42,7 +42,7 @@ export function middlewareLogResponse(req: Request, res: Response, next: NextFun
     next();
 }
 
-export function errorMiddleware(err: Error, _: Request, res: Response, __: NextFunction) {
+export function errorMiddleware(err: Error, req: Request, res: Response, _: NextFunction) {
     let statusCode = 500;
     let message = "Something went wrong on our end";
 
@@ -72,7 +72,20 @@ export function errorMiddleware(err: Error, _: Request, res: Response, __: NextF
     }
 
     if (statusCode >= 500) {
-        httpLogger.error({ err }, 'Server error');
+        httpLogger.error({ err, method: req.method, url: req.originalUrl }, 'Server error');
+    } else if (statusCode >= 400) {
+        // Log the REASON for client errors (validation, auth, ownership,
+        // not-found); the client receives the sanitized `message` above.
+        httpLogger.warn(
+            {
+                errorType: err.name,
+                reason: err.message,
+                statusCode,
+                method: req.method,
+                url: req.originalUrl,
+            },
+            'Request failed',
+        );
     }
 
     respondWithError(res, statusCode, message);

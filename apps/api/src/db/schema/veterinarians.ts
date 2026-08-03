@@ -4,7 +4,8 @@ import {
     varchar, 
     boolean, 
     timestamp, 
-    uuid
+    uuid,
+    index
   } from 'drizzle-orm/pg-core';
   import { user } from './auth-schema';
   
@@ -31,12 +32,11 @@ import {
     
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-  });
+  }, (table) => ({
+    userIdIdx: index('veterinarians_user_id_idx').on(table.userId),
+  }));
   
   // Types
   export type Veterinarian = typeof veterinarians.$inferSelect;
   export type NewVeterinarian = typeof veterinarians.$inferInsert;
   export type VeterinarianFormData = Omit<NewVeterinarian, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'isActive'>;
-  
-  
-  
