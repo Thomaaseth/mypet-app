@@ -169,6 +169,13 @@
       "when": 1785774718801,
       "tag": "0023_enable_rls_allowed_emails",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1785837849420,
+      "tag": "0024_add_food_date_finished",
+      "breakpoints": true
     }
   ]
 }
