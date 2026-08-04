@@ -9,6 +9,10 @@ export class DatabaseTestUtils {
   static async cleanDatabase(): Promise<void> {
     try {
       // Clean in dependency order (children first, parents last)
+      // appointments must go first: it references veterinarians (now ON DELETE
+      // RESTRICT), pets, and user, so it can no longer be cleared implicitly by
+      // cascade when those parents are deleted.
+      await db.delete(schema.appointments);
       await db.delete(schema.petVeterinarians);
       await db.delete(schema.foodEntries);
       await db.delete(schema.weightEntries);
