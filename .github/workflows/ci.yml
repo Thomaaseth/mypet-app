@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Set this to local `bun --version`.
+  BUN_VERSION: "1.3.14"
+
+jobs:
+  api:
+    name: API — typecheck + tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pettr_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/pettr_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        working-directory: apps/api
+        run: bunx tsc --noEmit
+      - name: Migrate test database
+        working-directory: apps/api
+        run: bun run test:db:migrate
+      - name: Run tests
+        working-directory: apps/api
+        run: bun run test:ci
+
+  web:
+    name: Web — typecheck + tests
+    runs-on: ubuntu-latest
+    # Assumes src/routeTree.gen.ts is committed (un-ignored).
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        working-directory: apps/web
+        run: bunx tsc --noEmit
+      - name: Run tests
+        working-directory: apps/web
+        run: bun run test:run
+
+  shared:
+    name: Shared — typecheck + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+      - name: Typecheck
+        working-directory: packages/shared
+        run: bunx tsc --noEmit
+      - name: Run tests
+        working-directory: packages/shared
+        run: bun run test:run
