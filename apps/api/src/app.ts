@@ -10,7 +10,6 @@ import helmet from "helmet";
 
 import petRoutes from '@/routes/pets.routes';
 import foodRoutes from '@/routes/food.routes';
-import adminRoutes from '@/routes/admin.routes';
 import vetRoutes from '@/routes/veterinarians.routes';
 import appointmentRoutes from '@/routes/appointments.routes';
 import userPreferencesRoutes from '@/routes/user-preferences.routes'
@@ -84,7 +83,7 @@ app.get('/api/ready', healthRateLimit, (req, res, next) => {
 });
 
 // ADMIN ROUTES
-app.use('/api/admin', adminRoutes);
+// app.use('/api/admin', adminRoutes);
 
  
 app.use(errorMiddleware);

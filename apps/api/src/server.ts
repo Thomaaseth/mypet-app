@@ -1,6 +1,5 @@
 import { app } from './app'
 import { config } from './config';
-import { CronScheduler } from './scheduler/cronScheduler';
 import { serverLogger } from './lib/logger';
 
 process.on('warning', (warning) => {
@@ -19,22 +18,15 @@ process.on('warning', (warning) => {
     message: warning.message 
   }, 'Process warning');
 });
-
-// Start cron scheduler in production and development
-if (process.env.NODE_ENV !== 'test') {
-    CronScheduler.start();
-}
   
 // Graceful shutdown handling
 process.on('SIGINT', () => {
   serverLogger.info('Shutting down server (SIGINT)...');
-  CronScheduler.stop();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   serverLogger.info('Shutting down server (SIGTERM)...');
-  CronScheduler.stop();
   process.exit(0);
 });
 
