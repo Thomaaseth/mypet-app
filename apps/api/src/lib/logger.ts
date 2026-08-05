@@ -49,9 +49,9 @@ export const logger = pino({
     url: stripUrlQuery,
   },
   
-  // Add base context
   base: {
-    env: process.env.NODE_ENV,
+    env: process.env.NODE_ENV, // runtime mode: development | production | test
+    app_env: APP_ENV,          // deployment identity: distinguishes staging vs prod
   },
 });
 

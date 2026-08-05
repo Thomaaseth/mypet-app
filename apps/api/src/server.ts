@@ -38,7 +38,19 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-app.listen(config.env.port, () => {
+
+const startedCb = () => {
   serverLogger.info({ port: config.env.port }, 'API server started');
-});
+};
+
+if (process.env.NODE_ENV === 'production') {
+  // Behind Caddy, bind loopback so the origin isn't reachable directly.
+  app.listen(config.env.port, '127.0.0.1', startedCb);
+} else {
+  // Dev/test: default binding (all interfaces), unchanged.
+  app.listen(config.env.port, startedCb);
+}
+// app.listen(config.env.port, () => {
+//   serverLogger.info({ port: config.env.port }, 'API server started');
+// });
 

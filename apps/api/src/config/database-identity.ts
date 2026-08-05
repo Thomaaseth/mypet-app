@@ -2,10 +2,10 @@ import { APP_ENV } from './app-env';
 import { getTestDatabaseUrl } from '@/lib/get-test-database-url';
 
 // This map is the pinned identity the guard checks DATABASE_URL against,
-// so a deployment can only ever talk to the database its APP_ENV is allowed to use
+// so a deployment can only ever talk to the database its APP_ENV is allowed touse
 const EXPECTED_PROJECT_REF = {
   staging: 'lntrknuxlsgyqqnphsph',
-  production: 'vjkaqvshcupzlgcxdwgl',
+  production: 'fhlujpwuundtwolfrjjq',
 } as const satisfies Record<'staging' | 'production', string>;
 
 // Extracts the Supabase project ref from a connection string, handling both

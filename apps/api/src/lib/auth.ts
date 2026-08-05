@@ -8,6 +8,7 @@ import { config } from "../config";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import { emailService } from "./email/email.service";
 import { authLogger } from './logger';
+import { APP_ENV } from "../config/app-env";
 
 authLogger.info('Creating Better-auth instance...');
 
@@ -29,8 +30,7 @@ export const auth = betterAuth({
     },
     advanced: {
         useSecureCookies: process.env.NODE_ENV === "production",
-        cookiePrefix: "pettr-auth", 
-            ipAddress: {
+        cookiePrefix: APP_ENV === "production" ? "pettr-auth" : `pettr-auth-${APP_ENV}`,            ipAddress: {
         ipAddressHeaders: ["x-forwarded-for"],
         },
         crossSubDomainCookies: process.env.NODE_ENV === "production" ? {
