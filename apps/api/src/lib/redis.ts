@@ -6,7 +6,7 @@ import { logger } from '../lib/logger';
 export const redisClient = process.env.REDIS_URL
   ? new Redis(process.env.REDIS_URL, {
       // Fail fast
-      enableOfflineQueue: false,
+      enableOfflineQueue: true,
       maxRetriesPerRequest: 3,
       connectTimeout: 10000,
     })
