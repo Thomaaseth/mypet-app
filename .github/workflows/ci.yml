@@ -88,7 +88,7 @@ jobs:
       - name: Run tests
         working-directory: packages/shared
         run: bun run test:run
-        
+
   deploy-staging:
     name: Deploy — staging
     needs: [api, web, shared]
@@ -131,3 +131,46 @@ jobs:
               sleep 3
             done
             echo "staging did not become ready:"; journalctl -u pettr-api-staging -n 60 --no-pager; exit 1
+
+  deploy-prod:
+    name: Deploy — prod
+    needs: [api, web, shared]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /opt/pettr/prod
+
+            # Deterministic sync to the pushed commit (no local merge on the box).
+            git fetch --prune origin main
+            git reset --hard origin/main
+
+            # Frozen install across the workspace.
+            bun install --frozen-lockfile
+
+            # Gated migration. APP_ENV is a literal here (matches the unit); DATABASE_URL
+            # + NODE_ENV come from the env file. The guard refuses a wrong-project URL.
+            set -a
+            . /etc/pettr/prod.env
+            set +a
+            ( cd apps/api && APP_ENV=production bun run db:migrate )
+
+            # Restart via the single scoped sudo command (see sudoers snippet in DEPLOY.md).
+            sudo systemctl restart pettr-api-prod
+
+            # Health-check the real process on loopback; dump logs and fail if it didn't come up.
+            for i in 1 2 3 4 5; do
+              if curl -fsS http://127.0.0.1:3001/api/ready >/dev/null; then
+                echo "prod /api/ready OK"; exit 0
+              fi
+              sleep 3
+            done
+            echo "prod did not become ready:"; journalctl -u pettr-api-prod -n 60 --no-pager; exit 1

@@ -19,7 +19,7 @@ export const app = express();
 
 // Trust exactly one proxy hop
 // Required for req.ip to reflect the real client IP behind a reverse proxy
-// MAY NEED TO BE CHANGED AFTER DEPLOY (Cloudflare CDN)
+// trust proxy: 1 Caddy overwrites XFF from CF-Connecting-IP, single trusted hop
 app.set('trust proxy', 1);
 
 app.use(cors({
