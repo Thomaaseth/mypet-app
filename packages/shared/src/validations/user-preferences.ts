@@ -1,10 +1,13 @@
 import { z } from 'zod';
-import { dateTimeLocaleSchema } from './locale';
 import { unitSystemSchema } from './units';
 import { timezoneSchema } from './timezone';
+import { dateFormatSchema } from './date-format';
+import { timeFormatSchema } from './time-format';
+import { languageSchema } from './language';
 
 export const userPreferencesFormSchema = z.object({
-  dateTimeLocale: dateTimeLocaleSchema,
+  dateFormat: dateFormatSchema,
+  timeFormat: timeFormatSchema,
   unitSystem: unitSystemSchema,
   timezone: timezoneSchema,
 }).strict();
@@ -19,3 +22,11 @@ export function validateUserPreferencesData(data: unknown) {
   }
   return result.data;
 }
+
+// Language is persisted independently of the banner/profile form (written from
+// the global footer switch via its own endpoint), so it has its own request contract.
+export const languageUpdateSchema = z.object({
+  language: languageSchema,
+}).strict();
+ 
+export type LanguageUpdateData = z.infer<typeof languageUpdateSchema>;

@@ -12,6 +12,7 @@ vi.mock('../../services/user-preferences.service', () => ({
   UserPreferencesService: {
     getUserPreferences: vi.fn(),
     upsertUserPreferences: vi.fn(),
+    updateLanguage: vi.fn(),
   },
 }));
 
@@ -41,13 +42,13 @@ app.use(errorMiddleware);
 const base = '/api/users/preferences';
 
 // Passes userPreferencesFormSchema (strict) cleanly.
-const validPrefsBody = { dateTimeLocale: 'fr-FR', unitSystem: 'metric', timezone: 'Europe/Paris' };
-
+const validPrefsBody = { dateFormat: 'DMY', timeFormat: '24h', unitSystem: 'metric', timezone: 'Europe/Paris' };
 const fakePrefs = {
   id: '22222222-2222-4222-8222-222222222222',
   userId: TEST_USER_ID,
-  dateTimeLocale: 'fr-FR',
-  unitSystem: 'metric',
+  dateFormat: 'DMY',
+  timeFormat: '24h',
+  language: 'fr',  unitSystem: 'metric',
   timezone: 'Europe/Paris',
   createdAt: new Date('2024-01-01T00:00:00Z'),
   updatedAt: new Date('2024-01-01T00:00:00Z'),
@@ -93,8 +94,8 @@ describe('PUT /api/users/preferences', () => {
     expect(UserPreferencesService.upsertUserPreferences).not.toHaveBeenCalled();
   });
 
-  it('returns 400 on an unsupported locale', async () => {
-    const res = await request(app).put(base).send({ ...validPrefsBody, dateTimeLocale: 'de-DE' });
+  it('returns 400 on an unsupported date format', async () => {
+    const res = await request(app).put(base).send({ ...validPrefsBody, dateFormat: 'YMD' });
     expect(res.status).toBe(400);
     expect(UserPreferencesService.upsertUserPreferences).not.toHaveBeenCalled();
   });
@@ -113,7 +114,34 @@ describe('PUT /api/users/preferences', () => {
     expect(res.body.message).toBe('User preferences saved successfully');
     expect(UserPreferencesService.upsertUserPreferences).toHaveBeenCalledWith(
       TEST_USER_ID,
-      expect.objectContaining({ dateTimeLocale: 'fr-FR', unitSystem: 'metric', timezone: 'Europe/Paris' }),
-    );
+      expect.objectContaining({ dateFormat: 'DMY', timeFormat: '24h', unitSystem: 'metric', timezone: 'Europe/Paris' }),    );
+  });
+});
+
+describe('PATCH /api/users/preferences/language', () => {
+  it('returns 400 on an unsupported language and does not call the service', async () => {
+    const res = await request(app).patch(`${base}/language`).send({ language: 'de' });
+    expect(res.status).toBe(400);
+    expect(UserPreferencesService.updateLanguage).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 on an injected field (strict)', async () => {
+    const res = await request(app).patch(`${base}/language`).send({ language: 'fr', isAdmin: true });
+    expect(res.status).toBe(400);
+    expect(UserPreferencesService.updateLanguage).not.toHaveBeenCalled();
+  });
+
+  it('returns 200 and calls updateLanguage(userId, language)', async () => {
+    vi.mocked(UserPreferencesService.updateLanguage).mockResolvedValue(fakePrefs);
+    const res = await request(app).patch(`${base}/language`).send({ language: 'fr' });
+    expect(res.status).toBe(200);
+    expect(UserPreferencesService.updateLanguage).toHaveBeenCalledWith(TEST_USER_ID, 'fr');
+  });
+
+  it('returns 200 with preferences: null pre-onboarding', async () => {
+    vi.mocked(UserPreferencesService.updateLanguage).mockResolvedValue(null);
+    const res = await request(app).patch(`${base}/language`).send({ language: 'en' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.preferences).toBeNull();
   });
 });

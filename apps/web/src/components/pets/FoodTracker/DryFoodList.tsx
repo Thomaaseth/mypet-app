@@ -23,14 +23,13 @@ import {
 import { Edit2, Trash2, Calendar, Weight, Utensils, CheckSquare, MoreHorizontal, Loader2 } from 'lucide-react';
 import { DryFoodForm } from './DryFoodForm';
 import type { DryFoodEntry, DryFoodFormData } from '@/types/food';
-import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import { FoodHistorySection } from './FoodHistorySection';
 import { MarkAsFinishedDialog } from './MarkAsFinishedDialog';
 import { formatRemainingWeight, formatFoodQuantity } from '@/lib/utils/food-formatting';
-import { StatLabel, StatValue, MutedText, SectionTitle } from '@/components/ui/typography';
+import { StatLabel, StatValue, SectionTitle } from '@/components/ui/typography';
 import { FoodUnitLabel } from './FoodUnitLabel'
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { convertFoodWeight } from '@/lib/validations/pet';
 import { useTranslation } from 'react-i18next';
 import { FOOD_TYPE_TAB_KEYS } from '@/i18n/enum-keys';
@@ -75,8 +74,8 @@ export function DryFoodList({
   // const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
   const [markingFinishedEntry, setMarkingFinishedEntry] = useState<DryFoodEntry | null>(null);
 
-  const { dateTimeLocale, units } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { units } = usePreferencesContext();
+  const { formatDate } = useDateTimeFormatters();
   const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
 
   const handleUpdate = async (data: DryFoodFormData) => {
@@ -192,7 +191,7 @@ export function DryFoodList({
                         </span>
                       <span className="flex items-center gap-1 shrink-0">
                         <Calendar className="h-4 w-4" />
-                        {formatDateForDisplay(entry.dateStarted, displayLocale)}
+                        {formatDate(entry.dateStarted)}
                       </span>
                     </div>
                 </CardHeader>
@@ -210,7 +209,7 @@ export function DryFoodList({
                     </div>
                     <div>
                     <StatLabel>{t('food.shared.runsOutLabel')}</StatLabel>
-                      <StatValue>{formatDateForDisplay(entry.depletionDate, displayLocale)}</StatValue>
+                      <StatValue>{formatDate(entry.depletionDate)}</StatValue>
                     </div>
                   </div>
                   

@@ -17,9 +17,7 @@ import {
 } from '@/components/ui/typography';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { ReactNode } from 'react';
-import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
-import { formatDateForDisplay, formatChartTickMonthYear } from '@/lib/utils/date-formatting';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { formatWeight } from '@/lib/validations/pet';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 import { useTranslation } from 'react-i18next';
@@ -48,8 +46,7 @@ export default function WeightChart({
 
   const { t } = useTranslation();
   const isMobile = useIsMobile();
-  const { dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale  ?? getFallbackDateTimeLocale();
+  const { formatDate, formatChartTick } = useDateTimeFormatters();
 
   if (data.length === 0 && !hasAnyEntries) {
     return (
@@ -136,7 +133,7 @@ export default function WeightChart({
                         axisLine={false}
                         tickMargin={8}
                         tickCount={3}
-                        tickFormatter={formatChartTickMonthYear}
+                        tickFormatter={formatChartTick}
                     />
                     <YAxis
                         width={36}
@@ -159,7 +156,7 @@ export default function WeightChart({
                               <div className="bg-background border border-border rounded-lg shadow-lg p-3 space-y-1.5">
                                 {/* Date */}
                                 <BodyText className="font-medium text-foreground">
-                                  {formatDateForDisplay(data.date, displayLocale)}
+                                  {formatDate(data.date)}
                                 </BodyText>                                
                                 {/* Weight */}
                                 <div className="flex items-center gap-2">

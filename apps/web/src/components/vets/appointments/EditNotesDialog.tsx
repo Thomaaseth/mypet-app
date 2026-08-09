@@ -6,11 +6,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppointmentWithRelations } from '@/types/appointments';
-import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { HelperText, BodyText } from '@/components/ui/typography';
-import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
-import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
+import { LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 import { useTranslation } from 'react-i18next';
 
 interface EditNotesDialogProps {
@@ -32,9 +30,8 @@ export default function EditNotesDialog({
   const [visitNotes, setVisitNotes] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
-
+  const { formatDate, formatTime } = useDateTimeFormatters();
+  
   // Update visitNotes when appointment changes
   useEffect(() => {
     if (appointment) {
@@ -44,8 +41,8 @@ export default function EditNotesDialog({
 
   if (!appointment) return null;
 
-  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
-  const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
+  const displayDate = formatDate(appointment.appointmentDate, LONG_DATE_DISPLAY_OPTIONS);
+  const displayTime = formatTime(appointment.appointmentTime)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

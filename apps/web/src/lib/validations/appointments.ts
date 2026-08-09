@@ -1,17 +1,22 @@
 export * from '@/shared/validations/appointments';
-import type { DateTimeLocale  } from '@/shared/validations/locale';
-
+import type { TimeFormat } from '@/shared/validations/time-format';
+import type { Language } from '@/shared/validations/language';
 
   
   // Time formatting utilities
-  export const formatTimeForDisplay = (timeString: string, locale: DateTimeLocale ): string => {
+  export const formatTimeForDisplay = (
+    timeString: string,
+    timeFormat: TimeFormat,
+    language: Language
+  ): string => {
     const [hours, minutes] = timeString.split(':');
     const date = new Date();
     date.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-  
-    return date.toLocaleTimeString(locale, {
+
+    return date.toLocaleTimeString(language, {
       hour: '2-digit',
       minute: '2-digit',
+      hour12: timeFormat === '12h',
     });
   };
   

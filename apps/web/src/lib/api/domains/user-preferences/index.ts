@@ -1,6 +1,7 @@
 import { UserPreferencesService } from './service';
 import { userPreferencesRepository } from './repository';
 import type { UserPreferencesFormData } from '@/types/user-preferences';
+import type { Language } from '@/shared/validations/language';
 
 const userPreferencesService = new UserPreferencesService(userPreferencesRepository);
 
@@ -8,6 +9,8 @@ export const userPreferencesApi = {
   getUserPreferences: () => userPreferencesService.getUserPreferences(),
   upsertUserPreferences: (data: UserPreferencesFormData) =>
     userPreferencesService.upsertUserPreferences(data),
+  updateLanguage: (language: Language) =>
+    userPreferencesService.updateLanguage(language),
 };
 
 export const userPreferencesErrorHandler = (error: unknown) =>

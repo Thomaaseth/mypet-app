@@ -8,6 +8,7 @@ import {
   UnauthorizedError,
   ForbiddenError,
 } from '../../errors';
+import type { Language } from '@/shared/validations/language';
 
 export class UserPreferencesService {
   constructor(private repository: UserPreferencesRepository) {}
@@ -23,6 +24,14 @@ export class UserPreferencesService {
   async upsertUserPreferences(data: UserPreferencesFormData): Promise<UserPreferences> {
     try {
       return await this.repository.upsertUserPreferences(data);
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async updateLanguage(language: Language): Promise<UserPreferences | null> {
+    try {
+      return await this.repository.updateLanguage(language);
     } catch (error) {
       throw this.handleError(error);
     }

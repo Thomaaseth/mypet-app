@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardAction } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -8,7 +8,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Stethoscope,
   FileText,
   Building2,
   ChevronDown,
@@ -27,14 +26,12 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import type { AppointmentWithRelations, AppointmentType } from '@/types/appointments';
-import { formatTimeForDisplay } from '@/lib/validations/appointments';
 import { useState } from 'react';
 import { MutedText, BodyText, SectionTitle } from '@/components/ui/typography';
-import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
-import { formatDateForDisplay, LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
+import { LONG_DATE_DISPLAY_OPTIONS } from '@/lib/utils/date-formatting';
 import { useTranslation } from 'react-i18next';
 import { APPOINTMENT_TYPE_KEYS } from '@/i18n/enum-keys';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 
 interface AppointmentCardProps {
   appointment: AppointmentWithRelations;
@@ -67,12 +64,12 @@ export default function AppointmentCard({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { formatDate, formatTime } = useDateTimeFormatters();
 
   const badgeVariant = APPOINTMENT_TYPE_BADGE_VARIANT[appointment.appointmentType];
-  const displayDate = formatDateForDisplay(appointment.appointmentDate, displayLocale, LONG_DATE_DISPLAY_OPTIONS);
-  const displayTime = formatTimeForDisplay(appointment.appointmentTime, displayLocale);
+  const displayDate = formatDate(appointment.appointmentDate, LONG_DATE_DISPLAY_OPTIONS)
+  const displayTime = formatTime(appointment.appointmentTime);
+
   
   // Check if appointment time has passed
   const hasAppointmentTimePassed = (() => {

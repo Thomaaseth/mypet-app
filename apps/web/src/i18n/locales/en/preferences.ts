@@ -1,12 +1,22 @@
 const preferences = {
-    dateTimeLocale: {
-      frFR: {
-        label: '24-hour',
-        description: 'DD/MM/YYYY · 24h clock',
+  dateFormat: {
+      DMY: {
+        label: 'Day / Month',
+        description: 'DD/MM/YYYY',
       },
-      enUS: {
+      MDY: {
+        label: 'Month / Day',
+        description: 'MM/DD/YYYY',
+      },
+    },
+    timeFormat: {
+      '24h': {
+        label: '24-hour',
+        description: '14:30',
+      },
+      '12h': {
         label: '12-hour',
-        description: 'MM/DD/YYYY · 12h clock',
+        description: '2:30 PM',
       },
     },
     unitSystem: {

@@ -183,7 +183,8 @@ describe('AppointmentsService', () => {
       const { primary, testPet, testVet } = await setupUserPetAndVet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });
@@ -237,7 +238,8 @@ describe('AppointmentsService', () => {
       const { primary, testPet, testVet } = await setupUserPetAndVet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });

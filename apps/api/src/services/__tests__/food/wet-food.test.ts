@@ -46,7 +46,8 @@ describe('Wet Food Operations', () => {
       const { primary, testPet } = await setupUserAndPet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });
@@ -71,7 +72,8 @@ describe('Wet Food Operations', () => {
       const { primary, testPet } = await setupUserAndPet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });

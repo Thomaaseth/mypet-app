@@ -27,14 +27,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
-import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import WeightForm from './WeightForm';
 import type { WeightEntry, WeightFormData } from '@/types/weights';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
-import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
+import { getFallbackUnitSystem } from '@/lib/utils/locale';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { getUnitsForSystem } from '@/shared/validations/units';
 import { useTranslation } from 'react-i18next';
 
@@ -62,9 +62,9 @@ export default function WeightList({
   const [deletingEntry, setDeletingEntry] = useState<WeightEntry | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const { units, dateTimeLocale } = usePreferencesContext();
+  const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? getUnitsForSystem(getFallbackUnitSystem()).weightUnit;
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { formatDate } = useDateTimeFormatters();
 
   // Sort entries by date (newest first for the table)
   const sortedEntries = [...weightEntries].sort((a, b) => 
@@ -130,7 +130,7 @@ export default function WeightList({
             return (
             <TableRow key={entry.id}>
               <TableCell className="font-medium">
-                {formatDateForDisplay(entry.date, displayLocale)}
+                {formatDate(entry.date)}
               </TableCell>
               <TableCell className='font-display'>
                 {displayWeight} {weightUnit}
@@ -196,7 +196,7 @@ export default function WeightList({
           <AlertDialogTitle>{t('weights.list.deleteDialogTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
             {t('weights.list.deleteConfirmation', {
-              date: deletingEntry ? formatDateForDisplay(deletingEntry.date, displayLocale) : '',
+              date: deletingEntry ? formatDate(deletingEntry.date) : '',
             })}
             </AlertDialogDescription>
           </AlertDialogHeader>

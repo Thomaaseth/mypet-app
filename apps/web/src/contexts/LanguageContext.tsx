@@ -1,6 +1,7 @@
 import { createContext, useContext, useCallback, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, type Language } from '@/shared/validations/language';
+import { useUpdateLanguage } from '@/queries/user-preferences';
 
 interface LanguageContextValue {
   language: Language;
@@ -20,18 +21,20 @@ function isSupportedLanguage(value: string): value is Language {
 
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation();
+  const { mutate: persistLanguage } = useUpdateLanguage();
 
   const currentLanguage: Language = isSupportedLanguage(i18n.language)
     ? i18n.language
     : 'en';
 
-  const setLanguage = useCallback(
+const setLanguage = useCallback(
     (nextLanguage: Language) => {
-      // i18next-browser-languagedetector's `caches: ['localStorage']` config
-      // persists this automatically on changeLanguage — no manual write needed.
+      // Client (localStorage via i18next-browser-languagedetector).
       void i18n.changeLanguage(nextLanguage);
+      // Server — authoritative once onboarded; no-op (null) before that.
+      persistLanguage(nextLanguage);
     },
-    [i18n]
+    [i18n, persistLanguage]
   );
 
   const value: LanguageContextValue = {

@@ -1,13 +1,11 @@
 import * as React from "react"
 import { CalendarIcon } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { usePreferencesContext } from "@/contexts/UserPreferencesContext"
-import { getFallbackDateTimeLocale } from "@/lib/utils/locale"
-import { formatDateForDisplay, parseDateOnly, toLocalDateString } from "@/lib/utils/date-formatting"
+import { parseDateOnly, toLocalDateString } from "@/lib/utils/date-formatting"
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 
 interface DatePickerProps {
   id?: string;
@@ -31,8 +29,7 @@ export function DatePicker({
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const { dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { formatDate } = useDateTimeFormatters()
 
   const selectedDate = value ? parseDateOnly(value) : undefined;
 
@@ -48,7 +45,7 @@ export function DatePicker({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen} modal>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           id={id}
@@ -62,7 +59,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? formatDateForDisplay(value, displayLocale) : placeholder}
+            {value ? formatDate(value) : placeholder}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start" style={{ pointerEvents: 'auto' }}>

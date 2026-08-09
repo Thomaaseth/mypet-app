@@ -5,11 +5,9 @@ import { UtensilsCrossed } from 'lucide-react';
 import { DryFoodTracker } from './DryFoodTracker';
 import { WetFoodTracker } from './WetFoodTracker';
 import { FoodTrackerProvider, useFoodTrackerContext } from './FoodTrackerContext';
-import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
-import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { useTranslation } from 'react-i18next';
 import { FOOD_TYPE_TAB_KEYS, FOOD_SUPPLY_LABEL_KEYS } from '@/i18n/enum-keys';
 
@@ -17,10 +15,10 @@ interface FoodTrackerProps {
   petId: string;
 }
 
-const FOOD_TYPE_LABELS = {
-  dry: 'Dry Food',
-  wet: 'Wet Food'
-};
+// const FOOD_TYPE_LABELS = {
+//   dry: 'Dry Food',
+//   wet: 'Wet Food'
+// };
 
 // Type guard to ensure entries have calculated fields
 function hasCalculatedFields(entry: DryFoodEntry | WetFoodEntry): entry is (DryFoodEntry | WetFoodEntry) & {
@@ -41,8 +39,7 @@ function FoodTrackerContent() {
   const [activeTab, setActiveTab] = useState<'dry' | 'wet'>('dry');
   const { activeFoodEntries, isLoading } = useFoodTrackerContext();
 
-  const { dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { formatDate } = useDateTimeFormatters();
 
   return (
     <Card className="w-full">
@@ -70,7 +67,7 @@ function FoodTrackerContent() {
                   </MetricValue>
                   <MutedText>
                     {activeFoodEntries[0].remainingDays > 0
-                      ? t('food.tracker.runsOut', { date: formatDateForDisplay(activeFoodEntries[0].depletionDate, displayLocale) })
+                      ? t('food.tracker.runsOut', { date: formatDate(activeFoodEntries[0].depletionDate) })
                       : t('food.tracker.needsRestocking')}
                   </MutedText>
                 </div>
@@ -91,7 +88,7 @@ function FoodTrackerContent() {
                       </MetricValue>
                       <MutedText>
                         {entry.remainingDays > 0
-                          ? t('food.tracker.runsOut', { date: formatDateForDisplay(entry.depletionDate, displayLocale) })
+                          ? t('food.tracker.runsOut', { date: formatDate(entry.depletionDate) })
                           : t('food.tracker.needsRestocking')}
                       </MutedText>
                     </div>

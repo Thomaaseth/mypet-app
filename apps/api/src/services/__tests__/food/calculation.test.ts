@@ -189,7 +189,8 @@ describe('Business Logic Calculations', () => {
       // UTC+14 the furthest-ahead real IANA zone, chosen so a UTC-fallback bug
       // reliably produces a different, detectably wrong "today" (won't coincide with UTC's date)
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'metric',
         timezone: 'Pacific/Kiritimati',
       });
@@ -220,7 +221,8 @@ describe('Business Logic Calculations', () => {
       const { primary, testPet } = await setupUserAndPet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });
@@ -248,7 +250,8 @@ describe('Business Logic Calculations', () => {
       const { primary, testPet } = await setupUserAndPet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });

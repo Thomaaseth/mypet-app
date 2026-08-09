@@ -6,6 +6,7 @@ import type { UserPreferencesFormData } from '@/shared/validations/user-preferen
 import { BadRequestError } from '../middleware/errors';
 import { dbLogger } from '../lib/logger';
 import { toDateString } from '@/shared/utils/dates';
+import type { Language } from '@/shared/validations/language';
 
 export class UserPreferencesService {
   // Get preferences for a user (returns null if not yet set)
@@ -37,7 +38,8 @@ export class UserPreferencesService {
         const [updated] = await db
           .update(userPreferences)
           .set({
-            dateTimeLocale: data.dateTimeLocale,
+            dateFormat: data.dateFormat,
+            timeFormat: data.timeFormat,
             unitSystem: data.unitSystem,
             timezone: data.timezone,
             updatedAt: new Date(),
@@ -50,7 +52,8 @@ export class UserPreferencesService {
 
       const newPreferences: NewUserPreferences = {
         userId,
-        dateTimeLocale: data.dateTimeLocale,
+        dateFormat: data.dateFormat,
+        timeFormat: data.timeFormat,
         unitSystem: data.unitSystem,
         timezone: data.timezone,
       };
@@ -70,6 +73,28 @@ export class UserPreferencesService {
     }
   }
 
+  // Persist the UI language independently of the banner/profile form.
+  // UPDATE-only by design: before onboarding no row exists, so this is a no-op
+  // (returns null) and client-side i18n stays the source of truth. Once a row
+  // exists the stored value is authoritative and is hydrated on load.
+  static async updateLanguage(
+    userId: string,
+    language: Language
+  ): Promise<UserPreferences | null> {
+    try {
+      const [updated] = await db
+        .update(userPreferences)
+        .set({ language, updatedAt: new Date() })
+        .where(eq(userPreferences.userId, userId))
+        .returning();
+
+      return updated ?? null;
+    } catch (error) {
+      dbLogger.error({ err: error }, 'Error updating language preference');
+      throw new BadRequestError('Failed to update language preference');
+    }
+  }
+
   // Server-authoritative "today" for a user, anchored to their stored IANA timezone.
   // Falls back to server-UTC-today only when the user has no preferences row yet
   // (never persisted, see schema comment on why the DB column default is migration-only).
@@ -84,7 +109,6 @@ export class UserPreferencesService {
     return new Intl.DateTimeFormat('en-CA', { timeZone: preferences.timezone }).format(new Date());
   }
 }
-
 
 // NOTE: THERE ARE NO RESYNC MECHANISM IN PLACE RIGHT NOW. TIMEZONE IS SET AND FORGET
 // USER ISN'T ABLE TO CHANGE MANUALLY 
