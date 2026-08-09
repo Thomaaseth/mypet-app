@@ -22,6 +22,9 @@ const common = {
       invalidCredentialsTitle: 'Invalid credentials',
       invalidCredentialsDescription: 'Please check your email and password',
     },
+    datePicker: {
+      selectDate: 'Select a date',
+    },
   } as const;
   
   export default common;
