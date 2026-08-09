@@ -29,6 +29,26 @@ describe('UserPreferencesService', () => {
       expect(result?.timezone).toBe('Europe/Paris');
       expect(result?.userId).toBe(primary.id);
     });
+
+  describe('updateLanguage', () => {
+    it('returns null and persists nothing when no row exists yet', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+
+      const result = await UserPreferencesService.updateLanguage(primary.id, 'fr');
+
+      expect(result).toBeNull();
+      expect(await UserPreferencesService.getUserPreferences(primary.id)).toBeNull();
+    });
+
+    it('persists the language once a preferences row exists', async () => {
+      const { primary } = await DatabaseTestUtils.createTestUsers();
+      await UserPreferencesService.upsertUserPreferences(primary.id, makeUserPreferencesData());
+
+      const result = await UserPreferencesService.updateLanguage(primary.id, 'fr');
+
+      expect(result?.language).toBe('fr');
+      });
+    });
   });
 
   describe('upsertUserPreferences', () => {
@@ -41,7 +61,8 @@ describe('UserPreferencesService', () => {
       );
 
       expect(result.userId).toBe(primary.id);
-      expect(result.dateTimeLocale).toBe('en-US');
+      expect(result.dateFormat).toBe('MDY');
+      expect(result.timeFormat).toBe('12h');
       expect(result.unitSystem).toBe('imperial');
       expect(result.timezone).toBe('America/New_York');
     });

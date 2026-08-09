@@ -30,7 +30,6 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
-import { formatDateForDisplay } from '@/lib/utils/date-formatting';
 import { getFeedingStatusColor, formatFeedingStatusMessage, calculateExpectedDays } from '@/lib/utils/food-formatting';
 import { EditFinishDateDialog } from './EditFinishDateDialog';
 import { DeleteFoodEntryDialog } from './DeleteFoodEntryDialog';
@@ -38,7 +37,7 @@ import { MutedText, EntryTitle } from '@/components/ui/typography';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { FoodUnitLabel } from './FoodUnitLabel';
 import { convertFoodWeight } from '@/lib/validations/pet';
 import { formatRemainingWeight } from '@/lib/utils/food-formatting';
@@ -70,10 +69,11 @@ export function FoodHistorySection({
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
 
-  const { dateTimeLocale, units } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { units } = usePreferencesContext();
+
   const dailyAmountUnit = foodType === 'dry' ? 'grams' : (units?.wetFoodUnit ?? 'grams');
   const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
+  const { formatDate } = useDateTimeFormatters();
 
   const handleDelete = async () => {
     if (!deletingEntry) return;
@@ -184,12 +184,12 @@ export function FoodHistorySection({
                   )}
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {t('food.tracker.startedLabel', { date: formatDateForDisplay(entry.dateStarted, displayLocale) })}
+                    {t('food.tracker.startedLabel', { date: formatDate(entry.dateStarted) })}
                   </span>
                   {entry.dateFinished && (
                     <span className="flex items-center gap-1">
                       <CheckCircle className="h-3 w-3" />
-                      {t('food.tracker.finishedLabel', { date: formatDateForDisplay(entry.dateFinished, displayLocale) })}
+                      {t('food.tracker.finishedLabel', { date: formatDate(entry.dateFinished) })}
                     </span>
                   )}
                   </div>

@@ -4,15 +4,18 @@ import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { useUpsertUserPreferences } from '@/queries/user-preferences';
-import type { DateTimeLocale } from '@/shared/validations/locale';
+import type { DateFormat } from '@/shared/validations/date-format';
+import type { TimeFormat } from '@/shared/validations/time-format';
 import type { UnitSystem } from '@/shared/validations/units';
-import { DATE_TIME_LOCALE_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
+import { DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
 import { detectBrowserTimezone } from '@/lib/utils/timezone';
 import { PreferenceOptionButton } from '@/components/ui/preference-option-button';
 import { useTranslation } from 'react-i18next';
 import {
-  DATE_TIME_LOCALE_LABEL_KEYS,
-  DATE_TIME_LOCALE_DESCRIPTION_KEYS,
+  DATE_FORMAT_LABEL_KEYS,
+  DATE_FORMAT_DESCRIPTION_KEYS,
+  TIME_FORMAT_LABEL_KEYS,
+  TIME_FORMAT_DESCRIPTION_KEYS,
   UNIT_SYSTEM_LABEL_KEYS,
   UNIT_SYSTEM_DESCRIPTION_KEYS,
 } from '@/i18n/enum-keys';
@@ -36,18 +39,20 @@ export function PreferenceBanner() {
   const { hasPreferences, isLoading } = usePreferencesContext();
   const { mutate: upsertPreferences, isPending } = useUpsertUserPreferences();
 
-  const [pendingDateTimeLocale, setPendingDateTimeLocale] = useState<DateTimeLocale | null>(null);
+  const [pendingDateFormat, setPendingDateFormat] = useState<DateFormat | null>(null);
+  const [pendingTimeFormat, setPendingTimeFormat] = useState<TimeFormat | null>(null);
   const [pendingUnitSystem, setPendingUnitSystem] = useState<UnitSystem | null>(null);
-
+  
   if (isLoading) return <PreferenceBannerSkeleton />;
   if (hasPreferences) return null;
 
-  const canSave = pendingDateTimeLocale !== null && pendingUnitSystem !== null;
+  const canSave = pendingDateFormat !== null && pendingTimeFormat !== null && pendingUnitSystem !== null;
 
   const handleSave = () => {
     if (!canSave) return;
     upsertPreferences({
-      dateTimeLocale: pendingDateTimeLocale,
+      dateFormat: pendingDateFormat,
+      timeFormat: pendingTimeFormat,
       unitSystem: pendingUnitSystem,
       timezone: detectBrowserTimezone(),
     });
@@ -63,17 +68,33 @@ export function PreferenceBanner() {
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row gap-3">
-            {/* Date/time format group */}
+
+            {/* Date format group */}
             <div className="flex gap-2 flex-1">
-              {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale }) => (
+              {DATE_FORMAT_OPTIONS.map(({ dateFormat }) => (
                 <PreferenceOptionButton
-                  key={dateTimeLocale}
-                  label={t(DATE_TIME_LOCALE_LABEL_KEYS[dateTimeLocale])}
-                  description={t(DATE_TIME_LOCALE_DESCRIPTION_KEYS[dateTimeLocale])}
-                  isActive={pendingDateTimeLocale === dateTimeLocale}
+                  key={dateFormat}
+                  label={t(DATE_FORMAT_LABEL_KEYS[dateFormat])}
+                  description={t(DATE_FORMAT_DESCRIPTION_KEYS[dateFormat])}
+                  isActive={pendingDateFormat === dateFormat}
                   disabled={isPending}
                   size="compact"
-                  onClick={() => setPendingDateTimeLocale(dateTimeLocale)}
+                  onClick={() => setPendingDateFormat(dateFormat)}
+                />
+              ))}
+            </div>
+
+            {/* Time format group */}
+            <div className="flex gap-2 flex-1">
+              {TIME_FORMAT_OPTIONS.map(({ timeFormat }) => (
+                <PreferenceOptionButton
+                  key={timeFormat}
+                  label={t(TIME_FORMAT_LABEL_KEYS[timeFormat])}
+                  description={t(TIME_FORMAT_DESCRIPTION_KEYS[timeFormat])}
+                  isActive={pendingTimeFormat === timeFormat}
+                  disabled={isPending}
+                  size="compact"
+                  onClick={() => setPendingTimeFormat(timeFormat)}
                 />
               ))}
             </div>

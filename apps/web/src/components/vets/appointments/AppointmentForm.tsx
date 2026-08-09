@@ -16,12 +16,9 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import type { AppointmentWithRelations, AppointmentFormData, AppointmentType } from '@/types/appointments';
 import { appointmentFormSchema, appointmentTypes, generateTimeOptions, isUpcomingAppointment } from '@/lib/validations/appointments';
 import { usePets } from '@/queries/pets';
-import { useVeterinarians } from '@/queries/vets';
 import { usePetVets } from '@/queries/vets';
 import { useLastVetForPet } from '@/queries/appointments';
-import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
-import { getFallbackDateTimeLocale } from '@/lib/utils/locale';
-import { formatTimeForDisplay } from '@/lib/validations/appointments';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { Controller } from 'react-hook-form';
 import { DatePicker } from '@/components/ui/date-picker';
 import { MutedText, ErrorText, HelperText } from '@/components/ui/typography';
@@ -60,7 +57,7 @@ export default function AppointmentForm({
   
   // Fetch pets and vets
   const { data: pets } = usePets();
-  const { data: vets } = useVeterinarians();
+  // const { data: vets } = useVeterinarians();
 
   const {
     register,
@@ -74,13 +71,12 @@ export default function AppointmentForm({
   const selectedPetId = watch('petId');
   const selectedVetId = watch('veterinarianId');
   
-  const { dateTimeLocale } = usePreferencesContext();
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { formatTime } = useDateTimeFormatters();
 
   // Fetch vets assigned to selected pet
   const { data: availableVetsData } = usePetVets(selectedPetId || '');
 
-  const { data: lastVetId, isLoading: isLoadingLastVet } = useLastVetForPet(selectedPetId || '', {
+  const { data: lastVetId } = useLastVetForPet(selectedPetId || '', {
     enabled: !!selectedPetId && !isEditing
   });
 
@@ -213,7 +209,7 @@ export default function AppointmentForm({
             <SelectContent className="max-h-[200px]">
               {timeOptions.map((time) => (
                 <SelectItem key={time} value={time}>
-                  {formatTimeForDisplay(time, displayLocale)}
+                  {formatTime(time)}
                 </SelectItem>
               ))}
             </SelectContent>

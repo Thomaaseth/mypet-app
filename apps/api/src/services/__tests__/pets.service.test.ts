@@ -655,7 +655,8 @@ describe('PetsService', () => {
       const { primary } = await DatabaseTestUtils.createTestUsers();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
-        dateTimeLocale: 'en-US',
+        dateFormat: 'MDY',
+        timeFormat: '12h',
         unitSystem: 'imperial',
         timezone: 'Pacific/Kiritimati',
       });

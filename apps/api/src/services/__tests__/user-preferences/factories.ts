@@ -4,7 +4,8 @@ export function makeUserPreferencesData(
   overrides: Partial<UserPreferencesFormData> = {}
 ): UserPreferencesFormData {
   return {
-    dateTimeLocale: 'en-US',
+    dateFormat: 'MDY',
+    timeFormat: '12h',
     unitSystem: 'imperial',
     timezone: 'America/New_York',
     ...overrides,

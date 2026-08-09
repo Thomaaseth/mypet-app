@@ -24,12 +24,12 @@ import {
 import { useWeightTarget, useUpsertWeightTarget, useDeleteWeightTarget } from '@/queries/weight-targets';
 import TargetRangeForm from './TargetRangeForm';
 import type { WeightTargetFormData } from '@/types/weight-targets';
-import { MutedText, SectionTitle, HelperText, BodyText } from '@/components/ui/typography';
+import { MutedText, SectionTitle, BodyText } from '@/components/ui/typography';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight } from '@/lib/validations/pet';
-import { formatDateForDisplay } from '@/lib/utils/date-formatting';
-import { getFallbackUnitSystem, getFallbackDateTimeLocale } from '@/lib/utils/locale';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
+import { getFallbackUnitSystem } from '@/lib/utils/locale';
 import { getUnitsForSystem } from '@/shared/validations/units';
 import { useTranslation } from 'react-i18next';
 import { WEIGHT_TREND_KEYS, WEIGHT_STATUS_KEYS } from '@/i18n/enum-keys';
@@ -87,9 +87,9 @@ export default function WeightTracker({ petId, petName, animalType }: WeightTrac
   
   
 
-  const { units, dateTimeLocale } = usePreferencesContext();
+  const { units } = usePreferencesContext();
   const weightUnit = units?.weightUnit ?? getUnitsForSystem(getFallbackUnitSystem()).weightUnit;
-  const displayLocale = dateTimeLocale ?? getFallbackDateTimeLocale();
+  const { formatDate } = useDateTimeFormatters();
 
   // Extract data (with defaults for undefined)
   const weightEntries = data?.weightEntries ?? [];
@@ -110,7 +110,7 @@ export default function WeightTracker({ petId, petName, animalType }: WeightTrac
   // Latest weight converted for display
   const latestWeightForChart = data?.latestWeight ? {
     weight: convertWeight(parseFloat(data.latestWeight.weight), 'kg', weightUnit),
-    date: formatDateForDisplay(data.latestWeight.date, displayLocale),
+    date: formatDate(data.latestWeight.date),
   } : null;
 
   // Target range converted for chart (must match chart's display unit)

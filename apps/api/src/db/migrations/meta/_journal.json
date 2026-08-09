@@ -176,6 +176,13 @@
       "when": 1785837849420,
       "tag": "0024_add_food_date_finished",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1786279615024,
+      "tag": "0025_bored_pete_wisdom",
+      "breakpoints": true
     }
   ]
 }

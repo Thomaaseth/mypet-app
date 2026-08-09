@@ -3,6 +3,7 @@ import { userPreferencesApi, userPreferencesErrorHandler } from '@/lib/api/domai
 import { toastService } from '@/lib/toast';
 import { useTranslation } from 'react-i18next';
 import type { UserPreferences, UserPreferencesFormData } from '@/types/user-preferences';
+import type { Language } from '@/shared/validations/language';
 
 export const preferenceKeys = {
   all: ['user-preferences'] as const,
@@ -35,6 +36,27 @@ export function useUpsertUserPreferences() {
     },
     onError: (error) => {
       const appError = userPreferencesErrorHandler(error);
+      toastService.error(appError.message);
+    },
+  });
+}
+
+// Language is written on its own from the footer switch. No success toast
+// Pre-onboarding the API returns null (no row yet) — nothing to cache. 
+// A logged-out toggle 401s, which we swallow since the client-side language change already applied.
+export function useUpdateLanguage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (language: Language) => userPreferencesApi.updateLanguage(language),
+    onSuccess: (updated: UserPreferences | null) => {
+      if (updated) {
+        queryClient.setQueryData(preferenceKeys.current(), updated);
+      }
+    },
+    onError: (error) => {
+      const appError = userPreferencesErrorHandler(error);
+      if (appError.code === 'UNAUTHORIZED') return;
       toastService.error(appError.message);
     },
   });

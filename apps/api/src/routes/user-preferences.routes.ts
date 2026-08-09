@@ -4,7 +4,7 @@ import { globalAuthHandler, type AuthenticatedRequest } from '../middleware/auth
 import { userRateLimit } from '../middleware/rate-limit';
 import { BadRequestError } from '../middleware/errors';
 import { respondWithSuccess } from '../lib/json';
-import { userPreferencesFormSchema } from '@/shared/validations/user-preferences';
+import { userPreferencesFormSchema, languageUpdateSchema } from '@/shared/validations/user-preferences';
 
 const router = Router();
 
@@ -47,6 +47,32 @@ router.put('/', async (req: AuthenticatedRequest, res: Response, next: NextFunct
     );
 
     respondWithSuccess(res, { preferences }, 'User preferences saved successfully');
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PATCH /api/users/preferences/language
+router.patch('/language', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const validation = languageUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
+    }
+
+    // preferences is null pre-onboarding (no row to update), not an error.
+    const preferences = await UserPreferencesService.updateLanguage(
+      userId,
+      validation.data.language
+    );
+
+    respondWithSuccess(res, { preferences }, 'Language preference saved successfully');
   } catch (error) {
     next(error);
   }

@@ -1,6 +1,7 @@
 import type { PetGender } from '@/lib/validations/pet';
 import type { AppointmentType } from '@/types/appointments';
-import type { DateTimeLocale } from '@/shared/validations/locale';
+import type { DateFormat } from '@/shared/validations/date-format';
+import type { TimeFormat } from '@/shared/validations/time-format';
 import type { UnitSystem } from '@/shared/validations/units';
 
 /**
@@ -66,15 +67,25 @@ export const APPOINTMENT_TYPE_KEYS = {
   other: 'appointments.type.other',
 } as const satisfies Record<AppointmentType, string>;
 
-export const DATE_TIME_LOCALE_LABEL_KEYS = {
-  'fr-FR': 'preferences.dateTimeLocale.frFR.label',
-  'en-US': 'preferences.dateTimeLocale.enUS.label',
-} as const satisfies Record<DateTimeLocale, string>;
- 
-export const DATE_TIME_LOCALE_DESCRIPTION_KEYS = {
-  'fr-FR': 'preferences.dateTimeLocale.frFR.description',
-  'en-US': 'preferences.dateTimeLocale.enUS.description',
-} as const satisfies Record<DateTimeLocale, string>;
+export const DATE_FORMAT_LABEL_KEYS = {
+  DMY: 'preferences.dateFormat.DMY.label',
+  MDY: 'preferences.dateFormat.MDY.label',
+} as const satisfies Record<DateFormat, string>;
+
+export const DATE_FORMAT_DESCRIPTION_KEYS = {
+  DMY: 'preferences.dateFormat.DMY.description',
+  MDY: 'preferences.dateFormat.MDY.description',
+} as const satisfies Record<DateFormat, string>;
+
+export const TIME_FORMAT_LABEL_KEYS = {
+  '24h': 'preferences.timeFormat.24h.label',
+  '12h': 'preferences.timeFormat.12h.label',
+} as const satisfies Record<TimeFormat, string>;
+
+export const TIME_FORMAT_DESCRIPTION_KEYS = {
+  '24h': 'preferences.timeFormat.24h.description',
+  '12h': 'preferences.timeFormat.12h.description',
+} as const satisfies Record<TimeFormat, string>;
  
 export const UNIT_SYSTEM_LABEL_KEYS = {
   metric: 'preferences.unitSystem.metric.label',

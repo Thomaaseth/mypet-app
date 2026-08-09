@@ -23,14 +23,16 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { useUpsertUserPreferences } from '@/queries/user-preferences';
-import { DATE_TIME_LOCALE_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
+import { DATE_FORMAT_OPTIONS, TIME_FORMAT_OPTIONS, UNIT_SYSTEM_OPTIONS } from '@/lib/constants/locale-options';
 import { detectBrowserTimezone } from '@/lib/utils/timezone';
-import { getFallbackDateTimeLocale, getFallbackUnitSystem } from '@/lib/utils/locale';
+import { getFallbackDateFormat, getFallbackTimeFormat, getFallbackUnitSystem } from '@/lib/utils/locale';
 import { PreferenceOptionButton } from '@/components/ui/preference-option-button';
 import { useTranslation } from 'react-i18next';
 import {
-  DATE_TIME_LOCALE_LABEL_KEYS,
-  DATE_TIME_LOCALE_DESCRIPTION_KEYS,
+  DATE_FORMAT_LABEL_KEYS,
+  DATE_FORMAT_DESCRIPTION_KEYS,
+  TIME_FORMAT_LABEL_KEYS,
+  TIME_FORMAT_DESCRIPTION_KEYS,
   UNIT_SYSTEM_LABEL_KEYS,
   UNIT_SYSTEM_DESCRIPTION_KEYS,
 } from '@/i18n/enum-keys';
@@ -49,7 +51,7 @@ export default function MyProfilePage() {
   const { t } = useTranslation();
   // user session context
   const { user: currentUser, isLoading: isLoadingUser, error: sessionError, updateUser } = useSessionContext();
-  const { dateTimeLocale: currentDateTimeLocale, unitSystem: currentUnitSystem, isLoading: isLoadingPreferences } = usePreferencesContext();
+  const { dateFormat: currentDateFormat, timeFormat: currentTimeFormat, unitSystem: currentUnitSystem, isLoading: isLoadingPreferences } = usePreferencesContext();
   const { mutate: upsertPreferences, isPending: isSavingPreferences, variables: pendingPreferences } = useUpsertUserPreferences();
 
   // UI-specific state remains as separate useState
@@ -247,21 +249,48 @@ export default function MyProfilePage() {
               </div>
             ) : (
               <>
-                {/* Date/Time format */}
+                
+                {/* Date format */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  {DATE_TIME_LOCALE_OPTIONS.map(({ dateTimeLocale }) => {
-                    const isActive = currentDateTimeLocale === dateTimeLocale;
+                  {DATE_FORMAT_OPTIONS.map(({ dateFormat }) => {
+                    const isActive = currentDateFormat === dateFormat;
                     return (
                       <PreferenceOptionButton
-                        key={dateTimeLocale}
-                        label={t(DATE_TIME_LOCALE_LABEL_KEYS[dateTimeLocale])}
-                        description={t(DATE_TIME_LOCALE_DESCRIPTION_KEYS[dateTimeLocale])}
+                        key={dateFormat}
+                        label={t(DATE_FORMAT_LABEL_KEYS[dateFormat])}
+                        description={t(DATE_FORMAT_DESCRIPTION_KEYS[dateFormat])}
                         isActive={isActive}
                         disabled={isSavingPreferences}
-                        isSaving={isSavingPreferences && !isActive && pendingPreferences?.dateTimeLocale === dateTimeLocale}
+                        isSaving={isSavingPreferences && !isActive && pendingPreferences?.dateFormat === dateFormat}
                         onClick={() => {
                           if (!isActive) upsertPreferences({
-                            dateTimeLocale,
+                            dateFormat,
+                            timeFormat: currentTimeFormat ?? getFallbackTimeFormat(),
+                            unitSystem: currentUnitSystem ?? getFallbackUnitSystem(),
+                            timezone: detectBrowserTimezone(),
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Time format */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {TIME_FORMAT_OPTIONS.map(({ timeFormat }) => {
+                    const isActive = currentTimeFormat === timeFormat;
+                    return (
+                      <PreferenceOptionButton
+                        key={timeFormat}
+                        label={t(TIME_FORMAT_LABEL_KEYS[timeFormat])}
+                        description={t(TIME_FORMAT_DESCRIPTION_KEYS[timeFormat])}
+                        isActive={isActive}
+                        disabled={isSavingPreferences}
+                        isSaving={isSavingPreferences && !isActive && pendingPreferences?.timeFormat === timeFormat}
+                        onClick={() => {
+                          if (!isActive) upsertPreferences({
+                            dateFormat: currentDateFormat ?? getFallbackDateFormat(),
+                            timeFormat,
                             unitSystem: currentUnitSystem ?? getFallbackUnitSystem(),
                             timezone: detectBrowserTimezone(),
                           });
@@ -285,7 +314,8 @@ export default function MyProfilePage() {
                         isSaving={isSavingPreferences && !isActive && pendingPreferences?.unitSystem === unitSystem}
                         onClick={() => {
                           if (!isActive) upsertPreferences({
-                            dateTimeLocale: currentDateTimeLocale ?? getFallbackDateTimeLocale(),
+                            dateFormat: currentDateFormat ?? getFallbackDateFormat(),
+                            timeFormat: currentTimeFormat ?? getFallbackTimeFormat(),
                             unitSystem,
                             timezone: detectBrowserTimezone(),
                           });

@@ -2,14 +2,24 @@ import type preferences from '../en/preferences';
 import type { TranslationShape } from '../../translation-shape';
 
 const fr: TranslationShape<typeof preferences> = {
-  dateTimeLocale: {
-    frFR: {
-      label: '24 heures',
-      description: 'JJ/MM/AAAA · horloge 24h',
+  dateFormat: {
+    DMY: {
+      label: 'Jour / Mois',
+      description: 'JJ/MM/AAAA',
     },
-    enUS: {
+    MDY: {
+      label: 'Mois / Jour',
+      description: 'MM/JJ/AAAA',
+    },
+  },
+  timeFormat: {
+    '24h': {
+      label: '24 heures',
+      description: '14:30',
+    },
+    '12h': {
       label: '12 heures',
-      description: 'MM/JJ/AAAA · horloge 12h',
+      description: '2:30 PM',
     },
   },
   unitSystem: {
