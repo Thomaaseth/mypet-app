@@ -16,6 +16,7 @@ import { PageTitle, MutedText, ErrorText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
 import { key } from '@/i18n/translation-key';
 import type { TranslationKey } from '@/i18n/translation-key';
+import { getAppUrl } from '@/lib/config';
 
 const signInSchema = z.object({
   email: z.string().email(key('auth.validation.invalidEmail')),
@@ -51,17 +52,28 @@ export default function SignInForm() {
         });
 
         if (error) {
-          // Unverified email => redirect to the verify-email page instead of
-          // showing an inline error. Branch on the semantic code rather than
-          // the 403 status: the code is specific to this condition
+          // Unverified email => redirect to the verify-email page
           // BETTER-AUTH CONTRACT: 'EMAIL_NOT_VERIFIED' is better-auth's string.
           // If it changes on upgrade, this branch silently stops firing and
           // unverified users get a raw error instead of the redirect. Re-verify
           // after any better-auth version bump.          
           if (error.code === 'EMAIL_NOT_VERIFIED') {
+            // Proactively send a fresh verification email on this redirect, so
+            // a user who never got the original (spam/delay) doesn't land on a
+            // page that implies mail is coming when none was sent.
+            // Fire-and-forget: never block or fail the redirect on the send 
+            // Backend quota (5/hr) + IP limit (3/15min) cap abuse.
+            void authClient.sendVerificationEmail({
+              email: data.email,
+              callbackURL: getAppUrl(),
+            }).catch(() => {
+              // the verify-email page handles recovery via its
+              // resend button. A failed proactive send must not disrupt the
+              // user's redirect or show an error.
+            });
             navigate({ to: '/verify-email', search: { email: data.email } });
             return null;
-          }          
+          }      
           throw error;
         }
 
