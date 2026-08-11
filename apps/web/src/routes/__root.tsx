@@ -41,7 +41,7 @@ function RootComponent() {
             <CookieConsentBanner />
             <Toaster position="bottom-right" />
             {/* Only show devtools in development */}
-            {import.meta.env.DEV && <TanStackRouterDevtools />}
+            {/* {import.meta.env.DEV && <TanStackRouterDevtools />} */}
           </CookieConsentProvider>
         </UserPreferencesProvider>
       </SessionProvider>

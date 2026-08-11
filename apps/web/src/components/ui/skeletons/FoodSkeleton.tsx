@@ -8,8 +8,8 @@ export function FoodEntriesSkeleton({ count = 2 }: { count?: number }) {
         <Card key={i}>
           <CardHeader className="pb-3">
             <div className="flex items-start gap-2">
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-6 w-48" />
+              <div className="flex-1 min-w-0 space-y-2">
+                <Skeleton className="h-6 w-full" />
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <Skeleton className="h-6 w-16" />
@@ -66,19 +66,6 @@ export function FoodTrackerSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Summary grid — 2 boxes matching the "Dry/Wet Food Supply" layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="p-4 rounded-lg border bg-muted space-y-2 text-center">
-            <Skeleton className="h-4 w-24 mx-auto" />
-            <Skeleton className="h-7 w-16 mx-auto" />
-            <Skeleton className="h-3 w-28 mx-auto" />
-          </div>
-          <div className="p-4 rounded-lg border bg-muted space-y-2 text-center">
-            <Skeleton className="h-4 w-24 mx-auto" />
-            <Skeleton className="h-7 w-16 mx-auto" />
-            <Skeleton className="h-3 w-28 mx-auto" />
-          </div>
-        </div>
         {/* 2-tab row */}
         <div className="grid grid-cols-2 gap-1">
           <Skeleton className="h-10 w-full" />
