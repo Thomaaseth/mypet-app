@@ -32,6 +32,7 @@ const fr: TranslationShape<typeof weights> = {
     entries: 'Entrées',
     min: 'Min',
     max: 'Max',
+    selectedWeight: 'Sélectionné',
   },
   target: {
     minWeightLabel: 'Poids minimum',

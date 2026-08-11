@@ -1,5 +1,5 @@
 import { TrendingUp } from 'lucide-react';
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, ReferenceArea } from 'recharts';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ReferenceArea, ReferenceLine } from 'recharts';
 import {
   ChartConfig,
   ChartContainer,
@@ -16,7 +16,7 @@ import {
   HelperText,
 } from '@/components/ui/typography';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { formatWeight } from '@/lib/validations/pet';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
@@ -33,6 +33,13 @@ interface WeightChartProps {
   filterSlot?: ReactNode;
 }
 
+type ChartPoint = { date: string; timestamp: number; weight: number };
+
+interface ChartScrubState {
+  isTooltipActive?: boolean;
+  activePayload?: Array<{ payload?: ChartPoint }>;
+}
+
 export default function WeightChart({ 
   data, 
   hasAnyEntries,
@@ -47,6 +54,14 @@ export default function WeightChart({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { formatDate, formatChartTick } = useDateTimeFormatters();
+  const [activePoint, setActivePoint] = useState<ChartPoint | null>(null);
+
+    // Mobile-only: capture the point under the finger while scrubbing.
+  const handleChartMove = (state: ChartScrubState) => {
+    if (!isMobile) return;
+    const point = state?.activePayload?.[0]?.payload ?? null;
+    setActivePoint(state?.isTooltipActive ? point : null);
+  };
 
   if (data.length === 0 && !hasAnyEntries) {
     return (
@@ -80,12 +95,11 @@ export default function WeightChart({
     return Math.ceil((maxValue + pad) * 10) / 10;
   })();
   
-  const chartData = data.map(point => ({
+  const chartData: ChartPoint[] = data.map(point => ({
     date: point.date,           // tooltip
     timestamp: point.timestamp, // X axis
     weight: point.weight,
   }));
-
 
   // Chart configuration
   const chartConfig = {
@@ -95,13 +109,17 @@ export default function WeightChart({
     },
   } satisfies ChartConfig; 
 
+  const scrubPoint = isMobile ? activePoint : null;
+  const shownWeight = scrubPoint ? scrubPoint.weight : latestWeight.weight;
+  const shownDate = scrubPoint ? formatDate(scrubPoint.date) : latestWeight.date;
+
   return (
         <div className="space-y-4">
         {/* Latest Weight Display */}
           <div className="text-center p-4 bg-muted/75 rounded-lg">
-            <MetricLabel>{t('weights.chart.currentWeight')}</MetricLabel>
-            <MetricValue>{formatWeight(latestWeight.weight)} {weightUnit}</MetricValue>
-            <MetricLabel className="text-xs">{t('weights.chart.asOf', { date: latestWeight.date })}</MetricLabel>
+            <MetricLabel>{scrubPoint ? t('weights.chart.selectedWeight') : t('weights.chart.currentWeight')}</MetricLabel>
+            <MetricValue>{formatWeight(shownWeight)} {weightUnit}</MetricValue>
+            <MetricLabel className="text-xs">{t('weights.chart.asOf', { date: shownDate })}</MetricLabel>
           </div>
 
         {filterSlot}
@@ -116,12 +134,10 @@ export default function WeightChart({
                   <LineChart
                       accessibilityLayer
                       data={chartData}
-                      margin={{
-                        top: 5,
-                        left: 8,
-                        right: 8,
-                        bottom: 5,
-                    }}
+                      margin={{ top: 5, left: 8, right: 8, bottom: 5 }}
+                      onMouseMove={handleChartMove}
+                      onClick={handleChartMove}
+                      onMouseLeave={() => { if (isMobile) setActivePoint(null); }}
                   >
                   <CartesianGrid vertical={false} />
                       <XAxis
@@ -146,7 +162,7 @@ export default function WeightChart({
                       
                       <ChartTooltip
                           cursor={false}
-                          content={(props) => {
+                          content={isMobile ? () => null : (props) => {
                             if (!props.active || !props.payload?.[0]) return null;
                             
                             const data = props.payload[0].payload;
@@ -190,6 +206,14 @@ export default function WeightChart({
                           strokeOpacity={0.4}
                           strokeWidth={1}
                           strokeDasharray="3 3"
+                        />
+                      )}
+                      {scrubPoint && (
+                        <ReferenceLine
+                          x={scrubPoint.timestamp}
+                          stroke="var(--muted-foreground)"
+                          strokeOpacity={0.5}
+                          strokeDasharray="4 4"
                         />
                       )}
                       <Line
