@@ -33,7 +33,7 @@ function RootComponent() {
               <NetworkStatusBanner />
               <Navbar />
               <PreferenceBanner />
-              <main className="flex-1">
+              <main className="flex-1 flex flex-col">
                 <Outlet />
               </main>
               <Footer />

@@ -1,7 +1,6 @@
 import { BadRequestError } from '@/middleware/errors';
 import type { DryFoodEntry, WetFoodEntry } from '../../db/schema/food';
-import { diffCalendarDays, addCalendarDays } from '@/shared/utils/dates';
-
+import { inclusiveDaySpan, lastDayOfSpan } from '@/shared/utils/dates';
 
 // Tolerance threshold for feeding status (±5%)
 const FEEDING_TOLERANCE_PERCENTAGE = 5;
@@ -9,71 +8,49 @@ const TOLERANCE_BUFFER = 0.5;
 const WARNING_THRESHOLD = 7;
 
 export class FoodCalculations {
-  static calculateDryFoodRemaining(entry: DryFoodEntry, today: string): { 
-    remainingDays: number; 
-    depletionDate: string; 
+    static calculateDryFoodRemaining(entry: DryFoodEntry, today: string): {
+    remainingDays: number;
+    depletionDate: string;
     remainingWeight: number;
   } {
-    // Day 1 logic: dateStarted = first day of consumption
-    const daysElapsed = diffCalendarDays(entry.dateStarted, today) + 1;
-    
-    const bagWeightInGrams = parseFloat(entry.bagWeight);
+    const totalWeightInGrams = parseFloat(entry.bagWeight);
     const dailyAmountInGrams = parseFloat(entry.dailyAmount);
-        
-    const foodConsumedInGrams = Math.max(0, daysElapsed * dailyAmountInGrams);
-    const remainingWeightInGrams = Math.max(0, bagWeightInGrams - foodConsumedInGrams);
-    
-    const remainingWeight = remainingWeightInGrams;
-
-    const remainingDays = dailyAmountInGrams > 0 
-      ? Math.floor(remainingWeightInGrams / dailyAmountInGrams) 
-      : 0;    
-
-    // Calculate depletion date
-    let depletionDate: string;
-    if (remainingDays > 0) {
-      depletionDate = addCalendarDays(today, remainingDays);
-    } else {
-      const totalConsumptionDays = dailyAmountInGrams > 0 
-        ? Math.ceil(bagWeightInGrams / dailyAmountInGrams) 
-        : 0;
-      depletionDate = addCalendarDays(entry.dateStarted, totalConsumptionDays);
-    }
-
-    return { remainingDays, depletionDate, remainingWeight };
+    return this.remainingFrom(totalWeightInGrams, dailyAmountInGrams, entry.dateStarted, today);
   }
 
-  static calculateWetFoodRemaining(entry: WetFoodEntry, today: string): { 
-    remainingDays: number; 
-    depletionDate: string; 
+  static calculateWetFoodRemaining(entry: WetFoodEntry, today: string): {
+    remainingDays: number;
+    depletionDate: string;
     remainingWeight: number;
   } {
-    
-    // Day 1 logic: dateStarted counts as first day of consumption
-    const daysElapsed = diffCalendarDays(entry.dateStarted, today) + 1;
-
     const totalWeightInGrams = entry.numberOfUnits * parseFloat(entry.weightPerUnit);
     const dailyAmountInGrams = parseFloat(entry.dailyAmount);
-    
-    const foodConsumedInGrams = Math.max(0, daysElapsed * dailyAmountInGrams);
-    const remainingWeightInGrams = Math.max(0, totalWeightInGrams - foodConsumedInGrams);
-    
-    const remainingWeight = remainingWeightInGrams;
-    
-    const remainingDays = dailyAmountInGrams > 0 
-    ? Math.floor(remainingWeightInGrams / dailyAmountInGrams) 
-    : 0;
+    return this.remainingFrom(totalWeightInGrams, dailyAmountInGrams, entry.dateStarted, today);
+  }
 
-    // Calculate depletion date
-    let depletionDate: string;
-    if (remainingDays > 0) {
-      depletionDate = addCalendarDays(today, remainingDays);
-    } else {
-      const totalConsumptionDays = dailyAmountInGrams > 0 
-        ? Math.ceil(totalWeightInGrams / dailyAmountInGrams) 
-        : 0;
-      depletionDate = addCalendarDays(entry.dateStarted, totalConsumptionDays);
-    }
+  // Shared remaining/depletion math for both food types.
+  // `remainingWeight` and `remainingDays` are "as of today". `depletionDate` is a
+  // FIXED property of the entry (start + total days of food) and does NOT depend on
+  // `today`
+  private static remainingFrom(
+    totalWeightInGrams: number,
+    dailyAmountInGrams: number,
+    dateStarted: string,
+    today: string
+  ): { remainingDays: number; depletionDate: string; remainingWeight: number } {
+    const daysElapsed = inclusiveDaySpan(dateStarted, today);
+    const foodConsumedInGrams = Math.max(0, daysElapsed * dailyAmountInGrams);
+    const remainingWeight = Math.max(0, totalWeightInGrams - foodConsumedInGrams);
+
+    const remainingDays = dailyAmountInGrams > 0
+      ? Math.floor(remainingWeight / dailyAmountInGrams + 1e-9)
+      : 0;
+
+    // ceil: the final short-ration day still counts as a day on which food exists.
+    const totalDaysOfFood = dailyAmountInGrams > 0
+      ? Math.ceil(totalWeightInGrams / dailyAmountInGrams)
+      : 0;
+    const depletionDate = lastDayOfSpan(dateStarted, totalDaysOfFood);
 
     return { remainingDays, depletionDate, remainingWeight };
   }
@@ -99,7 +76,7 @@ export class FoodCalculations {
     }
     
     // Both start and end dates are INCLUSIVE (day 1 = dateStarted, last day = dateFinished)
-    const actualDaysElapsed = diffCalendarDays(entry.dateStarted, entry.dateFinished) + 1;
+    const actualDaysElapsed = inclusiveDaySpan(entry.dateStarted, entry.dateFinished);
 
     let totalWeightInGrams: number;
 
