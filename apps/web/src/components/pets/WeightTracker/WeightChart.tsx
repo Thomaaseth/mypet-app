@@ -64,9 +64,8 @@ export default function WeightChart({
   };
 
   const endScrub = () => {
-    if (!isMobile) return;
-    window.setTimeout(() => setActivePoint(null), 50);
-  }
+    if (isMobile) setActivePoint(null);
+  };
 
   if (data.length === 0 && !hasAnyEntries) {
     return (
