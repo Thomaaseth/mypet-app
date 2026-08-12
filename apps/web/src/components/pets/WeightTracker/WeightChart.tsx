@@ -55,6 +55,7 @@ export default function WeightChart({
   const isMobile = useIsMobile();
   const { formatDate, formatChartTick } = useDateTimeFormatters();
   const [activePoint, setActivePoint] = useState<ChartPoint | null>(null);
+  const [chartKey, setChartKey] = useState(0);
 
   // Mobile-only: capture the point under the finger while scrubbing.
   const handleChartMove = (state: ChartScrubState) => {
@@ -63,8 +64,10 @@ export default function WeightChart({
     if (point) setActivePoint(point); // set only; never clear, tap and drag both persist
   };
 
-  const endScrub = () => {
-    if (isMobile) setActivePoint(null);
+    const endScrub = () => {
+    if (!isMobile) return;
+    setActivePoint(null);
+    setChartKey((k) => k + 1); // drop Recharts' active dot on release
   };
 
   if (data.length === 0 && !hasAnyEntries) {
@@ -136,6 +139,7 @@ export default function WeightChart({
         ) : (
           <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full select-none [-webkit-touch-callout:none] [touch-action:none]">
                   <LineChart
+                      key={chartKey}
                       accessibilityLayer
                       data={chartData}
                       margin={{ top: 5, left: 8, right: 8, bottom: 5 }}
