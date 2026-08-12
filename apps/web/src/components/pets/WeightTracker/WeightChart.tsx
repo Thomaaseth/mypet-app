@@ -56,12 +56,17 @@ export default function WeightChart({
   const { formatDate, formatChartTick } = useDateTimeFormatters();
   const [activePoint, setActivePoint] = useState<ChartPoint | null>(null);
 
-    // Mobile-only: capture the point under the finger while scrubbing.
+  // Mobile-only: capture the point under the finger while scrubbing.
   const handleChartMove = (state: ChartScrubState) => {
     if (!isMobile) return;
-    const point = state?.activePayload?.[0]?.payload ?? null;
-    setActivePoint(state?.isTooltipActive ? point : null);
+    const point = state?.activePayload?.[0]?.payload;
+    if (point) setActivePoint(point); // set only; never clear, tap and drag both persist
   };
+
+  const endScrub = () => {
+    if (!isMobile) return;
+    window.setTimeout(() => setActivePoint(null), 50);
+  }
 
   if (data.length === 0 && !hasAnyEntries) {
     return (
@@ -130,14 +135,14 @@ export default function WeightChart({
             <HelperText>{t('weights.chart.noEntriesInPeriod')}</HelperText>
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full select-none [-webkit-touch-callout:none] [touch-action:pan-y]">
+          <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full select-none [-webkit-touch-callout:none] [touch-action:none]">
                   <LineChart
                       accessibilityLayer
                       data={chartData}
                       margin={{ top: 5, left: 8, right: 8, bottom: 5 }}
                       onMouseMove={handleChartMove}
-                      onClick={handleChartMove}
-                      // onMouseLeave={() => { if (isMobile) setActivePoint(null); }}
+                      onMouseUp={endScrub}
+                      onMouseLeave={endScrub}
                   >
                   <CartesianGrid vertical={false} />
                       <XAxis
