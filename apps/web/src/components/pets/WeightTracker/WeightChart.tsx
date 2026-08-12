@@ -130,14 +130,14 @@ export default function WeightChart({
             <HelperText>{t('weights.chart.noEntriesInPeriod')}</HelperText>
           </div>
         ) : (
-          <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full">
+          <ChartContainer config={chartConfig} className="h-[150px] sm:h-[160px] w-full select-none [-webkit-touch-callout:none] [touch-action:pan-y]">
                   <LineChart
                       accessibilityLayer
                       data={chartData}
                       margin={{ top: 5, left: 8, right: 8, bottom: 5 }}
                       onMouseMove={handleChartMove}
                       onClick={handleChartMove}
-                      onMouseLeave={() => { if (isMobile) setActivePoint(null); }}
+                      // onMouseLeave={() => { if (isMobile) setActivePoint(null); }}
                   >
                   <CartesianGrid vertical={false} />
                       <XAxis
