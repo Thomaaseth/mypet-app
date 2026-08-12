@@ -25,6 +25,9 @@ const fr: TranslationShape<typeof common> = {
     invalidCredentialsTitle: 'Identifiants invalides',
     invalidCredentialsDescription: 'Veuillez vérifier votre e-mail et votre mot de passe',
   },
+  datePicker: {
+    selectDate: 'Sélectionner une date',
+  },
 };
 
 export default fr;

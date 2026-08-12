@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { UserPreferencesService } from '../../user-preferences.service';
 import { toDateString, addCalendarDays } from '@/shared/utils/dates';
 import { useFixedTimeForTimezoneTests } from '../../../test/timezone-test-utils';
+import { FoodCalculations } from '../../food/calculations';
 
 describe('Business Logic Calculations', () => {
   // NOTE: tests in this describe block deliberately pass randomUUID() as the
@@ -168,12 +169,85 @@ describe('Business Logic Calculations', () => {
 
       const result = await FoodService.calculateDryFoodRemaining(dryFoodEntry, randomUUID());
 
-      // Bag fully depleted before finish: function computes depletionDate as
-      // dateStarted + totalConsumptionDays (2000g / 100g/day = 20 days)
-      const expectedDepletionDate = addCalendarDays(dateStarted, 20);
+      // Bag depleted: last day food is available is dateStarted + (totalConsumptionDays - 1),
+      // per the Day-1-inclusive convention (2000g / 100g/day = 20 days → offset 19).
+      const expectedDepletionDate = addCalendarDays(dateStarted, 19);
 
       expect(result.remainingDays).toBe(0);
       expect(result.depletionDate).toBe(expectedDepletionDate);
+    });
+
+    it('should calculate correct depletion date for depleted wet food (Day-1 inclusive)', async () => {
+      const todayStr = toDateString(new Date());
+      const dateStarted = addCalendarDays(todayStr, -11); // day 1 = dateStarted → 12 inclusive days
+
+      const wetFoodEntry = makeWetFoodEntry({
+        numberOfUnits: 12,
+        weightPerUnit: '85.00',
+        dailyAmount: '85.00',
+        dateStarted,
+        isActive: true,
+      });
+
+      const result = await FoodService.calculateWetFoodRemaining(wetFoodEntry, randomUUID());
+
+      // 12 * 85g / 85g per day = 12 days of food. Day-1 inclusive => last day food
+      // exists is dateStarted + (12 - 1), i.e. exactly today.
+      const expectedDepletionDate = addCalendarDays(dateStarted, 11);
+
+      expect(result.remainingDays).toBe(0);
+      expect(result.depletionDate).toBe(expectedDepletionDate);
+      expect(result.depletionDate).toBe(todayStr); // depletes today, not tomorrow — the reported bug
+    });
+
+    it('remainingDays counts a whole day of food despite float rounding (unit-converted grams)', () => {
+      // 12 x 85.05g at 170.10g/day = exactly 6 days of food (from 3oz / 6oz converted).
+      // On day 2 (1 elapsed inclusive → daysElapsed 2), 4 whole days remain, but
+      // 680.3999… / 170.10 floats to 3.999999… — naive Math.floor would report 3.
+      const dateStarted = '2026-01-01';
+      const entry = makeWetFoodEntry({
+        numberOfUnits: 12,
+        weightPerUnit: '85.05',
+        dailyAmount: '170.10',
+        dateStarted,
+      });
+
+      const result = FoodCalculations.calculateWetFoodRemaining(entry, addCalendarDays(dateStarted, 1));
+
+      expect(result.remainingDays).toBe(4);
+    });
+  });
+
+  describe('FoodCalculations — depletion invariants (pure day-math)', () => {
+    it('depletion date is fixed by the entry and does not drift as today advances', () => {
+      const dateStarted = '2026-01-01';
+      const entry = makeWetFoodEntry({
+        numberOfUnits: 10,
+        weightPerUnit: '100.00', // 1000g total
+        dailyAmount: '75.00',    // 1000 / 75 = 13.33 → 14 inclusive days
+        dateStarted,
+      });
+
+      const observedDay4 = FoodCalculations.calculateWetFoodRemaining(entry, addCalendarDays(dateStarted, 3));
+      const observedDay10 = FoodCalculations.calculateWetFoodRemaining(entry, addCalendarDays(dateStarted, 9));
+
+      expect(observedDay4.depletionDate).toBe(observedDay10.depletionDate); // no drift
+      expect(observedDay4.depletionDate).toBe(addCalendarDays(dateStarted, 13)); // 14 inclusive days → +13
+    });
+
+    it('counts the final short-ration day (ceil) for amounts that do not divide evenly', () => {
+      const dateStarted = '2026-01-01';
+      const entry = makeDryFoodEntry({
+        bagWeight: '1000.00',
+        dailyAmount: '85.00', // 1000 / 85 = 11.76 → 12 inclusive days (11 full + 1 short)
+        dateStarted,
+      });
+
+      // Observed with 150g left (2 feeding days remain: one full, one short).
+      // The old floor/today-anchored branch reported start+10; correct is start+11.
+      const result = FoodCalculations.calculateDryFoodRemaining(entry, addCalendarDays(dateStarted, 9));
+
+      expect(result.depletionDate).toBe(addCalendarDays(dateStarted, 11));
     });
   });
 
@@ -213,8 +287,20 @@ describe('Business Logic Calculations', () => {
   
       const calculations = await FoodService.calculateDryFoodRemaining(created, primary.id);
   
-      // Depletion date is anchored to the user's local "today" + remainingDays
-      expect(calculations.depletionDate).toBe(addCalendarDays(expectedToday, calculations.remainingDays));
+      // Timezone changes the day count (remaining weight/days) — NOT the depletion date,
+      // which is a fixed property of the entry (start + total days of food).
+      const viaUserTz = FoodCalculations.calculateDryFoodRemaining(created, expectedToday);
+      const viaServerUtc = FoodCalculations.calculateDryFoodRemaining(created, serverUtcToday);
+
+      // tz is a real discriminator: the two "todays" give different remaining amounts.
+      expect(viaUserTz.remainingDays).not.toBe(viaServerUtc.remainingDays);
+      // depletion is tz-independent by design — documented as an invariant.
+      expect(viaUserTz.depletionDate).toBe(viaServerUtc.depletionDate);
+
+      // The service resolved the USER's timezone → its output matches the user-tz computation.
+      expect(calculations.remainingDays).toBe(viaUserTz.remainingDays);
+      expect(calculations.remainingWeight).toBe(viaUserTz.remainingWeight);
+      expect(calculations.depletionDate).toBe(viaUserTz.depletionDate);
     });
 
     it('uses the stored user timezone, not server UTC, for wet food depletion calculations', async () => {
@@ -243,10 +329,23 @@ describe('Business Logic Calculations', () => {
 
       const calculations = await FoodService.calculateWetFoodRemaining(created, primary.id);
 
-      expect(calculations.depletionDate).toBe(addCalendarDays(expectedToday, calculations.remainingDays));
+      // Timezone changes the day count (remaining weight/days) — NOT the depletion date,
+      // which is a fixed property of the entry (start + total days of food).
+      const viaUserTz = FoodCalculations.calculateWetFoodRemaining(created, expectedToday);
+      const viaServerUtc = FoodCalculations.calculateWetFoodRemaining(created, serverUtcToday);
+
+      // tz is a real discriminator: the two "todays" give different remaining amounts.
+      expect(viaUserTz.remainingDays).not.toBe(viaServerUtc.remainingDays);
+      // depletion is tz-independent by design — documented as an invariant.
+      expect(viaUserTz.depletionDate).toBe(viaServerUtc.depletionDate);
+
+      // The service resolved the USER's timezone → its output matches the user-tz computation.
+      expect(calculations.remainingDays).toBe(viaUserTz.remainingDays);
+      expect(calculations.remainingWeight).toBe(viaUserTz.remainingWeight);
+      expect(calculations.depletionDate).toBe(viaUserTz.depletionDate);
     });
 
-    it('uses the stored user timezone, not server UTC, when listing all food entries', async () => {
+it('uses the stored user timezone, not server UTC, when listing all food entries', async () => {
       const { primary, testPet } = await setupUserAndPet();
 
       await UserPreferencesService.upsertUserPreferences(primary.id, {
@@ -272,13 +371,20 @@ describe('Business Logic Calculations', () => {
       const [entry] = await FoodService.getAllFoodEntries(testPet.id, primary.id);
 
       expect(entry.id).toBe(created.id);
-      expect(entry.remainingDays).toBeDefined();
 
       if (entry.remainingDays === undefined) {
         throw new Error('Expected remainingDays to be populated on a listed food entry');
       }
 
-      expect(entry.depletionDate).toBe(addCalendarDays(expectedToday, entry.remainingDays));
+      const viaUserTz = FoodCalculations.calculateDryFoodRemaining(created, expectedToday);
+      const viaServerUtc = FoodCalculations.calculateDryFoodRemaining(created, serverUtcToday);
+
+      // tz is a real discriminator: the two "todays" give different remaining amounts.
+      expect(viaUserTz.remainingDays).not.toBe(viaServerUtc.remainingDays);
+
+      // The LISTING surfaced the user-tz numbers, not server-UTC — this is the actual proof.
+      expect(entry.remainingDays).toBe(viaUserTz.remainingDays);
+      expect(entry.depletionDate).toBe(viaUserTz.depletionDate); // tz-independent, but must still match
     });
   });
 });

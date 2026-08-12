@@ -13,6 +13,7 @@ import preferences from './preferences';
 import profile from './profile';
 import cookies from './cookies';
 import footer from './footer';
+import nav from './nav';
 
 const fr: TranslationShape<typeof en> = {
   common,
@@ -28,6 +29,7 @@ const fr: TranslationShape<typeof en> = {
   profile,
   cookies,
   footer,
+  nav,
 };
 
 export default fr;

@@ -11,6 +11,8 @@ import { SectionTitle } from '@/components/ui/typography';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { EmptyStateCta } from '@/components/ui/empty-state-cta';
 import { useTranslation } from 'react-i18next';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import { toastService } from '@/lib/toast';
 
 // Generic hook interface that both food trackers conform to
 interface GenericFoodHookReturn<TEntry, TFormData> {
@@ -70,6 +72,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   labels,
 }: GenericFoodTrackerProps<TEntry, TFormData>) {
   const { t } = useTranslation();
+    const isMobile = useIsMobile();
   const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -90,7 +93,17 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const hasActiveEntry = activeFoodEntries.length > 0;
   const disableAddButton = hasActiveEntry;
   const tooltipText = t('food.tracker.duplicateEntryTooltip');
-  
+   
+  // Desktop keeps the button disabled + hover tooltip. Mobile keeps it enabled so a
+  // tap reaches this handler. Single source of truth: tooltipText.
+  const handleAddClick = () => {
+    if (disableAddButton) {
+      toastService.info(tooltipText);
+      return;
+    }
+    setIsAddDialogOpen(true);
+  }
+
   const handleCreateEntry = async (data: TFormData) => {
     setIsCreating(true);
     const result = await executeAction(async () => {
@@ -203,38 +216,45 @@ if (!hasActiveEntries) {
   );
 }
 
+  const addButton = (
+    <Button
+      size="sm"
+      // enabled on mobile (tap → toast), disabled on desktop (hover tooltip explains)
+      disabled={!isMobile && disableAddButton}
+      className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
+      onClick={handleAddClick}
+    >
+      <Plus className="h-4 w-4 sm:mr-2" />
+      <span className="hidden sm:inline">{labels.addButton}</span>
+    </Button>
+  );
+
 // Normal state - HAS active entries (button always disabled here)
 return (
   <div>
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex justify-between items-center mb-6 pr-2 sm:pr-0">
       <SectionTitle>{labels.entriesTitle}</SectionTitle>
-      <Tooltip>
-        <TooltipTrigger asChild>
-        <span>
-          <Button
-            size="sm"
-            disabled={disableAddButton}
-            className="h-8 w-8 p-0 sm:h-auto sm:w-auto sm:px-4 sm:py-2"
-            onClick={() => setIsAddDialogOpen(true)}
-          >
-            <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">{labels.addButton}</span>
-          </Button>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className="max-w-xs">
-          <p>{tooltipText}</p>
-        </TooltipContent>
-      </Tooltip>
-      <ResponsiveDialog
-        open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
-        title={labels.dialogTitle}
-        description={labels.dialogDescription}
-      >
-        <FormComponent onSubmit={handleCreateEntry} onCancel={() => setIsAddDialogOpen(false)} isLoading={isCreating} />
-        </ResponsiveDialog>
-    </div>
+            {isMobile ? (
+              addButton
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>{addButton}</span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>{tooltipText}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            <ResponsiveDialog
+              open={isAddDialogOpen}
+              onOpenChange={setIsAddDialogOpen}
+              title={labels.dialogTitle}
+              description={labels.dialogDescription}
+            >
+              <FormComponent onSubmit={handleCreateEntry} onCancel={() => setIsAddDialogOpen(false)} isLoading={isCreating} />
+            </ResponsiveDialog>
+        </div>
 
     {/* Error Display */}
     {error && (

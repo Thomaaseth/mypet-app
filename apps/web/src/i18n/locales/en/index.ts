@@ -11,6 +11,7 @@ import preferences from './preferences';
 import profile from './profile';
 import cookies from './cookies';
 import footer from './footer';
+import nav from './nav';
 
 const en = {
   common,
@@ -26,6 +27,7 @@ const en = {
   profile,
   cookies,
   footer,
+  nav,
 } as const;
 
 export default en;

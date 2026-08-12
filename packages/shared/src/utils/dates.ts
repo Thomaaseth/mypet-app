@@ -24,6 +24,20 @@ export function addCalendarDays(dateString: string, days: number): string {
   return `${year}-${month}-${day}`;
 }
 
+// Number of inclusive calendar days from start through end, where day 1 = start.
+// inclusiveDaySpan('2026-07-31', '2026-08-11') === 12
+export function inclusiveDaySpan(startDateString: string, endDateString: string): number {
+  return diffCalendarDays(startDateString, endDateString) + 1;
+}
+
+// The last calendar day of a `dayCount`-day inclusive span starting at startDate.
+// A count of N inclusive days starting at D ends on D + (N - 1).
+// Math.max(0, …) guards a 0-count from producing a date before the start.
+// lastDayOfSpan('2026-07-31', 12) === '2026-08-11'
+export function lastDayOfSpan(startDateString: string, dayCount: number): string {
+  return addCalendarDays(startDateString, Math.max(0, dayCount - 1));
+}
+
 /** Converts a Date instant to a "YYYY-MM-DD" string, anchored to UTC. Server-side default/fallback only — for a user's local date, use their stored IANA timezone instead. */
 export function toDateString(date: Date): string {
     return date.toISOString().split('T')[0];

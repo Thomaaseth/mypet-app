@@ -10,8 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useTranslation } from 'react-i18next';
 
 export const Navbar = () => {
+    const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -34,7 +36,7 @@ export const Navbar = () => {
     { href: '/', label: 'Home' },
     { href: '/pets', label: 'My Pets' },
     { href: '/vets', label: 'My Vets' },
-    { href: '/profile', label: 'Profile' },
+    { href: '/profile', label: t('nav.profile') },
   ];
 
   // Navigation items for non-authenticated users

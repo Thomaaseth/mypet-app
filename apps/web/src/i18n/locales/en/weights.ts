@@ -29,6 +29,7 @@ const weights = {
         entries: 'Entries',
         min: 'Min',
         max: 'Max',
+        selectedWeight: 'Selected',
       },
       target: {
         minWeightLabel: 'Minimum Weight',

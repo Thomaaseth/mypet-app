@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { parseDateOnly, toLocalDateString } from "@/lib/utils/date-formatting"
 import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
+import { useTranslation } from "react-i18next"
 
 interface DatePickerProps {
   id?: string;
@@ -25,12 +26,13 @@ export function DatePicker({
   disabled = false,
   minDate,
   maxDate,
-  placeholder = "Select a date",
+  placeholder,
   "aria-invalid": ariaInvalid,
 }: DatePickerProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const { formatDate } = useDateTimeFormatters()
-
+  const resolvedPlaceholder = placeholder ?? t('common.datePicker.selectDate');
   const selectedDate = value ? parseDateOnly(value) : undefined;
 
   const currentYear = new Date().getFullYear();
@@ -59,7 +61,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-            {value ? formatDate(value) : placeholder}
+            {value ? formatDate(value) : resolvedPlaceholder}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start" style={{ pointerEvents: 'auto' }}>

@@ -33,7 +33,7 @@ function RootComponent() {
               <NetworkStatusBanner />
               <Navbar />
               <PreferenceBanner />
-              <main className="flex-1">
+              <main className="flex-1 flex flex-col">
                 <Outlet />
               </main>
               <Footer />
@@ -41,7 +41,7 @@ function RootComponent() {
             <CookieConsentBanner />
             <Toaster position="bottom-right" />
             {/* Only show devtools in development */}
-            {import.meta.env.DEV && <TanStackRouterDevtools />}
+            {/* {import.meta.env.DEV && <TanStackRouterDevtools />} */}
           </CookieConsentProvider>
         </UserPreferencesProvider>
       </SessionProvider>
