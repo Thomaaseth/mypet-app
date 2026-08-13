@@ -12,6 +12,8 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { CookieConsentProvider } from '@/contexts/CookieConsentContext';
 import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import { Footer } from '@/components/Footer';
+import { InstallPromptProvider } from '@/contexts/InstallPromptContext';
+import { InstallPrompt } from '@/components/InstallPrompt';
 
 interface RouterContext {
   queryClient: QueryClient
@@ -27,6 +29,7 @@ function RootComponent() {
       <SessionProvider>
         <UserPreferencesProvider>
           <CookieConsentProvider>
+            <InstallPromptProvider> 
             <div
               className="min-h-dvh flex flex-col"
             >
@@ -39,9 +42,11 @@ function RootComponent() {
               <Footer />
             </div>
             <CookieConsentBanner />
+            <InstallPrompt /> 
             <Toaster position="bottom-right" />
             {/* Only show devtools in development */}
             {/* {import.meta.env.DEV && <TanStackRouterDevtools />} */}
+          </InstallPromptProvider>
           </CookieConsentProvider>
         </UserPreferencesProvider>
       </SessionProvider>
