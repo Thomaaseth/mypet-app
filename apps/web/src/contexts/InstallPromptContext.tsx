@@ -1,12 +1,12 @@
 import { createContext, useContext, useCallback, type ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useInstallPrompt, type InstallPlatform } from '@/hooks/useInstallPrompts';
-import { installLogger } from '@/lib/logger';
 import { useCookieConsentContext } from '@/contexts/CookieConsentContext';
+import { installLogger } from '@/lib/logger';
 
 const INSTALL_PROMPT_STORAGE_KEY = 'pettr-install-prompt';
 
-// Re-show the install banner this long after a dismissal
+// Re-show the install banner this long after a dismissal.
 const INSTALL_SNOOZE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 interface InstallPromptPersistedState {
@@ -23,13 +23,9 @@ function isSnoozed(dismissedAt: number | null): boolean {
 }
 
 interface InstallPromptContextValue {
-  /** Whether the install banner should render. */
   shouldShowBanner: boolean;
-  /** Install strategy for the current platform. */
   platform: InstallPlatform;
-  /** Trigger the native install prompt (Chromium only). */
   promptInstall: () => Promise<'accepted' | 'dismissed' | null>;
-  /** Persistently dismiss the banner so we don't show on every visit. */
   dismiss: () => void;
 }
 
@@ -47,15 +43,15 @@ export function InstallPromptProvider({ children }: InstallPromptProviderProps) 
   const { platform, isStandalone, isInstalled, canPromptNatively, promptInstall } =
     useInstallPrompt();
   const { hasConsented } = useCookieConsentContext();
-  
+
   const dismiss = useCallback(() => {
-    setState((prev) => ({ ...prev, dismissed: true }));
+    setState((prev) => ({ ...prev, dismissedAt: Date.now() }));
     installLogger.debug('Install banner dismissed by user');
   }, [setState]);
 
-  // Never show if already installed/standalone, previously dismissed, or the
-  // platform offers no install path we can guide. On
-  // Chromium we additionally wait until the native prompt has been captured.
+  // Consent-first ordering, then: never show if already installed/standalone,
+  // currently snoozed, or the platform offers no install path we can guide.
+  // On Chromium we additionally wait for the native prompt to be captured.
   const shouldShowBanner =
     hasConsented &&
     !isStandalone &&
