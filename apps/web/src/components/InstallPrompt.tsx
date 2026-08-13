@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Share, Plus, X } from 'lucide-react';
+import { Download, Share, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useInstallPromptContext } from '@/contexts/InstallPromptContext';
 
@@ -11,12 +9,12 @@ export function InstallPrompt() {
   const isMobile = useIsMobile();
   const { shouldShowBanner, platform, promptInstall, dismiss } = useInstallPromptContext();
 
-  // Feature is scoped to mobile
+  // Feature is scoped to mobile per product decision
   if (!isMobile || !shouldShowBanner) return null;
 
   const handleInstallClick = async (): Promise<void> => {
-    // Chromium: fire the native prompt. Dismiss on any resolved choice so the
-    // banner doesn't linger after the user has decided (appinstalled also
+    // Chromium only: fire the native prompt. Dismiss on any resolved choice so
+    // the banner doesn't linger after the user has decided (appinstalled also
     // hides us on acceptance).
     const outcome = await promptInstall();
     if (outcome !== null) dismiss();
@@ -71,3 +69,5 @@ export function InstallPrompt() {
         </>
       )}
     </div>
+  );
+}
