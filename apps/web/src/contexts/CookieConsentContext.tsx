@@ -3,18 +3,9 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { logCookieConsent } from '@/lib/api/domains/cookie-consent';
 import { apiLogger } from '@/lib/logger';
 import type { CookieConsent, CookieConsentState } from '@/types/cookie-consent';
+import { isStale, createConsentId } from '@/lib/cookie-consent/logic';
 
 const COOKIE_CONSENT_STORAGE_KEY = 'pettr-cookie-consent';
-
-// CNIL best-practice re-prompt interval — see conversation record: this is
-// the "ask again" cadence for the banner itself, distinct from (and shorter
-// than) the ~13-month retention ceiling that applies to cookie/analytics
-// data lifespan, which is a different concept.
-const CONSENT_STALE_AFTER_MS = 1000 * 60 * 60 * 24 * 30 * 6; // ~6 months
-
-function createConsentId(): string {
-  return crypto.randomUUID();
-}
 
 const DEFAULT_STATE: CookieConsentState = {
   consent: { necessary: true, analytics: false },
@@ -23,10 +14,6 @@ const DEFAULT_STATE: CookieConsentState = {
   consentedAt: null,
 };
 
-function isStale(consentedAt: number | null): boolean {
-  if (consentedAt === null) return false;
-  return Date.now() - consentedAt > CONSENT_STALE_AFTER_MS;
-}
 
 // Fire-and-forget: the banner's own visibility/state must never depend on
 // network success. A failed log means we lose that one audit entry, but the

@@ -44,15 +44,14 @@ export function CookieConsentBanner() {
           gone. See CookieConsentContext for why this state lives there. */}
       {!hasConsented &&
         (isMobile ? (
-          // Mobile: full-bleed slim bar. Accept/Reject sit side by side and
-          // text is compact, so the banner's vertical footprint stays small
-          // and doesn't bury the landing content behind it.
+          // Mobile: floating card (not a full-bleed bar), with margins and a
+          // gap above the footer so it reads as a distinct card hovering over
+          // the page rather than a second footer glued to the top edge.
           <div
-            style={{ bottom: 'calc(var(--footer-height, 0px))' }}
-            className="fixed inset-x-0 z-50 border-t bg-background px-4 py-3 shadow-lg
-                       sm:inset-x-auto sm:left-auto sm:max-w-sm sm:rounded-lg sm:border"
-          >          
-            <div className="flex items-start gap-2 text-xs text-foreground mb-2">
+            style={{ bottom: 'calc(var(--footer-height, 0px) + 1rem)' }}
+            className="fixed inset-x-4 z-50 mx-auto max-w-sm rounded-lg border bg-background p-4 shadow-lg"
+          >
+            <div className="flex items-start gap-2 text-sm text-foreground mb-3">
               <Cookie className="h-4 w-4 shrink-0 mt-0.5" />
               <span>{t('cookies.banner.description')}</span>
             </div>
