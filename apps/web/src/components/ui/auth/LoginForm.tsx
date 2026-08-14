@@ -86,7 +86,7 @@ export default function SignInForm() {
       toastService.auth.signInSuccess(t);
       await refreshSession();
       // Use the redirect param from _authenticated, or default to home
-      navigate({ to: search.redirect || '/' });
+      navigate({ to: search.redirect || '/pets' });
     }
   };
 

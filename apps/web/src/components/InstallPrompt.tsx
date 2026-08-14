@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { X, SquareArrowUp, SquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useInstallPromptContext } from '@/contexts/InstallPromptContext';
@@ -47,7 +47,21 @@ export function InstallPrompt() {
         <p className="mt-2 text-sm text-muted-foreground">
           <Trans
             i18nKey="install.banner.iosInstruction"
-            components={{ b: <strong className="font-semibold text-foreground" /> }}
+            components={{
+              b: <strong className="font-semibold text-foreground" />,
+              share: (
+                <SquareArrowUp
+                  className="mx-0.5 inline h-4 w-4 align-text-bottom text-foreground"
+                  aria-hidden="true"
+                />
+              ),
+              add: (
+                <SquarePlus
+                  className="mx-0.5 inline h-4 w-4 align-text-bottom text-foreground"
+                  aria-hidden="true"
+                />
+              ),
+            }}
           />
         </p>
       ) : (

@@ -20,7 +20,7 @@ export const Route = createFileRoute('/signup')({
   validateSearch: signupSearchSchema,
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(sessionQueryOptions)
-    if (user) throw redirect({ to: '/' })
+    if (user) throw redirect({ to: '/pets' })
     }
   }
 );
