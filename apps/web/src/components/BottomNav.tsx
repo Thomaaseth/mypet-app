@@ -47,7 +47,7 @@ export function BottomNav() {
       ref={navRef}
       aria-label={t('nav.primary')}
       className="sticky bottom-0 z-50 border-t bg-background md:hidden"
-      style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) * 0.5)' }}
     >
       <ul className="flex items-stretch justify-around">
         {NAV_ITEMS.map(({ to, labelKey, Icon }) => {

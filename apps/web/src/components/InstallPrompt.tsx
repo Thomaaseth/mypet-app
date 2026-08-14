@@ -25,7 +25,10 @@ export function InstallPrompt() {
       // home-indicator clearance), so it hovers over the page rather than
       // docking full-width over the footer / language switcher.
       className="fixed inset-x-4 z-50 mx-auto max-w-sm rounded-lg border bg-background px-4 py-3 shadow-lg"
-      style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      style={{
+        bottom:
+          'calc(var(--footer-height, 0px) + var(--bottom-nav-height, 0px) + 1rem)',
+      }}
     >
       {/* Purpose line — shown on every platform so the user knows what this is. */}
       <div className="flex items-start justify-between gap-2">
