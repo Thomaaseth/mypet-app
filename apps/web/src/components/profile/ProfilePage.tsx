@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toastService } from '@/lib/toast';
-import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle, Globe } from 'lucide-react';
+import { Loader2, AlertCircle, Mail, Lock, Eye, EyeOff, CheckCircle, Globe, Scale } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { passwordChangeSchema } from '@/lib/validations/password';
 import { 
@@ -38,6 +38,7 @@ import {
 } from '@/i18n/enum-keys';
 import { key } from '@/i18n/translation-key';
 import type { TranslationKey } from '@/i18n/translation-key';
+import { LegalLinks } from '@/components/LegalLinks';
 
 // Component-local schema (not shared with API)
 const emailUpdateSchema = z.object({
@@ -501,6 +502,23 @@ export default function MyProfilePage() {
             </form>
           </CardContent>
         </Card>
+        {/* Legal & preferences — for logged-in users these links live here
+            (relocated from the footer). Keeps the GDPR "Manage preferences"
+            entry point reachable via a permanent Profile tab. */}
+         <Card>
+           <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+             <Scale className="h-5 w-5" />
+                {t('profile.legal.title')}
+            </CardTitle>
+             <CardDescription>
+              {t('profile.legal.description')}
+             </CardDescription>
+           </CardHeader>
+          <CardContent>
+            <LegalLinks orientation="stacked" />
+          </CardContent>
+         </Card>
       </div>
     </div>
   );

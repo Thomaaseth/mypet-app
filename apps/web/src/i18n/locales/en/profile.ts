@@ -31,6 +31,10 @@ const profile = {
       submitChanging: 'Changing...',
       submitChange: 'Change Password',
     },
+    legal: {
+      title: 'Legal & preferences',
+      description: 'Privacy, terms, and cookie preferences.',
+    },
   } as const;
   
   export default profile;
