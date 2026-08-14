@@ -1,6 +1,5 @@
 const isDev = import.meta.env.DEV;
 
-
 const createLogger = (module: string) => ({
     debug: (msg: string, ctx?: Record<string, unknown>) => {
         if (isDev) console.debug(`[${module}]`, msg, ctx);
@@ -22,3 +21,4 @@ export const authLogger = createLogger('auth');
 export const apiLogger = createLogger('api');
 export const routeLogger = createLogger('router');
 export const networkLogger = createLogger('network');
+export const installLogger = createLogger('install');

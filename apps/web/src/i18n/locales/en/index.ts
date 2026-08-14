@@ -12,6 +12,7 @@ import profile from './profile';
 import cookies from './cookies';
 import footer from './footer';
 import nav from './nav';
+import install from './install';
 
 const en = {
   common,
@@ -28,6 +29,7 @@ const en = {
   cookies,
   footer,
   nav,
+  install,
 } as const;
 
 export default en;

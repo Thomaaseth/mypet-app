@@ -14,6 +14,7 @@ import profile from './profile';
 import cookies from './cookies';
 import footer from './footer';
 import nav from './nav';
+import install from './install';
 
 const fr: TranslationShape<typeof en> = {
   common,
@@ -30,6 +31,7 @@ const fr: TranslationShape<typeof en> = {
   cookies,
   footer,
   nav,
+  install,
 };
 
 export default fr;
