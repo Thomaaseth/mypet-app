@@ -1,13 +1,11 @@
 import { createContext, useContext, useCallback, type ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useInstallPrompt, type InstallPlatform } from '@/hooks/useInstallPrompts';
+import { useInstallPrompt, type InstallPlatform } from '@/hooks/useInstallPrompt';
 import { useCookieConsentContext } from '@/contexts/CookieConsentContext';
 import { installLogger } from '@/lib/logger';
+import { isSnoozed } from '@/lib/install/detection';
 
 const INSTALL_PROMPT_STORAGE_KEY = 'pettr-install-prompt';
-
-// Re-show the install banner this long after a dismissal.
-const INSTALL_SNOOZE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 interface InstallPromptPersistedState {
   dismissedAt: number | null;
@@ -16,11 +14,6 @@ interface InstallPromptPersistedState {
 const DEFAULT_STATE: InstallPromptPersistedState = {
   dismissedAt: null,
 };
-
-function isSnoozed(dismissedAt: number | null): boolean {
-  if (dismissedAt === null) return false;
-  return Date.now() - dismissedAt < INSTALL_SNOOZE_MS;
-}
 
 interface InstallPromptContextValue {
   shouldShowBanner: boolean;

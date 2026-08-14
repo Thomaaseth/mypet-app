@@ -34,6 +34,10 @@ const fr: TranslationShape<typeof profile> = {
     submitChanging: 'Modification en cours...',
     submitChange: 'Modifier le mot de passe',
   },
+  legal: {
+      title: 'Légal et préférences',
+      description: 'Confidentialité, conditions et préférences de cookies.',
+    },
 };
 
 export default fr;

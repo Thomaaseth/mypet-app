@@ -2,7 +2,7 @@
   "name": "Pettr",
   "short_name": "Pettr",
   "description": "Track your pets' health, food, weight, vets and appointments.",
-  "start_url": "/",
+  "start_url": "/pets",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",

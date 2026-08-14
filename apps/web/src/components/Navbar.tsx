@@ -157,17 +157,18 @@ export const Navbar = () => {
               <DropdownMenuContent align="end" className="w-48">
                 {user ? (
                   <>
-                    {authenticatedNavItems.map((item) => (
-                      <DropdownMenuItem key={item.href} asChild>
-                        <Link
-                          to={item.href}
-                          search={{}}
-                          className={isActivePath(item.href) ? "font-semibold" : ""}
-                        >
-                          {item.label}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
+                    {/* Pets / Vets / Profile now live in the bottom nav on
+                        mobile — burger keeps only what the bottom nav doesn't
+                        cover (Home + Logout). */}
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/"
+                        search={{}}
+                        className={isActivePath('/') ? 'font-semibold' : ''}
+                      >
+                        Home
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={handleLogout}

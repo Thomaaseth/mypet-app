@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { installLogger } from '@/lib/logger';
+import { detectIOS, detectStandalone } from '@/lib/install/detection';
 
 // `beforeinstallprompt` is a non-standard, Chromium-only event and is not part
 // of TypeScript's DOM lib
@@ -15,10 +16,6 @@ declare global {
     appinstalled: Event;
   }
 }
-
-// iOS Safari exposes a non-standard `navigator.standalone` when launched from
-// an installed home-screen icon. Also not in lib.dom
-type SafariNavigator = Navigator & { standalone?: boolean };
 
 export type InstallPlatform = 'chromium' | 'ios' | 'unsupported';
 
@@ -38,22 +35,6 @@ export interface UseInstallPrompt {
   promptInstall: () => Promise<'accepted' | 'dismissed' | null>;
 }
 
-function detectStandalone(): boolean {
-  if (typeof window === 'undefined') return false;
-  const displayModeStandalone = window.matchMedia('(display-mode: standalone)').matches;
-  const iosStandalone = (navigator as SafariNavigator).standalone === true;
-  return displayModeStandalone || iosStandalone;
-}
-
-function detectIOS(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  // iPhone/iPod always report iOS. iPadOS 13+ masquerades as "Macintosh", so a
-  // touch-capable Mac is treated as iOS for install-instruction purposes.
-  const ua = navigator.userAgent;
-  const isIPhoneOrIPod = /iPhone|iPod/.test(ua);
-  const isIPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  return isIPhoneOrIPod || isIPad;
-}
 
 export function useInstallPrompt(): UseInstallPrompt {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);

@@ -22,6 +22,6 @@ export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(sessionQueryOptions)
-    if (user) throw redirect({ to: '/' })
+    if (user) throw redirect({ to: '/pets' })
   },
 });

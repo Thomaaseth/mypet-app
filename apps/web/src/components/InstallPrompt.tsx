@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { X, SquareArrowUp, SquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useInstallPromptContext } from '@/contexts/InstallPromptContext';
@@ -25,7 +25,7 @@ export function InstallPrompt() {
       // home-indicator clearance), so it hovers over the page rather than
       // docking full-width over the footer / language switcher.
       className="fixed inset-x-4 z-50 mx-auto max-w-sm rounded-lg border bg-background px-4 py-3 shadow-lg"
-      style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      style={{ bottom: 'calc(var(--footer-height, 0px))' }}
     >
       {/* Purpose line — shown on every platform so the user knows what this is. */}
       <div className="flex items-start justify-between gap-2">
@@ -47,7 +47,21 @@ export function InstallPrompt() {
         <p className="mt-2 text-sm text-muted-foreground">
           <Trans
             i18nKey="install.banner.iosInstruction"
-            components={{ b: <strong className="font-semibold text-foreground" /> }}
+            components={{
+              b: <strong className="font-semibold text-foreground" />,
+              share: (
+                <SquareArrowUp
+                  className="mx-0.5 inline h-4 w-4 align-text-bottom text-foreground"
+                  aria-hidden="true"
+                />
+              ),
+              add: (
+                <SquarePlus
+                  className="mx-0.5 inline h-4 w-4 align-text-bottom text-foreground"
+                  aria-hidden="true"
+                />
+              ),
+            }}
           />
         </p>
       ) : (
