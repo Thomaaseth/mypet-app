@@ -36,8 +36,6 @@ function RootComponent() {
               {/* AppShell lives inside the providers so it can read the
                   session to gate the (logged-in-only) bottom nav. */}
               <AppShell />
-              <CookieConsentBanner />
-              <InstallPrompt />
               <Toaster position="bottom-right" />
               {/* Only show devtools in development */}
               {/* {import.meta.env.DEV && <TanStackRouterDevtools />} */}
@@ -57,13 +55,15 @@ function AppShell() {
       <NetworkStatusBanner />
       <Navbar />
       <PreferenceBanner />
-      <main className="flex-1 flex flex-col">
+      <main className="min-h-dvh sm:min-h-full flex-1 flex flex-col">
         <Outlet />
       </main>
       {/* Sticky bottom nav — flow sibling right before the footer, so it pins
           to the viewport bottom while scrolling and rests above the footer at
           scroll-end. Logged-in only; md:hidden handles desktop. Mounting here
           (not in _authenticated) is what makes it appear on Home too. */}
+      <CookieConsentBanner />
+      <InstallPrompt />
       {user && <BottomNav />}
       <Footer />
     </div>
