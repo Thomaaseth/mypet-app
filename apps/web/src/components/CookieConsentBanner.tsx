@@ -4,12 +4,10 @@ import { Cookie } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useCookieConsentContext } from '@/contexts/CookieConsentContext';
 
 export function CookieConsentBanner() {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const {
     consent,
     hasConsented,
@@ -38,65 +36,36 @@ export function CookieConsentBanner() {
 
   return (
     <>
-      {/* Only the initial-choice UI is gated on hasConsented — the dialog
+      {/* Only the initial-choice card is gated on hasConsented — the dialog
           below is not, so "Manage preferences" keeps working (e.g. via the
           Footer's persistent link) even long after the banner itself is
           gone. See CookieConsentContext for why this state lives there. */}
-      {!hasConsented &&
-        (isMobile ? (
-          // Mobile: floating card (not a full-bleed bar), with margins and a
-          // gap above the footer so it reads as a distinct card hovering over
-          // the page rather than a second footer glued to the top edge.
-          <div
-            style={{ bottom: 'calc(var(--footer-height, 0px) + 1rem)' }}
-            className="fixed inset-x-4 z-50 mx-auto max-w-sm rounded-lg border bg-background p-4 shadow-lg"
-          >
-            <div className="flex items-start gap-2 text-sm text-foreground mb-3">
-              <Cookie className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>{t('cookies.banner.description')}</span>
-            </div>
+      {!hasConsented && (
+        <div
+          // Floats just above the footer's own measured height (published by
+          // Footer.tsx as --footer-height), rather than the page reserving
+          // padding sized to the card itself.
+          style={{ bottom: 'calc(var(--bottom-nav-height, 0px) + 1rem)' }}
+            className="sticky z-50 ml-4 mx-auto w-[calc(100%-2rem)] max-w-sm rounded-lg border bg-background p-4 shadow-lg"
+        >
+          <div className="flex items-start gap-2 text-sm text-foreground mb-3">
+            <Cookie className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>{t('cookies.banner.description')}</span>
+          </div>
 
-            <div className="flex flex-col gap-2">
-              <Button size="sm" onClick={acceptAll}>
-                {t('cookies.banner.acceptAll')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={rejectNonEssential}>
-                {t('cookies.banner.rejectNonEssential')}
-              </Button>
-            </div>
-
-            <button
-              type="button"
-              onClick={openDialog}
-              className="mt-2 text-xs text-muted-foreground underline underline-offset-2"
-            >
+          <div className="flex flex-col gap-2">
+            <Button size="sm" onClick={acceptAll}>
+              {t('cookies.banner.acceptAll')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={rejectNonEssential}>
+              {t('cookies.banner.rejectNonEssential')}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={openDialog}>
               {t('cookies.banner.managePreferences')}
-            </button>
+            </Button>
           </div>
-        ) : (
-          // Desktop: unobtrusive corner card (unchanged).
-          <div
-            style={{ bottom: 'calc(var(--footer-height, 0px) + 1rem)' }}
-            className="fixed left-4 z-50 w-[calc(100vw-2rem)] max-w-sm rounded-lg border bg-background p-4 shadow-lg"
-          >
-            <div className="flex items-start gap-2 text-sm text-foreground mb-3">
-              <Cookie className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>{t('cookies.banner.description')}</span>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Button size="sm" onClick={acceptAll}>
-                {t('cookies.banner.acceptAll')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={rejectNonEssential}>
-                {t('cookies.banner.rejectNonEssential')}
-              </Button>
-              <Button variant="ghost" size="sm" onClick={openDialog}>
-                {t('cookies.banner.managePreferences')}
-              </Button>
-            </div>
-          </div>
-        ))}
+        </div>
+      )}
 
       <ResponsiveDialog
         open={isPreferencesDialogOpen}
