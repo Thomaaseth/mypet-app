@@ -1,0 +1,1 @@
+export * from '@/shared/validations/anti-parasite-treatment';

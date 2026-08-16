@@ -3,6 +3,7 @@ import type { AppointmentType } from '@/types/appointments';
 import type { DateFormat } from '@/shared/validations/date-format';
 import type { TimeFormat } from '@/shared/validations/time-format';
 import type { UnitSystem } from '@/shared/validations/units';
+import type { AntiParasiteCategory } from '@/lib/validations/anti-parasite-treatment';
 
 /**
  * Maps runtime enum values to their translation keys.
@@ -96,3 +97,28 @@ export const UNIT_SYSTEM_DESCRIPTION_KEYS = {
   metric: 'preferences.unitSystem.metric.description',
   imperial: 'preferences.unitSystem.imperial.description',
 } as const satisfies Record<UnitSystem, string>;
+
+export const ANTI_PARASITE_CATEGORY_KEYS = {
+  fleas_ticks: 'antiParasite.category.fleasTicks',
+  worms: 'antiParasite.category.worms',
+  heartworm: 'antiParasite.category.heartworm',
+} as const satisfies Record<AntiParasiteCategory, string>;
+
+// Keyed by the encoded "unit:amount" dropdown value.
+export const ANTI_PARASITE_DURATION_OPTION_KEYS = {
+  'weeks:4': 'antiParasite.duration.weeks4',
+  'weeks:5': 'antiParasite.duration.weeks5',
+  'weeks:6': 'antiParasite.duration.weeks6',
+  'weeks:7': 'antiParasite.duration.weeks7',
+  'weeks:8': 'antiParasite.duration.weeks8',
+  'months:3': 'antiParasite.duration.months3',
+  'months:4': 'antiParasite.duration.months4',
+  'months:5': 'antiParasite.duration.months5',
+  'months:6': 'antiParasite.duration.months6',
+  'months:7': 'antiParasite.duration.months7',
+  'months:8': 'antiParasite.duration.months8',
+  'months:9': 'antiParasite.duration.months9',
+  'months:10': 'antiParasite.duration.months10',
+  'months:11': 'antiParasite.duration.months11',
+  'months:12': 'antiParasite.duration.months12',
+} as const;

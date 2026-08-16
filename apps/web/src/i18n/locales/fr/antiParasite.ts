@@ -1,0 +1,92 @@
+const antiParasite = {
+  validation: {
+    productNameRequired: 'Le nom du produit est requis',
+    productNameTooLong: 'Le nom du produit ne doit pas dépasser 50 caractères',
+    categoriesRequired: 'Sélectionnez au moins une catégorie',
+    categoriesInvalid: 'Sélection de catégorie invalide',
+    invalidCategory: 'Veuillez sélectionner une catégorie valide',
+    durationRequired: 'Veuillez sélectionner une durée',
+    invalidDurationUnit: 'Veuillez sélectionner une unité de durée valide',
+    durationAmountRequired: 'La durée est requise',
+    durationAmountInvalid: 'Veuillez sélectionner une durée valide',
+    durationCombinationInvalid: 'Veuillez sélectionner une durée valide',
+    durationUnitRequiredForUpdate: "L'unité de durée est requise lors de la mise à jour de la durée",
+    durationAmountRequiredForUpdate: 'La durée est requise lors de la mise à jour de la durée',
+    dateRequired: 'La date est requise',
+    invalidDate: 'Veuillez saisir une date valide',
+  },
+  category: {
+    fleasTicks: 'Puces / Tiques',
+    worms: 'Vers',
+    heartworm: 'Dirofilariose',
+  },
+  duration: {
+    weeks4: '4 semaines',
+    weeks5: '5 semaines',
+    weeks6: '6 semaines',
+    weeks7: '7 semaines',
+    weeks8: '8 semaines',
+    months3: '3 mois',
+    months4: '4 mois',
+    months5: '5 mois',
+    months6: '6 mois',
+    months7: '7 mois',
+    months8: '8 mois',
+    months9: '9 mois',
+    months10: '10 mois',
+    months11: '11 mois',
+    months12: '12 mois',
+  },
+  form: {
+    categoriesLabel: 'Protection contre',
+    productNameLabel: 'Nom du produit',
+    productNamePlaceholder: 'ex. Bravecto, Milbemax',
+    durationLabel: 'Durée',
+    durationPlaceholder: 'Sélectionnez une durée',
+    durationTooltip:
+      'Si la protection contre les puces/tiques est nettement plus courte que celle contre les vers pour ce produit, nous recommandons d’ajouter 2 entrées distinctes.',
+    durationTooltipAria: 'Aide sur la durée',
+    dateLabel: 'Date d’administration',
+    addButton: 'Ajouter un traitement',
+  },
+  subCard: {
+    protectedUntil: 'Protégé jusqu’au {{date}}',
+    notTracked: 'Non suivi',
+    editDialogTitle: 'Modifier le traitement',
+    editDialogDescription:
+      'Mettez à jour ce traitement. Les modifications s’appliquent à toutes les catégories concernées.',
+    editSubmitLabel: 'Mettre à jour',
+    deleteDialogTitle: 'Supprimer le traitement',
+    deleteConfirmation:
+      'Voulez-vous vraiment supprimer « {{product}} » ? Cette action est irréversible.',
+    deleteConfirm: 'Supprimer',
+  },
+  list: {
+    productColumn: 'Produit',
+    categoriesColumn: 'Protection',
+    dateColumn: 'Administré',
+    protectedUntilColumn: 'Protégé jusqu’au',
+    actionsColumn: 'Actions',
+    deleteAria: 'Supprimer {{product}}',
+    deleteDialogTitle: 'Supprimer le traitement',
+    deleteConfirmation:
+      'Voulez-vous vraiment supprimer « {{product}} » ? Cette action est irréversible.',
+    deleteConfirm: 'Supprimer',
+  },
+  tracker: {
+    title: 'Traitement antiparasitaire',
+    addTreatment: 'Ajouter un traitement',
+    history: 'Historique des traitements',
+    entries_one: '{{count}} entrée',
+    entries_other: '{{count}} entrées',
+    emptyTitle: 'Aucun traitement suivi pour le moment',
+    emptyDescription:
+      'Ajoutez votre premier traitement antiparasitaire pour suivre la protection contre les puces, tiques, vers et la dirofilariose.',
+    emptyButtonLabel: 'Ajouter un traitement',
+    addDialogTitle: 'Ajouter un traitement antiparasitaire',
+    addDialogDescription:
+      'Enregistrez un traitement contre les puces/tiques, les vers ou la dirofilariose pour votre animal.',
+  },
+} as const;
+
+export default antiParasite;

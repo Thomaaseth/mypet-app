@@ -13,6 +13,7 @@ import cookies from './cookies';
 import footer from './footer';
 import nav from './nav';
 import install from './install';
+import antiParasite from './antiParasite';
 
 const en = {
   common,
@@ -30,6 +31,7 @@ const en = {
   footer,
   nav,
   install,
+  antiParasite,
 } as const;
 
 export default en;

@@ -8,7 +8,7 @@ import type { WeightTarget } from '@/types/weight-targets';
 import type { Veterinarian } from '@/types/veterinarian';
 import type { AppointmentWithRelations, AppointmentFormData } from '@/types/appointments';
 import { convertFoodWeight } from '@/shared/utils/units';
-
+import type { AntiParasiteTreatment } from '@/types/anti-parasite-treatments';
 
 
 // Get API base URL from environment
@@ -354,6 +354,35 @@ export function resetMockWetFood() {
   activeWetFoodList = [...mockActiveWetFood];
   finishedWetFoodList = [...mockFinishedWetFood];
 }
+
+export const mockAntiParasiteTreatments: AntiParasiteTreatment[] = [
+  {
+    id: 'apt-1',
+    petId: 'pet-1',
+    productName: 'Bravecto',
+    durationUnit: 'months',
+    durationAmount: 3,
+    dateAdministered: '2024-01-15',
+    categories: ['fleas_ticks'],
+    expiryDate: '2024-04-15',
+    isActive: true,
+    createdAt: '2024-01-15T00:00:00.000Z',
+    updatedAt: '2024-01-15T00:00:00.000Z',
+  },
+  {
+    id: 'apt-2',
+    petId: 'pet-1',
+    productName: 'Milbemax',
+    durationUnit: 'months',
+    durationAmount: 1,
+    dateAdministered: '2024-03-10',
+    categories: ['worms', 'heartworm'],
+    expiryDate: '2024-04-10',
+    isActive: true,
+    createdAt: '2024-03-10T00:00:00.000Z',
+    updatedAt: '2024-03-10T00:00:00.000Z',
+  },
+];
 
 /**
  * REQUEST HANDLERS
@@ -1645,6 +1674,74 @@ const appointmentsHandlers = [
   }),
 ];
 
+export const antiParasiteHandlers = [
+// GET /api/pets/:petId/anti-parasite-treatments
+  http.get(`${API_BASE_URL}/api/pets/:petId/anti-parasite-treatments`, ({ params }) => {
+    const { petId } = params;
+    const treatments = mockAntiParasiteTreatments.filter((t) => t.petId === petId);
+    return HttpResponse.json({
+      success: true,
+      data: { antiParasiteTreatments: treatments, total: treatments.length },
+      message: `Retrieved ${treatments.length} anti-parasite treatments`,
+    });
+  }),
+
+  // POST /api/pets/:petId/anti-parasite-treatments
+  http.post(`${API_BASE_URL}/api/pets/:petId/anti-parasite-treatments`, async ({ params, request }) => {
+    const { petId } = params;
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json(
+      {
+        success: true,
+        data: {
+          antiParasiteTreatment: {
+            id: 'apt-new',
+            petId,
+            ...body,
+            expiryDate: '2024-12-31',
+            createdAt: '2024-06-01T00:00:00.000Z',
+            updatedAt: '2024-06-01T00:00:00.000Z',
+          },
+        },
+        message: 'Anti-parasite treatment created successfully',
+      },
+      { status: 201 },
+    );
+  }),
+
+  // PUT /api/pets/:petId/anti-parasite-treatments/:treatmentId
+  http.put(
+    `${API_BASE_URL}/api/pets/:petId/anti-parasite-treatments/:treatmentId`,
+    async ({ params, request }) => {
+      const { petId, treatmentId } = params;
+      const existing = mockAntiParasiteTreatments.find((t) => t.id === treatmentId);
+      if (!existing) {
+        return HttpResponse.json({ success: false, error: 'Anti-parasite treatment not found' }, { status: 404 });
+      }
+      const body = (await request.json()) as Record<string, unknown>;
+      return HttpResponse.json({
+        success: true,
+        data: {
+          antiParasiteTreatment: { ...existing, ...body, petId, updatedAt: '2024-06-02T00:00:00.000Z' },
+        },
+        message: 'Anti-parasite treatment updated successfully',
+      });
+    },
+  ),
+
+  // DELETE /api/pets/:petId/anti-parasite-treatments/:treatmentId
+  http.delete(
+    `${API_BASE_URL}/api/pets/:petId/anti-parasite-treatments/:treatmentId`,
+    ({ params }) => {
+      const { treatmentId } = params;
+      const existing = mockAntiParasiteTreatments.find((t) => t.id === treatmentId);
+      if (!existing) {
+        return HttpResponse.json({ success: false, error: 'Anti-parasite treatment not found' }, { status: 404 });
+      }
+      return HttpResponse.json({ success: true, data: null, message: 'Anti-parasite treatment deleted successfully' });
+    },
+  ),
+]
 
 
 
@@ -1657,6 +1754,7 @@ export const handlers = [
   ...wetFoodHandlers,
   ...veterinariansHandlers,
   ...appointmentsHandlers,
+  ...antiParasiteHandlers,
 ];
 
 

@@ -114,6 +114,14 @@ const fr: TranslationShape<typeof toasts> = {
     saveSuccess: 'Objectif de poids enregistré avec succès',
     deleteSuccess: 'Objectif de poids supprimé avec succès',
   },
+  antiParasite: {
+        addSuccess: 'Traitement ajouté avec succès',
+        addError: "Échec de l'ajout du traitement",
+        updateSuccess: 'Traitement mis à jour avec succès',
+        updateError: 'Échec de la mise à jour du traitement',
+        deleteSuccess: 'Traitement supprimé avec succès',
+        deleteError: 'Échec de la suppression du traitement',
+      },
 };
 
 export default fr;

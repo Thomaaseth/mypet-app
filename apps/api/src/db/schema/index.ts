@@ -8,6 +8,7 @@ export * from './veterinarians';
 export * from './pet-veterinarians';
 export * from './appointments';
 export * from './pet-notes';
+export * from './anti-parasite-treatment';
 export * from './rate-limit';
 export * from './user-preferences';
 export * from './cookie-consent-log';

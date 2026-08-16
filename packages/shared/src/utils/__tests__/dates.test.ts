@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toDateString, diffCalendarDays, addCalendarDays } from '../dates';
+import { toDateString, diffCalendarDays, addCalendarDays, addCalendarMonths } from '../dates';
 
 describe('toDateString', () => {
   it('formats a Date as YYYY-MM-DD', () => {
@@ -95,5 +95,40 @@ describe('addCalendarDays', () => {
     expect(addCalendarDays('2024-11-02', 1)).toBe('2024-11-03');
     expect(addCalendarDays('2024-11-03', 1)).toBe('2024-11-04');
     expect(diffCalendarDays('2024-11-02', '2024-11-04')).toBe(2);
+  });
+});
+
+describe('addCalendarMonths', () => {
+  it('preserves the day when it exists in the target month', () => {
+    expect(addCalendarMonths('2026-03-15', 6)).toBe('2026-09-15');
+    expect(addCalendarMonths('2026-01-10', 1)).toBe('2026-02-10');
+  });
+
+  it('clamps to the last day when the origin day overflows the target month', () => {
+    // Jan 31 + 3mo → Apr has only 30 days (design doc §3 canonical example)
+    expect(addCalendarMonths('2026-01-31', 3)).toBe('2026-04-30');
+    // Jan 31 + 1mo → Feb 2026 (non-leap) has 28 days
+    expect(addCalendarMonths('2026-01-31', 1)).toBe('2026-02-28');
+  });
+
+  it('clamps to Feb 29 in a leap year', () => {
+    expect(addCalendarMonths('2024-01-31', 1)).toBe('2024-02-29');
+  });
+
+  it('rolls over into the next year', () => {
+    expect(addCalendarMonths('2026-11-15', 3)).toBe('2027-02-15');
+    expect(addCalendarMonths('2026-12-01', 1)).toBe('2027-01-01');
+  });
+
+  it('handles the maximum 12-month duration', () => {
+    expect(addCalendarMonths('2026-06-15', 12)).toBe('2027-06-15');
+    // 12 months from a leap-day clamps when the target year is non-leap
+    expect(addCalendarMonths('2024-02-29', 12)).toBe('2025-02-28');
+  });
+
+  it('does not shift the date via timezone (pure string arithmetic)', () => {
+    // A day that would be vulnerable to UTC/local rollover if Date math leaked in
+    expect(addCalendarMonths('2026-07-01', 1)).toBe('2026-08-01');
+    expect(addCalendarMonths('2026-07-31', 1)).toBe('2026-08-31');
   });
 });

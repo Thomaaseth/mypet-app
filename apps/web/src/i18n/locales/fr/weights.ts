@@ -45,7 +45,7 @@ const fr: TranslationShape<typeof weights> = {
     educationAgeActivity: "L'âge et le niveau d'activité",
     educationHealthCondition: 'L\'état de santé général',
     askVetTip: 'Demandez à votre vétérinaire "Quel est un poids sain pour mon animal ?" Puis ajoutez-le dans l\'application.',
-    deleteTarget: 'Supprimer la cible',
+    deleteTarget: 'Supprimer',
     deleteDialogTitle: 'Supprimer la plage cible ?',
     deleteDialogDescription: 'Cela supprimera la plage de poids cible pour {{petName}} du graphique. Vous pourrez toujours la redéfinir plus tard.',
   },

@@ -7,6 +7,7 @@ export * from './validations/password';
 export * from './validations/date-format';
 export * from './validations/time-format';
 export * from './validations/pet-notes';
+export * from './validations/anti-parasite-treatment';
 export * from './utils/units';
 export * from './validations/language';
 export * from './validations/cookie-consent';
