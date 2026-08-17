@@ -1,178 +1,83 @@
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AntiParasiteForm } from './AntiParasiteForm';
+import { Badge } from '@/components/ui/badge';
+import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
 import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { useTranslation } from 'react-i18next';
+import { Calendar, CheckCircle } from 'lucide-react';
 import { ANTI_PARASITE_CATEGORY_KEYS } from '@/i18n/enum-keys';
-import type { AntiParasiteCategory } from '@/lib/validations/anti-parasite-treatment';
-import type {
-  AntiParasiteTreatment,
-  AntiParasiteTreatmentFormData,
-} from '@/types/anti-parasite-treatments';
+import { CATEGORY_BADGE_CLASS } from './categoryBadge';
+import type { AntiParasiteCategoryCard, AntiParasiteStatus } from './antiParasiteStatus';
 
 interface CategoryCardProps {
-  category: AntiParasiteCategory;
-  // The most-recent ACTIVE treatment for this category, or null if none is
-  // currently active (never logged, or the latest one has expired). Derived
-  // by the tracker from the isActive flag.
-  activeTreatment: AntiParasiteTreatment | null;
-  onUpdateTreatment: (
-    treatmentId: string,
-    data: AntiParasiteTreatmentFormData,
-  ) => Promise<AntiParasiteTreatment | null>;
-  onDeleteTreatment: (treatmentId: string) => Promise<boolean>;
-  isLoading?: boolean;
+  card: AntiParasiteCategoryCard;
 }
 
-export function CategoryCard({
-  category,
-  activeTreatment,
-  onUpdateTreatment,
-  onDeleteTreatment,
-  isLoading = false,
-}: CategoryCardProps) {
+const STATUS_LABEL_KEY = {
+  active: 'antiParasite.subCard.statusActive',
+  expiring_soon: 'antiParasite.subCard.statusExpiringSoon',
+  expired: 'antiParasite.subCard.statusExpired',
+} as const satisfies Record<AntiParasiteStatus, string>;
+
+export function CategoryCard({ card }: CategoryCardProps) {
   const { t } = useTranslation();
   const { formatDate } = useDateTimeFormatters();
 
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { status, daysUntilExpiry, governingTreatment, categories } = card;
+  const isExpired = status === 'expired';
 
-  const categoryLabel = t(ANTI_PARASITE_CATEGORY_KEYS[category]);
-  const isTracked = activeTreatment !== null;
-
-  const handleEditSubmit = async (data: AntiParasiteTreatmentFormData) => {
-    if (!activeTreatment) return null;
-    const result = await onUpdateTreatment(activeTreatment.id, data);
-    if (result) {
-      setIsEditDialogOpen(false);
-    }
-    return result;
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!activeTreatment) return;
-    const success = await onDeleteTreatment(activeTreatment.id);
-    if (success) {
-      setIsDeleteDialogOpen(false);
-    }
-  };
+  const countdown = isExpired
+    ? t('antiParasite.subCard.overdue', { count: Math.abs(daysUntilExpiry) })
+    : daysUntilExpiry === 0
+      ? t('antiParasite.subCard.expiresToday')
+      : t('antiParasite.subCard.daysLeft', { count: daysUntilExpiry });
 
   return (
-    <Card className={cn('w-full', !isTracked && 'opacity-60')}>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 space-y-1">
-            <MetricLabel>{categoryLabel}</MetricLabel>
+    <div className={cn('flex gap-3 p-4 bg-muted/75 rounded-lg', isExpired && 'opacity-60')}>
+      {/* Left: status panel */}
+      <div className="flex-1 flex flex-col justify-center text-center">
+      <MetricLabel>
+        {categories.length === 1
+          ? t(ANTI_PARASITE_CATEGORY_KEYS[categories[0]])
+          : t('antiParasite.subCard.treatmentStatus')}
+      </MetricLabel>
+        <MetricValue>{t(STATUS_LABEL_KEY[status])}</MetricValue>
+        <MutedText className={cn(status === 'expiring_soon' && 'text-accent font-medium')}>
+          {countdown}
+        </MutedText>
+      </div>
 
-            {isTracked ? (
-              <>
-                <MetricValue className="truncate">{activeTreatment.productName}</MetricValue>
-                <MutedText className="text-sm">
-                  {t('antiParasite.subCard.protectedUntil', {
-                    date: formatDate(activeTreatment.expiryDate),
-                  })}
-                </MutedText>
-              </>
-            ) : (
-              <MutedText className="text-sm">{t('antiParasite.subCard.notTracked')}</MutedText>
-            )}
+      {/* Right: nested detail card (active/expiring only; expired reserves this
+          space for the future add-treatment CTA) */}
+      {!isExpired && (
+        <div className="flex-1 bg-background rounded-lg p-3 flex flex-col gap-2">
+          <div className="font-display font-semibold">{governingTreatment.productName}</div>
+          <div className="flex flex-wrap gap-1">
+            {governingTreatment.categories.map((cat) => (
+              <Badge
+                key={cat}
+                variant="outline"
+                className={cn('text-xs', CATEGORY_BADGE_CLASS[cat])}
+              >
+                {t(ANTI_PARASITE_CATEGORY_KEYS[cat])}
+              </Badge>
+            ))}
           </div>
-
-          {isTracked && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 w-8 p-0 shrink-0"
-                  disabled={isLoading}
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  {t('common.actions.edit')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t('common.actions.delete')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </CardContent>
-
-      {/* Edit — full form pre-filled with this active treatment (all its
-          categories, not just this card's category) */}
-      <ResponsiveDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        title={t('antiParasite.subCard.editDialogTitle')}
-        description={t('antiParasite.subCard.editDialogDescription')}
-      >
-        {activeTreatment && (
-          <AntiParasiteForm
-            treatment={activeTreatment}
-            onSubmit={handleEditSubmit}
-            onCancel={() => setIsEditDialogOpen(false)}
-            isLoading={isLoading}
-            submitLabel={t('antiParasite.subCard.editSubmitLabel')}
-          />
-        )}
-      </ResponsiveDialog>
-
-      {/* Delete confirmation */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('antiParasite.subCard.deleteDialogTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('antiParasite.subCard.deleteConfirmation', {
-                product: activeTreatment?.productName ?? '',
+          <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3" />
+              {t('antiParasite.subCard.administeredOn', {
+                date: formatDate(governingTreatment.dateAdministered),
               })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>{t('common.actions.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isLoading}
-              className="bg-destructive text-white hover:bg-destructive/90"
-            >
-              {t('antiParasite.subCard.deleteConfirm')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Card>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle className="h-3 w-3" />
+              {t('antiParasite.subCard.protectedUntil', {
+                date: formatDate(governingTreatment.expiryDate),
+              })}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

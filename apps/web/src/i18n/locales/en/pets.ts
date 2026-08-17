@@ -71,7 +71,7 @@ const pets = {
         emptyDescription: 'Add your first pet to start managing...',
         addFirstPet: 'Add Your First Pet',
         addPetDialogTitle: 'Add New Pet',
-        addPetDialogDescription: "Fill out your pet's information below. Only the name is required.",
+        addPetDialogDescription: "Fields marked with * are required.",
         addPet: 'Add Pet',
         pageTitle: 'My Pets',
         managePets_one: 'Manage your {{count}} pet',

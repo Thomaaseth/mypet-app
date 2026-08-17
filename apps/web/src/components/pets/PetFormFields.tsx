@@ -35,7 +35,7 @@ export function PetFormFields({ weightSlot }: PetFormFieldsProps) {
     <>
       {/* Pet Name */}
       <div className="space-y-2">
-        <Label htmlFor="name">{t('pets.form.nameLabel')}</Label>
+        <Label htmlFor="name">{t('pets.form.nameLabel')}*</Label>
         <Input
           id="name"
           placeholder={t('pets.form.namePlaceholder')}
@@ -47,7 +47,7 @@ export function PetFormFields({ weightSlot }: PetFormFieldsProps) {
 
        {/* Animal Type */}
       <div className="space-y-2">
-        <Label>{t('pets.form.animalTypeLabel')}</Label>
+        <Label>{t('pets.form.animalTypeLabel')}*</Label>
         <div className="grid grid-cols-2 gap-2">
           {(['cat', 'dog'] as const).map((type) => (
             <Button
@@ -82,7 +82,7 @@ export function PetFormFields({ weightSlot }: PetFormFieldsProps) {
 
       {/* Gender */}
       <div className="space-y-2">
-        <Label>{t('pets.form.genderLabel')}</Label>
+        <Label>{t('pets.form.genderLabel')}*</Label>
         <div className="grid grid-cols-2 gap-2">
           {(['male', 'female'] as const).map((g) => (
             <Button

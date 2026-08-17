@@ -10,6 +10,13 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -19,18 +26,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Trash2 } from 'lucide-react';
-import type { AntiParasiteTreatment } from '@/types/anti-parasite-treatments';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
+import { AntiParasiteForm } from './AntiParasiteForm';
+import type {
+  AntiParasiteTreatment,
+  AntiParasiteTreatmentFormData,
+} from '@/types/anti-parasite-treatments';
 import { ANTI_PARASITE_CATEGORY_KEYS } from '@/i18n/enum-keys';
 import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { useTranslation } from 'react-i18next';
+import type { AntiParasiteCategory } from '@/lib/validations/anti-parasite-treatment';
+import { cn } from '@/lib/utils';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 
 const PAGE_SIZE = 5;
 
 interface AntiParasiteHistoryListProps {
   treatments: AntiParasiteTreatment[];
+  onUpdateTreatment: (
+    treatmentId: string,
+    data: AntiParasiteTreatmentFormData,
+  ) => Promise<AntiParasiteTreatment | null>;
   onDeleteTreatment: (treatmentId: string) => Promise<boolean>;
   isLoading?: boolean;
   isHistoryOpen: boolean;
@@ -38,11 +57,13 @@ interface AntiParasiteHistoryListProps {
 
 export default function AntiParasiteHistoryList({
   treatments,
+  onUpdateTreatment,
   onDeleteTreatment,
   isLoading = false,
   isHistoryOpen,
 }: AntiParasiteHistoryListProps) {
   const { t } = useTranslation();
+  const [editingTreatment, setEditingTreatment] = useState<AntiParasiteTreatment | null>(null);
   const [deletingTreatment, setDeletingTreatment] = useState<AntiParasiteTreatment | null>(null);
   const { formatDate } = useDateTimeFormatters();
 
@@ -50,6 +71,7 @@ export default function AntiParasiteHistoryList({
   const sortedTreatments = [...treatments].sort(
     (a, b) => new Date(b.dateAdministered).getTime() - new Date(a.dateAdministered).getTime(),
   );
+  const today = getTodayDateString();
 
   const { currentPage, totalPages, paginatedItems, goToNextPage, goToPreviousPage, resetPage } =
     usePagination(sortedTreatments, PAGE_SIZE);
@@ -59,6 +81,16 @@ export default function AntiParasiteHistoryList({
       resetPage();
     }
   }, [isHistoryOpen, resetPage]);
+
+  const handleEditSubmit = async (data: AntiParasiteTreatmentFormData) => {
+    if (!editingTreatment) return null;
+    const result = await onUpdateTreatment(editingTreatment.id, data);
+    if (result) {
+      setEditingTreatment(null);
+    }
+    return result;
+  };
+
   const handleDeleteConfirm = async () => {
     if (!deletingTreatment) return;
     const success = await onDeleteTreatment(deletingTreatment.id);
@@ -67,13 +99,19 @@ export default function AntiParasiteHistoryList({
     }
   };
 
+// Category => solid app-theme color
+const CATEGORY_BADGE_CLASS: Record<AntiParasiteCategory, string> = {
+  fleas_ticks: 'border-accent text-accent',
+  worms: 'border-secondary text-secondary',
+  heartworm: 'border-primary text-primary',
+};
+
   return (
     <>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>{t('antiParasite.list.productColumn')}</TableHead>
-            <TableHead>{t('antiParasite.list.categoriesColumn')}</TableHead>
             <TableHead>{t('antiParasite.list.dateColumn')}</TableHead>
             <TableHead>{t('antiParasite.list.protectedUntilColumn')}</TableHead>
             <TableHead className="text-right">
@@ -84,29 +122,56 @@ export default function AntiParasiteHistoryList({
         <TableBody>
           {paginatedItems.map((treatment) => (
             <TableRow key={treatment.id}>
-              <TableCell className="font-medium">{treatment.productName}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium">
+              <div className="space-y-1.5">
+                <div>{treatment.productName}</div>
                 <div className="flex flex-wrap gap-1">
                   {treatment.categories.map((category) => (
-                    <Badge key={category} variant="secondary" className="text-xs">
+                    <Badge
+                      key={category}
+                      variant="outline"
+                      className={cn('text-xs', CATEGORY_BADGE_CLASS[category])}
+                    >
                       {t(ANTI_PARASITE_CATEGORY_KEYS[category])}
                     </Badge>
                   ))}
                 </div>
-              </TableCell>
+              </div>
+            </TableCell>
               <TableCell>{formatDate(treatment.dateAdministered)}</TableCell>
-              <TableCell className="font-display">{formatDate(treatment.expiryDate)}</TableCell>
+              <TableCell className={cn(treatment.expiryDate < today ? 'text-muted-foreground' : 'font-display')}>
+                {formatDate(treatment.expiryDate)}
+              </TableCell>
               <TableCell className="text-right">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                  disabled={isLoading}
-                  onClick={() => setDeletingTreatment(treatment)}
-                  aria-label={t('antiParasite.list.deleteAria', { product: treatment.productName })}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled={isLoading}
+                      aria-label={t('antiParasite.list.actionsAria', {
+                        product: treatment.productName,
+                      })}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setEditingTreatment(treatment)}>
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      {t('common.actions.edit')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setDeletingTreatment(treatment)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t('common.actions.delete')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
@@ -120,7 +185,25 @@ export default function AntiParasiteHistoryList({
         onNext={goToNextPage}
       />
 
-      <AlertDialog open={!!deletingTreatment} onOpenChange={() => setDeletingTreatment(null)}>
+      {/* Edit — full form pre-filled with the whole treatment */}
+      <ResponsiveDialog
+        open={!!editingTreatment}
+        onOpenChange={(open) => !open && setEditingTreatment(null)}
+        title={t('antiParasite.list.editDialogTitle')}
+        description={t('antiParasite.list.editDialogDescription')}
+      >
+        {editingTreatment && (
+          <AntiParasiteForm
+            treatment={editingTreatment}
+            onSubmit={handleEditSubmit}
+            onCancel={() => setEditingTreatment(null)}
+            isLoading={isLoading}
+            submitLabel={t('antiParasite.list.editSubmitLabel')}
+          />
+        )}
+      </ResponsiveDialog>
+
+      <AlertDialog open={!!deletingTreatment} onOpenChange={(open) => !open && setDeletingTreatment(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('antiParasite.list.deleteDialogTitle')}</AlertDialogTitle>

@@ -163,7 +163,7 @@ export function AntiParasiteForm({
                   const value = encodeDurationOption(option);
                   return (
                     <SelectItem key={value} value={value}>
-                      {t(ANTI_PARASITE_DURATION_OPTION_KEYS[value])}
+                      {t(ANTI_PARASITE_DURATION_OPTION_KEYS[value as keyof typeof ANTI_PARASITE_DURATION_OPTION_KEYS])}
                     </SelectItem>
                   );
                 })}

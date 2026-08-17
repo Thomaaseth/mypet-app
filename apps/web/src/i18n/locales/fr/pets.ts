@@ -74,7 +74,7 @@ const fr: TranslationShape<typeof pets> = {
     emptyDescription: 'Ajoutez votre premier animal pour commencer à le suivre...',
     addFirstPet: 'Ajouter votre premier animal',
     addPetDialogTitle: 'Ajouter un nouvel animal',
-    addPetDialogDescription: 'Renseignez les informations de votre animal ci-dessous. Seul le nom est requis.',
+    addPetDialogDescription: 'Les champs marqués d\'un * sont obligatoires.',
     addPet: 'Ajouter un animal',
     pageTitle: 'My Pets',
     managePets_one: 'Gérez votre {{count}} animal',

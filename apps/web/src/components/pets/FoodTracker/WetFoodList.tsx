@@ -253,7 +253,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
      {/* Edit Dialog */}
      <ResponsiveDialog
         open={!!editingEntry}
-        onOpenChange={() => setEditingEntry(null)}
+        onOpenChange={(open) => !open && setEditingEntry(null)}
         title={t('food.wet.editDialogTitle')}
         description={t('food.wet.editDialogDescription')}
       >
@@ -279,7 +279,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
     )}
 
      {/* Delete Confirmation */}
-     <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
+     <AlertDialog open={!!deletingEntry} onOpenChange={(open) => !open && setDeletingEntry(null)}>
        <AlertDialogContent>
          <AlertDialogHeader>
            <AlertDialogTitle>{t('food.wet.deleteDialogTitle')}</AlertDialogTitle>

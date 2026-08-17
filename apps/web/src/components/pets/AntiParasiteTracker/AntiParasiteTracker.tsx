@@ -16,7 +16,6 @@ import AntiParasiteHistoryList from './AntiParasiteHistoryList';
 import { AntiParasiteTrackerSkeleton } from '@/components/ui/skeletons/AntiParasiteSkeleton';
 import { antiParasiteTreatmentErrorHandler } from '@/lib/api/domains/anti-parasite-treatments';
 import { ANTI_PARASITE_CATEGORIES } from '@/lib/validations/anti-parasite-treatment';
-import type { AntiParasiteCategory } from '@/lib/validations/anti-parasite-treatment';
 import type {
   AntiParasiteTreatment,
   AntiParasiteTreatmentFormData,
@@ -27,12 +26,23 @@ import {
   useUpdateAntiParasiteTreatment,
   useDeleteAntiParasiteTreatment,
 } from '@/queries/anti-parasite-treatments';
+import { deriveCategoryCards } from './antiParasiteStatus';
+import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { MutedText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils'
 
 interface AntiParasiteTrackerProps {
   petId: string;
 }
+
+// Fill the row exactly, no empty trailing cells (mirrors the food supply
+// grid, extended to 3). 
+const GRID_COLS_BY_COUNT: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-3',
+};
 
 export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
   const { t } = useTranslation();
@@ -48,20 +58,8 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
   const isActionLoading =
     createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
-  // The current active treatment for a category = the newest entry that
-  // covers it AND is still active (server-computed isActive). The list is
-  // newest-first, so the first match wins. null → "Not tracked".
-  const deriveActiveTreatment = (
-    category: AntiParasiteCategory,
-  ): AntiParasiteTreatment | null => {
-    if (!treatments) return null;
-    return (
-      treatments.find((tr) => tr.isActive && tr.categories.includes(category)) ?? null
-    );
-  };
-
-  // Shared mutation handlers — passed to sub-cards (edit/delete their active
-  // treatment) and the history list (delete). One create/update/delete path.
+  // Shared mutation handlers. Create => add dialog. Update/delete => history list
+  // (the sub-cards are read-only; editing/deleting lives in history).
   const handleCreate = async (
     data: AntiParasiteTreatmentFormData,
   ): Promise<AntiParasiteTreatment | null> => {
@@ -122,6 +120,8 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
 
   const allTreatments = treatments ?? [];
   const hasAnyTreatments = allTreatments.length > 0;
+  const today = getTodayDateString();
+  const categoryCards = deriveCategoryCards(allTreatments, today, ANTI_PARASITE_CATEGORIES);
 
   return (
     <Card>
@@ -159,20 +159,14 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
           />
         ) : (
           <>
-            {/* 3 sub-cards — one per category, each showing its active
-                treatment or "Not tracked" */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {ANTI_PARASITE_CATEGORIES.map((category) => (
-                <CategoryCard
-                  key={category}
-                  category={category}
-                  activeTreatment={deriveActiveTreatment(category)}
-                  onUpdateTreatment={handleUpdate}
-                  onDeleteTreatment={handleDelete}
-                  isLoading={isActionLoading}
-                />
-              ))}
-            </div>
+            {/* One card per category that has ever been treated (furthest-expiry
+              governing treatment), showing live status + countdown. Categories never
+              treated show no card. */}
+          <div className={cn('grid gap-3', GRID_COLS_BY_COUNT[categoryCards.length] ?? 'grid-cols-1 sm:grid-cols-3')}>
+            {categoryCards.map((card) => (
+              <CategoryCard key={card.governingTreatment.id} card={card} />
+            ))}
+          </div>
 
             {/* Unified history — all entries, newest first */}
             <Card>
@@ -203,6 +197,7 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
                   <CardContent className="pt-0">
                     <AntiParasiteHistoryList
                       treatments={allTreatments}
+                      onUpdateTreatment={handleUpdate}
                       onDeleteTreatment={handleDelete}
                       isLoading={isActionLoading}
                       isHistoryOpen={isHistoryOpen}
