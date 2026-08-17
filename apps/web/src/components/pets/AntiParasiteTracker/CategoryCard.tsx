@@ -32,9 +32,9 @@ export function CategoryCard({ card }: CategoryCardProps) {
       : t('antiParasite.subCard.daysLeft', { count: daysUntilExpiry });
 
   return (
-    <div className={cn('flex gap-3 p-4 bg-muted/75 rounded-lg', isExpired && 'opacity-60')}>
+    <div className={cn('flex gap-3 p-4 bg-muted/75 rounded-lg min-w-0', isExpired && 'opacity-60')}>
       {/* Left: status panel */}
-      <div className="flex-1 flex flex-col justify-center text-center">
+      <div className="flex-1 min-w-0 flex flex-col justify-center text-center">
       <MetricLabel>
         {categories.length === 1
           ? t(ANTI_PARASITE_CATEGORY_KEYS[categories[0]])
@@ -49,7 +49,7 @@ export function CategoryCard({ card }: CategoryCardProps) {
       {/* Right: nested detail card (active/expiring only; expired reserves this
           space for the future add-treatment CTA) */}
       {!isExpired && (
-        <div className="flex-1 bg-background rounded-lg p-3 flex flex-col gap-2">
+        <div className="flex-1 min-w-0 bg-background rounded-lg p-3 flex flex-col gap-2">
           <div className="font-display font-semibold">{governingTreatment.productName}</div>
           <div className="flex flex-wrap gap-1">
             {governingTreatment.categories.map((cat) => (
@@ -64,13 +64,13 @@ export function CategoryCard({ card }: CategoryCardProps) {
           </div>
           <div className="flex flex-col gap-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <Calendar className="h-3 w-3" />
+              <Calendar className="h-3 w-3 shrink-0" />
               {t('antiParasite.subCard.administeredOn', {
                 date: formatDate(governingTreatment.dateAdministered),
               })}
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3" />
+              <CheckCircle className="h-3 w-3 shrink-0" />
               {t('antiParasite.subCard.protectedUntil', {
                 date: formatDate(governingTreatment.expiryDate),
               })}

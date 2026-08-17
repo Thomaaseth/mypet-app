@@ -41,7 +41,7 @@ interface AntiParasiteTrackerProps {
 const GRID_COLS_BY_COUNT: Record<number, string> = {
   1: 'grid-cols-1',
   2: 'grid-cols-1 sm:grid-cols-2',
-  3: 'grid-cols-1 sm:grid-cols-3',
+  3: 'grid-cols-1 xl:grid-cols-3',
 };
 
 export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
