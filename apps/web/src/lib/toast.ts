@@ -89,6 +89,15 @@ auth: {
         t('toasts.auth.passwordResetSuccessDescription')
         ),
   },
+  app: {
+    updateAvailable: (t: TFunction, onReload: () => void) =>
+      toast(t('toasts.app.updateAvailableTitle'), {
+        description: t('toasts.app.updateAvailableDescription'),
+        duration: Infinity, // sticky until acted on
+        id: 'app-update',   // dedup: never stacks across focus events
+        action: { label: t('toasts.app.reload'), onClick: onReload },
+    }),
+  },
 }
 
 export { toast };

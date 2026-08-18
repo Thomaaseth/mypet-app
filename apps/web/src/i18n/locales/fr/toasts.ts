@@ -122,6 +122,11 @@ const fr: TranslationShape<typeof toasts> = {
         deleteSuccess: 'Traitement supprimé avec succès',
         deleteError: 'Échec de la suppression du traitement',
       },
+  app: {
+    updateAvailableTitle: 'Nouvelle version disponible',
+    updateAvailableDescription: "Rechargez l'app pour obtenir la dernière version de Pettr.",
+    reload: 'Recharger',
+  },
 };
 
 export default fr;

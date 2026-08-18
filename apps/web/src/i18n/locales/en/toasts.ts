@@ -119,6 +119,11 @@ const toasts = {
         deleteSuccess: 'Treatment deleted successfully',
         deleteError: 'Failed to delete treatment',
       },
+    app: {
+      updateAvailableTitle: 'New version available',
+      updateAvailableDescription: 'Reload to get the latest version of Pettr.',
+      reload: 'Reload',
+    },
   } as const;
   
   export default toasts;
