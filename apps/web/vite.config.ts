@@ -4,6 +4,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import type { Plugin } from 'vite'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -33,7 +34,16 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
-    emitVersionJson()
+    emitVersionJson(),
+    ...(process.env.ANALYZE
+    ? [visualizer({
+          filename: 'dist/stats.json',
+          template: 'raw-data',
+          gzipSize: true,
+          brotliSize: true,
+          open: false,
+        })]
+      : []),
   ],
   resolve: {
     alias: {

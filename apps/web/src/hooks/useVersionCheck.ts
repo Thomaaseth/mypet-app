@@ -25,5 +25,3 @@ export function useVersionCheck() {
     return () => { cancelled = true; document.removeEventListener('visibilitychange', onVisible) }
   }, [t])
 }
-
-// For testing
