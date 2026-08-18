@@ -52,6 +52,7 @@ interface WetFoodListProps {
   entries: WetFoodEntry[];
   finishedEntries: WetFoodEntry[];
   onUpdate: (foodId: string, data: Partial<WetFoodFormData>) => Promise<WetFoodEntry | null>;
+  onRenew?: (entry: WetFoodEntry) => void;  
   onDelete: (foodId: string) => Promise<boolean>;
   onMarkAsFinished: (foodId: string) => Promise<boolean>;
   onUpdateFinishDate: (foodId: string, dateFinished: string) => Promise<WetFoodEntry | null>;
@@ -64,6 +65,7 @@ export function WetFoodList({
   onDelete, 
   onMarkAsFinished,
   onUpdateFinishDate,
+  onRenew,
   isLoading = false 
 }: WetFoodListProps) {
   const { t } = useTranslation();
@@ -246,6 +248,7 @@ if (validActiveEntries.length === 0 && finishedEntries.length === 0) {
          foodType="wet"
          onEditFinishDate={onUpdateFinishDate}
          onDelete={onDelete}
+         onRenew={onRenew}
        />
       </div>
      )}

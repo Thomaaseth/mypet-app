@@ -6,13 +6,31 @@ import { convertFoodWeight, formatWeight } from '@/lib/validations/pet';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 
+
+// Single source of truth for mapping a stored entry onto form fields.
+// Reused by edit, renew, and resetWithDryFoodEntry.
+function dryFoodEntryToFormValues(
+  entry: DryFoodEntry,
+  bagWeightUnit: DryFoodFormData['bagWeightUnit'],
+): DryFoodFormData {
+  return {
+    brandName: entry.brandName ?? undefined,
+    productName: entry.productName ?? undefined,
+    bagWeight: formatWeight(convertFoodWeight(parseFloat(entry.bagWeight), 'grams', bagWeightUnit)),
+    bagWeightUnit,
+    dailyAmount: formatWeight(parseFloat(entry.dailyAmount)),
+    dateStarted: entry.dateStarted,
+  };
+}
+
 interface UseDryFoodFormOptions {
   dryFoodEntry?: DryFoodEntry;
+  renewFrom?: DryFoodEntry;
   defaultValues?: Partial<DryFoodFormData>;
 }
 
 export function useDryFoodForm(options: UseDryFoodFormOptions = {}) {
-  const { dryFoodEntry, defaultValues } = options;
+  const { dryFoodEntry, renewFrom, defaultValues } = options;
   const { units } = usePreferencesContext();
   const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
 
@@ -20,15 +38,12 @@ export function useDryFoodForm(options: UseDryFoodFormOptions = {}) {
 
   const getInitialValues = (): DryFoodFormData => {
     if (dryFoodEntry) {
+      return dryFoodEntryToFormValues(dryFoodEntry, bagWeightUnit);
+    }
 
-      return {
-        brandName: dryFoodEntry.brandName ?? undefined,
-        productName: dryFoodEntry.productName ?? undefined,
-        bagWeight: formatWeight(convertFoodWeight(parseFloat(dryFoodEntry.bagWeight), 'grams', bagWeightUnit)),
-        bagWeightUnit,
-        dailyAmount: formatWeight(parseFloat(dryFoodEntry.dailyAmount)),
-        dateStarted: dryFoodEntry.dateStarted,
-      };
+    if (renewFrom) {
+      // Renew: prefill like edit, blank the date (create mode).
+      return { ...dryFoodEntryToFormValues(renewFrom, bagWeightUnit), dateStarted: '' };
     }
 
     return {
@@ -47,14 +62,7 @@ export function useDryFoodForm(options: UseDryFoodFormOptions = {}) {
   });
 
   const resetWithDryFoodEntry = (newDryFoodEntry: DryFoodEntry) => {
-    form.reset({
-      brandName: newDryFoodEntry.brandName ?? undefined,
-      productName: newDryFoodEntry.productName ?? undefined,
-      bagWeight: formatWeight(convertFoodWeight(parseFloat(newDryFoodEntry.bagWeight), 'grams', bagWeightUnit)),
-      bagWeightUnit,
-      dailyAmount: formatWeight(parseFloat(newDryFoodEntry.dailyAmount)),
-      dateStarted: newDryFoodEntry.dateStarted,
-    });
+    form.reset(dryFoodEntryToFormValues(newDryFoodEntry, bagWeightUnit));
   };
 
   const resetToEmpty = () => {

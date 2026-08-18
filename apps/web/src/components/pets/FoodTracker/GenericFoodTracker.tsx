@@ -37,6 +37,7 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
   
   // Component dependencies (injected by specific tracker)
   FormComponent: React.ComponentType<{
+    renewFrom?: TEntry;
     onSubmit: (data: TFormData) => Promise<TEntry | null>;
     onCancel?: () => void;
     isLoading?: boolean;
@@ -48,6 +49,7 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
     onDelete: (foodId: string) => Promise<boolean>;
     onMarkAsFinished: (foodId: string) => Promise<boolean>;
     onUpdateFinishDate: (foodId: string, dateFinished: string) => Promise<TEntry | null>;  // ADD THIS
+    onRenew?: (entry: TEntry) => void;
     isLoading?: boolean;
   }>;
   
@@ -60,6 +62,8 @@ interface GenericFoodTrackerProps<TEntry, TFormData> {
     emptyTitle: string;
     emptyDescription: string;
     emptyButtonText: string;
+    renewDialogTitle: string;
+    renewDialogDescription: string;
   };
 }
 
@@ -76,6 +80,7 @@ export function GenericFoodTracker<TEntry, TFormData>({
   const { isLoading: isActionLoading, executeAction } = useErrorState();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [renewSource, setRenewSource] = useState<TEntry | null>(null);
 
   const {
     activeFoodEntries,
@@ -118,6 +123,18 @@ export function GenericFoodTracker<TEntry, TFormData>({
     return result;
   };
 
+  // Renew = create a new entry seeded from a finished one; closes the renew dialog.
+  const handleRenewEntry = async (data: TFormData) => {
+    setIsCreating(true);
+    const result = await executeAction(async () => {
+      const created = await createFoodEntry(data);
+      if (created) setRenewSource(null);
+      return created;
+    }, foodErrorHandler);
+    setIsCreating(false);
+    return result;
+  };
+
   const handleUpdateEntry = async (foodId: string, data: Partial<TFormData>) => {
     return executeAction(async () => {
       const result = await updateFoodEntry(foodId, data);
@@ -144,6 +161,24 @@ export function GenericFoodTracker<TEntry, TFormData>({
     }, foodErrorHandler);
     return result || false;
   };
+
+  const renewDialog = (
+    <ResponsiveDialog
+      open={!!renewSource}
+      onOpenChange={(open) => !open && setRenewSource(null)}
+      title={labels.renewDialogTitle}
+      description={labels.renewDialogDescription}
+    >
+      {renewSource && (
+        <FormComponent
+          renewFrom={renewSource}
+          onSubmit={handleRenewEntry}
+          onCancel={() => setRenewSource(null)}
+          isLoading={isCreating}
+        />
+      )}
+    </ResponsiveDialog>
+  );
 
 // Initial loading state - show appropriate skeleton based on what we expect
 if (isLoading) {
@@ -209,9 +244,11 @@ if (!hasActiveEntries) {
           onDelete={handleDeleteEntry}
           onUpdateFinishDate={updateFinishDate}
           onMarkAsFinished={handleMarkAsFinished}
+          onRenew={setRenewSource}
           isLoading={isActionLoading}
         />
       )}
+      {renewDialog}
     </div>
   );
 }
@@ -272,8 +309,10 @@ return (
       onDelete={handleDeleteEntry}
       onUpdateFinishDate={updateFinishDate}
       onMarkAsFinished={handleMarkAsFinished}
+      onRenew={setRenewSource}
       isLoading={isActionLoading}
     />
+    {renewDialog} 
   </div>
 );
 }

@@ -38,6 +38,7 @@ import type { AntiParasiteTreatment, AntiParasiteTreatmentFormData } from '@/typ
 
 interface AntiParasiteFormProps {
   treatment?: AntiParasiteTreatment;
+  renewFrom?: AntiParasiteTreatment;
   onSubmit: (data: AntiParasiteTreatmentFormData) => Promise<AntiParasiteTreatment | null>;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -46,6 +47,7 @@ interface AntiParasiteFormProps {
 
 export function AntiParasiteForm({
   treatment,
+  renewFrom,
   onSubmit,
   onCancel,
   isLoading = false,
@@ -57,7 +59,7 @@ export function AntiParasiteForm({
     handleSubmit,
     control,
     formState: { errors },
-  } = useAntiParasiteForm({ treatment });
+  } = useAntiParasiteForm({ treatment, renewFrom });
 
   // Split the single dropdown string back into the two API fields at the
   // submit boundary (decode is guaranteed non-null here: the form schema

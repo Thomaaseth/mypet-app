@@ -12,6 +12,7 @@ const common = {
       submit: 'Submit',
       loading: 'Loading...',
       tryAgain: 'Try Again',
+      renew: 'Renew',
     },
     errors: {
       generic: 'Something went wrong. Please try again.',

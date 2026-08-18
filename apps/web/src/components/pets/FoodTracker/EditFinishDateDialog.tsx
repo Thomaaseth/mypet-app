@@ -8,6 +8,7 @@ import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useTranslation } from 'react-i18next';
+import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 
 interface EditFinishDateDialogProps {
   entry: DryFoodEntry | WetFoodEntry;
@@ -21,9 +22,12 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
   const [dateFinished, setDateFinished] = useState(entry.dateFinished || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { formatDate } = useDateTimeFormatters();
 
   const minDate = entry.dateStarted;
   const maxDate = getTodayDateString();
+  // Display-only strings for the helper text
+  const minDateDisplay = formatDate(minDate, { year: 'numeric', month: 'long', day: 'numeric' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +85,12 @@ export function EditFinishDateDialog({ entry, isOpen, onClose, onUpdate }: EditF
             minDate={minDate}
             maxDate={maxDate}
           />
-          <HelperText>{t('food.editFinishDate.betweenDates', { minDate, maxDate })}</HelperText>
+          <HelperText>
+            {t('food.editFinishDate.betweenDates', {
+              minDate: minDateDisplay,
+              maxDate: t('food.editFinishDate.today'),
+            })}
+          </HelperText>        
         </div>
         {error && <ErrorText>{error}</ErrorText>}
         <div className="flex justify-end gap-3 pt-2">

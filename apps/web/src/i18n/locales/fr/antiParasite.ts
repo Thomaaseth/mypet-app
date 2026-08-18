@@ -90,6 +90,9 @@ const antiParasite = {
     addDialogTitle: 'Ajouter un traitement antiparasitaire',
     addDialogDescription:
       'Enregistrez un traitement contre les puces/tiques, les vers ou la dirofilariose pour votre animal.',
+    renewDialogTitle: 'Renouveler le traitement',
+    renewDialogDescription:
+      'Renouvelez ce traitement ; indiquez simplement la nouvelle date.',
   },
 } as const;
 

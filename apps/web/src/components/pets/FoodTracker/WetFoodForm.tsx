@@ -15,6 +15,7 @@ import type { TranslationKey } from '@/i18n/translation-key';
 
 interface WetFoodFormProps {
   wetFoodEntry?: WetFoodEntry; // If provided, we're editing
+  renewFrom?: WetFoodEntry;
   onSubmit: (data: WetFoodFormData) => Promise<WetFoodEntry | null>;
   onCancel?: () => void,
   isLoading?: boolean;
@@ -23,6 +24,7 @@ interface WetFoodFormProps {
 
 export function WetFoodForm({ 
   wetFoodEntry,
+  renewFrom,
   onSubmit, 
   onCancel,
   isLoading = false,
@@ -37,7 +39,7 @@ export function WetFoodForm({
     watch,
     formState: { errors },
     control,
-  } = useWetFoodForm({ wetFoodEntry });
+  } = useWetFoodForm({ wetFoodEntry, renewFrom });
 
   const onFormSubmit = async (data: WetFoodFormData) => {
     await onSubmit(data);

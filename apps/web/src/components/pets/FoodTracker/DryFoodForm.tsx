@@ -14,6 +14,7 @@ import type { TranslationKey } from '@/i18n/translation-key';
 
 interface DryFoodFormProps {
   dryFoodEntry?: DryFoodEntry;
+  renewFrom?: DryFoodEntry;
   onSubmit: (data: DryFoodFormData) => Promise<DryFoodEntry | null>;
   onCancel?: () => void,
   isLoading?: boolean;
@@ -22,6 +23,7 @@ interface DryFoodFormProps {
 
 export function DryFoodForm({ 
   dryFoodEntry,
+  renewFrom,
   onSubmit, 
   onCancel,
   isLoading = false,
@@ -35,7 +37,7 @@ export function DryFoodForm({
     handleSubmit,
     formState: { errors },
     control,
-  } = useDryFoodForm({ dryFoodEntry });
+  } = useDryFoodForm({ dryFoodEntry, renewFrom });
   
   const onFormSubmit = async (data: DryFoodFormData) => {
     await onSubmit(data);

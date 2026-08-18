@@ -6,13 +6,29 @@ import { convertFoodWeight, formatWeight } from '@/lib/validations/pet';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 
+function wetFoodEntryToFormValues(
+  entry: WetFoodEntry,
+  wetFoodUnit: WetFoodFormData['wetFoodUnit'],
+): WetFoodFormData {
+  return {
+    brandName: entry.brandName ?? undefined,
+    productName: entry.productName ?? undefined,
+    numberOfUnits: entry.numberOfUnits.toString(),
+    weightPerUnit: formatWeight(convertFoodWeight(parseFloat(entry.weightPerUnit), 'grams', wetFoodUnit)),
+    wetFoodUnit,
+    dailyAmount: formatWeight(convertFoodWeight(parseFloat(entry.dailyAmount), 'grams', wetFoodUnit)),
+    dateStarted: entry.dateStarted,
+  };
+}
+
 interface UseWetFoodFormOptions {
   wetFoodEntry?: WetFoodEntry;
+  renewFrom?: WetFoodEntry;
   defaultValues?: Partial<WetFoodFormData>;
 }
 
 export function useWetFoodForm(options: UseWetFoodFormOptions = {}) {
-  const { wetFoodEntry, defaultValues } = options;
+  const { wetFoodEntry, renewFrom, defaultValues } = options;
   const { units } = usePreferencesContext();
   const wetFoodUnit = units?.wetFoodUnit ?? 'grams';
 
@@ -20,17 +36,10 @@ export function useWetFoodForm(options: UseWetFoodFormOptions = {}) {
 
   const getInitialValues = (): WetFoodFormData => {
     if (wetFoodEntry) {
-      // weightPerUnit and dailyAmount are both stored in grams
-      // both need converting to display unit for editing
-      return {
-        brandName: wetFoodEntry.brandName ?? undefined,
-        productName: wetFoodEntry.productName ?? undefined,
-        numberOfUnits: wetFoodEntry.numberOfUnits.toString(),
-        weightPerUnit: formatWeight(convertFoodWeight(parseFloat(wetFoodEntry.weightPerUnit), 'grams', wetFoodUnit)),
-        wetFoodUnit,
-        dailyAmount: formatWeight(convertFoodWeight(parseFloat(wetFoodEntry.dailyAmount), 'grams', wetFoodUnit)),
-        dateStarted: wetFoodEntry.dateStarted,
-      };
+      return wetFoodEntryToFormValues(wetFoodEntry, wetFoodUnit);
+    }
+    if (renewFrom) {
+      return { ...wetFoodEntryToFormValues(renewFrom, wetFoodUnit), dateStarted: '' };
     }
 
     return {
@@ -50,15 +59,7 @@ export function useWetFoodForm(options: UseWetFoodFormOptions = {}) {
   });
 
   const resetWithWetFoodEntry = (newWetFoodEntry: WetFoodEntry) => {
-    form.reset({
-      brandName: newWetFoodEntry.brandName ?? undefined,
-      productName: newWetFoodEntry.productName ?? undefined,
-      numberOfUnits: newWetFoodEntry.numberOfUnits.toString(),
-      weightPerUnit: formatWeight(convertFoodWeight(parseFloat(newWetFoodEntry.weightPerUnit), 'grams', wetFoodUnit)),
-      wetFoodUnit,
-      dailyAmount: formatWeight(convertFoodWeight(parseFloat(newWetFoodEntry.dailyAmount), 'grams', wetFoodUnit)),
-      dateStarted: newWetFoodEntry.dateStarted,
-    });
+    form.reset(wetFoodEntryToFormValues(newWetFoodEntry, wetFoodUnit));
   };
 
   const resetToEmpty = () => {
