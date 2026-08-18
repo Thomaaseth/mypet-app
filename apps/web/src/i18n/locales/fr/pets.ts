@@ -77,7 +77,7 @@ const fr: TranslationShape<typeof pets> = {
     addPetDialogDescription: 'Les champs marqués d\'un * sont obligatoires.',
     addPet: 'Ajouter un animal',
     pageTitle: 'My Pets',
-    managePets_one: 'Gérez votre {{count}} animal',
+    managePets_one: 'Gérez votre animal',
     managePets_other: 'Gérez vos {{count}} animaux',
     comingSoonTitle: 'Bientôt disponible...',
     comingSoonDescription: 'Suivi des symptômes, suivi des médicaments et bien plus à venir !',

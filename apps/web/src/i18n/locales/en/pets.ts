@@ -74,7 +74,7 @@ const pets = {
         addPetDialogDescription: "Fields marked with * are required.",
         addPet: 'Add Pet',
         pageTitle: 'My Pets',
-        managePets_one: 'Manage your {{count}} pet',
+        managePets_one: 'Manage your pet',
         managePets_other: 'Manage your {{count}} pets',
         comingSoonTitle: 'More coming soon...',
         comingSoonDescription: 'Symptoms tracker, medicine tracker and more coming soon!',

@@ -45,15 +45,6 @@ export function FoodHistorySection({
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | WetFoodEntry | null>(null);
 
-  const handleDelete = async () => {
-    if (!deletingEntry) return;
-
-    const success = await onDelete(deletingEntry.id);
-    if (success) {
-      setDeletingEntry(null);
-    }
-  };
-
   const handleOpenChange = (open: boolean) => {
     if (!open) resetPage();
     setIsExpanded(open);

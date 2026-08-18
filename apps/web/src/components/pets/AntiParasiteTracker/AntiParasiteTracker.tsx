@@ -155,7 +155,6 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
             description={t('antiParasite.tracker.emptyDescription')}
             buttonLabel={t('antiParasite.tracker.emptyButtonLabel')}
             onAction={() => setIsAddDialogOpen(true)}
-            withCard={false}
           />
         ) : (
           <>

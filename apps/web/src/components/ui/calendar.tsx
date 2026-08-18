@@ -9,9 +9,72 @@ import {
   getDefaultClassNames,
   type DayButton,
 } from "react-day-picker"
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+
+// Props react-day-picker passes to a custom `Dropdown` (month / year navigation).
+// Derived from the public DayPicker API rather than RDP internals, which don't
+// export DropdownProps from the package root.
+type CalendarDropdownProps = React.ComponentProps<
+  NonNullable<
+    NonNullable<React.ComponentProps<typeof DayPicker>["components"]>["Dropdown"]
+  >
+>
+
+// RDP types the dropdown's onChange as a native <select> change handler and reads
+// only `event.target.value` (see react-day-picker DayPicker.js). shadcn Select emits
+// a bare string, so we forward a minimal event carrying just that field. Asserted
+// (not `any`) because we deliberately don't construct a full DOM ChangeEvent.
+function emitSelectChange(
+  onChange: CalendarDropdownProps["onChange"],
+  value: string
+) {
+  onChange?.({
+    target: { value },
+  } as unknown as React.ChangeEvent<HTMLSelectElement>)
+}
+
+// Replaces RDP's native <select> month/year dropdowns with the shadcn Select.
+// SelectContent portals to <body>, escaping the Popover's transformed wrapper —
+// which is what breaks native selects inside a Radix Popover on mobile/iOS.
+function CalendarDropdown({
+  options,
+  value,
+  onChange,
+  disabled,
+}: CalendarDropdownProps) {
+  const selected = options?.find((option) => option.value === Number(value))
+
+  return (
+    <Select
+      value={value?.toString()}
+      onValueChange={(newValue) => emitSelectChange(onChange, newValue)}
+      disabled={disabled}
+    >
+      <SelectTrigger size="sm" className="h-7 w-fit gap-1 border-input px-2 font-medium">
+        <SelectValue>{selected?.label}</SelectValue>
+      </SelectTrigger>
+      <SelectContent className="max-h-60">
+        {options?.map((option) => (
+          <SelectItem
+            key={option.value}
+            value={option.value.toString()}
+            disabled={option.disabled}
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
 
 function Calendar({
   className,
@@ -161,6 +224,7 @@ function Calendar({
           )
         },
         DayButton: CalendarDayButton,
+        Dropdown: CalendarDropdown,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
