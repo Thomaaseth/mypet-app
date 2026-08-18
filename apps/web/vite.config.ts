@@ -34,16 +34,7 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
-    emitVersionJson(),
-    ...(process.env.ANALYZE
-    ? [visualizer({
-          filename: 'dist/stats.json',
-          template: 'raw-data',
-          gzipSize: true,
-          brotliSize: true,
-          open: false,
-        })]
-      : []),
+    emitVersionJson()
   ],
   resolve: {
     alias: {
