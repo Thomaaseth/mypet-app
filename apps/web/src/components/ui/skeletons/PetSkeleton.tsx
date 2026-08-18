@@ -3,6 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { WeightTrackerSkeleton } from './WeightSkeleton';
 import { FoodTrackerSkeleton } from './FoodSkeleton';
 import { NotesWidgetSkeleton } from './NotesSkeleton';
+import { AntiParasiteTrackerSkeleton } from './AntiParasiteSkeleton';
 
 export function PetCardSkeleton() {
   return (
@@ -68,6 +69,7 @@ export function PetListSkeleton() {
               <WeightTrackerSkeleton />
               <FoodTrackerSkeleton />
             </div>
+            <AntiParasiteTrackerSkeleton />
             <NotesWidgetSkeleton />
             <Card>
               <CardHeader>

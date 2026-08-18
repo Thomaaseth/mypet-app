@@ -17,21 +17,32 @@ export function AntiParasiteTrackerSkeleton() {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* 3 sub-cards — one per category, matching the real grid layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="w-full">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 space-y-2">
-                    <Skeleton className="h-3 w-20" />
-                    <Skeleton className="h-5 w-24" />
-                    <Skeleton className="h-3 w-28" />
-                  </div>
-                  <Skeleton className="h-8 w-8 shrink-0" />
+        {/* Sub-cards — one per treated category. Mirrors CategoryCard's two-panel
+            layout (centered status panel + nested detail card) and the real grid
+            for a 2-card state (GRID_COLS_BY_COUNT[2]). */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="flex gap-3 p-4 bg-muted/75 rounded-lg">
+              {/* Left: status panel */}
+              <div className="flex-1 min-w-0 flex flex-col items-center justify-center gap-2 text-center">
+                <Skeleton className="h-3 w-20" /> {/* MetricLabel */}
+                <Skeleton className="h-6 w-24" /> {/* MetricValue (status) */}
+                <Skeleton className="h-3 w-16" /> {/* countdown */}
+              </div>
+
+              {/* Right: nested detail card */}
+              <div className="flex-1 min-w-0 bg-background rounded-lg p-3 flex flex-col gap-2">
+                <Skeleton className="h-5 w-28" /> {/* product name */}
+                <div className="flex flex-wrap gap-1">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex flex-col gap-1.5">
+                  <Skeleton className="h-3 w-32" /> {/* administered on */}
+                  <Skeleton className="h-3 w-28" /> {/* protected until */}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
