@@ -121,7 +121,23 @@ export type ValidationMessageKey =
   | 'appointments.validation.timeRequired'
   | 'appointments.validation.typeRequired'
   | 'appointments.validation.vetRequired'
-  | 'appointments.validation.visitNotesTooLong';
+  | 'appointments.validation.visitNotesTooLong'
+  // antiParasite.validation.*
+  | 'antiParasite.validation.categoriesInvalid'
+  | 'antiParasite.validation.categoriesRequired'
+  | 'antiParasite.validation.dateRequired'
+  | 'antiParasite.validation.durationAmountInvalid'
+  | 'antiParasite.validation.durationAmountRequired'
+  | 'antiParasite.validation.durationAmountRequiredForUpdate'
+  | 'antiParasite.validation.durationCombinationInvalid'
+  | 'antiParasite.validation.durationUnitRequiredForUpdate'
+  | 'antiParasite.validation.invalidCategory'
+  | 'antiParasite.validation.invalidDate'
+  | 'antiParasite.validation.invalidDurationUnit'
+  | 'antiParasite.validation.productNameRequired'
+  | 'antiParasite.validation.productNameTooLong'
+  | 'antiParasite.validation.durationRequired';
+ 
 
 /** Identity at runtime; the whole point is the compile-time constraint. */
 export const key = (k: ValidationMessageKey): string => k;

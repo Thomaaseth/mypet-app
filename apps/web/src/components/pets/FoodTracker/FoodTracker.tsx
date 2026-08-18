@@ -5,34 +5,17 @@ import { UtensilsCrossed } from 'lucide-react';
 import { DryFoodTracker } from './DryFoodTracker';
 import { WetFoodTracker } from './WetFoodTracker';
 import { FoodTrackerProvider, useFoodTrackerContext } from './FoodTrackerContext';
-import type { DryFoodEntry, WetFoodEntry } from '@/types/food';
 import { MetricLabel, MetricValue, MutedText } from '@/components/ui/typography';
 import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { useTranslation } from 'react-i18next';
 import { FOOD_TYPE_TAB_KEYS, FOOD_SUPPLY_LABEL_KEYS } from '@/i18n/enum-keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FoodEntriesSkeleton } from '@/components/ui/skeletons/FoodSkeleton';
+import type { FoodType } from '@/types/food';
+import { hasCalculatedFields, resolveFoodTab } from '@/lib/utils/food-tab';
 
 interface FoodTrackerProps {
   petId: string;
-}
-
-// const FOOD_TYPE_LABELS = {
-//   dry: 'Dry Food',
-//   wet: 'Wet Food'
-// };
-
-// Type guard to ensure entries have calculated fields
-function hasCalculatedFields(entry: DryFoodEntry | WetFoodEntry): entry is (DryFoodEntry | WetFoodEntry) & {
-  remainingDays: number;
-  remainingWeight: number;
-  depletionDate: string;
-} {
-  return (
-    entry.remainingDays !== undefined &&
-    entry.remainingWeight !== undefined &&
-    entry.depletionDate !== undefined
-  );
 }
 
 // Internal component that uses the context
@@ -40,14 +23,12 @@ function FoodTrackerContent() {
   const { t } = useTranslation();
   const { activeFoodEntries, isLoading } = useFoodTrackerContext();
 
-  const hasWet = activeFoodEntries.some((e) => e.foodType === 'wet');
-  const hasDry = activeFoodEntries.some((e) => e.foodType === 'dry');
-
-  // The tab the data implies: wet only → wet; dry-only / both / none → dry.
-  const resolvedTab: 'dry' | 'wet' = hasWet && !hasDry ? 'wet' : 'dry';
+  // The tab the data implies. When both types are active this is the type of
+  // the entry depleting soonest (most urgent info wins); see resolveFoodTab.
+  const resolvedTab = resolveFoodTab(activeFoodEntries);
 
   // null = user hasn't overridden; fall back to the data-derived tab.
-  const [userTab, setUserTab] = useState<'dry' | 'wet' | null>(null);
+  const [userTab, setUserTab] = useState<FoodType | null>(null);
   const activeTab = userTab ?? resolvedTab;
 
   const { formatDate } = useDateTimeFormatters();
@@ -117,7 +98,7 @@ function FoodTrackerContent() {
               </div>
             )}
 
-            <Tabs value={activeTab} onValueChange={(value) => setUserTab(value as 'dry' | 'wet')}>
+              <Tabs value={activeTab} onValueChange={(value) => setUserTab(value as FoodType)}>
               <TabsList className="grid w-full grid-cols-2 mt-2">
                 <TabsTrigger value="dry">{t(FOOD_TYPE_TAB_KEYS.dry)}</TabsTrigger>
                 <TabsTrigger value="wet">{t(FOOD_TYPE_TAB_KEYS.wet)}</TabsTrigger>

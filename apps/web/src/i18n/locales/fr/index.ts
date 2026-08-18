@@ -15,6 +15,7 @@ import cookies from './cookies';
 import footer from './footer';
 import nav from './nav';
 import install from './install';
+import antiParasite from './antiParasite';
 
 const fr: TranslationShape<typeof en> = {
   common,
@@ -32,6 +33,7 @@ const fr: TranslationShape<typeof en> = {
   footer,
   nav,
   install,
+  antiParasite,
 };
 
 export default fr;

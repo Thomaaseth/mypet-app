@@ -24,6 +24,7 @@ import { petErrorHandler } from '@/lib/api/domains/pets';
 import { PetListSkeleton } from '@/components/ui/skeletons/PetSkeleton';
 import { WeightTracker } from './WeightTracker';
 import { FoodTracker } from './FoodTracker';
+import { AntiParasiteTracker } from './AntiParasiteTracker';
 import NotesWidget from './NotesWidget/NotesWidget';
 import { PageTitle, EmptyStateTitle, EmptyStateDescription, MutedText } from '@/components/ui/typography';
 import { useTranslation } from 'react-i18next';
@@ -279,6 +280,10 @@ export default function PetList() {
                       petId={pet.id}
                     />
                   </div>
+
+                  <AntiParasiteTracker
+                    petId={pet.id}
+                  />
 
                   {/* Notes full width within right col */}
                   <NotesWidget

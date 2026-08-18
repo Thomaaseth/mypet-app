@@ -249,7 +249,7 @@ export function DryFoodList({
       {/* Edit Dialog */}
       <ResponsiveDialog
         open={!!editingEntry}
-        onOpenChange={() => setEditingEntry(null)}
+        onOpenChange={(open) => !open && setEditingEntry(null)}
         title={t('food.dry.editDialogTitle')}
         description={t('food.dry.editDialogDescription')}
       >
@@ -275,7 +275,7 @@ export function DryFoodList({
       )}
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deletingEntry} onOpenChange={() => setDeletingEntry(null)}>
+      <AlertDialog open={!!deletingEntry} onOpenChange={(open) => !open && setDeletingEntry(null)}>
          <AlertDialogContent>
            <AlertDialogHeader>
            <AlertDialogTitle>{t('food.dry.deleteDialogTitle')}</AlertDialogTitle>

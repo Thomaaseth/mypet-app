@@ -17,6 +17,7 @@ import weightEntriesRoutes from './weight-entries.routes';
 import weightTargetsRoutes from './weight-targets.routes';
 import { VeterinariansService } from '@/services/veterinarians.service';
 import petNotesRoutes from './pet-notes.routes'
+import antiParasiteTreatmentsRoutes from './anti-parasite-treatments.routes';
 import { upload } from '@/lib/upload';
 import { StorageService } from '@/services/storage.service';
 import { csrfOriginGuard } from '@/middleware/csrf.middleware';
@@ -30,6 +31,7 @@ router.use(globalAuthHandler, userRateLimit);
 router.use('/:petId/weights', weightEntriesRoutes);
 router.use('/:petId/weight-target', weightTargetsRoutes);
 router.use('/:petId/notes', petNotesRoutes);
+router.use('/:petId/anti-parasite-treatments', antiParasiteTreatmentsRoutes);
 
 // GET /api/pets - Get all user's pets
 router.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

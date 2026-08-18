@@ -73,6 +73,21 @@ export function FoodTrackerSkeleton() {
         </div>
         {/* Tab content */}
         <FoodEntriesSkeleton count={1} />
+
+                <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-5 w-5" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-4" />
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
       </CardContent>
     </Card>
   );

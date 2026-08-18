@@ -6,6 +6,7 @@ import { veterinarians } from './veterinarians';
 import { petVeterinarians } from './pet-veterinarians';
 import { appointments } from './appointments';
 import { petNotes } from './pet-notes';
+import { antiParasiteTreatments, antiParasiteTreatmentCategories } from './anti-parasite-treatment';
 
 export const petsRelations = relations(pets, ({ one, many }) => ({
   user: one(user, {
@@ -16,6 +17,7 @@ export const petsRelations = relations(pets, ({ one, many }) => ({
   petVeterinarians: many(petVeterinarians),
   appointments: many(appointments),
   petNotes: many(petNotes),
+  antiParasiteTreatments: many(antiParasiteTreatments),
 }));
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -66,3 +68,21 @@ export const appointmentsRelations = relations(appointments, ({ one }) => ({
     references: [veterinarians.id],
   }),
 }));
+
+export const antiParasiteTreatmentsRelations = relations(antiParasiteTreatments, ({ one, many }) => ({
+  pet: one(pets, {
+    fields: [antiParasiteTreatments.petId],
+    references: [pets.id],
+  }),
+  categories: many(antiParasiteTreatmentCategories),
+}));
+
+export const antiParasiteTreatmentCategoriesRelations = relations(
+  antiParasiteTreatmentCategories,
+  ({ one }) => ({
+    treatment: one(antiParasiteTreatments, {
+      fields: [antiParasiteTreatmentCategories.treatmentId],
+      references: [antiParasiteTreatments.id],
+    }),
+  }),
+);

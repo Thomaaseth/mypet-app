@@ -111,6 +111,14 @@ const toasts = {
         saveSuccess: 'Weight target saved successfully',
         deleteSuccess: 'Weight target deleted successfully',
       },
+      antiParasite: {
+        addSuccess: 'Treatment added successfully',
+        addError: 'Failed to add treatment',
+        updateSuccess: 'Treatment updated successfully',
+        updateError: 'Failed to update treatment',
+        deleteSuccess: 'Treatment deleted successfully',
+        deleteError: 'Failed to delete treatment',
+      },
   } as const;
   
   export default toasts;

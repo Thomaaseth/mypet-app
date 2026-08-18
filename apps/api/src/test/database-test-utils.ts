@@ -17,6 +17,8 @@ export class DatabaseTestUtils {
       await db.delete(schema.foodEntries);
       await db.delete(schema.weightEntries);
       await db.delete(schema.weightTargets);
+      await db.delete(schema.antiParasiteTreatmentCategories);
+      await db.delete(schema.antiParasiteTreatments);
       await db.delete(schema.veterinarians);
       await db.delete(schema.userPreferences);
       await db.delete(schema.cookieConsentLog);
