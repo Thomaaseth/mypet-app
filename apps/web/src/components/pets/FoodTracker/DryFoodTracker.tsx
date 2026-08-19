@@ -47,6 +47,8 @@ export function DryFoodTracker() {
         emptyTitle: t('food.dry.emptyTitle'),
         emptyDescription: t('food.dry.emptyDescription'),
         emptyButtonText: t('food.dry.emptyButtonText'),
+        renewDialogTitle: t('food.dry.renewDialogTitle'),
+        renewDialogDescription: t('food.dry.renewDialogDescription'),
       }}
     />
   );

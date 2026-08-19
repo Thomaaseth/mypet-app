@@ -47,6 +47,8 @@ export function WetFoodTracker() {
         emptyTitle: t('food.wet.emptyTitle'),
         emptyDescription: t('food.wet.emptyDescription'),
         emptyButtonText: t('food.wet.emptyButtonText'),
+        renewDialogTitle: t('food.wet.renewDialogTitle'),
+        renewDialogDescription: t('food.wet.renewDialogDescription'),
       }}
     />
   );

@@ -15,6 +15,7 @@ const fr: TranslationShape<typeof common> = {
     submit: 'Valider',
     loading: 'Chargement...',
     tryAgain: 'Réessayer',
+    renew: 'Renouveler',
   },
   errors: {
     generic: 'Une erreur est survenue. Veuillez réessayer.',

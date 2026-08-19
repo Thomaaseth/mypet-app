@@ -20,25 +20,25 @@ import { PaginationControls } from '@/components/ui/pagination-controls';
 import { useTranslation } from 'react-i18next';
 import { FOOD_HISTORY_TITLE_KEYS } from '@/i18n/enum-keys';
 
-interface FoodHistorySectionProps {
-  entries: (DryFoodEntry | WetFoodEntry)[];
+interface FoodHistorySectionProps<T extends DryFoodEntry | WetFoodEntry> {
+  entries: T[];
   foodType: FoodType;
-  onReorder?: (entry: DryFoodEntry | WetFoodEntry) => void;
-  onEditFinishDate: (foodId: string, dateFinished: string) => Promise<DryFoodEntry | WetFoodEntry | null>;
+  onRenew?: (entry: T) => void;
+  onEditFinishDate: (foodId: string, dateFinished: string) => Promise<T | null>;
   onDelete: (foodId: string) => Promise<boolean>;
   isLoading?: boolean;
 }
 
 const PAGE_SIZE = 5;
 
-export function FoodHistorySection({
+export function FoodHistorySection<T extends DryFoodEntry | WetFoodEntry>({
   entries,
   foodType,
-  onReorder,
+  onRenew,
   onEditFinishDate,
   onDelete,
   isLoading = false
-}: FoodHistorySectionProps) {
+}: FoodHistorySectionProps<T>) {
   const { t } = useTranslation();
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -90,7 +90,7 @@ export function FoodHistorySection({
                   key={entry.id}
                   entry={entry}
                   foodType={foodType}
-                  onReorder={onReorder}
+                  onRenew={onRenew}
                   onEditClick={setEditingEntry}
                   onDeleteClick={setDeletingEntry}
                   isLoading={isLoading}

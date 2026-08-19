@@ -14,6 +14,23 @@ import '@/i18n/config'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
+// Recover from stale lazy chunks after a deploy. When a dynamic import fails
+// reload once onto the fresh build. The timestamp guard prevents reload
+// loops if the failure is not deploy-related and keeps recurring.
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault()
+  try {
+    const RELOAD_KEY = 'lastChunkReload'
+    const lastReload = Number(sessionStorage.getItem(RELOAD_KEY) ?? '0')
+    // Still inside the guard window: don't reload again (avoids a loop).
+    if (Date.now() - lastReload < 10_000) return
+    sessionStorage.setItem(RELOAD_KEY, String(Date.now()))
+  } catch {
+    // storage unavailable (e.g. disabled/private mode); proceed to reload
+    // without the loop guard rather than silently failing to recover.
+  }
+  window.location.reload()
+})
 
 // Create a new router instance
 const router = createRouter({

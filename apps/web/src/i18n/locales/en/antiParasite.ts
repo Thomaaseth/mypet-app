@@ -88,6 +88,8 @@ const antiParasite = {
     emptyButtonLabel: 'Add treatment',
     addDialogTitle: 'Add anti-parasite treatment',
     addDialogDescription: 'Log a flea/tick, worm, or heartworm treatment for your pet.',
+    renewDialogTitle: 'Renew treatment',
+    renewDialogDescription: 'Log this treatment again; just set the new date.',
   },
 } as const;
 

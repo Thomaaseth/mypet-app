@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { Edit2, Trash2, MoreHorizontal } from 'lucide-react';
+import { Edit2, Trash2, MoreHorizontal, RotateCcw } from 'lucide-react';
 import { AntiParasiteForm } from './AntiParasiteForm';
 import type {
   AntiParasiteTreatment,
@@ -41,7 +41,7 @@ import { useTranslation } from 'react-i18next';
 import type { AntiParasiteCategory } from '@/lib/validations/anti-parasite-treatment';
 import { cn } from '@/lib/utils';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
-
+import { CATEGORY_BADGE_CLASS } from './categoryBadge';
 const PAGE_SIZE = 5;
 
 interface AntiParasiteHistoryListProps {
@@ -51,6 +51,7 @@ interface AntiParasiteHistoryListProps {
     data: AntiParasiteTreatmentFormData,
   ) => Promise<AntiParasiteTreatment | null>;
   onDeleteTreatment: (treatmentId: string) => Promise<boolean>;
+  onRenewTreatment: (treatment: AntiParasiteTreatment) => void;
   isLoading?: boolean;
   isHistoryOpen: boolean;
 }
@@ -59,6 +60,7 @@ export default function AntiParasiteHistoryList({
   treatments,
   onUpdateTreatment,
   onDeleteTreatment,
+  onRenewTreatment,
   isLoading = false,
   isHistoryOpen,
 }: AntiParasiteHistoryListProps) {
@@ -100,11 +102,11 @@ export default function AntiParasiteHistoryList({
   };
 
 // Category => solid app-theme color
-const CATEGORY_BADGE_CLASS: Record<AntiParasiteCategory, string> = {
-  fleas_ticks: 'border-accent text-accent',
-  worms: 'border-secondary text-secondary',
-  heartworm: 'border-primary text-primary',
-};
+// const CATEGORY_BADGE_CLASS: Record<AntiParasiteCategory, string> = {
+//   fleas_ticks: 'border-accent text-accent',
+//   worms: 'border-secondary text-secondary',
+//   heartworm: 'border-primary text-primary',
+// };
 
   return (
     <>
@@ -161,6 +163,10 @@ const CATEGORY_BADGE_CLASS: Record<AntiParasiteCategory, string> = {
                     <DropdownMenuItem onClick={() => setEditingTreatment(treatment)}>
                       <Edit2 className="h-4 w-4 mr-2" />
                       {t('common.actions.edit')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onRenewTreatment(treatment)}>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      {t('common.actions.renew')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

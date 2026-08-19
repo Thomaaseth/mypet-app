@@ -78,6 +78,9 @@ shared: {
     deleteConfirmDescription: 'Êtes-vous sûr de vouloir supprimer cette entrée de croquettes pour {{name}} ? Cette action est irréversible.',
     genericFallbackName: 'ces croquettes',
     historyTitle: 'Historique des croquettes',
+    renewDialogTitle: 'Renouveler la nourriture',
+    renewDialogDescription:
+      'Renouvelez cette nourriture ; indiquez simplement la nouvelle date de début.',
     },
   wet: {
     addButton: 'Ajouter pâtée',
@@ -102,13 +105,17 @@ shared: {
     deleteConfirmDescription: 'Êtes-vous sûr de vouloir supprimer cette entrée de pâtée pour {{name}} ? Cette action est irréversible.',
     genericFallbackName: 'cette pâtée',
     historyTitle: 'Historique de la pâtée',
+    renewDialogTitle: 'Renouveler la nourriture',
+    renewDialogDescription:
+      'Renouvelez cette nourriture ; indiquez simplement la nouvelle date de début.',
   },
   editFinishDate: {
     title: 'Modifier la date de fin',
     description: "Mettez à jour la date à laquelle cette nourriture a réellement été terminée. Doit être comprise entre la date de début et aujourd'hui.",
     startDateLabel: 'Date de début (référence)',
     finishDateLabel: 'Date de fin',
-    betweenDates: 'Entre le {{minDate}} et le {{maxDate}}',
+    betweenDates: 'Entre le {{minDate}} et {{maxDate}}',
+    today: "aujourd'hui",
     selectDateRequired: 'Veuillez sélectionner une date de fin',
     beforeStartDate: 'La date de fin ne peut pas être antérieure à la date de début',
     futureDate: 'La date de fin ne peut pas être dans le futur',
@@ -119,7 +126,7 @@ shared: {
     productNameTooLong: 'Le nom du produit doit contenir 150 caractères ou moins',
     dailyAmountRequired: 'La quantité journalière est requise',
     dailyAmountMustBePositive: 'La quantité journalière doit être un nombre positif',
-    dateStartedRequired: "La date d'achat est requise",
+    dateStartedRequired: "La date de début est requise",
     bagWeightRequired: 'Le poids du sac est requis',
     bagWeightMustBePositive: 'Le poids du sac doit être un nombre positif',
     bagWeightUnitRequired: 'L\'unité de poids du sac est requise',

@@ -42,28 +42,29 @@ import { convertFoodWeight } from '@/lib/validations/pet';
 import { useTranslation } from 'react-i18next';
 import { FOOD_TYPE_TAB_KEYS } from '@/i18n/enum-keys';
 
-interface FoodHistoryEntryProps {
-  entry: DryFoodEntry | WetFoodEntry;
+interface FoodHistoryEntryProps<T extends DryFoodEntry | WetFoodEntry> {
+  entry: T;
   foodType: FoodType;
-  onReorder?: (entry: DryFoodEntry | WetFoodEntry) => void;
-  onEditClick: (entry: DryFoodEntry | WetFoodEntry) => void;
-  onDeleteClick: (entry: DryFoodEntry | WetFoodEntry) => void;
+  onRenew?: (entry: T) => void;
+  onEditClick: (entry: T) => void;
+  onDeleteClick: (entry: T) => void;
   isLoading?: boolean;
 }
 
-export function FoodHistoryEntry({
+export function FoodHistoryEntry<T extends DryFoodEntry | WetFoodEntry>({
   entry,
   foodType,
-  onReorder,
+  onRenew,
   onEditClick,
   onDeleteClick,
   isLoading = false,
-}: FoodHistoryEntryProps) {
+}: FoodHistoryEntryProps<T>) {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { units } = usePreferencesContext();
   const { formatDate } = useDateTimeFormatters();
+  const e: DryFoodEntry | WetFoodEntry = entry;
 
   const dailyAmountUnit = foodType === 'dry' ? 'grams' : (units?.wetFoodUnit ?? 'grams');
   const bagWeightUnit = units?.bagWeightUnit ?? 'kg';
@@ -118,10 +119,10 @@ export function FoodHistoryEntry({
                 <Pencil className="h-4 w-4 mr-2" />
                 {t('food.editFinishDate.title')}
               </DropdownMenuItem>
-              {onReorder && (
-                <DropdownMenuItem onClick={() => onReorder(entry)}>
+              {onRenew && (
+                <DropdownMenuItem onClick={() => onRenew(entry)}>
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  {t('food.tracker.reorderLabel')}
+                    {t('common.actions.renew')}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
@@ -144,22 +145,22 @@ export function FoodHistoryEntry({
             <>
               <span className="flex items-center gap-1">
                 <Package className="h-3 w-3" />
-                {formatRemainingWeight(convertFoodWeight(parseFloat((entry as DryFoodEntry).bagWeight), 'grams', bagWeightUnit))} <FoodUnitLabel unit={bagWeightUnit} />
+                {formatRemainingWeight(convertFoodWeight(parseFloat((e as DryFoodEntry).bagWeight), 'grams', bagWeightUnit))} <FoodUnitLabel unit={bagWeightUnit} />
               </span>
               <span className="flex items-center gap-1">
                 <Utensils className="h-3 w-3" />
-                {(entry as DryFoodEntry).dailyAmount} <FoodUnitLabel unit="grams" />{t('food.shared.perDaySuffix')}
+                {(e as DryFoodEntry).dailyAmount} <FoodUnitLabel unit="grams" />{t('food.shared.perDaySuffix')}
               </span>
             </>
           ) : (
             <>
               <span className="flex items-center gap-1">
                 <Package className="h-3 w-3" />
-                {(entry as WetFoodEntry).numberOfUnits}×{formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).weightPerUnit), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />
+                {(e as WetFoodEntry).numberOfUnits}×{formatRemainingWeight(convertFoodWeight(parseFloat((e as WetFoodEntry).weightPerUnit), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />
               </span>
               <span className="flex items-center gap-1">
                 <Utensils className="h-3 w-3" />
-                {formatRemainingWeight(convertFoodWeight(parseFloat((entry as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />{t('food.shared.perDaySuffix')}
+                {formatRemainingWeight(convertFoodWeight(parseFloat((e as WetFoodEntry).dailyAmount), 'grams', dailyAmountUnit))} <FoodUnitLabel unit={dailyAmountUnit} />{t('food.shared.perDaySuffix')}
               </span>
             </>
           )}

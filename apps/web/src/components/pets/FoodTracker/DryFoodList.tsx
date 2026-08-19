@@ -52,6 +52,7 @@ interface DryFoodListProps {
   entries: DryFoodEntry[];
   finishedEntries: DryFoodEntry[];
   onUpdate: (foodId: string, data: Partial<DryFoodFormData>) => Promise<DryFoodEntry | null>;
+  onRenew?: (entry: DryFoodEntry) => void; 
   onDelete: (foodId: string) => Promise<boolean>;
   onMarkAsFinished: (foodId: string) => Promise<boolean>;
   onUpdateFinishDate: (foodId: string, dateFinished: string) => Promise<DryFoodEntry | null>;
@@ -65,13 +66,13 @@ export function DryFoodList({
   onDelete, 
   onMarkAsFinished, 
   onUpdateFinishDate,
+  onRenew,
   isLoading = false 
 }: DryFoodListProps) {
   const { t } = useTranslation();
 
   const [editingEntry, setEditingEntry] = useState<DryFoodEntry | null>(null);
   const [deletingEntry, setDeletingEntry] = useState<DryFoodEntry | null>(null);
-  // const [markingAsFinished, setMarkingAsFinished] = useState<string | null>(null);
   const [markingFinishedEntry, setMarkingFinishedEntry] = useState<DryFoodEntry | null>(null);
 
   const { units } = usePreferencesContext();
@@ -241,6 +242,7 @@ export function DryFoodList({
           foodType="dry"
           onEditFinishDate={onUpdateFinishDate}
           onDelete={onDelete}
+          onRenew={onRenew}
         />
         </div>
       )}

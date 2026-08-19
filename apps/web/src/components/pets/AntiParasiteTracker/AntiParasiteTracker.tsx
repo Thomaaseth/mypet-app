@@ -48,6 +48,7 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
   const { t } = useTranslation();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [renewingTreatment, setRenewingTreatment] = useState<AntiParasiteTreatment | null>(null);
 
   const { data: treatments, error } = useAntiParasiteTreatments({ petId });
 
@@ -66,6 +67,20 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
     try {
       const result = await createMutation.mutateAsync(data);
       setIsAddDialogOpen(false);
+      return result;
+    } catch {
+      return null;
+    }
+  };
+
+  // Renew reuses the create mutation — it's a brand-new treatment seeded from an
+  // old one — but closes the renew dialog rather than the add dialog.
+  const handleRenew = async (
+    data: AntiParasiteTreatmentFormData,
+  ): Promise<AntiParasiteTreatment | null> => {
+    try {
+      const result = await createMutation.mutateAsync(data);
+      setRenewingTreatment(null);
       return result;
     } catch {
       return null;
@@ -155,6 +170,7 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
             description={t('antiParasite.tracker.emptyDescription')}
             buttonLabel={t('antiParasite.tracker.emptyButtonLabel')}
             onAction={() => setIsAddDialogOpen(true)}
+            withCard={true}
           />
         ) : (
           <>
@@ -198,6 +214,7 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
                       treatments={allTreatments}
                       onUpdateTreatment={handleUpdate}
                       onDeleteTreatment={handleDelete}
+                      onRenewTreatment={setRenewingTreatment}
                       isLoading={isActionLoading}
                       isHistoryOpen={isHistoryOpen}
                     />
@@ -221,6 +238,23 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
           onCancel={() => setIsAddDialogOpen(false)}
           isLoading={createMutation.isPending}
         />
+      </ResponsiveDialog>
+
+      {/* Renew dialog — a new treatment seeded from a past one, date blanked */}
+      <ResponsiveDialog
+        open={!!renewingTreatment}
+        onOpenChange={(open) => !open && setRenewingTreatment(null)}
+        title={t('antiParasite.tracker.renewDialogTitle')}
+        description={t('antiParasite.tracker.renewDialogDescription')}
+      >
+        {renewingTreatment && (
+          <AntiParasiteForm
+            renewFrom={renewingTreatment}
+            onSubmit={handleRenew}
+            onCancel={() => setRenewingTreatment(null)}
+            isLoading={createMutation.isPending}
+          />
+        )}
       </ResponsiveDialog>
     </Card>
   );

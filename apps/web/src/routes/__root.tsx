@@ -17,6 +17,7 @@ import { BottomNav } from '@/components/BottomNav';
 // If you added these during the PWA work, keep your versions/paths:
 import { InstallPromptProvider } from '@/contexts/InstallPromptContext';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { useVersionCheck } from '@/hooks/useVersionCheck';
 
 interface RouterContext {
   queryClient: QueryClient
@@ -48,6 +49,7 @@ function RootComponent() {
 }
 
 function AppShell() {
+  useVersionCheck()
   const { user } = useSessionContext();
 
   return (
