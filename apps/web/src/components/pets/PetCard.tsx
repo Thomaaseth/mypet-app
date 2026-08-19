@@ -37,9 +37,10 @@ interface PetCardProps {
   onEdit: (pet: Pet) => void;
   onDelete: (pet: Pet) => void;
   onView?: (pet: Pet) => void;
+  canPin?: boolean;
 }
 
-export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
+export default function PetCard({ pet, onEdit, onDelete, canPin = false }: PetCardProps) {
   const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
@@ -102,6 +103,8 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {canPin && (
+              <>
               <DropdownMenuItem
                 onClick={() => setFavoriteMutation.mutate({ petId: pet.id, isFavorite: !pet.isFavorite })}
               >
@@ -113,6 +116,8 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
                 {pet.isFavorite ? t('pets.card.unpinFirst') : t('pets.card.pinFirst')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              </>
+              )}
               <DropdownMenuItem onClick={() => onEdit(pet)}>
                 <Edit2 className="mr-2 h-4 w-4" />
                 {t('common.actions.edit')}

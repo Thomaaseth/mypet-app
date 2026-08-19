@@ -263,6 +263,7 @@ export default function PetList() {
                     pet={pet}
                     onEdit={() => setEditingPet(pet)}
                     onDelete={() => setDeletingPet(pet)}
+                    canPin={pets.length > 1 }
                   />
                 </div>
 
@@ -274,7 +275,7 @@ export default function PetList() {
                     <FoodTracker 
                       petId={pet.id}
                     />
-                    
+
                     <WeightTracker 
                       petId={pet.id} 
                       petName={pet.name}
