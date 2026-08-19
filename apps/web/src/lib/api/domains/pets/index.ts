@@ -16,6 +16,7 @@ export const petApi = {
   getPetSignedUrl: (petId: string) => petService.getPetSignedUrl(petId),
   uploadPetImage: (petId: string, file: File) => petService.uploadPetImage(petId, file),
   deletePetImage: (petId: string) => petService.deletePetImage(petId),
+  setPetFavorite: (petId: string, isFavorite: boolean) => petService.setPetFavorite(petId, isFavorite),
 };
 
 // Export the same error handler interface

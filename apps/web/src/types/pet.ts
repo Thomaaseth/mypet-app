@@ -13,6 +13,7 @@ export interface Pet {
   imageUrl: string | null;
   notes: string | null;
   isActive: boolean;
+  isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
 }

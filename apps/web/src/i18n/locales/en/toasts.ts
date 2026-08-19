@@ -98,6 +98,10 @@ const toasts = {
         removePhotoSuccessTitle: 'Photo removed',
         removePhotoSuccessDescription: "Your pet's photo has been removed.",
         removePhotoError: 'Failed to remove photo',
+        favoriteError: 'Failed to update favorite',
+        favoriteSuccessTitle: 'Pets updated',
+        pinSuccessDescription: 'Pet pinned to first position.',
+        unpinSuccessDescription: 'Pet unpinned.',
       },
       weights: {
         addSuccess: 'Weight entry added successfully',

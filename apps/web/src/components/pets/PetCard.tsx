@@ -10,7 +10,9 @@ import {
   HeartOff,
   Venus,
   Mars,
-  Cpu
+  Cpu,
+  Pin,
+  PinOff
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,7 +25,7 @@ import type { Pet } from '@/types/pet';
 import { calculatePetAge } from '@/lib/validations/pet';
 import { useState } from 'react';
 import { useWeightEntries } from '@/queries/weights';
-import { usePetSignedUrl } from '@/queries/pets';
+import { usePetSignedUrl, useSetFavoritePet } from '@/queries/pets';
 import { MutedText, SectionTitle, EntryTitle } from '@/components/ui/typography';
 import { usePreferencesContext } from '@/contexts/UserPreferencesContext';
 import { convertWeight, formatWeight } from '@/lib/validations/pet';
@@ -41,6 +43,7 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
   const { t } = useTranslation();
   const [imageError, setImageError] = useState(false);
   const { data: signedUrl } = usePetSignedUrl(pet.id, Boolean(pet.imageUrl));
+  const setFavoriteMutation = useSetFavoritePet();
 
   const age = calculatePetAge(pet.birthDate, t);
 
@@ -99,6 +102,17 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setFavoriteMutation.mutate({ petId: pet.id, isFavorite: !pet.isFavorite })}
+              >
+                {pet.isFavorite ? (
+                  <PinOff className="mr-2 h-4 w-4" />
+                ) : (
+                  <Pin className="mr-2 h-4 w-4" />
+                )}
+                {pet.isFavorite ? t('pets.card.unpinFirst') : t('pets.card.pinFirst')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onEdit(pet)}>
                 <Edit2 className="mr-2 h-4 w-4" />
                 {t('common.actions.edit')}

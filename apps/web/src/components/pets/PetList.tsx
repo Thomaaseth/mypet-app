@@ -270,14 +270,15 @@ export default function PetList() {
                 <div className="min-w-0 space-y-6">
                   {/* Weight + Food side by side, wrapping on smaller screens */}
                   <div className="grid grid-cols-1 2xl:grid-cols-2 gap-6">
-                 
+                    
+                    <FoodTracker 
+                      petId={pet.id}
+                    />
+                    
                     <WeightTracker 
                       petId={pet.id} 
                       petName={pet.name}
                       animalType={pet.animalType} 
-                    />
-                    <FoodTracker 
-                      petId={pet.id}
                     />
                   </div>
 

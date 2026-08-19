@@ -1,4 +1,4 @@
-import { get, post, put, del } from '../../base';
+import { get, post, put, patch, del } from '../../base';
 import type { PetImageUploadResponse, PetSignedUrlResponse } from './types';
 import type { Pet } from '@/types/pet';
 import type { PetFormData } from '@/lib/validations/pet';
@@ -33,6 +33,14 @@ export class PetRepository {
 
   async deletePet(petId: string): Promise<void> {
     await del<{ message: string }>(`/api/pets/${petId}`);
+  }
+
+  async setPetFavorite(petId: string, isFavorite: boolean): Promise<Pet> {
+    const result = await patch<{ pet: Pet }, { isFavorite: boolean }>(
+      `/api/pets/${petId}/favorite`,
+      { isFavorite }
+    );
+    return result.pet;
   }
 
   async permanentlyDeletePet(petId: string): Promise<void> {

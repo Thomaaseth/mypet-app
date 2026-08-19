@@ -121,12 +121,17 @@ export const petEditFormSchema = basePetFormSchema
   .omit({ weight: true, weightUnit: true })
   .strict();
 
+export const petFavoriteSchema = z.object({
+  isFavorite: z.boolean(),
+}).strict();
+
 // Export types
 export type PetFormData = z.infer<typeof petFormSchema>;
 export type CreatePetData = z.infer<typeof createPetSchema>;
 export type UpdatePetData = z.infer<typeof updatePetSchema>;
 export type PetEditFormData = z.infer<typeof petEditFormSchema>;
 export type PetGender = z.infer<typeof petGenderSchema>;
+export type PetFavoriteData = z.infer<typeof petFavoriteSchema>;
 
 // Validate functions
 export const validatePetForm = (data: unknown) => {
@@ -143,4 +148,8 @@ export const validateUpdatePet = (data: unknown) => {
 
 export const validatePetEditForm = (data: unknown) => {
   return petEditFormSchema.safeParse(data)
+};
+
+export const validatePetFavorite = (data: unknown) => {
+  return petFavoriteSchema.safeParse(data);
 };

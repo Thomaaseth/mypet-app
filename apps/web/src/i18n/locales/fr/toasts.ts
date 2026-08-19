@@ -101,6 +101,10 @@ const fr: TranslationShape<typeof toasts> = {
     removePhotoSuccessTitle: 'Photo supprimée',
     removePhotoSuccessDescription: 'La photo de votre animal a été supprimée.',
     removePhotoError: 'Échec de la suppression de la photo',
+    favoriteError: 'Échec de la mise à jour du favori',
+    favoriteSuccessTitle: 'Animaux mis à jour',
+    pinSuccessDescription: 'Animal épinglé en première position.',
+    unpinSuccessDescription: 'Animal désépinglé.',
   },
   weights: {
     addSuccess: 'Entrée de poids ajoutée avec succès',

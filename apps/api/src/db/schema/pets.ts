@@ -7,9 +7,11 @@ import {
   date, 
   timestamp, 
   uuid,
-  index
+  index,
+  uniqueIndex
 } from 'drizzle-orm/pg-core';
 import { user } from './auth-schema';
+import { sql } from 'drizzle-orm';
 
 export const petGenderEnum = pgEnum('pet_gender', ['male', 'female']);
 export const petAnimalTypeEnum = pgEnum('pet_animal_type', ['cat', 'dog']);
@@ -28,10 +30,18 @@ export const pets = pgTable('pets', {
   imageUrl: text('image_url'),
   notes: text('notes'),
   isActive: boolean('is_active').default(true), // Soft delete flag
+  isFavorite: boolean('is_favorite').notNull().default(false), // Pin one pet as the default tab on load
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   userIdIdx: index('pets_user_id_idx').on(table.userId),
+  // At most one favourite per user, enforced at the DB level
+  // Partial: only favourite rows participate, so the many
+  // is_favorite=false rows never collide. Mirrors the service transaction
+  // that unsets the previous favourite before setting a new one.
+  userFavoriteUnique: uniqueIndex('pets_user_id_favorite_unique')
+    .on(table.userId)
+    .where(sql`${table.isFavorite} = true`),
 }));
 
 // Types 

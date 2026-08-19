@@ -74,7 +74,8 @@ export class PetsService {
           eq(pets.userId, userId),
           eq(pets.isActive, true)
         ))
-        .orderBy(desc(pets.createdAt));
+        // Fav first (boolean DESC puts true ahead of false)
+        .orderBy(desc(pets.isFavorite), desc(pets.createdAt));
 
       return result;
     } catch (error) {
@@ -245,6 +246,56 @@ export class PetsService {
       }
       dbLogger.error({ err: error }, 'Error updating pet');
       throw new BadRequestError('Failed to update pet');
+    }
+  }
+
+  // Set or clear the single favourite pet for a user
+  static async setPetFavorite(
+    petId: string,
+    userId: string,
+    isFavorite: boolean
+  ): Promise<Pet> {
+    try {
+      // Authorization + existence (validates UUID, enforces ownership + isActive)
+      await this.getPetById(petId, userId);
+
+      const updated = await db.transaction(async (tx) => {
+        if (isFavorite) {
+          // Enforce single favourite: clear the user's current favourite first.
+          // Scoped by userId only (not isActive) so a lingering favourite on a
+          // soft-deleted pet can't trip the partial unique index.
+          await tx
+            .update(pets)
+            .set({ isFavorite: false, updatedAt: new Date() })
+            .where(and(
+              eq(pets.userId, userId),
+              eq(pets.isFavorite, true)
+            ));
+        }
+
+        const [row] = await tx
+          .update(pets)
+          .set({ isFavorite, updatedAt: new Date() })
+          .where(and(
+            eq(pets.id, petId),
+            eq(pets.userId, userId)
+          ))
+          .returning();
+
+        return row;
+      });
+
+      if (!updated) {
+        throw new NotFoundError('Pet not found');
+      }
+
+      return updated;
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof BadRequestError) {
+        throw error;
+      }
+      dbLogger.error({ err: error }, 'Error setting pet favorite');
+      throw new BadRequestError('Failed to update favorite');
     }
   }
 

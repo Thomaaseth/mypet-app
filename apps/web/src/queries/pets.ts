@@ -196,6 +196,66 @@ export function useDeletePet() {
     });
   }
 
+// Mirrors the backend ORDER BY (desc(isFavorite), desc(createdAt)) so optimistic
+// cache updates reorder identically to a server refetch.
+function sortPetsByFavorite(a: Pet, b: Pet): number {
+  if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1;
+  return b.createdAt.localeCompare(a.createdAt);
+}
+
+// SET / CLEAR FAVOURITE
+// Optimistic: same cancel → snapshot → update → rollback → invalidate shape as
+// useDeletePet. Because only one favourite is allowed, setting a new favourite
+// also clears the others in the cache, then re-sorts so it floats to pets[0].
+export function useSetFavoritePet() {
+  const queryClient = useQueryClient()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: ({ petId, isFavorite }: { petId: string; isFavorite: boolean }) =>
+      petApi.setPetFavorite(petId, isFavorite),
+    onMutate: async ({ petId, isFavorite }) => {
+      await queryClient.cancelQueries({ queryKey: petKeys.all })
+
+      const previousPets = queryClient.getQueryData<Pet[]>(petKeys.all)
+
+      if (previousPets) {
+        const next = previousPets
+          .map((p) => {
+            if (p.id === petId) return { ...p, isFavorite }
+            // Unset the previous favourite only when setting a new one
+            if (isFavorite && p.isFavorite) return { ...p, isFavorite: false }
+            return p
+          })
+          .sort(sortPetsByFavorite)
+
+        queryClient.setQueryData<Pet[]>(petKeys.all, next)
+      }
+
+      return { previousPets }
+    },
+    onError: (error, _variables, context) => {
+      if (context?.previousPets) {
+        queryClient.setQueryData(petKeys.all, context.previousPets)
+      }
+      const appError = petErrorHandler(error)
+      toastService.error(t('toasts.pets.favoriteError'), appError.message)
+    },
+    onSuccess: (_updatedPet, { isFavorite }) => {
+      toastService.success(
+        t('toasts.pets.favoriteSuccessTitle'),
+        isFavorite
+          ? t('toasts.pets.pinSuccessDescription')
+          : t('toasts.pets.unpinSuccessDescription')
+      )
+    },
+    onSettled: () => {
+      // Reconcile with the server's canonical ordering
+      queryClient.invalidateQueries({ queryKey: petKeys.all })
+    },
+  })
+}
+
 // Helper: Get pet by ID from cache (no API call)
 export function usePetFromCache(petId: string): Pet | undefined {
   const queryClient = useQueryClient()

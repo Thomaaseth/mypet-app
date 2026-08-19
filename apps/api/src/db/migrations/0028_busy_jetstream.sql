@@ -1,0 +1,2 @@
+ALTER TABLE "pets" ADD COLUMN "is_favorite" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "pets_user_id_favorite_unique" ON "pets" USING btree ("user_id") WHERE "pets"."is_favorite" = true;

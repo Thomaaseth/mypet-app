@@ -7,8 +7,10 @@ import { respondWithSuccess, respondWithCreated } from '../lib/json';
 import { 
   validateCreatePet, 
   validateUpdatePet,
+  validatePetFavorite,
   type CreatePetData,
-  type UpdatePetData
+  type UpdatePetData,
+  type PetFavoriteData,
 } from '@/shared/validations/pet';
 import { 
   BadRequestError, 
@@ -213,6 +215,34 @@ router.delete('/:id/image', async (req: AuthenticatedRequest, res: Response, nex
     const updatedPet = await PetsService.updatePet(petId, userId, { imageUrl: null });
 
     respondWithSuccess(res, { pet: updatedPet }, 'Pet image removed successfully');
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PATCH /api/pets/:id/favorite - Set or clear this pet as the user's favourite
+router.patch('/:id/favorite', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.authSession?.user.id;
+    if (!userId) {
+      throw new BadRequestError('User session not found');
+    }
+
+    const petId = req.params.id;
+    if (!petId) {
+      throw new BadRequestError('Pet ID is required');
+    }
+
+    const validation = validatePetFavorite(req.body);
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      throw new BadRequestError(`Validation error: ${firstError.message}`);
+    }
+
+    const { isFavorite }: PetFavoriteData = validation.data;
+
+    const updatedPet = await PetsService.setPetFavorite(petId, userId, isFavorite);
+    respondWithSuccess(res, { pet: updatedPet }, 'Pet favorite updated successfully');
   } catch (error) {
     next(error);
   }

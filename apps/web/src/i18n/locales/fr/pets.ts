@@ -8,6 +8,8 @@ const fr: TranslationShape<typeof pets> = {
     openMenu: 'Ouvrir le menu',
     spayedNeutered: 'Stérilisé(e)',
     noWeight: 'Pas de poids',
+    pinFirst: "Épingler en premier",
+    unpinFirst: "Désépingler",
   },
   age: {
     unknown: 'Inconnu',
