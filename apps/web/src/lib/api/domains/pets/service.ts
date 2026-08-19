@@ -74,6 +74,15 @@ export class PetService {
     }
   }
 
+  async setPetFavorite(petId: string, isFavorite: boolean): Promise<Pet> {
+    try {
+      return await this.repository.setPetFavorite(petId, isFavorite);
+    } catch (error) {
+      console.error('Error setting pet favorite:', error);
+      throw error;
+    }
+  }
+
   async permanentlyDeletePet(petId: string): Promise<void> {
     try {
       await this.repository.permanentlyDeletePet(petId);

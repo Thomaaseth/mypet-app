@@ -5,6 +5,8 @@ const pets = {
       openMenu: 'Open menu',
       spayedNeutered: 'Spayed/Neutered',
       noWeight: 'No weight',
+      pinFirst: 'Pin pet as first',
+      unpinFirst: 'Unpin pet',
     },
     age: {
         unknown: 'Unknown',

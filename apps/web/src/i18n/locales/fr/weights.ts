@@ -52,7 +52,7 @@ const fr: TranslationShape<typeof weights> = {
   tracker: {
     title: 'Suivi du poids',
     setRange: 'Définir la plage',
-    editRange: 'Modifier la plage',
+    editRange: 'Modifier',
     tooltipTitle: 'Suivez le poids santé de votre animal',
     tooltipDescription: "Demandez à votre vétérinaire la plage de poids idéale pour votre animal...",
     addWeightEntry: 'Ajouter une entrée',
