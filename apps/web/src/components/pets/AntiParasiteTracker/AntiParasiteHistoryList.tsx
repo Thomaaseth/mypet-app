@@ -38,7 +38,6 @@ import { usePagination } from '@/hooks/usePagination';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { useDateTimeFormatters } from '@/hooks/useDateTimeFormatters';
 import { useTranslation } from 'react-i18next';
-import type { AntiParasiteCategory } from '@/lib/validations/anti-parasite-treatment';
 import { cn } from '@/lib/utils';
 import { getTodayDateString } from '@/lib/utils/date-formatting';
 import { CATEGORY_BADGE_CLASS } from './categoryBadge';

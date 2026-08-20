@@ -190,7 +190,7 @@ export function AntiParasiteTracker({ petId }: AntiParasiteTrackerProps) {
                   <CardHeader className="cursor-pointer hover:bg-muted/75 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
+                        <Calendar className="h-4 w-4" />
                         <MutedText className="font-display flex items-center gap-2">
                           {t('antiParasite.tracker.history')}
                         </MutedText>
