@@ -1,0 +1,335 @@
+/* ========================================================
+   PETTR 4-QUARTER INTERACTIVE SCROLL SHOWCASE
+   Bespoke styles copied verbatim from the Elementor HTML export.
+   This is the one section whose CSS was present in the source,
+   so it reproduces 1:1. Scoped under #pettr-scroll-root.
+   ======================================================== */
+
+.pettr-showcase-container {
+  width: 100%;
+  position: relative;
+  background-color: #f8f8f8;
+  font-family: "Montserrat", sans-serif;
+  color: #000000;
+  transition: background-color 0.4s ease-out;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+.pettr-showcase-container * {
+  box-sizing: border-box;
+}
+
+.pettr-showcase-container img {
+  max-width: none !important;
+  border-style: none !important;
+}
+
+.pettr-header-spacer {
+  height: 175px;
+  width: 100%;
+  display: block;
+}
+
+/* 340vh Sticky Scroll Track */
+.pettr-sticky-track {
+  min-height: 340vh;
+  height: 340vh;
+  position: relative;
+  width: 100%;
+}
+.pettr-viewport-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+}
+
+/* Hero Heading — 88px desktop default */
+.pettr-hero-heading {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 88px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: #000000;
+  margin: 220px 0 16px 0;
+  transition: color 0.3s ease, font-size 0.2s ease;
+}
+
+/* 1500px 4-Quarter Grid */
+.pettr-grid-stage {
+  width: 100%;
+  max-width: 1500px;
+  padding: 50px !important;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  min-height: 460px;
+  height: 460px;
+  margin: auto;
+  align-items: stretch;
+  position: relative;
+}
+
+/* Inactive Cards */
+.pettr-card-col {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 15px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  height: 100%;
+  pointer-events: none;
+}
+.pettr-inactive-card .pettr-card-title {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 12px 0;
+  color: #94a3b8 !important;
+}
+.pettr-inactive-card .pettr-card-body {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #94a3b8 !important;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Active 50% Card */
+.pettr-active-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(50% - 12px);
+  height: 100%;
+  background: #ffffff;
+  border-radius: 23px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.pettr-inner-textbox {
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 15px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Pre-rendered Text Panes */
+.pettr-text-stage {
+  position: relative;
+  width: 100%;
+  flex: 1;
+}
+.pettr-text-pane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+.pettr-text-pane.active {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  pointer-events: auto;
+}
+.pettr-active-title {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.2;
+  margin: 0 0 12px 0;
+  color: #000000 !important;
+}
+.pettr-active-body {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #334155;
+  font-weight: 500;
+  margin: 0;
+}
+.pettr-step-bars {
+  display: flex;
+  gap: 6px;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+.pettr-step-bar {
+  width: 32px;
+  height: 5px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  transition: background 0.35s ease;
+}
+.pettr-step-bar.active {
+  background: #ebab42;
+}
+
+/* Photo Spot */
+.pettr-photo-wrap {
+  flex: 1;
+  min-width: 220px;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+.pettr-photo-layer {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  opacity: 0;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  will-change: opacity;
+}
+.pettr-photo-layer.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Timeline Indicator */
+.pettr-timeline-bar {
+  width: 100%;
+  max-width: 1500px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+}
+.pettr-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(0, 0, 0, 0);
+}
+.pettr-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0);
+}
+.pettr-stage-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+}
+.pettr-stage-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+.pettr-stage-dot.active {
+  background: rgba(0, 0, 0, 0);
+  transform: scale(1.3);
+}
+
+/* TABLET (≤1024px) */
+@media (max-width: 1024px) {
+  .pettr-hero-heading {
+    font-size: 54px;
+    margin: 140px 0 16px 0;
+  }
+  .pettr-grid-stage {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: auto;
+    padding: 30px !important;
+  }
+  .pettr-card-col {
+    display: none !important;
+  }
+  .pettr-active-stage {
+    position: relative !important;
+    width: 100% !important;
+    transform: none !important;
+    flex-direction: column;
+    height: auto;
+  }
+  .pettr-text-stage {
+    min-height: 160px;
+  }
+  .pettr-photo-wrap {
+    min-height: 220px;
+    height: 220px;
+  }
+}
+
+/* MOBILE (≤767px) */
+@media (max-width: 767px) {
+  .pettr-hero-heading {
+    font-size: 28px;
+    margin: 90px 0 12px 0;
+  }
+  .pettr-grid-stage {
+    padding: 16px !important;
+    gap: 16px;
+  }
+  .pettr-inner-textbox {
+    padding: 18px;
+  }
+  .pettr-active-title {
+    font-size: 22px;
+  }
+  .pettr-photo-wrap {
+    min-height: 180px;
+    height: 180px;
+  }
+}
