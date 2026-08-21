@@ -18,7 +18,7 @@ const antiParasite = {
   category: {
     fleasTicks: 'Puces & Tiques',
     worms: 'Vers',
-    heartworm: 'Dirofilariose',
+    heartworm: 'Ver du cœur',
   },
   duration: {
     weeks4: '4 semaines',
@@ -43,8 +43,7 @@ const antiParasite = {
     productNamePlaceholder: 'ex. Bravecto, Milbemax',
     durationLabel: 'Durée',
     durationPlaceholder: 'Sélectionnez une durée',
-    durationTooltip:
-      'Si la protection contre les puces/tiques est nettement plus courte que celle contre les vers pour ce produit, nous recommandons d’ajouter 2 entrées distinctes.',
+    durationTooltip: "Si vous utilisez un traitement combiné (par exemple, contre les puces, tiques et contre les vers) dont les durées de protection diffèrent significativement, nous vous recommandons d'ajouter deux entrées distinctes.",
     durationTooltipAria: 'Aide sur la durée',
     dateLabel: 'Date d’administration',
     addButton: 'Ajouter un traitement',
@@ -85,11 +84,11 @@ const antiParasite = {
     entries_other: '{{count}} entrées',
     emptyTitle: 'Aucun traitement suivi pour le moment',
     emptyDescription:
-      'Ajoutez votre premier traitement antiparasitaire pour suivre la protection contre les puces, tiques, vers et la dirofilariose.',
+      'Ajoutez votre premier traitement antiparasitaire pour suivre la protection contre les puces, tiques, vers et le ver du cœur.',
     emptyButtonLabel: 'Ajouter un traitement',
     addDialogTitle: 'Ajouter un traitement antiparasitaire',
     addDialogDescription:
-      'Enregistrez un traitement contre les puces/tiques, les vers ou la dirofilariose pour votre animal.',
+      'Enregistrez un traitement contre les puces/tiques, les vers ou le ver du cœur pour votre animal.',
     renewDialogTitle: 'Renouveler le traitement',
     renewDialogDescription:
       'Renouvelez ce traitement ; indiquez simplement la nouvelle date.',

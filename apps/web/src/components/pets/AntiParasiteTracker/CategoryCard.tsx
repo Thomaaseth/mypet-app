@@ -41,7 +41,9 @@ export function CategoryCard({ card }: CategoryCardProps) {
           : t('antiParasite.subCard.treatmentStatus')}
       </MetricLabel>
         <MetricValue>{t(STATUS_LABEL_KEY[status])}</MetricValue>
-        <MutedText className={cn(status === 'expiring_soon' && 'text-accent font-medium')}>
+        {/* ADD EXPIRING COLOR APP WIDE */}
+        {/* <MutedText className={cn(status === 'expiring_soon' && 'text-warning font-medium')}> */}
+        <MutedText>
           {countdown}
         </MutedText>
       </div>
