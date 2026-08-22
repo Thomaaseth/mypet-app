@@ -92,14 +92,15 @@ function LandingPage() {
       {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
       <LandingCofounder />
 
+
+         {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
+      <LandingText2 />
+
 {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
       <LandingFAQ />
 
            {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
       <LandingComingSoon />
-
-         {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
-      <LandingText2 />
 
 
       {/* ============ FAQ — intro + accordion inside a 15px card ============ */}
