@@ -6,20 +6,20 @@ import {
   useRevealOnScroll,
 } from './LandingSystem'
 
-const PHONE = '/landing/Pettr-landing-phone.png'
+const CATDOG2 = '/landing/Cat-and-dog_No-background-scaled-e1787140745404.png'
 
-export function LandingMockup() {
+export function LandingText2() {
   // Poppier: speed 2.2, active range 0.05–0.95 (progress is clamped 0–1
   // internally, so anything past 1 as rangeEnd was previously a no-op).
-  const phoneRef = useScrollParallax(2.2, 0.05, 0.95)
+  const catdog2Ref = useScrollParallax(2.2, 0.05, 0.95)
   const [copyRef, copyVisible] = useRevealOnScroll<HTMLDivElement>()
-  const [phoneWrapRef, phoneVisible] = useRevealOnScroll<HTMLDivElement>()
+  const [catdog2WrapRef, catdog2Visible] = useRevealOnScroll<HTMLDivElement>()
 
   return (
     <Section>
       <SectionInner>
         <div className="mx-auto max-w-[1500px]">
-          {/* Phone column wider than text (38fr/30fr), gap-0 — columns
+          {/* Photo column wider than text (38fr/30fr), gap-0 — columns
               sit close together per your ask. */}
           <div className="grid grid-cols-[38fr_30fr] items-stretch gap-0">
             {/* LEFT — copy, drifts down into place. Heading written directly
@@ -35,25 +35,23 @@ export function LandingMockup() {
               }`}
             >
               <h2 className="font-display font-bold capitalize text-[28px] leading-[1.15] tracking-[-1px] md:text-[54px] md:leading-[1.2] md:tracking-[-2px] lg:text-[84px] lg:leading-[74px] lg:tracking-[-2.3px]">
-                Built Around What Pet Parents Forget &amp; What Vets Actually
-                Ask For
+                Keep your vet in the loop with all the things you tend to forget.
               </h2>
               <div className="max-w-lg">
                 <LandingText>
-                  Pettr helps your vets find missed or lost data, helping your
-                  pet live longer
+                  Vets need a full picture of your pets health to treat them comprehensively and for longevity. Starting with food, weight, treatments, and timelines, Pettr continues to build features to make sure small things pet parents can sometimes forget are still being told to your vet. Small things add up and Pettr can help.
                 </LandingText>
               </div>
             </div>
 
-            {/* RIGHT — phone column. overflow-hidden clips anything the
+            {/* RIGHT — photo column. overflow-hidden clips anything the
                 -25px shift or the contain-sized image would otherwise push
                 past the box edge. self-stretch fills whatever height the
                 text column ends up at. */}
             <div
-              ref={phoneWrapRef}
-              className={`relative w-[110%] min-h-[72vh] self-stretch overflow-hidden transition-all duration-[1200ms] ease-[cubic-bezier(1.16,1,0.3,1)] delay-[250ms] ${
-                phoneVisible
+              ref={catdog2WrapRef}
+              className={`relative w-full min-h-[52vh] self-stretch overflow-hidden transition-all duration-[1200ms] ease-[cubic-bezier(1.16,1,0.3,1)] delay-[250ms] ${
+                catdog2Visible
                   ? 'translate-y-0 scale-100 opacity-100'
                   : 'translate-y-8 scale-95 opacity-0'
               }`}
@@ -65,7 +63,7 @@ export function LandingMockup() {
                 className="pointer-events-none absolute inset-0 motion-safe:animate-pulse"
                 style={{
                   background:
-                    'radial-gradient(60% 55% at 65% 45%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 70%)',
+                    'radial-gradient(60% 55% at 65% 45%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 40%)',
                   animationDuration: '3s',
                 }}
               />
@@ -73,20 +71,19 @@ export function LandingMockup() {
               {/* Moving group: 25px static upward shift, applied on this
                   wrapper so it doesn't fight the parallax hook's own
                   scroll-driven transform (set on the child below). */}
-              <div className="absolute inset-0">
-                {/* Image carries its own fade via mask-image — top + bottom
-                    fade baked into the image's own pixels, same element,
-                    same transform as the parallax. Nothing separate to
-                    keep in sync. */}
+              <div className="absolute inset-0 -translate-y-[25px]">
+                {/* Image carries its own fade via mask-image — top fade only
+                    (0→15%), stays fully opaque through to 100% — lower
+                    gradient removed per your last request. */}
                 <div
-                  ref={phoneRef}
-                  className="absolute inset-0 bg-contain bg-[right_bottom] bg-no-repeat will-change-transform"
+                  ref={catdog2Ref}
+                  className="absolute inset-0 bg-contain bg-[center_center] bg-no-repeat will-change-transform"
                   style={{
-                    backgroundImage: `url(${PHONE})`,
+                    backgroundImage: `url(${CATDOG2})`,
                     maskImage:
-                      'linear-gradient(180deg, transparent 0%, black 15%, black 80%, transparent 87%)',
+                      'linear-gradient(180deg, transparent 0%, black 15%, black 100%)',
                     WebkitMaskImage:
-                      'linear-gradient(180deg, transparent 0%, black 15%, black 80%, transparent 87%)',
+                      'linear-gradient(180deg, transparent 0%, black 15%, black 100%)',
                     maskRepeat: 'no-repeat',
                     WebkitMaskRepeat: 'no-repeat',
                   }}

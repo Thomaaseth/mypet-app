@@ -9,6 +9,10 @@ import { ScrollShowcase } from '@/components/landing/scrollShowcase'
 import { LandingHero } from '@/components/landing/LandingHero'
 import { LandingMockup } from '@/components/landing/Landingmockup'
 import { LandingCofounder } from '@/components/landing/Landingcofounder'
+import { LandingFAQ } from '@/components/landing/LandingFAQ'
+import { LandinglargeCTA } from '@/components/landing/LandingLargeCTA'
+import { LandingComingSoon } from '@/components/landing/LandingComingSoon'
+import { LandingText2 } from '@/components/landing/LandingText2'
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
@@ -88,8 +92,18 @@ function LandingPage() {
       {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
       <LandingCofounder />
 
+{/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
+      <LandingFAQ />
+
+           {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
+      <LandingComingSoon />
+
+         {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
+      <LandingText2 />
+
+
       {/* ============ FAQ — intro + accordion inside a 15px card ============ */}
-      <section className="flex min-h-[75vh] flex-col justify-center bg-[#F8F8F8] px-6 pt-[120px] pb-16 sm:px-20">
+      {/* <section className="flex min-h-[75vh] flex-col justify-center bg-[#F8F8F8] px-6 pt-[120px] pb-16 sm:px-20">
         <div
           className="mx-auto w-full max-w-[1200px] rounded-[15px] bg-white p-8 sm:p-12"
           style={{ boxShadow: CARD_SHADOW }}
@@ -116,10 +130,10 @@ function LandingPage() {
             ))}
           </Accordion>
         </div>
-      </section>
+      </section> */}
 
       {/* ============ ROADMAP — burgundy 30px panel, 3 white cards + dividers ============ */}
-      <section className="px-6 py-24 sm:px-20">
+      {/* <section className="px-6 py-24 sm:px-20">
         <div className="mx-auto max-w-[1200px] rounded-[30px] bg-primary px-6 py-16 sm:px-12">
           <div className="text-center">
             <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-accent">
@@ -152,27 +166,11 @@ function LandingPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* ============ VET-LOOP — 75vh ============ */}
-      <section className="relative flex min-h-[75vh] flex-col justify-center overflow-hidden bg-[#F8F8F8] px-6 py-20 sm:px-20">
-        <DecorPaws count={5} />
-        <div className="mx-auto w-full max-w-[1200px]">
-          <h2 className="font-display text-[28px] font-bold leading-[1.05] text-foreground sm:text-[56px] lg:text-[84px]">
-            Keep your vet in the loop with all the things you tend to forget.
-          </h2>
-          <p className="mt-8 max-w-3xl font-body text-lg text-muted-foreground">
-            Vets need a full picture of your pet&apos;s health to treat them
-            comprehensively and for longevity. Starting with food, weight,
-            treatments, and timelines, Pettr continues to build features to make
-            sure small things pet parents can sometimes forget are still being
-            told to your vet. Small things add up and Pettr can help.
-          </p>
-        </div>
-      </section>
-
+  
       {/* ============ FINAL CTA — card-in-card (30px / 15px) ============ */}
-      <section className="px-6 py-24 sm:px-20">
+      {/* <section className="px-6 py-24 sm:px-20">
         <div
           className="mx-auto max-w-[1000px] rounded-[30px]"
           style={{ boxShadow: SECTION_SHADOW }}
@@ -196,22 +194,25 @@ function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+
+       {/* ============ CO-FOUNDER — screenshot + accent text card ============ */}
+      <LandinglargeCTA />
 
       {/* ============ FOOTER ============ */}
       <footer className="bg-[#F8F8F8] px-6 pt-[120px] pb-10 sm:px-20">
-        <div className="mx-auto flex max-w-[1200px] flex-col gap-10 md:flex-row md:items-end md:justify-between">
+        <div className="mx-auto flex max-w-[1300px] flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-6">
-            <h2 className="font-display text-2xl font-bold text-foreground">
+            <h1 className=" font-display font-bold capitalize text-[54px] leading-[1.2] tracking-[-2px] md:leading-[1] md:tracking-[-2.3px] lg:text-[84px] lg:leading-[88px]">
               Building a new generation of healthy pets
-            </h2>
+            </h1>
             <a
               href="#"
               className="inline-flex w-fit items-center rounded-[13px] border border-accent px-5 py-2 text-sm font-semibold text-accent transition-colors hover:bg-primary hover:text-primary-foreground"
             >
               Be the first to know more
             </a>
-            <img src={LOGO} alt="Pettr" className="h-9 w-auto" />
+            <img src={LOGO} alt="Pettr" className="h-9 object-contain object-left" />
           </div>
 
           <div
