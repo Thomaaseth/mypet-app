@@ -44,7 +44,7 @@ const antiParasite = {
     durationLabel: 'Duration',
     durationPlaceholder: 'Select a duration',
     durationTooltip:
-      'If flea/tick protection is significantly shorter than worm protection for this product, we recommend adding 2 separate entries.',
+      'If you use a joint treatment (e.g. Fleas & Ticks and Worms) with significantly different protection durations, we reccomend adding two separate entries.',
     durationTooltipAria: 'Duration guidance',
     dateLabel: 'Date administered',
     addButton: 'Add treatment',

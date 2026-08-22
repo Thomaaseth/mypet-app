@@ -65,7 +65,7 @@ const fr: TranslationShape<typeof weights> = {
     statusBelow: 'En-dessous',
     setTargetBannerText: 'Définissez une plage de poids cible avec votre vétérinaire.',
     learnMore: 'En savoir plus',
-    addWeightDialogDescription: "Enregistrez le poids de votre animal. Toutes les entrées utiliseront {{unit}} comme unité.",
+    addWeightDialogDescription: "Enregistrez le poids de votre animal.",
     targetRangeDialogTitleEdit: 'Modifier la plage de poids cible',
     targetRangeDialogTitleSet: 'Définir la plage de poids cible',
     targetRangeDialogDescription: 'Entrez la plage de poids saine pour votre animal recommandée par votre vétérinaire.',
